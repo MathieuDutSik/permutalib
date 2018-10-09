@@ -53,6 +53,13 @@ or
 git clone http://github.com/MathieuDutSik/permutalib.git --recursive
 
 
+
+Licensing
+---------
+
+The GPLv2 licensing is available from the GAP.
+The LGPL licensing is available so that the library can be used in other programs.
+
 Contact information
 -------------------
 
