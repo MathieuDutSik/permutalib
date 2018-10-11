@@ -3,7 +3,7 @@
 
 #include "PermGroup.h"
 
-namespace partition {
+namespace gap {
 
 struct Partition {
   std::vector<int> points;
@@ -38,7 +38,7 @@ Partition GetPartition(std::vector<std::vector<int>> const& list)
 
 
 
-int NumberCells(const Partition & ePartition)
+int NumberCells(Partition const& ePartition)
 {
   int nbPart=ePartition.firsts.size();
   return nbPart;

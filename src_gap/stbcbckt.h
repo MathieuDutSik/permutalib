@@ -115,6 +115,7 @@ struct rbaseType {
 };
 
 
+template<typename Telt>
 bool ProcessFixpoint_rbase(rbaseType<Telt> & rbase, int const& pnt)
 {
   if (rbase.level2.status != 0 && rbase.level2.status != 1) {
@@ -187,7 +188,7 @@ bool IsTrivialRBase(rbaseType<Telt> const& rbase)
       return true;
   }
   if (rbase.level.status == 3) {
-    int eLev=base.level.eLev;
+    int eLev=rbase.level.eLev;
     if (rbase.level.stabilizer[eLev].genlabels.size() == 0)
       return true;
   }
@@ -199,7 +200,7 @@ bool IsTrivialRBase(rbaseType<Telt> const& rbase)
 template<typename Telt>
 rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& IsId, std::vector<int> const& Omega, Partition const& P)
 {
-  rbase<Telt> rbase;
+  rbaseType<Telt> rbase;
   rbase.domain = Omega;
   rbase.base = {};
   rbase.where = {};
