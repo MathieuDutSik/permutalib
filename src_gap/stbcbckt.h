@@ -564,7 +564,6 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   imageType<Telt> image;
   Face orB_sing; // backup of <orb>. We take a single entry. Not sure it is correct
   int nrback;
-  permPlusBool<Telt> rep;
   std::vector<Face> orb;
   std::vector<Face> org; // intersected (mapped) basic orbits of <G>
   Tplusinfinity<int> blen(true, 0);
@@ -669,10 +668,10 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     else {
       orb[d] = BlistList(range, {});
       for (auto & pVal : rbase.lev[d].orbit) {
-	b = PowAct(p, image.perm.val);
+	b = PowAct(pVal, image.perm.val);
 	if (oldcel[b] == rbase.where[d] && (image.level2.status == int_false || IsInBasicOrbit(rbase.lev2[d], SlashAct(b,image.perm2.val)))) {
 	  orb[d][b] = true;
-	  org[d][b] = p;
+	  org[d][b] = pVal;
 	}
       }
     }
@@ -828,7 +827,6 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   }
     
   // Construct the <image>.
-  imageType<Telt> image;
   image.data=data;
   image.depth=1;
   if (repr) {
