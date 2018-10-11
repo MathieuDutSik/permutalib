@@ -3,6 +3,8 @@
 
 #include "StabChainMain.h"
 #include "partition.h"
+#include "COMB_Combinatorics.h"
+#include "plus_infinity.h"
 /*
 #############################################################################
 ##
@@ -340,7 +342,7 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt)
     rbase.rfm[len].push_back(Refinement({pnt,k}));
   }
   if (rbase.level2.status != 0) {
-    auto MainInsert=[&](StabChainPlusLev const& lev) -> void {
+    auto MainInsert=[&](StabChainPlusLev<Telt> const& lev) -> void {
       if (lev.status != 2) {
 	Partition O = OrbitsPartition(lev, rbase.domain);
 	std::vector<singStrat> strat = StratMeetPartition(rbase, P, O);
@@ -370,7 +372,7 @@ void NextRBasePoint(Partition & P, rbaseType<Telt> & rbase)
       l = 0;
     }
     else {
-      l = PositionProperty(ClosedInterval(0, lens[k]), [](int const& i) -> int {return !IsFixedStabilizer(rbase.level, P.points[i+P.firsts[order[k]]]);});
+      l = PositionProperty(ClosedInterval(0, lens[k]), [&](int const& i) -> int {return !IsFixedStabilizer(rbase.level, P.points[i+P.firsts[order[k]]]);});
     }
     k++;
   }
@@ -432,7 +434,7 @@ int RRefine(rbaseType<Telt> & rbase, imageType<Telt> & image, bool const& uscore
   }
   else {
     for (auto & Rf : rbase.rfm[image.depth]) {
-      if (UnderscoreNature(Rf.nature) {
+      if (UnderscoreNature(Rf.nature)) {
 	bool t = Evaluation(Rf);
 	if (!t) {
 	  return int_fail;
@@ -446,7 +448,7 @@ int RRefine(rbaseType<Telt> & rbase, imageType<Telt> & image, bool const& uscore
     }
     return int_true;
   }
-}		       }
+}
 
 		       
 template<typename Telt>
@@ -492,7 +494,6 @@ template<typename Telt>
 void SubtractBlistOrbitStabChain(Face & blist, std::vector<Telt> const& LGen, int const& pnt)
 {
   std::vector<int> orb{pnt};
-  std::vector<int> orb = {pnt};
   blist[pnt]=false;
   int pos=0;
   int PrevPos=0;
@@ -504,7 +505,7 @@ void SubtractBlistOrbitStabChain(Face & blist, std::vector<Telt> const& LGen, in
     for (int ePos=0; ePos<siz; ePos++) {
       pnt=orb[ePos];
       for (auto& eGen : LGen) {
-        int img = PowAct(pnt, gen);
+        int img = PowAct(pnt, eGen);
         if (blist[img]) {
           blist[img]=false;
           orb.push_back(img);
@@ -528,7 +529,7 @@ struct ResultPBT {
 
 
 template<typename Telt>
-Telt MappingPermListList(n, std::vector<int> const& src, int const& dst)
+Telt MappingPermListList(int const& n, std::vector<int> const& src, std::vector<int> const& dst)
 {
   std::vector<int> ListImage(n);
   Face StatusSrc(n);
@@ -538,15 +539,15 @@ Telt MappingPermListList(n, std::vector<int> const& src, int const& dst)
     StatusDst[i]=1;
   }
   int len = src.size();
-  for (int j=0; j<len; j++) {
+  for (int i=0; i<len; i++) {
     ListImage[src[i]] = dst[i];
     StatusSrc[src[i]] = 0;
     StatusDst[dst[i]] = 0;
   }
   int sizRemain = n - len;
-  dynamic_bitset::size_type posSrc=StatusSrc.find_first();
-  dynamic_bitset::size_type posDst=StatusDst.find_first();
-  for (int u=0; i<sizRemain; i++) {
+  boost::dynamic_bitset<>::size_type posSrc=StatusSrc.find_first();
+  boost::dynamic_bitset<>::size_type posDst=StatusDst.find_first();
+  for (int u=0; u<sizRemain; u++) {
     ListImage[posSrc] = posDst;
     posSrc=StatusSrc.find_next(posSrc);
     posDst=StatusDst.find_next(posDst);
@@ -557,7 +558,7 @@ Telt MappingPermListList(n, std::vector<int> const& src, int const& dst)
 
 
 
-template<typename Telt>
+template<typename Telt, typename Tint>
 ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(Telt const&)> const& Pr, bool const& repr, rbaseType<Telt> & rbase, dataType<Telt> const& data, std::vector<StabChain<Telt>> & L, std::vector<StabChain<Telt>> & R)
 {
   imageType<Telt> image;
@@ -576,7 +577,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     permPlusBool<Telt> t; // group element constructed, to be handed upwards
     int m;                // initial number of candidates in <orb>
     int max;              // maximal number of candidates still needed
-    dynamic_bitset::size_type  b;        // image of base point currently being considered
+    boost::dynamic_bitset<>::size_type  b;        // image of base point currently being considered
                
     if (image.perm.status != int_true) 
       return {int_fail, {}};
@@ -658,7 +659,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       orb[ d ] = BlistList(range, Cell(oldcel, rbase.where[d]) );
       if (image.level2.status != int_false) {
 	b = orb[d].find_first();
-	while (b != dynamic_bitset::npos) {
+	while (b != boost::dynamic_bitset<>::npos) {
 	  if (!IsInBasicOrbit(rbase.lev2[d], SlashAct(b, image.perm2.val))) 
 	    orb[d][b] = false;
 	  b = orb[d].find_next(b);
@@ -675,7 +676,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	}
       }
     }
-    if (d == 1 && ForAll(G.labels, [](Telt const& x){return PowAct(a, x) == a;})) {
+    if (d == 1 && ForAll(G.labels, [&](Telt const& x){return PowAct(a, x) == a;})) {
       orb[d][a]=true; // ensure a is a possible image (can happen if acting on permutations with more points)
     }
     orB_sing = orb[d];
@@ -709,7 +710,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     }
     // Now the other possible images.
     b = orb[d].find_first();
-    while (b != dynamic_bitset::npos) {
+    while (b != boost::dynamic_bitset<>::npos) {
       // Try to prune the node with prop 8(ii) of Leon paper.
       if (!repr && !wasTriv) {
 	dd = branch;
@@ -812,7 +813,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       
     }
     return {int_fail, {}};
-  }
+  };
 
   nrback=0; // count the number of times we jumped up
 
@@ -906,7 +907,7 @@ Face OnSets(Face const& f, Telt const& g)
   int n=f.size();
   Face fRet(n);
   int b = f.find_first();
-  while (b != dynamic_bitset::npos) {
+  while (b != boost::dynamic_bitset<>::npos) {
     int eImg=g.at(b);
     fRet[eImg]=1;
     b = f.find_next(b);
@@ -933,7 +934,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
     }
   }
   else {
-    if (repr && (IsSubset(Psi, Omega) || ForAll(Omega, [&](int const& p) -> bool {return !Psi[p]})))
+    if (repr && (IsSubset(Psi, Omega) || ForAll(Omega, [&](int const& p) -> bool {return !Psi[p];})))
       return {int_fail, {}, {}};
   }
   auto GetPartitionFromPair=[&](std::vector<int> const& Omega, Face const& Ph) -> std::vector<std::vector<int>> {
@@ -945,7 +946,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
     Face Ph_copy = Ph;
     for (auto & eVal : Omega)
       Ph_copy[eVal]=1;
-    return Partition({IntVect, FaceToVector(Ph_copy)});
+    return GetPartition({IntVect, FaceToVector(Ph_copy)});
   };
 
 
@@ -986,7 +987,6 @@ StabChain<Telt> Stabilizer_OnSets(StabChain<Telt> const& G, Face const& Phi)
   bool repr=false;
   return RepOpSetsPermGroup(G, repr, Phi, Phi);
 }
-
 
 
 }
