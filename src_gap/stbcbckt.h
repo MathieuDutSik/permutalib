@@ -324,7 +324,7 @@ std::vector<singStrat> StratMeetPartition(rbaseType<Telt> const& rbase, Partitio
 
 
 template<typename Telt>
-void RegisterRBasePoint(Partition const& P, rbaseType<Telt> & rbase, int const& pnt)
+void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt)
 {
   if (rbase.level2.status != 0 && rbase.level2.status != 1)
     rbase.lev2.push_back(rbase.level2);
@@ -558,7 +558,7 @@ Telt MappingPermListList(n, std::vector<int> const& src, int const& dst)
 
 
 template<typename Telt>
-ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> onst& G, std::function<bool(Telt const&)> const& Pr, bool const& repr, rbaseType<Telt> & rbase, dataType<Telt> const& data, std::vector<StabChain<Telt>> & L, std::vector<StabChain<Telt>> & R)
+ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(Telt const&)> const& Pr, bool const& repr, rbaseType<Telt> & rbase, dataType<Telt> const& data, std::vector<StabChain<Telt>> & L, std::vector<StabChain<Telt>> & R)
 {
   imageType<Telt> image;
   Face orB_sing; // backup of <orb>. We take a single entry. Not sure it is correct
