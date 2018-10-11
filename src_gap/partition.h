@@ -12,8 +12,7 @@ struct Partition {
   std::vector<int> cellno;
 };
 
-
-Partition Partition(std::vector<std::vector<int>> const& list)
+Partition GetPartition(std::vector<std::vector<int>> const& list)
 {
   std::vector<int> points;
   for (auto & eList : list)
@@ -31,16 +30,20 @@ Partition Partition(std::vector<std::vector<int>> const& list)
     lengths[iPart]=len;
     i += len;
     for (auto & eVal : list[iPart])
-      cellno[eVal]=iPart;
+      cellno[eVal] = iPart;
   }
   return {points, firsts, lengths, cellno};
 }
 
-int NumberCells(Partition const& ePartition)
+
+
+
+int NumberCells(const Partition & ePartition)
 {
   int nbPart=ePartition.firsts.size();
   return nbPart;
 }
+
 
 std::vector<int> Cell(Partition const& ePartition, int const& iPart)
 {
@@ -107,7 +110,7 @@ int SplitCell_Kernel(Partition & P, int const& i, std::function<bool(int)> const
   std::vector<int> ListStay(len);
   int idxMov=0;
   int idxStay=0;
-  for (int j=0; j<len; i++) {
+  for (int j=0; j<len; j++) {
     int ePt=P.points[eFirst + j];
     bool res=test(ePt);
     if (res) {
@@ -134,7 +137,7 @@ int SplitCell_Kernel(Partition & P, int const& i, std::function<bool(int)> const
   P.lengths.push_back(idxMov);
   int newNbPart=P.firsts.size();
   for (int j=0; j<idxMov; j++) {
-    int ePt=ListMov[j];
+    int ePt=ListMove[j];
     P.points[pos]=ePt;
     P.cellno[ePt]=newNbPart;
     pos++;
@@ -231,7 +234,7 @@ int FixcellPoint(Partition const& P, std::set<int> & old)
   int nbPart=P.lengths.size();
   std::vector<int> poss;
   for (int iPart=0; iPart<nbPart; iPart++) {
-    if (P.lengths[i] == 1 && old.find(i) == old.end())
+    if (P.lengths[iPart] == 1 && old.find(iPart) == old.end())
       poss.push_back(iPart);
   }
   int nbPoss=poss.size();
@@ -257,7 +260,7 @@ typeFixcellsCell FixcellsCell(Partition const& P, Partition const& Q, std::set<i
   for (int iPart=0; iPart<nbPart; iPart++) {
     int start=P.firsts[iPart];
     int kPart=CellNoPoint(Q, P.points[start]);
-    if (old.find(k) == old.end()) {
+    if (old.find(kPart) == old.end()) {
       std::function<bool()> eval=[&]() -> bool {
 	for (int j=1; j<P.lengths[iPart]; j++) {
 	  if (CellNoPoint(Q, P.points[j]) != kPart)
@@ -334,7 +337,6 @@ Partition CollectedPartition(Partition const& P, Tarith const& size)
   return C;
 }
 
- 
  
  
 }

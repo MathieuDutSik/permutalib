@@ -2,6 +2,7 @@
 #define DEFINE_STBCBCKT_H
 
 #include "StabChainMain.h"
+#include "partition.h"
 /*
 #############################################################################
 ##
@@ -977,6 +978,15 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
   };
   return PartitionBacktrack( G, Pr, repr, rbase, [ Q ], L, R );
 }
+
+template<typename Telt>
+StabChain<Telt> Stabilizer_OnSets(StabChain<Telt> const& G, Face const& Phi)
+{
+  bool repr=false;
+  return RepOpSetsPermGroup(G, repr, Phi, Phi);
+}
+
+
 
 }
 
