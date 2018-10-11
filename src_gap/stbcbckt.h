@@ -207,7 +207,7 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
   rbase.rfm = {};
   rbase.partition = P;
   rbase.lev = {};
-  if (F.size() == 2) {
+  if (G.size() == 2) {
     if (IsId) {
       rbase.NeedLevel2=false;
       rbase.SetLevelStabChain2=false;
@@ -222,7 +222,7 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
     rbase.NeedLevel2=false;
     rbase.SetLevelStabChain2=false;
   }
-  rbase.level = {F[0], 0};
+  rbase.level = {G[0], 0};
   for (auto & pnt : Fixcells(P))
     ProcessFixpoint_rbase(rbase, pnt);
   return rbase;
@@ -237,7 +237,7 @@ bool MeetPartitionStrat(imageType<Telt> const& image, Partition const& S, Telt c
   if (strat.size() == 0)
     return false;
   for (auto & pRec : strat) {
-    if ((pRec.p == -1 && !ProcessFixpoint_image(image, p.s, FixpointCellNo(P, p.i), -1)) ||
+    if ((pRec.p == -1 && !ProcessFixpoint_image(image, pRec.s, FixpointCellNo(image.partition, pRec.i), -1)) ||
 	(pRec.p != -1 && SplitCell(image.partition, pRec.p, S, pRec.s, g, pRec.i ) != pRec.i))
       return false;
   }
@@ -257,7 +257,7 @@ bool MeetPartitionStrat(imageType<Telt> const& image, Partition const& S, Telt c
 ##            i.e., `P[p]' has become a one-point cell.
 ##
 */
-template<typenam Telt>
+template<typename Telt>
 std::vector<singStrat> StratMeetPartition(rbaseType<Telt> const& rbase, Partition const& P, Partition const& S, Telt const& g)
 {
   std::vector<singStrat> strat;
@@ -301,7 +301,7 @@ std::vector<singStrat> StratMeetPartition(rbaseType<Telt> const& rbase, Partitio
 	  cellsP[img] = NumberCells(P);
 	}
       }
-      strat.push_back({p, s, i});
+      strat.push_back({pVal, s, i});
       // If  we have one  or two  new fixpoints, put  them  into the base.
       if (i == 0) {
         int pnt = FixpointCellNo(P, NumberCells(P));
@@ -310,10 +310,10 @@ std::vector<singStrat> StratMeetPartition(rbaseType<Telt> const& rbase, Partitio
 	if (IsTrivialRBase(rbase)) 
 	  return strat;
       }
-      if (P.lengths[p] == 1) {
-        int pnt = FixpointCellNo(P, p);
+      if (P.lengths[pVal] == 1) {
+        int pnt = FixpointCellNo(P, pVal);
 	ProcessFixpoint_rbase(rbase, pnt);
-	strat.push_back({-1, pnt, p});
+	strat.push_back({-1, pnt, pVal});
 	if (IsTrivialRBase(rbase))
 	  return strat;
       }
