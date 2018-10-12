@@ -833,7 +833,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   image.data=data;
   image.depth=1;
   if (repr) {
-    image.partition = data[0];
+    image.partition = data.P;
   }
   else {
     image.partition = rbase.partition;
@@ -979,7 +979,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
     }
     return true;
   };
-  return PartitionBacktrack( G, Pr, repr, rbase, [ Q ], L, R );
+  return PartitionBacktrack( G, Pr, repr, rbase, {Q}, L, R );
 }
 
 template<typename Telt>
