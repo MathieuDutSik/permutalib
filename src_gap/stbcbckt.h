@@ -570,6 +570,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   int dd, branch; // branch is level where $Lstab\ne Rstab$ starts
   std::vector<int> range;    // range for construction of <orb>
   Partition oldcel;       // old value of <image.partition.cellno>
+  std::vector<int> oldcel_cellno;
   auto PBEnumerate = [&](int const& d, bool const & wasTriv) -> permPlusBool<Telt> {
     permPlusBool<Telt> oldprm, oldprm2;
     int a;                // current R-base point
@@ -588,7 +589,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       oldcel = image.partition;
     }
     else {
-      oldcel = image.partition.cellno;
+      oldcel_cellno = image.partition.cellno;
       oldprm = image.perm;
     }
     if (image.level2.status != int_false)
@@ -632,9 +633,9 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	// <image.partition> for the case ``image = base point''.
       }
       else {
-	if (!repr) {
-	  oldcel = StructuralCopy( oldcel );
-	}
+	//	if (!repr) {
+	//	  oldcel = StructuralCopy( oldcel );
+	//	}
 	NextRBasePoint(rbase.partition, rbase);
 	if (image.perm.status == int_true)
 	  rbase.fix.push_back(Fixcells(rbase.partition));
@@ -669,7 +670,9 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       orb[d] = BlistList(range, {});
       for (auto & pVal : rbase.lev[d].orbit) {
 	b = PowAct(pVal, image.perm.val);
-	if (oldcel[b] == rbase.where[d] && (image.level2.status == int_false || IsInBasicOrbit(rbase.lev2[d], SlashAct(b,image.perm2.val)))) {
+	if (oldcel_cellno[b] == rbase.where[d] &&
+	    (image.level2.status == int_false ||
+	     IsInBasicOrbit(rbase.lev2[d], SlashAct(b,image.perm2.val)))) {
 	  orb[d][b] = true;
 	  org[d][b] = pVal;
 	}
@@ -821,7 +824,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     if (!repr)
       return {int_group, G, {}};
     if (Pr(G.identity))
-      return {int_perm,{},F.identity};
+      return {int_perm,{},G.identity};
     else
       return {int_fail,{},{}};
   }
@@ -917,15 +920,15 @@ Face OnSets(Face const& f, Telt const& g)
 template<typename Telt>
 ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, Face const& Phi, Face const& Psi)
 {
-  std::string<int> Omega = MovedPoints(G.labels);
+  std::vector<int> Omega = MovedPoints(G.labels);
   if (repr && Phi.size() != Psi.size())
     return {int_fail, {}, {}};
   if (IsSubset(Phi, Omega) || ForAll(Omega, [&](int const &p) -> bool {return !Phi[p];})) {
     if (repr) {
-      if (Difference(Phi, Omega) != Difference(Psi, Omega))
+      if (Difference_face(Phi, Omega) != Difference_face(Psi, Omega))
 	return {int_fail, {}, {}};
       else
-	return {int_perm,{},F.identity};
+	return {int_perm,{},G.identity};
     }
     else {
       return {int_group, G, {}};
@@ -938,9 +941,9 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
   auto GetPartitionFromPair=[&](std::vector<int> const& Omega, Face const& Ph) -> std::vector<std::vector<int>> {
     std::vector<int> IntVect;
     for (auto & eVal : Omega)
-      if (Face[eVal] == 1)
+      if (Ph[eVal] == 1)
 	IntVect.push_back(eVal);
-    std::vector<int> UnionVect;
+    //    std::vector<int> UnionVect;
     Face Ph_copy = Ph;
     for (auto & eVal : Omega)
       Ph_copy[eVal]=1;
