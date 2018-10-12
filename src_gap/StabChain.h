@@ -486,9 +486,9 @@ StabChainOptions<Tint> GetStandardOptions()
 
 
 template<typename Telt>
-bool IsTrivial(std::vector<Telt> const& G)
+bool IsTrivial_ListGen(std::vector<Telt> const& LGen)
 {
-  for (auto & eElt : G)
+  for (auto & eElt : LGen)
     if (!eElt.isIdentity())
       return false;
   return true;
@@ -515,6 +515,24 @@ std::vector<int> MovedPoints(StabChain<Telt> const& S)
       LMoved.push_back(i);
   return LMoved;
 }
+
+
+template<typename Telt>
+bool IsTrivial(StabChain<Telt> const& G)
+{
+  std::set<int> LIdx;
+  for (auto & eChain : G.stabilizer)
+    for (auto & eIdx : eChain.genlabels)
+      LIdx.insert(eIdx);
+  for (auto & eIdx : LIdx) {
+    if (!G.labels[eIdx].isIdentity())
+      return false;
+  }
+  return true;
+}
+
+
+
 
 
 
@@ -1023,7 +1041,7 @@ bool TestEqualityAtLevel(StabChain<Telt> const& L, StabChain<Telt> const& R, int
 	int idxL=L.stabilizer[eLev].transversal[u];
 	int idxR=R.stabilizer[eLev].transversal[u];
 	Telt permL=L.labels[idxL];
-	Telt permR=L.labels[idxL];
+	Telt permR=L.labels[idxR];
 	if (permL != permR)
 	  return false;
       }

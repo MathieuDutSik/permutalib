@@ -104,6 +104,19 @@ bool operator==(DoubleSidedPerm const& v1, DoubleSidedPerm const& v2)
   return true;
 }
 
+
+bool operator!=(DoubleSidedPerm const& v1, DoubleSidedPerm const& v2)
+{
+  int siz=v1.size();
+  if (siz != v2.size() )
+    return true;
+  for (int i=0; i<siz; i++)
+    if (v1.at(i) != v2.at(i))
+      return true;
+  return false;
+}
+
+ 
 bool operator<(DoubleSidedPerm const& v1, DoubleSidedPerm const& v2)
 {
   int siz1=v1.size();

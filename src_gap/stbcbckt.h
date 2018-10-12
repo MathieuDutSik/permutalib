@@ -59,7 +59,20 @@ struct StabChainPlusLev {
   int eLev;
 };
 
+template<typename Telt>
+bool IsBool(StabChainPlusLev<Telt> const& S)
+{
+  if (S.status == int_true || S.status == int_false)
+    return true;
+  return false;
+}
 
+template<typename Telt>
+int BasePoint(StabChainPlusLev<Telt> const& S)
+{
+  return BasePoint(S.Stot, S.eLev);
+}
+ 
 struct singStrat {
   int p;
   int s;
@@ -127,7 +140,7 @@ bool ProcessFixpoint_rbase(rbaseType<Telt> & rbase, int const& pnt)
     if (BasePoint(rbase.level2) == pnt) 
       rbase.level2.eLev++;
   }
-  if (rbase.level_status == int_int) {
+  if (rbase.level.status == int_int) {
     rbase.level.value_int--;
   }
   else {
@@ -171,7 +184,7 @@ bool ProcessFixpoint_image(imageType<Telt> & image, int const& pnt, int const& i
     image.perm = t;
   }
   if (image.level2.status != int_false) {
-    permPlusBool<Telt> t = ExtendedT(image.perm2, pnt, img, 0, image.level2);
+    permPlusBool<Telt> t = ExtendedT(image.perm2, pnt, img, -1, image.level2);
     if (!t.status)
       return false;
     else {
@@ -404,7 +417,10 @@ bool Refinements_Intersection(rbaseType<Telt> & rbase, imageType<Telt> & image, 
   return MeetPartitionStrat(rbase, image, Q, t, strat);
 }
 
-
+// The function RRefine is doing the computation using CallFuncList
+// It processes a number of refinement strategies.
+// The functions Refinements used return only booleans 
+// 
 template<typename Telt>
 int RRefine(rbaseType<Telt> & rbase, imageType<Telt> & image, bool const& uscore)
 {
@@ -580,8 +596,8 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     permPlusBool<Telt> t; // group element constructed, to be handed upwards
     int m;                // initial number of candidates in <orb>
     int max;              // maximal number of candidates still needed
-    boost::dynamic_bitset<>::size_type  b;        // image of base point currently being considered
-               
+    boost::dynamic_bitset<>::size_type b;        // image of base point currently being considered
+
     if (image.perm.status != int_true) 
       return {int_fail, {}};
     image.depth = d;
@@ -619,12 +635,12 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	else {
 	  permPlusBool<Telt> prm;
 	  if (image.perm.status == int_true)
-	    prm = {int_perm, MappingPermListList(n, rbase.fix[rbase.base.size()-1], Fixcells(image.partition))};
+	    prm = {int_perm, MappingPermListList<Telt>(n, rbase.fix[rbase.base.size()-1], Fixcells(image.partition))};
 	  else
 	    prm = image.perm;
 	  if (image.level2.status != int_false) {
-	    if (SiftedPermutation(image.level2, prm.val * Inverse(image.perm2.val)).isIdentity()) 
-	      return {int_perm, prm};
+	    if (SiftedPermutation(image.level2.Stot, image.level2.eLev, prm.val * Inverse(image.perm2.val)).isIdentity()) 
+	      return prm;
 	  }
 	  else {
 	    if (Pr(prm.val))
@@ -663,19 +679,19 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       if (image.level2.status != int_false) {
 	b = orb[d].find_first();
 	while (b != boost::dynamic_bitset<>::npos) {
-	  if (!IsInBasicOrbit(rbase.lev2[d], SlashAct(b, image.perm2.val))) 
+	  if (!IsInBasicOrbit(rbase.lev2[d].Stot, rbase.lev2[d].eLev, SlashAct(b, image.perm2.val))) 
 	    orb[d][b] = false;
 	  b = orb[d].find_next(b);
 	}
       }
     }
     else {
-      orb[d] = BlistList(range, {});
-      for (auto & pVal : rbase.lev[d].orbit) {
+      orb[d] = BlistList(range, {}); // line below needs to be checked.
+      for (auto & pVal : rbase.lev[d].Stot.stabilizer[0].orbit) {
 	b = PowAct(pVal, image.perm.val);
 	if (oldcel_cellno[b] == rbase.where[d] &&
 	    (image.level2.status == int_false ||
-	     IsInBasicOrbit(rbase.lev2[d], SlashAct(b,image.perm2.val)))) {
+	     IsInBasicOrbit(rbase.lev2[d].Stot, rbase.lev2[d].eLev, SlashAct(b,image.perm2.val)))) {
 	  orb[d][b] = true;
 	  org[d][b] = pVal;
 	}
@@ -703,24 +719,25 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     
     // Only the early points of the orbit have to be considered.
     m = SizeBlist( orB_sing );
-    if (m < L.stabilizer[d].orbit.size())
+    if (m < int(L.stabilizer[d].orbit.size()) )
       return {int_fail,{}};
     max = PositionNthTrueBlist(orB_sing, m - L.stabilizer[d].orbit.size());
     
     if (wasTriv && a > max) {
       m--;
-      if (m < L.stabilizer[d].orbit.size() )
+      if (m < int(L.stabilizer[d].orbit.size()) )
 	return {int_fail,{}};
       max = PositionNthTrueBlist( orB_sing, m - L.stabilizer[d].orbit.size());
     }
     // Now the other possible images.
     b = orb[d].find_first();
     while (b != boost::dynamic_bitset<>::npos) {
+      int b_int = int(b);
       // Try to prune the node with prop 8(ii) of Leon paper.
       if (!repr && !wasTriv) {
 	dd = branch;
 	while (dd < d) {
-	  if (IsInBasicOrbit(L, dd, a) && !PBIsMinimal(range, R.stabilizer[dd].orbit[0], b, R, d))
+	  if (IsInBasicOrbit(L, dd, a) && !PBIsMinimal(range, R.stabilizer[dd].orbit[0], b_int, R, d))
 	    dd = d + 1;
 	  else
 	    dd = dd + 1;
@@ -748,11 +765,11 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	IsolatePoint( image.partition, b );
 	
 	if (ProcessFixpoint_image(image, a, b, org[d][b]))
-	  t = RRefine(rbase, image, false);
+	  t.status = RRefine(rbase, image, false);
 	else
-	  t = int_fail;
+	  t.status = int_fail;
 	
-	if (t != int_fail) {
+	if (t.status != int_fail) {
 	  // Subgroup case, base <> image   at current level:   <R>,
 	  //   which until now is identical to  <L>, must be changed
 	  //   without affecting <L>, so take a copy.
@@ -761,12 +778,12 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    branch = d;
 	  }
 	  if (2 * d <= blen) {
-	    ChangeStabChain(R, d, {b}, int_false);
+	    ChangeStabChain(R, d, {b_int}, int_false);
 	    //	    R[ d + 1 ] = R[ d ].stabilizer;
 	  }
 	  else {
 	    std::vector<Telt> LGen = StrongGeneratorsStabChain( R, d);
-	    std::vector<Telt> LGenB = Filtered(LGen, [&](Telt const& gen) -> bool {return PowAct(b, gen) == b;});
+	    std::vector<Telt> LGenB = Filtered(LGen, [&](Telt const& gen) -> bool {return PowAct(b_int, gen) == b_int;});
 	    //	    R[ d + 1 ] := rec( generators := Filtered( R[ d + 1 ], gen -> b ^ gen = b ) );
 	    int largMov=LargestMovedPoint(LGenB);
 	    StabChainOptions<Tint> options = GetStandardOptions<Tint>();
@@ -799,7 +816,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    //   enlarged <L>. Reset <R> to the enlarged <L>.
 	    //	    for (int dd=0; dd<d; dd++)
 	    //	      AddGeneratorsExtendSchreierTree( L[ dd ], {t});
-	    AddGeneratorsExtendSchreierTree(L, 0, {t});
+	    AddGeneratorsExtendSchreierTree(L, 0, {t.val});
 	    if (m < int(L.stabilizer[d].orbit.size()))
 	      return {int_fail,{}};
 	    max = PositionNthTrueBlist( orB_sing, m - L.stabilizer[d].orbit.size());
@@ -809,7 +826,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
         
 	// Now  we can remove the   entire <R>-orbit  of <b> from  the
 	// candidate list.
-	if  (R.stabilizer[d].translabels[b] != -1)
+	if (R.stabilizer[d].translabels[b] != -1)
 	  SubtractBlist(orb[d], BlistList(range, R.stabilizer[d].orbit));
 	else
 	  SubtractBlistOrbitStabChain(orb[d], StrongGeneratorsStabChain(R, d), b);
@@ -842,16 +859,16 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     image.partition = rbase.partition;
   }
   if (IsBool(rbase.level2)) {
-    image.level2 = 0;
+    image.level2 = {int_false,-444,{},0};
   }
   else {
     image.level2 = rbase.level2;
-    image.perm2  = rbase.level2.identity;
+    image.perm2  = {int_perm, G.identity};
   }
     
   // If  <Pr> is  function,   multiply  permutations. Otherwise, keep   them
   // factorized.
-  image.perm = G.identity;
+  image.perm = {int_perm, G.identity};
   //  image.level = rbase.chain;
     
   if (repr) {
@@ -864,7 +881,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       std::vector<int> fix  = Fixcells(rbase.partition);
       std::vector<int> fixP = Fixcells(image.partition);
       for (int i=0; i<int(fix.size()); i++)
-	ProcessFixpoint_image(image, fix[i], fixP[i]);
+	ProcessFixpoint_image(image, fix[i], fixP[i], -1);
     }
     // In   the representative case,   assign  to <L>  and <R>  stabilizer
     // chains.

@@ -24,7 +24,7 @@ StabChain<Telt> StabChainOp(std::vector<Telt> const& Lgen, StabChainOptions<Tint
   std::cerr << "SEARCH : Doing the ordinary Schreier Sims\n";
   int n=Lgen[0].size();
   StabChain<Telt> Stot = EmptyStabChain<Telt>(n);
-  if (!IsTrivial(Lgen)) {
+  if (!IsTrivial_ListGen(Lgen)) {
     int eLev=0;
     Stot.UseCycle=true;
     StabChainStrong(Stot, eLev, Lgen, options );
