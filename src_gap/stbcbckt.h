@@ -917,10 +917,10 @@ Face OnSets(Face const& f, Telt const& g)
 }
 
 
-template<typename Telt>
+template<typename Telt, typename Tint>
 ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, Face const& Phi, Face const& Psi)
 {
-  std::vector<int> Omega = MovedPoints(G.labels);
+  std::vector<int> Omega = MovedPoints(G);
   if (repr && Phi.size() != Psi.size())
     return {int_fail, {}, {}};
   if (IsSubset(Phi, Omega) || ForAll(Omega, [&](int const &p) -> bool {return !Phi[p];})) {
@@ -938,7 +938,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
     if (repr && (IsSubset(Psi, Omega) || ForAll(Omega, [&](int const& p) -> bool {return !Psi[p];})))
       return {int_fail, {}, {}};
   }
-  auto GetPartitionFromPair=[&](std::vector<int> const& Omega, Face const& Ph) -> std::vector<std::vector<int>> {
+  auto GetPartitionFromPair=[&](Face const& Ph) -> Partition {
     std::vector<int> IntVect;
     for (auto & eVal : Omega)
       if (Ph[eVal] == 1)
@@ -979,14 +979,14 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
     }
     return true;
   };
-  return PartitionBacktrack( G, Pr, repr, rbase, {Q}, L, R );
+  return PartitionBacktrack<Telt,Tint>( G, Pr, repr, rbase, {Q}, L, R );
 }
 
-template<typename Telt>
+template<typename Telt,typename Tint>
 StabChain<Telt> Stabilizer_OnSets(StabChain<Telt> const& G, Face const& Phi)
 {
   bool repr=false;
-  return RepOpSetsPermGroup(G, repr, Phi, Phi);
+  return RepOpSetsPermGroup<Telt,Tint>(G, repr, Phi, Phi).stab;
 }
 
 

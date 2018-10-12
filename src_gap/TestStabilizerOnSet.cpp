@@ -40,7 +40,8 @@ int main(int argc, char *argv[])
       is2 >> eVal;
       eFace[i] = eVal;
     }
-    //    gap::StabChain<Telt> eG2 = Stabilizer_OnSets(eG, eFace);
+    gap::StabChain<Telt> eG2 = gap::Stabilizer_OnSets<Telt,Tint>(eG, eFace);
+    std::cerr << "eG2=" << eG2 << "\n";
   }
   catch (TerminalException const& e) {
     exit(e.eVal);

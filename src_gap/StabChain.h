@@ -499,15 +499,15 @@ std::vector<int> MovedPoints(StabChain<Telt> const& S)
   for (auto & eChain : S.stabilizer)
     for (auto & eIdx : eChain.genlabels)
       LIdx.insert(eIdx);
-  int n=S.n;
   auto IsMoved=[&](int const& ePt) -> bool {
     for (auto & eIdx : LIdx) {
       if (S.labels[eIdx].at(ePt) != ePt)
-	return false;
+	return true;
     }
-    return true;
+    return false;
   };
   std::vector<int> LMoved;
+  int n=S.n;
   for (int i=0; i<n; i++)
     if (IsMoved(i))
       LMoved.push_back(i);
