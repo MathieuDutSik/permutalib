@@ -49,9 +49,9 @@ public:
   }
   DoubleSidedPerm operator=(DoubleSidedPerm const& ePerm)
   {
-    siz=ePerm.siz;
-    ListVal=ePerm.ListVal;
-    ListRev=ePerm.ListRev;
+    siz = ePerm.siz;
+    ListVal = ePerm.ListVal;
+    ListRev = ePerm.ListRev;
     return *this;
   }
   bool isIdentity() const
@@ -87,9 +87,9 @@ public:
   }
   //
 private:
+  int siz;
   std::vector<int> ListVal;
   std::vector<int> ListRev;
-  int siz;
 };
 
 

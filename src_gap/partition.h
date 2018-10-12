@@ -286,13 +286,13 @@ typeFixcellsCell FixcellsCell(Partition const& P, Partition const& Q, std::set<i
 
 Partition TrivialPartition(std::vector<int> const& Omega)
 {
-  return Partition({Omega});
+  return GetPartition({Omega});
 }
 
 template<typename Telt>
 Partition OrbitsPartition(std::vector<Telt> const& gens, std::vector<int> const& Omega)
 {
-  return Partition(OrbitsPerm(gens, Omega));
+  return GetPartition(OrbitsPerms(gens, Omega));
 }
 
 

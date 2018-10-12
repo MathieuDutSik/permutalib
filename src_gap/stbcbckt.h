@@ -50,14 +50,15 @@ permPlusBool<Telt> ExtendedT(Telt const& t, int const& pnt, int& img, int const&
   if (bpt != pnt) {
     if (pnt != img)
       return {int_false,{}};
-  }
-  else {
-    if (S.Stot.stabilizer[S.eLev].translabels[img] == -1) 
-      return {int_false,{}};
     else
-      t = LeftQuotient(InverseRepresentative(S.Stot, S.eLev, img), t);
+      return {int_perm, t};
   }
-  return {int_true, t};
+  if (S.Stot.stabilizer[S.eLev].transversal[img] == -1) {
+    return {int_false,{}};
+  }
+  //      Telt u = InverseRepresentative(S.Stot, S.eLev, img);
+  //      t = LeftQuotient(u, t);
+  return {int_perm, LeftQuotient(InverseRepresentative(S.Stot, S.eLev, img), t)};
 }
 
 
@@ -252,13 +253,14 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
 
 
 template<typename Telt>
-bool MeetPartitionStrat(imageType<Telt> const& image, Partition const& S, Telt const& g, std::vector<singStrat> const& strat)
+bool MeetPartitionStrat(rbaseType<Telt> const& rbase, imageType<Telt> & image, Partition const& S, Telt const& g, std::vector<singStrat> const& strat)
 {
   if (strat.size() == 0)
     return false;
   for (auto & pRec : strat) {
-    if ((pRec.p == -1 && !ProcessFixpoint_image(image, pRec.s, FixpointCellNo(image.partition, pRec.i), -1)) ||
-	(pRec.p != -1 && SplitCell(image.partition, pRec.p, S, pRec.s, g, pRec.i ) != pRec.i))
+    int eFix=FixpointCellNo(image.partition, pRec.i);
+    if ((pRec.p == -1 && !ProcessFixpoint_image(image, pRec.s, eFix, -1)) ||
+	(pRec.p != -1 && SplitCell_Partition(image.partition, pRec.p, S, pRec.s, g, pRec.i ) != pRec.i))
       return false;
   }
   return true;
@@ -278,7 +280,7 @@ bool MeetPartitionStrat(imageType<Telt> const& image, Partition const& S, Telt c
 ##
 */
 template<typename Telt>
-std::vector<singStrat> StratMeetPartition(rbaseType<Telt> const& rbase, Partition const& P, Partition const& S, Telt const& g)
+std::vector<singStrat> StratMeetPartition(rbaseType<Telt> & rbase, Partition & P, Partition const& S, Telt const& g)
 {
   std::vector<singStrat> strat;
   std::vector<int> cellsP;
@@ -313,7 +315,7 @@ std::vector<singStrat> StratMeetPartition(rbaseType<Telt> const& rbase, Partitio
     }
     for (auto & pVal : splits) {
       // Last argument true means that the cell will split.
-      int i = SplitCell(P, pVal, S, s, g, true);
+      int i = SplitCell_Partition(P, pVal, S, s, g, true);
       if (!g.isIdentity()) {
 	std::vector<int> cell = Cell(P, NumberCells(P));
 	for (auto & eVal : cell) {
@@ -344,7 +346,7 @@ std::vector<singStrat> StratMeetPartition(rbaseType<Telt> const& rbase, Partitio
 
 
 template<typename Telt>
-void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt)
+void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, Telt const& TheId)
 {
   if (rbase.level2.status != int_true && rbase.level2.status != int_false)
     rbase.lev2.push_back(rbase.level2);
@@ -363,7 +365,7 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt)
     auto MainInsert=[&](StabChainPlusLev<Telt> const& lev) -> void {
       if (lev.status != int_int) {
 	Partition O = OrbitsPartition(StrongGeneratorsStabChain(lev.Stot, lev.eLev), rbase.domain);
-	std::vector<singStrat> strat = StratMeetPartition(rbase, P, O);
+	std::vector<singStrat> strat = StratMeetPartition(rbase, P, O, TheId);
 	rbase.rfm[len].push_back(Refinement({O,strat}));
       }
     };
@@ -378,7 +380,7 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt)
 
 
 template<typename Telt>
-void NextRBasePoint(Partition & P, rbaseType<Telt> & rbase)
+void NextRBasePoint(Partition & P, rbaseType<Telt> & rbase, Telt const& TheId)
 {
   std::vector<int> lens = P.lengths;
   std::vector<int> order = ClosedInterval(0, NumberCells(P));
@@ -396,7 +398,7 @@ void NextRBasePoint(Partition & P, rbaseType<Telt> & rbase)
     k++;
   }
   int p = P.points[ P.firsts[ order[k] ] + l ];
-  RegisterRBasePoint(P, rbase, p);
+  RegisterRBasePoint(P, rbase, p, TheId);
 }
 
 template<typename Telt>
@@ -659,7 +661,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	//	if (!repr) {
 	//	  oldcel = StructuralCopy( oldcel );
 	//	}
-	NextRBasePoint(rbase.partition, rbase);
+	NextRBasePoint(rbase.partition, rbase, G.identity);
 	if (image.perm.status == int_true)
 	  rbase.fix.push_back(Fixcells(rbase.partition));
 	Face eNewF(range.size());
