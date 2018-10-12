@@ -112,6 +112,8 @@ struct rbaseType {
   std::vector<StabChainPlusLev<Telt>> lev;
   StabChainPlusLev<Telt> level;
   //
+  bool NeedLevel2;
+  bool SetLevelStabChain2;
   std::vector<StabChainPlusLev<Telt>> lev2;
   StabChainPlusLev<Telt> level2;
 };
@@ -559,7 +561,7 @@ Telt MappingPermListList(int const& n, std::vector<int> const& src, std::vector<
 
 
 template<typename Telt, typename Tint>
-ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(Telt const&)> const& Pr, bool const& repr, rbaseType<Telt> & rbase, dataType<Telt> const& data, std::vector<StabChain<Telt>> & L, std::vector<StabChain<Telt>> & R)
+ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(Telt const&)> const& Pr, bool const& repr, rbaseType<Telt> & rbase, dataType<Telt> const& data, StabChain<Telt> & L, StabChain<Telt> & R)
 {
   imageType<Telt> image;
   Face orB_sing; // backup of <orb>. We take a single entry. Not sure it is correct
@@ -907,7 +909,7 @@ Face OnSets(Face const& f, Telt const& g)
 {
   int n=f.size();
   Face fRet(n);
-  int b = f.find_first();
+  boost::dynamic_bitset<>::size_type b = f.find_first();
   while (b != boost::dynamic_bitset<>::npos) {
     int eImg=g.at(b);
     fRet[eImg]=1;
@@ -958,8 +960,8 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
 
 
   auto GetSubgroup=[&](Face const& Ph) -> StabChain<Telt> {
-    std::vector<Telt> sgs=Filtered(StrongGeneratorsStabChain(G), [&](Telt const& g)->bool{return OnSets(Ph, g) == Ph;});
-    return MinimalStabChain(sgs);
+    std::vector<Telt> sgs=Filtered(StrongGeneratorsStabChain(G, 0), [&](Telt const& g)->bool{return OnSets(Ph, g) == Ph;});
+    return MinimalStabChain<Telt,Tint>(sgs);
   };
   
   
@@ -968,8 +970,8 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
   if (repr)
     R = GetSubgroup(Psi);
   else
-    R=L;
-  rbaseType<Telt> rbase = EmptyRBase({G, G}, true, Omega, P);
+    R = L;
+  rbaseType<Telt> rbase = EmptyRBase<Telt>({G, G}, true, Omega, P);
   std::vector<int> Phi_vect = FaceToVector(Phi);
   std::function<bool(Telt const&)> Pr=[&](Telt const& gen) -> bool {
     for (auto & i : Phi_vect) {
