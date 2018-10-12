@@ -26,9 +26,18 @@ struct permPlusBool {
   Telt val;
 };
 
-
 template<typename Telt>
-permPlusBool<Telt> ExtendedT(Telt const& t, int const& pnt, int& img, int const& simg, StabChain<Telt> const& Stot, int const& eLev)
+struct StabChainPlusLev {
+  int status; // possible values in {int_false, int_true, int_int, int_stablev} 
+  int value_int;
+  StabChain<Telt> Stot;
+  int eLev;
+};
+
+
+ 
+template<typename Telt>
+permPlusBool<Telt> ExtendedT(Telt const& t, int const& pnt, int& img, int const& simg, StabChainPlusLev<Telt> const& S)
 {
   if (simg == -1)
     img = SlashAct(img, t);
@@ -37,27 +46,20 @@ permPlusBool<Telt> ExtendedT(Telt const& t, int const& pnt, int& img, int const&
     
   // If <G> fixes <pnt>, nothing more can  be changed, so test whether <pnt>
   // = <img>.
-  int bpt = BasePoint(Stot, eLev);
+  int bpt = BasePoint(S.Stot, S.eLev);
   if (bpt != pnt) {
     if (pnt != img)
       return {int_false,{}};
   }
   else {
-    if (Stot.stabilizer[eLev].translabels[img] == -1) 
+    if (S.Stot.stabilizer[S.eLev].translabels[img] == -1) 
       return {int_false,{}};
     else
-      t = LeftQuotient(InverseRepresentative(Stot, eLev, img ), t);
+      t = LeftQuotient(InverseRepresentative(S.Stot, S.eLev, img), t);
   }
   return {int_true, t};
 }
 
-template<typename Telt>
-struct StabChainPlusLev {
-  int status; // possible values in {int_false, int_true, int_int, int_stablev} 
-  int value_int;
-  StabChain<Telt> Stot;
-  int eLev;
-};
 
 template<typename Telt>
 bool IsBool(StabChainPlusLev<Telt> const& S)
@@ -120,7 +122,7 @@ struct rbaseType {
   dataType<Telt> data;
   std::vector<std::vector<int>> fix;
   //
-  std::vector<Refinement> rfm;
+  std::vector<std::vector<Refinement>> rfm;
   Partition partition;
   std::vector<StabChainPlusLev<Telt>> lev;
   StabChainPlusLev<Telt> level;
@@ -136,7 +138,7 @@ template<typename Telt>
 bool ProcessFixpoint_rbase(rbaseType<Telt> & rbase, int const& pnt)
 {
   if (rbase.level2.status != int_true && rbase.level2.status != int_false) {
-    ChangeStabChain(rbase.level2, {pnt});
+    ChangeStabChain(rbase.level2.Stot, rbase.level2.eLev, {pnt}, int_true);
     if (BasePoint(rbase.level2) == pnt) 
       rbase.level2.eLev++;
   }
@@ -144,7 +146,7 @@ bool ProcessFixpoint_rbase(rbaseType<Telt> & rbase, int const& pnt)
     rbase.level.value_int--;
   }
   else {
-    ChangeStabChain(rbase.level, {pnt} );
+    ChangeStabChain(rbase.level.Stot, rbase.level.eLev, {pnt}, int_true);
     if (BasePoint(rbase.level) == pnt) {
       rbase.level.eLev++;
     }
@@ -160,6 +162,7 @@ bool ProcessFixpoint_rbase(rbaseType<Telt> & rbase, int const& pnt)
 template<typename Telt>
 struct imageType {
   int depth;
+  dataType<Telt> data;
   Partition partition;
   permPlusBool<Telt> perm;
   StabChainPlusLev<Telt> level;
@@ -171,11 +174,11 @@ struct imageType {
 
 
 template<typename Telt>
-bool ProcessFixpoint_image(imageType<Telt> & image, int const& pnt, int const& img, int const& simg)
+bool ProcessFixpoint_image(imageType<Telt> & image, int const& pnt, int & img, int const& simg)
 {
   if (image.perm.status != int_true) {
-    permPlusBool<Telt> t = ExtendedT(image.perm, pnt, img, simg, image.level);
-    if (!t.status)
+    permPlusBool<Telt> t = ExtendedT(image.perm.val, pnt, img, simg, image.level);
+    if (t.status == int_false)
       return false;
     else {
       if (BasePoint(image.level ) == pnt)
@@ -184,8 +187,8 @@ bool ProcessFixpoint_image(imageType<Telt> & image, int const& pnt, int const& i
     image.perm = t;
   }
   if (image.level2.status != int_false) {
-    permPlusBool<Telt> t = ExtendedT(image.perm2, pnt, img, -1, image.level2);
-    if (!t.status)
+    permPlusBool<Telt> t = ExtendedT(image.perm2.val, pnt, img, -1, image.level2);
+    if (t.status == int_false)
       return false;
     else {
       if (BasePoint(image.level2 ) == pnt)
@@ -206,7 +209,7 @@ bool IsTrivialRBase(rbaseType<Telt> const& rbase)
   }
   if (rbase.level.status == int_stablev) {
     int eLev=rbase.level.eLev;
-    if (rbase.level.stabilizer[eLev].genlabels.size() == 0)
+    if (rbase.level.Stot.stabilizer[eLev].genlabels.size() == 0)
       return true;
   }
   return false;
@@ -359,7 +362,7 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt)
   if (rbase.level2.status != int_false) {
     auto MainInsert=[&](StabChainPlusLev<Telt> const& lev) -> void {
       if (lev.status != int_int) {
-	Partition O = OrbitsPartition(lev, rbase.domain);
+	Partition O = OrbitsPartition(StrongGeneratorsStabChain(lev.Stot, lev.eLev), rbase.domain);
 	std::vector<singStrat> strat = StratMeetPartition(rbase, P, O);
 	rbase.rfm[len].push_back(Refinement({O,strat}));
       }
@@ -387,7 +390,8 @@ void NextRBasePoint(Partition & P, rbaseType<Telt> & rbase)
       l = 0;
     }
     else {
-      l = PositionProperty(ClosedInterval(0, lens[k]), [&](int const& i) -> int {return !IsFixedStabilizer(rbase.level, P.points[i+P.firsts[order[k]]]);});
+      l = PositionProperty(ClosedInterval(0, lens[k]), [&](int const& i) -> int {
+	  return !IsFixedStabilizer(rbase.level.Stot, rbase.level.eLev, P.points[i+P.firsts[order[k]]]);});
     }
     k++;
   }
@@ -509,19 +513,19 @@ bool PBIsMinimal(std::vector<int> const& range, int const& a, int const& b, Stab
 }
 
 template<typename Telt>
-void SubtractBlistOrbitStabChain(Face & blist, std::vector<Telt> const& LGen, int const& pnt)
+void SubtractBlistOrbitStabChain(Face & blist, std::vector<Telt> const& LGen, int const& pnt_in)
 {
-  std::vector<int> orb{pnt};
-  blist[pnt]=false;
+  std::vector<int> orb{pnt_in};
+  blist[pnt_in]=false;
   int pos=0;
-  int PrevPos=0;
+  //  int PrevPos=0;
   while(true) {
     int siz = orb.size();
     if (pos == siz) {
       break;
     }
-    for (int ePos=0; ePos<siz; ePos++) {
-      pnt=orb[ePos];
+    for (int ePos=pos; ePos<siz; ePos++) {
+      int pnt=orb[ePos];
       for (auto& eGen : LGen) {
         int img = PowAct(pnt, eGen);
         if (blist[img]) {
@@ -764,7 +768,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	image.bimg[ d ] = b;
 	IsolatePoint( image.partition, b );
 	
-	if (ProcessFixpoint_image(image, a, b, org[d][b]))
+	if (ProcessFixpoint_image(image, a, b_int, org[d][b_int]))
 	  t.status = RRefine(rbase, image, false);
 	else
 	  t.status = int_fail;
@@ -826,10 +830,10 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
         
 	// Now  we can remove the   entire <R>-orbit  of <b> from  the
 	// candidate list.
-	if (R.stabilizer[d].translabels[b] != -1)
+	if (R.stabilizer[d].transversal[b] != -1)
 	  SubtractBlist(orb[d], BlistList(range, R.stabilizer[d].orbit));
 	else
-	  SubtractBlistOrbitStabChain(orb[d], StrongGeneratorsStabChain(R, d), b);
+	  SubtractBlistOrbitStabChain(orb[d], StrongGeneratorsStabChain(R, d), b_int);
 	b = orb[d].find_next(b);
       }
       
