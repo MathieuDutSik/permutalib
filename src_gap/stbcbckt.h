@@ -122,12 +122,12 @@ struct rbaseType {
 template<typename Telt>
 bool ProcessFixpoint_rbase(rbaseType<Telt> & rbase, int const& pnt)
 {
-  if (rbase.level2.status != 0 && rbase.level2.status != 1) {
+  if (rbase.level2.status != int_true && rbase.level2.status != int_false) {
     ChangeStabChain(rbase.level2, {pnt});
     if (BasePoint(rbase.level2) == pnt) 
       rbase.level2.eLev++;
   }
-  if (rbase.level_status == 2) {
+  if (rbase.level_status == int_int) {
     rbase.level.value_int--;
   }
   else {
@@ -160,7 +160,7 @@ struct imageType {
 template<typename Telt>
 bool ProcessFixpoint_image(imageType<Telt> & image, int const& pnt, int const& img, int const& simg)
 {
-  if (image.perm.status != 1) {
+  if (image.perm.status != int_true) {
     permPlusBool<Telt> t = ExtendedT(image.perm, pnt, img, simg, image.level);
     if (!t.status)
       return false;
@@ -170,7 +170,7 @@ bool ProcessFixpoint_image(imageType<Telt> & image, int const& pnt, int const& i
     }
     image.perm = t;
   }
-  if (image.level2.status != 0) {
+  if (image.level2.status != int_false) {
     permPlusBool<Telt> t = ExtendedT(image.perm2, pnt, img, 0, image.level2);
     if (!t.status)
       return false;
@@ -187,11 +187,11 @@ bool ProcessFixpoint_image(imageType<Telt> & image, int const& pnt, int const& i
 template<typename Telt>
 bool IsTrivialRBase(rbaseType<Telt> const& rbase)
 {
-  if (rbase.level.status == 2) {
+  if (rbase.level.status == int_int) {
     if (rbase.level.value_int <= 1)
       return true;
   }
-  if (rbase.level.status == 3) {
+  if (rbase.level.status == int_stablev) {
     int eLev=rbase.level.eLev;
     if (rbase.level.stabilizer[eLev].genlabels.size() == 0)
       return true;
@@ -218,7 +218,7 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
     }
     else {
       rbase.SetLevelStabChain2=true;
-      rbase.level2 = {G[1], 0};
+      rbase.level2 = {int_stablev, -444, G[1], 0};
       rbase.lev2 = {};
     }
   }
@@ -226,7 +226,7 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
     rbase.NeedLevel2=false;
     rbase.SetLevelStabChain2=false;
   }
-  rbase.level = {G[0], 0};
+  rbase.level = {int_stablev, -444, G[0], 0};
   for (auto & pnt : Fixcells(P))
     ProcessFixpoint_rbase(rbase, pnt);
   return rbase;
@@ -330,7 +330,7 @@ std::vector<singStrat> StratMeetPartition(rbaseType<Telt> const& rbase, Partitio
 template<typename Telt>
 void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt)
 {
-  if (rbase.level2.status != 0 && rbase.level2.status != 1)
+  if (rbase.level2.status != int_true && rbase.level2.status != int_false)
     rbase.lev2.push_back(rbase.level2);
   rbase.lev.push_back(rbase.level);
   rbase.base.push_back(pnt);
@@ -343,15 +343,15 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt)
     ProcessFixpoint_rbase(rbase, pnt);
     rbase.rfm[len].push_back(Refinement({pnt,k}));
   }
-  if (rbase.level2.status != 0) {
+  if (rbase.level2.status != int_false) {
     auto MainInsert=[&](StabChainPlusLev<Telt> const& lev) -> void {
-      if (lev.status != 2) {
+      if (lev.status != int_int) {
 	Partition O = OrbitsPartition(lev, rbase.domain);
 	std::vector<singStrat> strat = StratMeetPartition(rbase, P, O);
 	rbase.rfm[len].push_back(Refinement({O,strat}));
       }
     };
-    if (rbase.level2.status == 1)
+    if (rbase.level2.status == int_true)
       MainInsert(rbase.level);
     else
       MainInsert(rbase.level2);
@@ -370,7 +370,7 @@ void NextRBasePoint(Partition & P, rbaseType<Telt> & rbase)
   int k = PositionProperty(lens, [](int const& x) -> int {return x != 1;});
   int l = -1;
   while(l == -1) {
-    if (rbase.level.status == 2) {
+    if (rbase.level.status == int_int) {
       l = 0;
     }
     else {
@@ -394,7 +394,7 @@ template<typename Telt>
 bool Refinements_Intersection(rbaseType<Telt> & rbase, imageType<Telt> & image, Partition const& Q, std::vector<singStrat> const& strat)
 {
   Telt t;
-  if (image.level2.status == 0) {
+  if (image.level2.status == int_false) {
     t = image.perm.val;
   }
   else {
@@ -563,6 +563,7 @@ Telt MappingPermListList(int const& n, std::vector<int> const& src, std::vector<
 template<typename Telt, typename Tint>
 ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(Telt const&)> const& Pr, bool const& repr, rbaseType<Telt> & rbase, dataType<Telt> const& data, StabChain<Telt> & L, StabChain<Telt> & R)
 {
+  int n=G.n;
   imageType<Telt> image;
   Face orB_sing; // backup of <orb>. We take a single entry. Not sure it is correct
   int nrback;
@@ -573,7 +574,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   std::vector<int> range;    // range for construction of <orb>
   Partition oldcel;       // old value of <image.partition.cellno>
   std::vector<int> oldcel_cellno;
-  auto PBEnumerate = [&](int const& d, bool const & wasTriv) -> permPlusBool<Telt> {
+  std::function<permPlusBool<Telt>(int const&,bool const&)> PBEnumerate = [&](int const& d, bool const & wasTriv) -> permPlusBool<Telt> {
     permPlusBool<Telt> oldprm, oldprm2;
     int a;                // current R-base point
     permPlusBool<Telt> t; // group element constructed, to be handed upwards
@@ -600,7 +601,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       oldprm2.status = int_false;
     // Recursion comes to an end  if all base  points have been prescribed
     // images.
-    if (d >= rbase.base.size()) {
+    if (d >= int(rbase.base.size())) {
       if (IsTrivialRBase(rbase)) {
 	blen = rbase.base.size();
 	// Do     not  add the   identity    element  in the  subgroup
@@ -611,14 +612,14 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  StabChainOptions<Tint> options = GetStandardOptions<Tint>();
 	  options.base = rbase.base;
 	  options.reduced = false;
-	  L = StabChainOp(L, options);
+	  L = StabChainOp<Telt,Tint>(StrongGeneratorsStabChain(L,0), options);
 	  R = L;
 	  return {int_fail,{}};
 	}
 	else {
 	  permPlusBool<Telt> prm;
 	  if (image.perm.status == int_true)
-	    prm = {int_perm, MappingPermListList(rbase.fix[rbase.base.size()-1], Fixcells(image.partition))};
+	    prm = {int_perm, MappingPermListList(n, rbase.fix[rbase.base.size()-1], Fixcells(image.partition))};
 	  else
 	    prm = image.perm;
 	  if (image.level2.status != int_false) {
@@ -733,11 +734,11 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	// and <image.perm>.
 	for (int i=undoto+1; i<NumberCells(image.partition); i++) 
 	  UndoRefinement(image.partition);
-	if (image.perm.status != 1) {
+	if (image.perm.status != int_true) {
 	  image.level = rbase.lev[ d ];
 	  image.perm = oldprm;
 	}
-	if (image.level2.status != 0) {
+	if (image.level2.status != int_false) {
 	  image.level2 = rbase.lev2[ d ];
 	  image.perm2  = oldprm2;
 	}
@@ -857,7 +858,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     // In the representative case, map the  fixpoints of the partitions at
     // the root of the search tree.
     if (rbase.partition.lengths != image.partition.lengths) {
-      image.perm.status=0;
+      image.perm.status = int_false;
     }
     else {
       std::vector<int> fix  = Fixcells(rbase.partition);
