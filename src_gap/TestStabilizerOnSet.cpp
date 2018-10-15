@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
   try {
     using Telt = permutalib::DoubleSidedPerm;
     using Tint = mpz_class;
-    if (argc != 3) {
+    if (argc != 2) {
       std::cerr << "We should have argc = 3\n";
       throw TerminalException{1};
     }
@@ -33,11 +33,10 @@ int main(int argc, char *argv[])
     permutalib::StabChain<Telt> eG = permutalib::MinimalStabChain<Telt,Tint>(LGen);
     std::cerr << "eG=" << eG << "\n";
     //
-    std::ifstream is2(argv[2]);
     Face eFace(n);
     for (int i=0; i<n; i++) {
       int eVal;
-      is2 >> eVal;
+      is >> eVal;
       eFace[i] = eVal;
     }
     permutalib::StabChain<Telt> eG2 = permutalib::Stabilizer_OnSets<Telt,Tint>(eG, eFace);
