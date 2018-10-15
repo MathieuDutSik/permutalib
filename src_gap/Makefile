@@ -11,11 +11,11 @@ CC		= g++ -std=c++14 -Wall -g -O2 -fsanitize=address -fsanitize=undefined -fstac
 NOLINKFLAG 	= -c
 OUTPUTFLAG 	= -o
 
-CLOCAL          = -I../src_number -I../src -I../src_matrix -I../src_basic -I../src_comb -I../src_graph -I../src_matrix
+CLOCAL          = -I../src_number -I../src_matrix -I../src_basic -I../src_comb -I../src_graph
 
-CFLAGS 		= -I$(GMP_INCDIR)  -I$(PERMLIB_INCDIR) -I$(LIBBLISS_INCDIR) -I$(BOOST_INCDIR) -I$(EIGEN_PATH) $(MINISAT_INCLUDE)
+CFLAGS 		= -I$(GMP_INCDIR) -I$(BOOST_INCDIR) -I$(EIGEN_PATH)
 
-LIBS		= -lm $(GMP_CXX_LINK) -pthread $(LIBBLISS_LINK) $(MINISAT_CPP_LINK)
+LIBS		= -lm $(GMP_CXX_LINK) -pthread
 
 %.o: %.cpp
 	@echo
