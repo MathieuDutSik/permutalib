@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
       LGen[iGen] = ePerm;
     }
     //
-    permutalib::StabChain<Telt> eG = permutalib::MinimalStabChain<Telt,Tint>(LGen);
+    permutalib::StabChain<Telt> eG = permutalib::MinimalStabChain<Telt,Tint>(LGen, n);
     std::cerr << "eG=" << eG << "\n";
     //
     Face eFace(n);

@@ -22,7 +22,7 @@ StabChain<Telt> StabChainOp(std::vector<Telt> const& Lgen, StabChainOptions<Tint
     return StabChainRandomPermGroup(Lgen, TheId, options);
   }
   std::cerr << "SEARCH : Doing the ordinary Schreier Sims\n";
-  int n=Lgen[0].size();
+  int n=options.n;
   StabChain<Telt> Stot = EmptyStabChain<Telt>(n);
   if (!IsTrivial_ListGen(Lgen)) {
     int eLev=0;
@@ -51,10 +51,10 @@ StabChain<Telt> StabChainOp(std::vector<Telt> const& Lgen, StabChainOptions<Tint
 
 
 template<typename Telt, typename Tint>
-StabChain<Telt> MinimalStabChain(std::vector<Telt> const& LGen)
+StabChain<Telt> MinimalStabChain(std::vector<Telt> const& LGen, int const& n)
 {
+  StabChainOptions<Tint> options = GetStandardOptions<Tint>(n);
   int largMov=LargestMovedPoint(LGen);
-  StabChainOptions<Tint> options = GetStandardOptions<Tint>();
   options.base = ClosedInterval(0, largMov);
   return StabChainOp(LGen, options);
 }

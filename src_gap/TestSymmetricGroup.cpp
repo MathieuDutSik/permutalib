@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
     //
     std::vector<Telt> LGen{ePerm1, ePerm2};
     //
-    permutalib::StabChain<Telt> S = permutalib::MinimalStabChain<Telt,Tint>(LGen);
+    permutalib::StabChain<Telt> S = permutalib::MinimalStabChain<Telt,Tint>(LGen, n);
     std::cerr << "S=" << S << "\n";
   }
   catch (TerminalException const& e) {

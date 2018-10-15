@@ -463,6 +463,7 @@ std::vector<Telt> ElementsStabChain(StabChain<Telt> const& Stot)
 // is base is empty then this just replaces the IsBound(options.base)
 template<typename Tint>
 struct StabChainOptions {
+  int n;
   std::vector<int> base;
   std::vector<int> knownBase;
   int random;
@@ -473,7 +474,7 @@ struct StabChainOptions {
 
 
 template<typename Tint>
-StabChainOptions<Tint> GetStandardOptions()
+StabChainOptions<Tint> GetStandardOptions(int const& n)
 {
   std::vector<int> base;
   std::vector<int> knownBase;
@@ -481,7 +482,7 @@ StabChainOptions<Tint> GetStandardOptions()
   bool reduced=true;
   Tint size=0;
   Tint limit=0;
-  return {base, knownBase, random, reduced, size, limit};
+  return {n, base, knownBase, random, reduced, size, limit};
 }
 
 
@@ -539,6 +540,8 @@ bool IsTrivial(StabChain<Telt> const& G)
 template<typename Telt>
 int LargestMovedPoint(std::vector<Telt> const& LGen)
 {
+  if (LGen.size() == 0)
+    return -1;
   int n=LGen[0].size();
   std::vector<int> Status(n, 1);
   for (auto & eGen : LGen) {

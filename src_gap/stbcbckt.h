@@ -631,7 +631,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	if (wasTriv) {
 	  // In the subgroup case, assign to  <L> and <R> stabilizer
 	  // chains when the R-base is complete.
-	  StabChainOptions<Tint> options = GetStandardOptions<Tint>();
+	  StabChainOptions<Tint> options = GetStandardOptions<Tint>(n);
 	  options.base = rbase.base;
 	  options.reduced = false;
 	  L = StabChainOp<Telt,Tint>(StrongGeneratorsStabChain(L,0), options);
@@ -792,7 +792,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    std::vector<Telt> LGenB = Filtered(LGen, [&](Telt const& gen) -> bool {return PowAct(b_int, gen) == b_int;});
 	    //	    R[ d + 1 ] := rec( generators := Filtered( R[ d + 1 ], gen -> b ^ gen = b ) );
 	    int largMov=LargestMovedPoint(LGenB);
-	    StabChainOptions<Tint> options = GetStandardOptions<Tint>();
+	    StabChainOptions<Tint> options = GetStandardOptions<Tint>(n);
 	    options.base = ClosedInterval(0, largMov);
 	    StabChainStrong(R, d+1, LGenB, options);
 	  }
@@ -946,6 +946,7 @@ Face OnSets(Face const& f, Telt const& g)
 template<typename Telt, typename Tint>
 ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, Face const& Phi, Face const& Psi)
 {
+  int n=G.n;
   std::vector<int> Omega = MovedPoints(G);
   if (repr && Phi.size() != Psi.size())
     return {int_fail, {}, {}};
@@ -985,7 +986,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
 
   auto GetSubgroup=[&](Face const& Ph) -> StabChain<Telt> {
     std::vector<Telt> sgs=Filtered(StrongGeneratorsStabChain(G, 0), [&](Telt const& g)->bool{return OnSets(Ph, g) == Ph;});
-    return MinimalStabChain<Telt,Tint>(sgs);
+    return MinimalStabChain<Telt,Tint>(sgs, n);
   };
   
   

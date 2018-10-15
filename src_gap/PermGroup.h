@@ -103,24 +103,13 @@ int SmallestMovedPointsPerms(std::vector<Telt> const& gens)
   return -1;
 }
 
-template<typename Telt>
-int LargestMovedPointsPerms(std::vector<Telt> const& gens)
-{
-  int siz=0;
-  for (int i=0; i<siz; i++) {
-    int j=siz - 1 - i;
-    for (auto & eGen : gens)
-      if (PowAct(j, eGen) != j)
-	return j;
-  }
-  return -1;
-}
-
 
 
 template<typename Telt>
 std::vector<int> MovedPointsPerms(std::vector<Telt> const& gens)
 {
+  if (gens.size() == 0)
+    return {};
   std::vector<int> ListMoved;
   int siz=gens[0].size();
   for (int i=0; i<siz; i++) {
