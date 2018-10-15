@@ -3,6 +3,7 @@
 
 #include "Face_basic.h"
 
+namespace permutalib {
 
 template<typename Telt>
 int SmallestMovedPoint(std::vector<Telt> const& LGen)
@@ -242,5 +243,6 @@ Telt PowerGroupElement(Telt const& u, int const& n)
 
 
 
+}
 
 #endif

@@ -2,6 +2,7 @@
 #define GRP_TEMPLATE_CLASS_H
 
 
+namespace permutalib {
 
 template<typename T>
 struct {
@@ -64,5 +65,7 @@ private:
   std::vector<int> ListIndices;
 }
 
+
+}
 
 #endif

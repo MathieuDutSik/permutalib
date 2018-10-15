@@ -38,7 +38,7 @@
 
 
 
-namespace gap {
+namespace permutalib {
 
 static const int int_reducedm1 = -1;
 static const int int_false = 0;

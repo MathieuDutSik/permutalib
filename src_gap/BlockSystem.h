@@ -7,7 +7,7 @@
 #include "PermGroup.h"
 
 
-namespace gap {
+namespace permutalib {
 
 template<typename Telt>
 std::pair<std::vector<std::vector<int>>,std::vector<Face>> Blocks_Kernel(std::vector<Telt> const& ListGen, std::vector<int> const& Omega, std::vector<int> const& seed)

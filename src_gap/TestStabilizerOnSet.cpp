@@ -8,7 +8,7 @@
 int main(int argc, char *argv[])
 {
   try {
-    using Telt = perm::DoubleSidedPerm;
+    using Telt = permutalib::DoubleSidedPerm;
     using Tint = mpz_class;
     if (argc != 3) {
       std::cerr << "We should have argc = 3\n";
@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
       LGen[iGen] = ePerm;
     }
     //
-    gap::StabChain<Telt> eG = gap::MinimalStabChain<Telt,Tint>(LGen);
+    permutalib::StabChain<Telt> eG = permutalib::MinimalStabChain<Telt,Tint>(LGen);
     std::cerr << "eG=" << eG << "\n";
     //
     std::ifstream is2(argv[2]);
@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
       is2 >> eVal;
       eFace[i] = eVal;
     }
-    gap::StabChain<Telt> eG2 = gap::Stabilizer_OnSets<Telt,Tint>(eG, eFace);
+    permutalib::StabChain<Telt> eG2 = permutalib::Stabilizer_OnSets<Telt,Tint>(eG, eFace);
     std::cerr << "eG2=" << eG2 << "\n";
   }
   catch (TerminalException const& e) {

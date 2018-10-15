@@ -3,7 +3,7 @@
 
 #include "Face_basic.h"
 
-namespace gap {
+namespace permutalib {
 
 using Tarith = int;
   

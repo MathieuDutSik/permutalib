@@ -3,7 +3,7 @@
 
 #include "PermGroup.h"
 
-namespace gap {
+namespace permutalib {
 
 struct Partition {
   std::vector<int> points;
@@ -157,7 +157,7 @@ int SplitCell_Partition(Partition & P, int const& i, Partition const& Q, int con
 
 
 template<typename Telt>
-int SplitCell_Partition(Partition & P, int const& i, Face const& f, int const& j, Telt const& g, int const& out)
+int SplitCell_Face(Partition & P, int const& i, Face const& f, int const& j, Telt const& g, int const& out)
 {
   std::function<bool(int)> test=[&](int const& ePt) -> bool {
     int fPt=PowAct(ePt, g);

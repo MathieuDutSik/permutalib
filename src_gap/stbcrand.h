@@ -15,8 +15,7 @@
 #include "pseudorandom.h"
 #include "COMB_Vectors.h"
 
-namespace gap {
-
+namespace permutalib {
   
 template<typename Telt>
 void SCRExtend(std::vector<Telt> & labels, std::vector<int> & orb, std::vector<int> & transversal, std::vector<Telt> & treegen, std::vector<Telt> & treegeninv, int & len)

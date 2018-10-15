@@ -6,7 +6,7 @@
 int main(int argc, char *argv[])
 {
   try {
-    using Telt = perm::DoubleSidedPerm;
+    using Telt = permutalib::DoubleSidedPerm;
     using Tint = mpz_class;
     int n=10;
     std::vector<int> ePermV1(n);
@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
     //
     std::vector<Telt> LGen{ePerm1, ePerm2};
     //
-    gap::StabChain<Telt> S = gap::MinimalStabChain<Telt,Tint>(LGen);
+    permutalib::StabChain<Telt> S = permutalib::MinimalStabChain<Telt,Tint>(LGen);
     std::cerr << "S=" << S << "\n";
   }
   catch (TerminalException const& e) {

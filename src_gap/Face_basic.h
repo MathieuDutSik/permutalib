@@ -8,6 +8,9 @@
 
 typedef boost::dynamic_bitset<> Face;
 
+namespace permutalib {
+
+
 std::vector<int> FaceToVector(Face const& eSet)
 {
   int nbVert=eSet.count();
@@ -231,5 +234,5 @@ void VectVectInt_Magma_Print(std::ostream &os, std::vector<Face> const&ListOrbit
 }
 
 
-
+}
 #endif

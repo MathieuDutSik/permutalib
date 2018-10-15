@@ -6,7 +6,7 @@
 #include "stbcrand.h"
 
 
-namespace gap {
+namespace permutalib {
 
   
 // The main function

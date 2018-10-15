@@ -17,7 +17,7 @@
 ##
 */
 
-namespace gap {
+namespace permutalib {
 
 
 template<typename Telt>

@@ -3,7 +3,7 @@
 
 #include <vector>
 
-namespace perm {
+namespace permutalib {
 
 
 struct DoubleSidedPerm {

@@ -1,8 +1,11 @@
 #ifndef SRC_GAP_LIST_H
 #define SRC_GAP_LIST_H
 
+
 #include <vector>
 #include <Boost_bitset.h>
+
+namespace permutalib {
 
 template<typename T>
 std::vector<T> Reversed(std::vector<T> const& eList)
@@ -117,5 +120,5 @@ void SubtractBlist(Face & a, Face const& b)
 }
 
 
-
+}
 #endif
