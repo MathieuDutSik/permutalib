@@ -597,6 +597,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   Partition oldcel;       // old value of <image.partition.cellno>
   std::vector<int> oldcel_cellno;
   std::function<permPlusBool<Telt>(int const&,bool const&)> PBEnumerate = [&](int const& d, bool const & wasTriv) -> permPlusBool<Telt> {
+    std::cerr << "Beginning of PBEnumerate\n";
     permPlusBool<Telt> oldprm, oldprm2;
     int a;                // current R-base point
     permPlusBool<Telt> t; // group element constructed, to be handed upwards
@@ -985,6 +986,12 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
 
 
   auto GetSubgroup=[&](Face const& Ph) -> StabChain<Telt> {
+    std::vector<Telt> LGen = StrongGeneratorsStabChain(G, 0);
+    std::cerr << "GetSubgroup, |LGen|=" << LGen.size() << "\n";
+    std::cerr << "GetSubgroup, LGen=";
+    for (auto & eGen : LGen)
+      std::cerr << " " << eGen;
+    std::cerr << "\n";
     std::vector<Telt> sgs=Filtered(StrongGeneratorsStabChain(G, 0), [&](Telt const& g)->bool{return OnSets(Ph, g) == Ph;});
     return MinimalStabChain<Telt,Tint>(sgs, n);
   };
@@ -996,6 +1003,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
     R = GetSubgroup(Psi);
   else
     R = L;
+  std::cerr << "Orders: |R|=" << SizeStabChain<Telt,Tint>(R) << " |L|=" << SizeStabChain<Telt,Tint>(L) << "\n";
   rbaseType<Telt> rbase = EmptyRBase<Telt>({G, G}, true, Omega, P);
   std::vector<int> Phi_vect = FaceToVector(Phi);
   std::function<bool(Telt const&)> Pr=[&](Telt const& gen) -> bool {

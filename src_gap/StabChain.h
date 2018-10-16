@@ -124,12 +124,17 @@ std::ostream& operator<<(std::ostream& os, StabChain<Telt> const& Stot)
   for (int iLev=0; iLev<nbLev; iLev++) {
     os << "iLev=" << iLev << "\n";
     os << "  transversal =";
-    for (auto & eVal : Stot.stabilizer[iLev].transversal)
-      os << " " << eVal;
+    for (auto & eVal : Stot.stabilizer[iLev].transversal) {
+      if (eVal == -1)
+	os << " " << eVal;
+      else
+	os << " " << Stot.labels[eVal];
+    }
     os << "\n";
     os << "  orbit=";
-    for (auto & eVal : Stot.stabilizer[iLev].orbit)
-      os << " " << eVal;
+    for (auto & eVal : Stot.stabilizer[iLev].orbit) {
+      os << " " << eVal+1;
+    }
     os << "\n";
     os << "  genlabels=";
     for (auto & eVal : Stot.stabilizer[iLev].genlabels)
@@ -363,10 +368,10 @@ Tint SizeStabChain(StabChain<Telt> const& Stot)
   int len=Stot.stabilizer.size();
   for (int iLev=0; iLev<len; iLev++) {
     int siz=Stot.stabilizer[iLev].orbit.size();
-    if (siz > 0) {
-      Tint siz_i = siz;
-      size *= siz_i;
-    }
+    if (siz == 0)
+      break;
+    Tint siz_i = siz;
+    size *= siz_i;
   }
   return size;
 }
@@ -374,16 +379,18 @@ Tint SizeStabChain(StabChain<Telt> const& Stot)
 template<typename Telt>
 std::vector<Telt> StrongGeneratorsStabChain(StabChain<Telt> const& Stot, int const& TheLev)
 {
-  std::set<Telt> sgs_set;
+  std::set<int> sgs_set;
   int len=Stot.stabilizer.size();
   for (int iLev=TheLev; iLev<len; iLev++) {
     int siz=Stot.stabilizer[iLev].genlabels.size();
     if (siz == 0)
       break;
     for (auto & pos : Stot.stabilizer[iLev].genlabels)
-      sgs_set.insert(Stot.labels[pos]);
+      sgs_set.insert(pos);
   }
-  std::vector<Telt> sgs(sgs_set.begin(), sgs_set.end());
+  std::vector<Telt> sgs;
+  for (auto & ePos : sgs_set)
+    sgs.push_back(Stot.labels[ePos]);
   return sgs;
 }
 

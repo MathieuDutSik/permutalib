@@ -1,5 +1,36 @@
+RequirePackage("gapcommon");
+Local_RemoveFileIfExist:=function(FileName)
+  if IsExistingFile(FileName)=true then
+    RemoveFile(FileName);
+  fi;
+end;
+
+
+
+Local_RandomSubset:=function(eSet, k)
+  local i, sSet, V, h;
+  sSet:=[];
+  V:=ListWithIdenticalEntries(Length(eSet), 1);
+  for i in [1..k]
+  do
+    while(true)
+    do
+      h:=Random([1..Length(eSet)]);
+      if V[h]=1 then
+        V[h]:=0;
+        Add(sSet, eSet[h]);
+        break;
+      fi;
+    od;
+  od;
+  return Set(sSet);
+end;
+
+
+
 CreateExampleOnSetCase:=function(FileName, GRP, sizSet)
   local LGen, SetMovedPt, eGen, nbMov, output, iMov, eImg, eSet, pos, eVal, eStab;
+  PrintStabChain(GRP);
   LGen:=GeneratorsOfGroup(GRP);
   SetMovedPt:=[];
   for eGen in LGen
@@ -12,7 +43,7 @@ CreateExampleOnSetCase:=function(FileName, GRP, sizSet)
     Error("Please correct");
   fi;
   #
-  RemoveFileIfExist(FileName);
+  Local_RemoveFileIfExist(FileName);
   output:=OutputTextFile(FileName, true);
   AppendTo(output, Length(LGen), " ", nbMov, "\n");
   for eGen in LGen
@@ -25,7 +56,7 @@ CreateExampleOnSetCase:=function(FileName, GRP, sizSet)
     AppendTo(output, "\n");
   od;
   #
-  eSet:=RandomSubset([1..nbMov], sizSet);
+  eSet:=Local_RandomSubset([1..nbMov], sizSet);
   for iMov in [1..nbMov]
   do
     pos:=Position(eSet, iMov);

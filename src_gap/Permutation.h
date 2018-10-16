@@ -236,17 +236,11 @@ DoubleSidedPerm Inverse(DoubleSidedPerm const& ePerm)
   return ~ePerm;
 }
 
-std::string GapStyleString(DoubleSidedPerm const& ePerm)
+std::string GapStyleStringShift(DoubleSidedPerm const& ePerm, int const& eShift)
 {
   int n=ePerm.size();
   std::vector<int> ListStat(n,1);
   std::string eRet;
-  /*
-  for (int i=0; i<n; i++) {
-    eRet += " " + std::to_string(ePerm.at(i));
-  }
-  eRet += "\n";*/
-
   
   for (int i=0; i<n; i++) {
     if (ListStat[i] == 1) {
@@ -259,7 +253,7 @@ std::string GapStyleString(DoubleSidedPerm const& ePerm)
 	if (!IsFirst)
 	  ePart += ",";
 	IsFirst=false;
-	ePart += std::to_string(eCurr);
+	ePart += std::to_string(eCurr + eShift);
 	ListStat[eCurr]=0;
 	int eNext = ePerm.at(eCurr);
 	len++;
@@ -277,8 +271,17 @@ std::string GapStyleString(DoubleSidedPerm const& ePerm)
   return "()";
 }
 
- 
+std::string GapStyleString(DoubleSidedPerm const& ePerm)
+{
+  return GapStyleStringShift(ePerm, 0);
+}
 
+
+std::ostream& operator<<(std::ostream& os, DoubleSidedPerm const& ePerm)
+{
+  os << GapStyleStringShift(ePerm,1);
+  return os;
+}
   
 }
 
