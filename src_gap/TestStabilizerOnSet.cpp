@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     using Telt = permutalib::DoubleSidedPerm;
     using Tint = mpz_class;
     if (argc != 2) {
-      std::cerr << "We should have argc = 3\n";
+      std::cerr << "We should have argc = 2\n";
       throw TerminalException{1};
     }
     std::ifstream is(argv[1]);
@@ -32,6 +32,8 @@ int main(int argc, char *argv[])
     //
     permutalib::StabChain<Telt> eG = permutalib::MinimalStabChain<Telt,Tint>(LGen, n);
     std::cerr << "eG=" << eG << "\n";
+    //
+    std::cerr << "|eG|=" << permutalib::Order<Telt,Tint>(eG) << "\n";
     //
     Face eFace(n);
     for (int i=0; i<n; i++) {

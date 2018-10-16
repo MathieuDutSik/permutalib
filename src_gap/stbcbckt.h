@@ -1006,12 +1006,14 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
     }
     return true;
   };
+  std::cerr << "Before call to PartitionBacktrack\n";
   return PartitionBacktrack<Telt,Tint>( G, Pr, repr, rbase, {Q}, L, R );
 }
 
 template<typename Telt,typename Tint>
 StabChain<Telt> Stabilizer_OnSets(StabChain<Telt> const& G, Face const& Phi)
 {
+  std::cerr << "Beginning of Stabilizer_OnSets\n";
   bool repr=false;
   return RepOpSetsPermGroup<Telt,Tint>(G, repr, Phi, Phi).stab;
 }

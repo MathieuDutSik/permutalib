@@ -49,6 +49,13 @@ StabChain<Telt> StabChainOp(std::vector<Telt> const& Lgen, StabChainOptions<Tint
 }
 
 
+template<typename Telt, typename Tint>
+Tint Order(StabChain<Telt> const& G)
+{
+  return SizeStabChain<Telt,Tint>(G);
+}
+
+ 
 
 template<typename Telt, typename Tint>
 StabChain<Telt> MinimalStabChain(std::vector<Telt> const& LGen, int const& n)

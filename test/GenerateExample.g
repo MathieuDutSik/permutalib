@@ -38,12 +38,42 @@ CreateExampleOnSetCase:=function(FileName, GRP, sizSet)
   od;
   AppendTo(output, "\n");
   CloseStream(output);
+
   eStab:=Stabilizer(GRP, eSet, OnSets);
   Print("|eStab|=", Order(eStab), "\n");
 end;
 
 
+DoMathieu:=false;
+if DoMathieu then
+  for eSize in [1..12]
+  do
+    eFile:=Concatenation("ExampleM24_", String(eSize));
+    CreateExampleOnSetCase(eFile, MathieuGroup(24), eSize);
+  od;
+  #
+  for eSize in [1..6]
+  do
+    eFile:=Concatenation("ExampleM12_", String(eSize));
+    CreateExampleOnSetCase(eFile, MathieuGroup(12), eSize);
+  od;
+fi;
 
-CreateExampleOnSetCase("ExampleM24", MathieuGroup(24), 12);
+DoSym6:=false;
+if DoSym6 then
+  for eSize in [1..3]
+  do
+    eFile:=Concatenation("ExampleSym6_", String(eSize));
+    CreateExampleOnSetCase(eFile, SymmetricGroup(6), eSize);
+  od;
+  #
+fi;
 
-
+DoSym4:=true;
+if DoSym4 then
+  for eSize in [2..2]
+  do
+    eFile:=Concatenation("ExampleSym4_", String(eSize));
+    CreateExampleOnSetCase(eFile, SymmetricGroup(4), eSize);
+  od;
+fi;

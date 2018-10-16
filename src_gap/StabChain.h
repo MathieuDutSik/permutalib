@@ -363,12 +363,14 @@ Tint SizeStabChain(StabChain<Telt> const& Stot)
   int len=Stot.stabilizer.size();
   for (int iLev=0; iLev<len; iLev++) {
     int siz=Stot.stabilizer[iLev].orbit.size();
-    Tint siz_i = siz;
-    size *= siz_i;
+    if (siz > 0) {
+      Tint siz_i = siz;
+      size *= siz_i;
+    }
   }
   return size;
 }
- 
+
 template<typename Telt>
 std::vector<Telt> StrongGeneratorsStabChain(StabChain<Telt> const& Stot, int const& TheLev)
 {
@@ -944,6 +946,7 @@ bool ChangeStabChain(StabChain<Telt> & Stot, int const& TheLev, std::vector<int>
   int basSiz=base.size();
   while (eLev < int(Stot.stabilizer.size())-1 || i < basSiz) {
     int old=BasePoint(Stot, eLev);
+    std::cerr << "eLev=" << eLev << "\n";
     if (Stot.stabilizer[eLev].genlabels.size() == 0 && (reduced == int_true || i >= basSiz)) {
       RemoveStabChain(Stot);
       i = basSiz;
