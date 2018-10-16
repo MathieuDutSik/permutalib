@@ -27,6 +27,7 @@ StabChain<Telt> StabChainOp(std::vector<Telt> const& Lgen, StabChainOptions<Tint
   if (!IsTrivial_ListGen(Lgen)) {
     int eLev=0;
     Stot.UseCycle=true;
+    std::cerr << "Before call to StabChainStrong\n";
     StabChainStrong(Stot, eLev, Lgen, options );
   }
   if (!options.reduced && options.base.size() > 0) {
