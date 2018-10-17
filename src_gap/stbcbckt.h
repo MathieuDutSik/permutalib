@@ -128,8 +128,6 @@ struct rbaseType {
   std::vector<StabChainPlusLev<Telt>> lev;
   StabChainPlusLev<Telt> level;
   //
-  bool NeedLevel2;
-  bool SetLevelStabChain2;
   std::vector<StabChainPlusLev<Telt>> lev2;
   StabChainPlusLev<Telt> level2;
 };
@@ -230,12 +228,10 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
   rbase.lev = {};
   if (G.size() == 2) {
     if (IsId) {
-      rbase.NeedLevel2=false;
-      rbase.SetLevelStabChain2=false;
+      rbase.level2.status=int_true;
       rbase.level2.Stot.UseCycle = false;
     }
     else {
-      rbase.SetLevelStabChain2=true;
       rbase.level2 = {int_stablev, -444, G[1], 0};
       std::cerr << "rbase Before bool print\n";
       std::cerr << "bool=" << rbase.level2.Stot.UseCycle << "\n";
@@ -244,8 +240,7 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
     }
   }
   else {
-    rbase.NeedLevel2=false;
-    rbase.SetLevelStabChain2=false;
+    rbase.level2.status=int_false;
   }
   rbase.level = {int_stablev, -444, G[0], 0};
   for (auto & pnt : Fixcells(P))
@@ -352,8 +347,11 @@ std::vector<singStrat> StratMeetPartition(rbaseType<Telt> & rbase, Partition & P
 template<typename Telt>
 void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, Telt const& TheId)
 {
-  if (rbase.level2.status != int_true && rbase.level2.status != int_false)
+  if (rbase.level2.status != int_true && rbase.level2.status != int_false) {
+    std::cerr << "Inserting rbase.level2 into rbase.lev2\n";
+    std::cerr << "rbase.level2.status=" << GetIntTypeNature(rbase.level2.status) << "\n";
     rbase.lev2.push_back(rbase.level2);
+  }
   rbase.lev.push_back(rbase.level);
   rbase.base.push_back(pnt);
   int k = IsolatePoint(P, pnt);
@@ -386,6 +384,7 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
 template<typename Telt>
 void NextRBasePoint(Partition & P, rbaseType<Telt> & rbase, Telt const& TheId)
 {
+  std::cerr << "Working with NextRBasePoint rbase.level2.status=" << GetIntTypeNature(rbase.level2.status) << "\n";
   std::vector<int> lens = P.lengths;
   std::vector<int> order = ClosedInterval(0, NumberCells(P));
   SortParallel(lens, order);
@@ -602,11 +601,9 @@ void AssignationVectorGapStyle(std::vector<T> & eVect, int const& pos, T const& 
 template<typename Telt, typename Tint>
 ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(Telt const&)> const& Pr, bool const& repr, rbaseType<Telt> & rbase, dataType<Telt> const& data, StabChain<Telt> & L, StabChain<Telt> & R)
 {
-  
-
-  
   int n=G.n;
   std::cerr << "PartitionBacktrack step 1\n";
+  std::cerr << "rbase.level2.status=" << GetIntTypeNature(rbase.level2.status) << "\n";
   imageType<Telt> image;
   std::cerr << "PartitionBacktrack step 2\n";
   Face orB_sing; // backup of <orb>. We take a single entry. Not sure it is correct
@@ -754,7 +751,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     // Loop  over the candidate images  for the  current base point. First
     // the special case image = base up to current level.
     if (wasTriv) {
-      image.bimg[ d ] = a;
+      AssignationVectorGapStyle(image.bimg, d, a);
       // Refinements that start with '_' must be executed even when base
       // = image since they modify image.data, etc.
       RRefine(rbase, image, true);
@@ -814,8 +811,8 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	}
 	// If <b> could not be prescribed as image for  <a>, or if the
 	// refinement was impossible, give up for this image.
-	image.bimg[ d ] = b;
-	IsolatePoint( image.partition, b );
+	AssignationVectorGapStyle(image.bimg, d, b_int);
+	IsolatePoint( image.partition, b_int );
 	
 	if (ProcessFixpoint_image(image, a, b_int, org[d][b_int]))
 	  t.status = RRefine(rbase, image, false);
@@ -1073,6 +1070,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
     R = L;
   std::cerr << "Orders: |R|=" << SizeStabChain<Telt,Tint>(R) << " |L|=" << SizeStabChain<Telt,Tint>(L) << "\n";
   rbaseType<Telt> rbase = EmptyRBase<Telt>({G, G}, true, Omega, P);
+  std::cerr << "RepOpSetsPermGroup rbase.level2.status=" << GetIntTypeNature(rbase.level2.status) << "\n";
   std::vector<int> Phi_vect = FaceToVector(Phi);
   std::function<bool(Telt const&)> Pr=[&](Telt const& gen) -> bool {
     for (auto & i : Phi_vect) {
