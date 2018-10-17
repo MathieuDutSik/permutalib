@@ -178,9 +178,13 @@ int SplitCell_Face(Partition & P, int const& i, Face const& f, int const& j, Tel
 
 int IsolatePoint(Partition & P, int const& a)
 {
+  std::cerr << "IsolatePoint a=" << a << "\n";
   int i=P.cellno[a];
+  std::cerr << "IsolatePoint i=" << i << "\n";
   int eFirst=P.firsts[i];
+  std::cerr << "IsolatePoint eFirst=" << eFirst << "\n";
   int len=P.lengths[i];
+  std::cerr << "IsolatePoint len=" << len << "\n";
   if (len == 1)
     return -1;
   int pos=-1;
