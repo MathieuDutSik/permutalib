@@ -21,8 +21,8 @@ However, GAP itself had some problems:
   * We want parallel code using groups.
   * The benefits of C++ (speed, templates) are very attractive for this kind of code.
 
-The permlib code provided a solution to this problem. It is a
-reimplementation of the algorithms and generally very satisfying.
+The permlib code (https://github.com/tremlin/PermLib) provided a solution to this problem.
+It is a reimplementation of the algorithms and generally very satisfying.
 However, in some cases it was very very slow compared to the GAP
 code. This made it unusable in many contexts.
 
