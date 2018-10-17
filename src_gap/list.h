@@ -32,12 +32,16 @@ std::vector<int> ClosedInterval(int const& begin, int const& end)
 
 Face BlistList(std::vector<int> const& list, std::vector<int> const& sub)
 {
+  std::cerr << "BlistList, step 1\n";
   int len=list.size();
+  std::cerr << "BlistList, step 2\n";
   Face ret(len);
+  std::cerr << "BlistList, step 3\n";
   for (auto & eVal : sub) {
     int pos=PositionVect(list, eVal);
     ret[pos]=true;
   }
+  std::cerr << "BlistList, step 4\n";
   return ret;
 }
 

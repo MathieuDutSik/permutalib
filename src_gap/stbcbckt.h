@@ -232,10 +232,14 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
     if (IsId) {
       rbase.NeedLevel2=false;
       rbase.SetLevelStabChain2=false;
+      rbase.level2.Stot.UseCycle = false;
     }
     else {
       rbase.SetLevelStabChain2=true;
       rbase.level2 = {int_stablev, -444, G[1], 0};
+      std::cerr << "rbase Before bool print\n";
+      std::cerr << "bool=" << rbase.level2.Stot.UseCycle << "\n";
+      std::cerr << "rbase After bool print\n";
       rbase.lev2 = {};
     }
   }
@@ -580,13 +584,31 @@ Telt MappingPermListList(int const& n, std::vector<int> const& src, std::vector<
 }
 
 
-
+template<typename T>
+void AssignationVectorGapStyle(std::vector<T> & eVect, int const& pos, T const& val)
+{
+  int siz=eVect.size();
+  if (pos < siz)
+    eVect[pos] = val;
+#ifdef DEBUG  
+  if (pos != siz) {
+    std::cerr << "Assignation leaves gap in the vector. Not allowed\n";
+    throw TerminalException{1};
+  }
+#endif
+  eVect.push_back(val);
+}
 
 template<typename Telt, typename Tint>
 ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(Telt const&)> const& Pr, bool const& repr, rbaseType<Telt> & rbase, dataType<Telt> const& data, StabChain<Telt> & L, StabChain<Telt> & R)
 {
+  
+
+  
   int n=G.n;
+  std::cerr << "PartitionBacktrack step 1\n";
   imageType<Telt> image;
+  std::cerr << "PartitionBacktrack step 2\n";
   Face orB_sing; // backup of <orb>. We take a single entry. Not sure it is correct
   int nrback;
   std::vector<Face> orb;
@@ -596,6 +618,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   std::vector<int> range;    // range for construction of <orb>
   Partition oldcel;       // old value of <image.partition.cellno>
   std::vector<int> oldcel_cellno;
+  std::cerr << "PartitionBacktrack step 3\n";
   std::function<permPlusBool<Telt>(int const&,bool const&)> PBEnumerate = [&](int const& d, bool const & wasTriv) -> permPlusBool<Telt> {
     std::cerr << "Beginning of PBEnumerate\n";
     permPlusBool<Telt> oldprm, oldprm2;
@@ -605,8 +628,10 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     int max;              // maximal number of candidates still needed
     boost::dynamic_bitset<>::size_type b;        // image of base point currently being considered
 
-    if (image.perm.status != int_true) 
+    if (image.perm.status == int_false) {
+      std::cerr << "PBEnumerate, case 1, image.perm.status=" << GetIntTypeNature(image.perm.status) << "\n";
       return {int_fail, {}};
+    }
     image.depth = d;
 
     // Store the original values of <image.*>.
@@ -637,6 +662,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  options.reduced = false;
 	  L = StabChainOp<Telt,Tint>(StrongGeneratorsStabChain(L,0), options);
 	  R = L;
+	  std::cerr << "PBEnumerate, case 2\n";
 	  return {int_fail,{}};
 	}
 	else {
@@ -646,13 +672,18 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  else
 	    prm = image.perm;
 	  if (image.level2.status != int_false) {
-	    if (SiftedPermutation(image.level2.Stot, image.level2.eLev, prm.val * Inverse(image.perm2.val)).isIdentity()) 
+	    if (SiftedPermutation(image.level2.Stot, image.level2.eLev, prm.val * Inverse(image.perm2.val)).isIdentity()) {
+	      std::cerr << "PBEnumerate, case 3\n";
 	      return prm;
+	    }
 	  }
 	  else {
-	    if (Pr(prm.val))
+	    if (Pr(prm.val)) {
+	      std::cerr << "PBEnumerate, case 4\n";
 	      return {int_perm, prm.val};
+	    }
 	  }
+	  std::cerr << "PBEnumerate, case 5\n";
 	  return {int_fail, {}};
 	}
 	// Construct the   next refinement  level. This  also  initializes
@@ -682,7 +713,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     // Intersect  the current cell of <P>  with  the mapped basic orbit of
     // <G> (and also with the one of <H> in the intersection case).
     if (image.perm.status == int_true) {
-      orb[ d ] = BlistList(range, Cell(oldcel, rbase.where[d]) );
+      AssignationVectorGapStyle(orb, d, BlistList(range, Cell(oldcel, rbase.where[d]) ));
       if (image.level2.status != int_false) {
 	b = orb[d].find_first();
 	while (b != boost::dynamic_bitset<>::npos) {
@@ -693,14 +724,25 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       }
     }
     else {
-      orb[d] = BlistList(range, {}); // line below needs to be checked.
+      std::cerr << "Before call to BlistList d=" << d << " |orb|=" << orb.size() << "\n";
+      AssignationVectorGapStyle(orb, d, BlistList(range, {}));
+      std::cerr << "After  call to BlistList\n";
+				// line below needs to be checked.
       for (auto & pVal : rbase.lev[d].Stot.stabilizer[0].orbit) {
 	b = PowAct(pVal, image.perm.val);
-	if (oldcel_cellno[b] == rbase.where[d] &&
-	    (image.level2.status == int_false ||
-	     IsInBasicOrbit(rbase.lev2[d].Stot, rbase.lev2[d].eLev, SlashAct(b,image.perm2.val)))) {
-	  orb[d][b] = true;
-	  org[d][b] = pVal;
+	if (oldcel_cellno[b] == rbase.where[d]) {
+	  bool DoOper=false;
+	  if (image.level2.status == int_false)
+	    DoOper=true;
+	  if (!DoOper) {
+	    std::cerr << "d=" << d << " |rbase.lev2|=" << rbase.lev2.size() << "\n";
+	    if (IsInBasicOrbit(rbase.lev2[d].Stot, rbase.lev2[d].eLev, SlashAct(b,image.perm2.val)))
+	      DoOper=true;
+	  }
+	  if (DoOper) {
+	    orb[d][b] = true;
+	    org[d][b] = pVal;
+	  }
 	}
       }
     }
@@ -726,14 +768,18 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     
     // Only the early points of the orbit have to be considered.
     m = SizeBlist( orB_sing );
-    if (m < int(L.stabilizer[d].orbit.size()) )
+    if (m < int(L.stabilizer[d].orbit.size()) ) {
+      std::cerr << "PBEnumerate, case 6\n";
       return {int_fail,{}};
+    }
     max = PositionNthTrueBlist(orB_sing, m - L.stabilizer[d].orbit.size());
     
     if (wasTriv && a > max) {
       m--;
-      if (m < int(L.stabilizer[d].orbit.size()) )
+      if (m < int(L.stabilizer[d].orbit.size()) ) {
+	std::cerr << "PBEnumerate, case 7\n";
 	return {int_fail,{}};
+      }
       max = PositionNthTrueBlist( orB_sing, m - L.stabilizer[d].orbit.size());
     }
     // Now the other possible images.
@@ -815,8 +861,10 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  // Subgroup case, base <> image  before current level:  We
 	  //   need  only find  a representative  because we already
 	  //   know the stabilizer of <L> at an earlier level.
-	  if (repr || !wasTriv)
+	  if (repr || !wasTriv) {
+	    std::cerr << "PBEnumerate, case 8\n";
 	    return t;
+	  }
 	  else {
 	    // Subgroup case, base  <> image at current level: Enlarge
 	    //   <L>    with  <t>. Decrease <max>     according to the
@@ -824,8 +872,10 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    //	    for (int dd=0; dd<d; dd++)
 	    //	      AddGeneratorsExtendSchreierTree( L[ dd ], {t});
 	    AddGeneratorsExtendSchreierTree(L, 0, {t.val});
-	    if (m < int(L.stabilizer[d].orbit.size()))
+	    if (m < int(L.stabilizer[d].orbit.size())) {
+	      std::cerr << "PBEnumerate, case 9\n";
 	      return {int_fail,{}};
+	    }
 	    max = PositionNthTrueBlist( orB_sing, m - L.stabilizer[d].orbit.size());
 	    SetStabChainFromLevel(R, L, d);
 	  }
@@ -841,8 +891,10 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       }
       
     }
+    std::cerr << "PBEnumerate, case 10\n";
     return {int_fail, {}};
   };
+  std::cerr << "PartitionBacktrack step 4\n";
 
   nrback=0; // count the number of times we jumped up
 
@@ -855,9 +907,11 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     else
       return {int_fail,{},{}};
   }
+  std::cerr << "PartitionBacktrack step 5\n";
     
   // Construct the <image>.
   image.data=data;
+  std::cerr << "PartitionBacktrack step 5.1\n";
   image.depth=1;
   if (repr) {
     image.partition = data.P;
@@ -866,12 +920,20 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     image.partition = rbase.partition;
   }
   if (IsBool(rbase.level2)) {
+    std::cerr << "PartitionBacktrack step 5.2\n";
     image.level2 = {int_false,-444,{},0};
+    std::cerr << "PartitionBacktrack step 5.3\n";
   }
   else {
+    std::cerr << "PartitionBacktrack step 5.4\n";
+    std::cerr << "bool=" << rbase.level2.Stot.UseCycle << "\n";
+    std::cerr << "PartitionBacktrack step 5.4.1\n";
     image.level2 = rbase.level2;
+    std::cerr << "PartitionBacktrack step 5.5\n";
     image.perm2  = {int_perm, G.identity};
+    std::cerr << "PartitionBacktrack step 5.6\n";
   }
+  std::cerr << "PartitionBacktrack step 6\n";
     
   // If  <Pr> is  function,   multiply  permutations. Otherwise, keep   them
   // factorized.
@@ -895,11 +957,13 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     //    L := ListStabChain( CopyStabChain( StabChainMutable( L ) ) );
     //    R := ListStabChain( CopyStabChain( StabChainMutable( R ) ) );
   }
+  std::cerr << "PartitionBacktrack step 7\n";
     
   int lenD=rbase.domain[rbase.domain.size()-1];
   for (int i=0; i<lenD; i++)
     range.push_back(i);
   permPlusBool<Telt> rep = PBEnumerate(0, !repr);
+  std::cerr << "PartitionBacktrack step 8\n";
   if (!repr) {
     return {int_group, L, {}};
   }
@@ -909,6 +973,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     else
       return {int_fail, {}, {}};
   }
+  std::cerr << "PartitionBacktrack step 9\n";
 }
 
 bool IsSubset(Face const& f, std::vector<int> const& g)
@@ -947,6 +1012,9 @@ Face OnSets(Face const& f, Telt const& g)
 template<typename Telt, typename Tint>
 ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, Face const& Phi, Face const& Psi)
 {
+  std::cerr << "Beginning of RepOpSetsPermGroup\n";
+  std::cerr << "UseCycle=" << G.UseCycle << "\n";
+  std::cerr << "After bool print\n";
   int n=G.n;
   std::vector<int> Omega = MovedPoints(G);
   if (repr && Phi.size() != Psi.size())
@@ -1015,6 +1083,8 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
     return true;
   };
   std::cerr << "Before call to PartitionBacktrack\n";
+  std::cerr << "bool=" << rbase.level2.Stot.UseCycle << "\n";
+  std::cerr << "After bool print\n";
   return PartitionBacktrack<Telt,Tint>( G, Pr, repr, rbase, {Q}, L, R );
 }
 

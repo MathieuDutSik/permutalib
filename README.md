@@ -28,7 +28,8 @@ code. This made it unusable in many contexts.
 
 Thus the idea is to simply recode the GAP code into C++ in order
 to achieve this. Idea is really not to try to be too clever and
-adapt the code accordingly.
+adapt the code accordingly. We work with gap-4.7.8 as reference
+gap source code implementation.
 
 
 Programming differences

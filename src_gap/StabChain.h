@@ -49,7 +49,30 @@ static const int int_perm = 4;
 static const int int_group = 5;
 static const int int_stablev = 6;
 
-  
+
+std::string GetIntTypeNature(int const& val)
+{
+  if (val == int_reducedm1)
+    return "reduced-1";
+  if (val == int_false)
+    return "false";
+  if (val == int_true)
+    return "true";
+  if (val == int_fail)
+    return "fail";
+  if (val == int_int)
+    return "int";
+  if (val == int_perm)
+    return "perm";
+  if (val == int_group)
+    return "group";
+  if (val == int_stablev)
+    return "stab+lev";
+  return "Not allowed value";
+}
+
+
+ 
 template<typename Telt>
 int GetLabelIndex(std::vector<Telt> & labels, Telt const& u)
 {
@@ -271,6 +294,7 @@ void RemoveStabChain(StabChain<Telt> & Stot)
 template<typename Telt>
 bool IsInBasicOrbit(StabChain<Telt> const& eStab, int const& lev, int const& pnt)
 {
+  std::cerr << "IsInBasicOrbit lev=" << lev << " |eStab.stabilizer|=" << eStab.stabilizer.size() << "\n";
   int eVal=eStab.stabilizer[lev].transversal[pnt];
   if (eVal == -1)
     return false;
