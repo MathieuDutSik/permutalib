@@ -696,7 +696,9 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	if (image.perm.status == int_true)
 	  rbase.fix.push_back(Fixcells(rbase.partition));
 	Face eNewF(range.size());
+	std::cerr << "Before the org push_back |range|=" << range.size() << " |org|=" << org.size() << "\n";
 	org.push_back(eNewF);
+	std::cerr << " After the org push_back\n";
 	if (repr) {
 	  // In  the representative  case,  change  the   stabilizer
 	  // chains of <L> and <R>.

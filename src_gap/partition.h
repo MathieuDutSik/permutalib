@@ -26,7 +26,7 @@ Partition GetPartition(std::vector<std::vector<int>> const& list)
   int i=0;
   for (int iPart=0; iPart<nbPart; iPart++) {
     int len=list[iPart].size();
-    firsts[iPart]=0;
+    firsts[iPart]=i;
     lengths[iPart]=len;
     i += len;
     for (auto & eVal : list[iPart])
