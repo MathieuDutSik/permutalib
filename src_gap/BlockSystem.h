@@ -1,9 +1,8 @@
 #ifndef DEFINE_BLOCK_SYSTEM_H
 #define DEFINE_BLOCK_SYSTEM_H
 
-#include "MAT_Matrix.h"
 #include "Face_basic.h"
-#include "GRAPH_GraphicalBasic.h"
+#include "GraphicFunctionality.h"
 #include "PermGroup.h"
 
 
@@ -61,20 +60,14 @@ std::pair<std::vector<std::vector<int>>,std::vector<Face>> Blocks_Kernel(std::ve
     return false;
   };
   int sizOrb=SeedOrbit.size();
-  std::vector<int> ListA;
+  std::vector<int> ListEdge;
   for (int u=0; u<sizOrb; u++)
     for (int v=u+1; v<sizOrb; v++) {
       if (IsIntersecting(SeedOrbit[u], SeedOrbit[v])) {
-	ListA.push_back(u);
-	ListA.push_back(v);
+	ListEdge.push_back(u);
+	ListEdge.push_back(v);
       }
     }
-  int nbEdge=ListA.size() / 2;
-  MyMatrix<int> ListEdge(nbEdge,2);
-  for (int iEdge=0; iEdge<nbEdge; iEdge++) {
-    ListEdge(iEdge,0) = ListA[2*iEdge];
-    ListEdge(iEdge,1) = ListA[2*iEdge+1];
-  }
   GraphSparseImmutable eGR(ListEdge, sizOrb);
   std::vector<std::vector<int>> ListConn = ConnectedComponents_set(eGR);
   std::vector<std::vector<int>> ListBlocks;

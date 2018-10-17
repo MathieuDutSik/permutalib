@@ -3,7 +3,9 @@
 
 #include "StabChainMain.h"
 #include "partition.h"
-#include "COMB_Combinatorics.h"
+//#include "COMB_Combinatorics.h"
+#include "Combinatorics.h"
+#include "COMB_Vectors.h"
 #include "plus_infinity.h"
 /*
 #############################################################################
