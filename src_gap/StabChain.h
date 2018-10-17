@@ -739,7 +739,7 @@ void ChooseNextBasePoint(StabChain<Telt> & Stot, int const& eLev, std::vector<in
   }
   std::cerr << "BPT/POS bpt=" << bpt << " pos=" << pos << "\n";
   if ((pos != -1 && i < pos) || (pos == -1 && i<int(base.size())) || (pos == -1 && pnt < bpt)) {
-    std::cerr << "InsertTrivialStabilizer pnt=" << pnt << " bpt=" << bpt << " pos=" << pos << "\n";
+    std::cerr << "ChooseNextBasePoint: InsertTrivialStabilizer pnt=" << pnt << " bpt=" << bpt << " pos=" << pos << "\n";
     InsertTrivialStabilizer(Stot, eLev, pnt);
     if (Stot.UseCycle) {
       Face eFace(1);
@@ -937,6 +937,8 @@ void ConjugateStabChain(StabChain<Telt> & Stot, int const& TheLev, Telt const& c
   for (int uLev=TheLev; uLev<nbLev; uLev++) {
     
   }
+  std::cerr << "Now we need to program ConjugateStabChain\n";
+  throw TerminalException{1};
 }
 
 // value of reduced

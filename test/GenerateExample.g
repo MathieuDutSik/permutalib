@@ -100,11 +100,21 @@ if DoSym6 then
   #
 fi;
 
-DoSym4:=true;
-if DoSym4 then
+# The case of Sym4 is simpler. However it is also solvable 
+# and in that case GAP uses the PCGS algorithms that we do not
+# want to implement.
+# 
+# Also, we need to put Group([(1,2,3,4,5),(1,2)])
+#       instead of SymmetricGroup(5)
+# because this triggers a different algo for the Symmetric group
+# 
+
+
+DoSym5:=true;
+if DoSym5 then
   for eSize in [2..2]
   do
-    eFile:=Concatenation("ExampleSym4_", String(eSize));
-    CreateExampleOnSetCase(eFile, SymmetricGroup(4), eSize);
+    eFile:=Concatenation("ExampleSym5_", String(eSize));
+    CreateExampleOnSetCase(eFile, Group([(1,2,3,4,5),(1,2)]), eSize);
   od;
 fi;
