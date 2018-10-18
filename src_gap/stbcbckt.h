@@ -387,9 +387,34 @@ template<typename Telt>
 void NextRBasePoint(Partition & P, rbaseType<Telt> & rbase, Telt const& TheId)
 {
   std::cerr << "Working with NextRBasePoint rbase.level2.status=" << GetIntTypeNature(rbase.level2.status) << "\n";
+  RawPrintPartition(P);
   std::vector<int> lens = P.lengths;
   std::vector<int> order = ClosedInterval(0, NumberCells(P));
+  std::cerr << "Before SortParallel\n";
+  std::cerr << " lens=";
+  for (auto & eVal : lens)
+    std::cerr << " " << eVal;
+  std::cerr << "\n";
+  //
+  std::cerr << "order=";
+  for (auto & eVal : order)
+    std::cerr << " " << eVal;
+  std::cerr << "\n";
+  //
   SortParallel(lens, order);
+  std::cerr << "After SortParallel\n";
+  std::cerr << " lens=";
+  for (auto & eVal : lens)
+    std::cerr << " " << eVal;
+  std::cerr << "\n";
+  //
+  std::cerr << "order=";
+  for (auto & eVal : order)
+    std::cerr << " " << eVal;
+  std::cerr << "\n";
+  //
+  
+  
   int k = PositionProperty(lens, [](int const& x) -> int {return x != 1;});
   int l = -1;
   while(l == -1) {
@@ -402,7 +427,11 @@ void NextRBasePoint(Partition & P, rbaseType<Telt> & rbase, Telt const& TheId)
     }
     k++;
   }
+  std::cerr << "k=" << k << " l=" << l << "\n";
+  std::cerr << "order[k]=" << order[k] << "\n";
+  std::cerr << "P.firsts[order[k]]=" << P.firsts[order[k]] << "\n";
   int p = P.points[ P.firsts[ order[k] ] + l ];
+  std::cerr << "p=" << p << "\n";
   RegisterRBasePoint(P, rbase, p, TheId);
 }
 

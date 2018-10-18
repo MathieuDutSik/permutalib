@@ -12,6 +12,25 @@ struct Partition {
   std::vector<int> cellno;
 };
 
+void RawPrintPartition(Partition const& P)
+{
+  auto prt=[](std::vector<int> const& V) -> void {
+    for (auto & eVal : V)
+      std::cerr << " " << eVal;
+    std::cerr << "\n";
+  };
+  std::cerr << "points=";
+  prt(P.points);
+  std::cerr << "firsts=";
+  prt(P.firsts);
+  std::cerr << "lengths=";
+  prt(P.lengths);
+  std::cerr << "cellno=";
+  prt(P.cellno);
+}
+
+
+ 
 Partition GetPartition(std::vector<std::vector<int>> const& list)
 {
   std::vector<int> points;
