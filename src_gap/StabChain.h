@@ -72,6 +72,19 @@ std::string GetIntTypeNature(int const& val)
 }
 
 
+
+template<typename T, typename Telt>
+std::vector<T> PermutedAct(std::vector<T> const& V, Telt const& g)
+{
+  int len=V.size();
+  std::vector<T> Vret(len);
+  for (int i=0; i<len; i++) {
+    int iImg=g.at(i);
+    Vret[iImg] = V[i];
+  }
+  return Vret;
+}
+ 
  
 template<typename Telt>
 int GetLabelIndex(std::vector<Telt> & labels, Telt const& u)
@@ -973,12 +986,20 @@ void ConjugateStabChain(StabChain<Telt> & Stot, int const& TheLev, Telt const& c
   //  int n=Stot.n;
   int nbLev=Stot.stabilizer.size();
   for (int uLev=TheLev; uLev<nbLev; uLev++) {
-    std::vector<int> NewTransversal;
-    for (int i=0; i<n; i++) {
-      int iImg=cnj.at(i);
-      NewTransversal[iImg] = Stot.stabilizer[uLev].transversal[i];
+    if (Stot.stabilizer[uLev].transversal.size() > 0) {
+      std::vector<int> NewTransversal(n);
+      //      std::cerr << "Before loop n=" << n << "\n";
+      for (int i=0; i<n; i++) {
+	int iImg=cnj.at(i);
+	//	std::cerr << "i=" << i << " iImg=" << iImg << "\n";
+	int eVal=Stot.stabilizer[uLev].transversal[i];
+	//	std::cerr << "eVal=" << eVal << "\n";
+	NewTransversal[iImg] = eVal;
+	//	std::cerr << "After assignation\n";
+      }
+      //      std::cerr << " After loop\n";
+      Stot.stabilizer[uLev].transversal=NewTransversal;
     }
-    Stot.stabilizer[uLev].transversal=NewTransversal;
     Stot.stabilizer[uLev].treegen=ListT(Stot.stabilizer[uLev].treegen, hom);
     Stot.stabilizer[uLev].treegeninv=ListT(Stot.stabilizer[uLev].treegeninv, hom);
     Stot.stabilizer[uLev].aux=ListT(Stot.stabilizer[uLev].aux, hom);
