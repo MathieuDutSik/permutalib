@@ -952,18 +952,45 @@ T LabsLims(T const& lab, std::function<T(T const&)> const& hom, std::vector<T> &
   return lims[pos];
 }
 
-// We significantly change the functionality 
+// We significantly change the functionality
+// The function ConjugateStabChain is used only for the conjugation in the part of the code
+// that interest us.
+// The action that correspond to the code as written are
+// OnTuples(orbit, map) with map=cnj. This is the normal action on points.
+// OnTuples(labels, hom) with hom=cnj. This is the action by conjugacy: 
+// The action are therefore of the 
 template<typename Telt>
 void ConjugateStabChain(StabChain<Telt> & Stot, int const& TheLev, Telt const& cnj)
 {
+  int n=Stot.n;
+  Telt cnjInv=~cnj;
+  auto hom=[&](Telt const& x) -> Telt {
+    return cnjInv*x*cnj;
+  };
+  auto map=[&](int const& x) -> int {
+    return cnj.at(x);
+  };
   //  int n=Stot.n;
   int nbLev=Stot.stabilizer.size();
   for (int uLev=TheLev; uLev<nbLev; uLev++) {
-    
+    std::vector<int> NewTransversal;
+    for (int i=0; i<n; i++) {
+      int iImg=cnj.at(i);
+      NewTransversal[iImg] = Stot.stabilizer[uLev].transversal[i];
+    }
+    Stot.stabilizer[uLev].transversal=NewTransversal;
+    Stot.stabilizer[uLev].treegen=ListT(Stot.stabilizer[uLev].treegen, hom);
+    Stot.stabilizer[uLev].treegeninv=ListT(Stot.stabilizer[uLev].treegeninv, hom);
+    Stot.stabilizer[uLev].aux=ListT(Stot.stabilizer[uLev].aux, hom);
+    Stot.stabilizer[uLev].orbit=ListT(Stot.stabilizer[uLev].orbit, map);
   }
-  std::cerr << "Now we need to program ConjugateStabChain\n";
-  throw TerminalException{1};
+  Stot.labels = ListT(Stot.labels, hom);
+  //  std::cerr << "Now we need to program ConjugateStabChain\n";
+  //  throw TerminalException{1};
 }
+
+
+
 
 // value of reduced
 //  reduced = -1 corresponds to reduced = -1 in GAP code
