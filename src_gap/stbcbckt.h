@@ -400,41 +400,32 @@ void NextRBasePoint(Partition & P, rbaseType<Telt> & rbase, Telt const& TheId)
   std::vector<int> lens = P.lengths;
   std::vector<int> order = ClosedInterval(0, NumberCells(P));
   std::cerr << "Before SortParallel\n";
-  std::cerr << " lens=";
-  for (auto & eVal : lens)
-    std::cerr << " " << eVal;
-  std::cerr << "\n";
-  //
-  std::cerr << "order=";
-  for (auto & eVal : order)
-    std::cerr << " " << eVal;
-  std::cerr << "\n";
+  PrintVectDebug(" lens", lens);
+  PrintVectDebug("order", order);
   //
   SortParallel(lens, order);
   std::cerr << "After SortParallel\n";
-  std::cerr << " lens=";
-  for (auto & eVal : lens)
-    std::cerr << " " << eVal;
-  std::cerr << "\n";
-  //
-  std::cerr << "order=";
-  for (auto & eVal : order)
-    std::cerr << " " << eVal;
-  std::cerr << "\n";
+  PrintVectDebug(" lens", lens);
+  PrintVectDebug("order", order);
   //
   
   
   int k = PositionProperty(lens, [](int const& x) -> int {return x != 1;});
+  std::cerr << "Starting at k=" << k << "\n";
   int l = -1;
-  while(l == -1) {
-    if (rbase.level.status == int_int) {
-      l = 0;
-    }
-    else {
-      l = PositionProperty(ClosedInterval(0, lens[k]), [&](int const& i) -> int {
+  if (rbase.level.status == int_int) {
+    l = 0;
+  }
+  else {
+    while (true) {
+      std::cerr << "Before PositionProperty operation len[k]=" << lens[k] << "\n";
+      l = PositionProperty(ClosedInterval(0, lens[k]), [&](int const& i) -> bool {
 	  return !IsFixedStabilizer(rbase.level.Stot, rbase.level.eLev, P.points[i+P.firsts[order[k]]]);});
+      std::cerr << "At k=" << k << " found l=" << l << "\n";
+      if (l != -1)
+	break;
+      k++;
     }
-    k++;
   }
   std::cerr << "k=" << k << " l=" << l << "\n";
   std::cerr << "order[k]=" << order[k] << "\n";

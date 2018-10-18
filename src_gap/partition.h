@@ -32,15 +32,14 @@ void RawPrintPartition(Partition const& P)
 
 void CheckConsistencyPartition(std::string const& str, Partition const& P)
 {
+  int nbError=0;
   if (P.cellno.size() != P.points.size()) {
-    std::cerr << "1: Error at " << str << "\n";
     std::cerr << "1: P.cellno and P.points have different lengths\n";
-    throw TerminalException{1};
+    nbError++;
   }
   if (P.firsts.size() != P.lengths.size()) {
-    std::cerr << "2: Error at " << str << "\n";
     std::cerr << "2: P.firsts and P.lengths have different lengths\n";
-    throw TerminalException{1};
+    nbError++;
   }
   int nbPoint=P.cellno.size();
   int nbPart=P.lengths.size();
@@ -48,22 +47,20 @@ void CheckConsistencyPartition(std::string const& str, Partition const& P)
   for (int iPoint=0; iPoint<nbPoint; iPoint++) {
     int iPart=P.cellno[iPoint];
     if (iPart >= nbPart) {
-      std::cerr << "3: Error at " << str << "\n";
       std::cerr << "3: Error, iPart=" << iPart << " but nbPart=" << nbPart << "\n";
-      throw TerminalException{1};
+      nbError++;
     }
-    MeasuredLength[iPart]++;
+    if (iPart < nbPart)
+      MeasuredLength[iPart]++;
   }
   for (int iPart=0; iPart<nbPart; iPart++) {
     if (MeasuredLength[iPart] != P.lengths[iPart]) {
-      std::cerr << "4: Error at " << str << "\n";
       std::cerr << "4: At iPart=" << iPart << " we have error in lengths\n";
-      throw TerminalException{1};
+      nbError++;
     }
     if (MeasuredLength[iPart] == 0) {
-      std::cerr << "5: Error at " << str << "\n";
       std::cerr << "5: At iPart=" << iPart << " the length is zero\n";
-      throw TerminalException{1};
+      nbError++;
     }
   }
   for (int iPart=0; iPart<nbPart; iPart++) {
@@ -72,16 +69,20 @@ void CheckConsistencyPartition(std::string const& str, Partition const& P)
     for (int u=0; u<len; u++) {
       int ePt = P.points[eFirst + u];
       if (ePt < 0 || ePt >= nbPoint) {
-	std::cerr << "6: Error at " << str << "\n";
 	std::cerr << "6: At iPart=" << iPart << " u=" << u << " ePt=" << ePt << " point out of range\n";
-	throw TerminalException{1};
+	nbError++;
       }
-      if (P.cellno[ePt] != iPart) {
-	std::cerr << "7: Error at " << str << "\n";
-	std::cerr << "7: At iPart=" << iPart << " u=" << u << " ePt=" << ePt << " has wrong cellno\n";
-	throw TerminalException{1};
+      if (ePt >= 0 && ePt < nbPoint) {
+	if (P.cellno[ePt] != iPart) {
+	  std::cerr << "7: At iPart=" << iPart << " u=" << u << " ePt=" << ePt << " has wrong cellno\n";
+	  nbError++;
+	}
       }
     }
+  }
+  if (nbError > 0) {
+    std::cerr << "Error at " << str << ". We found nbError=" << nbError << "\n";
+    throw TerminalException{1};
   }
 }
 
@@ -184,6 +185,7 @@ std::vector<int> Fixcells(Partition const& ePartition)
 
 int SplitCell_Kernel(Partition & P, int const& i, std::function<bool(int)> const& test, int const& out)
 {
+  CheckConsistencyPartition("Input SplitCell_Kernel", P);
   int eFirst=P.firsts[i];
   int len=P.lengths[i];
   std::vector<int> ListMove(out);
@@ -225,7 +227,7 @@ int SplitCell_Kernel(Partition & P, int const& i, std::function<bool(int)> const
 
   std::cerr << "After SplitCell_Kernel operation P=\n";
   RawPrintPartition(P);
-  CheckConsistencyPartition("SplitCell_Kernel", P);
+  CheckConsistencyPartition("Output SplitCell_Kernel", P);
   return idxMov;
 }
 
@@ -262,9 +264,14 @@ int SplitCell_Face(Partition & P, int const& i, Face const& f, int const& j, Tel
 
 int IsolatePoint(Partition & P, int const& a)
 {
-  int i=P.cellno[a];
-  int eFirst=P.firsts[i];
-  int len=P.lengths[i];
+  CheckConsistencyPartition("Input IsolatePoint", P);
+  std::cerr << "Input Partition\n";
+  RawPrintPartition(P);
+  int nbPart=P.firsts.size();
+  int iPart=P.cellno[a];
+  int eFirst=P.firsts[iPart];
+  int len=P.lengths[iPart];
+  std::cerr << "a=" << a << " iPart=" << iPart << " eFirst=" << eFirst << " len=" << len << "\n";
   if (len == 1)
     return -1;
   int pos=-1;
@@ -274,24 +281,27 @@ int IsolatePoint(Partition & P, int const& a)
       pos=j;
   }
   int l=eFirst + len-1;
+  std::cerr << "pos=" << pos << " l=" << l << "\n";
   P.points[pos] = P.points[l];
   P.points[l]=a;
-  int m=P.firsts.size() + 1;
-  P.cellno[a]=m;
+  //  int m=P.firsts.size() + 1;
+  P.cellno[a]=nbPart;
+  P.lengths[iPart]--;
   P.firsts.push_back(l);
   P.lengths.push_back(1);
-  P.lengths[i] -= 1;
 
   std::cerr << "After IsolatePoint operation P=\n";
+  std::cerr << "Output partition\n";
   RawPrintPartition(P);
-  CheckConsistencyPartition("IsolatePoint", P);
-  return i;
+  CheckConsistencyPartition("Outout IsolatePoint", P);
+  return iPart;
 }
 
 
 
 int UndoRefinement(Partition & P)
 {
+  CheckConsistencyPartition("Input UndoRefinement", P);
   int nbPart=P.firsts.size();
   int pfm=P.firsts[nbPart-1];
   if (pfm == 0)
@@ -307,7 +317,7 @@ int UndoRefinement(Partition & P)
   P.lengths.pop_back();
   std::cerr << "After UndoRefinement operation P=\n";
   RawPrintPartition(P);
-  CheckConsistencyPartition("UndoRefinement", P);
+  CheckConsistencyPartition("Output UndoRefinement", P);
   return m;
 }
 
