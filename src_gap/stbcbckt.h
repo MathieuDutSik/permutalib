@@ -283,13 +283,14 @@ bool MeetPartitionStrat(rbaseType<Telt> const& rbase, imageType<Telt> & image, P
 template<typename Telt>
 std::vector<singStrat> StratMeetPartition(rbaseType<Telt> & rbase, Partition & P, Partition const& S, Telt const& g)
 {
+  std::cerr << "StratMeetPartition begin P\n";
+  RawPrintPartition(P);
+  std::cerr << "StratMeetPartition begin S\n";
+  RawPrintPartition(S);
+  std::cerr << "Now working\n";
   std::vector<singStrat> strat;
-  std::vector<int> cellsP;
-  if (g.isIdentity()) {
-    cellsP = P.cellno;
-  }
-  else {
-    cellsP = std::vector<int>(P.cellno.size(), 0);
+  std::vector<int> cellsP = P.cellno;
+  if (!g.isIdentity()) {
     for (int i=0; i<NumberCells(P); i++) {
       std::vector<int> cell = Cell( P, i );
       for (auto & eVal : cell) {
@@ -298,19 +299,27 @@ std::vector<singStrat> StratMeetPartition(rbaseType<Telt> & rbase, Partition & P
       }
     }
   }
+  PrintVectDebug("P.cellno=", P.cellno);
+  PrintVectDebug("cellsP=", cellsP);
   // If <S> is just a set, it is interpreted as partition ( <S>|<S>^compl ).
   int nrcells = NumberCells(S) - 1;
 
   for (int s=0; s<nrcells; s++) {
     // now split with cell number s of S.
+    std::cerr << "s=" << s << "\n";
     std::vector<int> p=Cell(S, s);
+    PrintVectDebug("p", p);
+    
     std::vector<int> p2;
     for (auto & eVal : p)
       p2.push_back(cellsP[eVal]);
-    CollectedResult<int> p3=Collected(p);
+    PrintVectDebug("p2", p2);
+    CollectedResult<int> p3=Collected(p2);
     std::vector<int> splits;
     for (int h=0; h<int(p3.LVal.size()); h++) {
       // a cell will split iff it contains more points than are in the s-cell
+      std::cerr << "h=" << h << " mult=" << p3.LMult[h] << " val=" << p3.LVal[h] << "\n";
+      std::cerr << "Before if test\n";
       if (P.lengths[p3.LVal[h]] > p3.LMult[h])
         splits.push_back(p3.LVal[h]);
     }
@@ -1067,18 +1076,16 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
   }
   auto GetPartitionFromPair=[&](Face const& Ph) -> Partition {
     std::vector<int> IntVect;
-    for (auto & eVal : Omega)
+    std::vector<int> DiffVect;
+    for (auto & eVal : Omega) {
       if (Ph[eVal] == 1)
 	IntVect.push_back(eVal);
-    //    std::vector<int> UnionVect;
-    Face Ph_copy = Ph;
-    for (auto & eVal : Omega)
-      Ph_copy[eVal]=1;
-    return GetPartition({IntVect, FaceToVector(Ph_copy)});
+      if (Ph[eVal] == 0)
+	DiffVect.push_back(eVal);
+    }
+    return GetPartition({IntVect, DiffVect});
   };
-
-
-
+  
   
   Partition P = GetPartitionFromPair(Phi);
   Partition Q = GetPartitionFromPair(Psi);

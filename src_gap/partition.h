@@ -17,7 +17,7 @@ void RawPrintPartition(Partition const& P)
   auto prt=[](std::vector<int> const& V) -> void {
     for (auto & eVal : V)
       std::cerr << " " << eVal;
-    std::cerr << "\n";
+    std::cerr << " |V|=" << V.size() << "\n";
   };
   std::cerr << "points=";
   prt(P.points);
@@ -29,6 +29,61 @@ void RawPrintPartition(Partition const& P)
   prt(P.cellno);
 }
 
+
+void CheckConsistencyPartition(std::string const& str, Partition const& P)
+{
+  if (P.cellno.size() != P.points.size()) {
+    std::cerr << "1: Error at " << str << "\n";
+    std::cerr << "1: P.cellno and P.points have different lengths\n";
+    throw TerminalException{1};
+  }
+  if (P.firsts.size() != P.lengths.size()) {
+    std::cerr << "2: Error at " << str << "\n";
+    std::cerr << "2: P.firsts and P.lengths have different lengths\n";
+    throw TerminalException{1};
+  }
+  int nbPoint=P.cellno.size();
+  int nbPart=P.lengths.size();
+  std::vector<int> MeasuredLength(nbPart,0);
+  for (int iPoint=0; iPoint<nbPoint; iPoint++) {
+    int iPart=P.cellno[iPoint];
+    if (iPart >= nbPart) {
+      std::cerr << "3: Error at " << str << "\n";
+      std::cerr << "3: Error, iPart=" << iPart << " but nbPart=" << nbPart << "\n";
+      throw TerminalException{1};
+    }
+    MeasuredLength[iPart]++;
+  }
+  for (int iPart=0; iPart<nbPart; iPart++) {
+    if (MeasuredLength[iPart] != P.lengths[iPart]) {
+      std::cerr << "4: Error at " << str << "\n";
+      std::cerr << "4: At iPart=" << iPart << " we have error in lengths\n";
+      throw TerminalException{1};
+    }
+    if (MeasuredLength[iPart] == 0) {
+      std::cerr << "5: Error at " << str << "\n";
+      std::cerr << "5: At iPart=" << iPart << " the length is zero\n";
+      throw TerminalException{1};
+    }
+  }
+  for (int iPart=0; iPart<nbPart; iPart++) {
+    int len=P.lengths[iPart];
+    int eFirst=P.firsts[iPart];
+    for (int u=0; u<len; u++) {
+      int ePt = P.points[eFirst + u];
+      if (ePt < 0 || ePt >= nbPoint) {
+	std::cerr << "6: Error at " << str << "\n";
+	std::cerr << "6: At iPart=" << iPart << " u=" << u << " ePt=" << ePt << " point out of range\n";
+	throw TerminalException{1};
+      }
+      if (P.cellno[ePt] != iPart) {
+	std::cerr << "7: Error at " << str << "\n";
+	std::cerr << "7: At iPart=" << iPart << " u=" << u << " ePt=" << ePt << " has wrong cellno\n";
+	throw TerminalException{1};
+      }
+    }
+  }
+}
 
  
 Partition GetPartition(std::vector<std::vector<int>> const& list)
@@ -51,10 +106,16 @@ Partition GetPartition(std::vector<std::vector<int>> const& list)
     for (auto & eVal : list[iPart])
       cellno[eVal] = iPart;
   }
-  return {points, firsts, lengths, cellno};
+  Partition P{points, firsts, lengths, cellno};
+  std::cerr << "After GetPartition operation P=\n";
+  RawPrintPartition(P);
+  CheckConsistencyPartition("GetPartition", P);
+  return P;
 }
 
 
+
+ 
 
 
 int NumberCells(Partition const& ePartition)
@@ -70,7 +131,7 @@ std::vector<int> Cell(Partition const& ePartition, int const& iPart)
   int eFirst=ePartition.firsts[iPart];
   std::vector<int> eList(len);
   for (int i=0; i<len; i++) {
-    int eVal=ePartition.points[i + eFirst];
+    int eVal=ePartition.points[eFirst + i];
     eList[i]=eVal;
   }
   return eList;
@@ -161,6 +222,10 @@ int SplitCell_Kernel(Partition & P, int const& i, std::function<bool(int)> const
     P.cellno[ePt]=newNbPart;
     pos++;
   }
+
+  std::cerr << "After SplitCell_Kernel operation P=\n";
+  RawPrintPartition(P);
+  CheckConsistencyPartition("SplitCell_Kernel", P);
   return idxMov;
 }
 
@@ -216,6 +281,10 @@ int IsolatePoint(Partition & P, int const& a)
   P.firsts.push_back(l);
   P.lengths.push_back(1);
   P.lengths[i] -= 1;
+
+  std::cerr << "After IsolatePoint operation P=\n";
+  RawPrintPartition(P);
+  CheckConsistencyPartition("IsolatePoint", P);
   return i;
 }
 
@@ -236,6 +305,9 @@ int UndoRefinement(Partition & P)
   }
   P.firsts.pop_back();
   P.lengths.pop_back();
+  std::cerr << "After UndoRefinement operation P=\n";
+  RawPrintPartition(P);
+  CheckConsistencyPartition("UndoRefinement", P);
   return m;
 }
 

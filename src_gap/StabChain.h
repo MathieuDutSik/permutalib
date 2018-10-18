@@ -73,6 +73,17 @@ std::string GetIntTypeNature(int const& val)
 
 
 
+template<typename T>
+void PrintVectDebug(std::string const& str, std::vector<T> const& V)
+{
+  std::cerr << str << " =";
+  for (auto & eVal : V)
+    std::cerr << " " << eVal;
+  std::cerr << "\n";
+}
+
+ 
+
 template<typename T, typename Telt>
 std::vector<T> PermutedAct(std::vector<T> const& V, Telt const& g)
 {
