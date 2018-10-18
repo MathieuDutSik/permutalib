@@ -695,11 +695,8 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	NextRBasePoint(rbase.partition, rbase, G.identity);
 	if (image.perm.status == int_true)
 	  rbase.fix.push_back(Fixcells(rbase.partition));
-	std::cerr << "Before the constructor of Face\n";
 	std::vector<int> eNewF(range.size(), 0);
-	std::cerr << "Before the org push_back |range|=" << range.size() << " |org|=" << org.size() << "\n";
 	org.push_back(eNewF);
-	std::cerr << " After the org push_back\n";
 	if (repr) {
 	  // In  the representative  case,  change  the   stabilizer
 	  // chains of <L> and <R>.
@@ -726,9 +723,9 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       }
     }
     else {
-      std::cerr << "Before call to BlistList d=" << d << " |orb|=" << orb.size() << "\n";
+      //      std::cerr << "Before call to BlistList d=" << d << " |orb|=" << orb.size() << "\n";
       AssignationVectorGapStyle(orb, d, BlistList(range, {}));
-      std::cerr << "After  call to BlistList\n";
+      //      std::cerr << "After  call to BlistList\n";
 				// line below needs to be checked.
       for (auto & pVal : rbase.lev[d].Stot.stabilizer[0].orbit) {
 	b = PowAct(pVal, image.perm.val);
@@ -742,11 +739,8 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	      DoOper=true;
 	  }
 	  if (DoOper) {
-	    std::cerr << "pVal critical 1\n";
 	    orb[d][b] = true;
-	    std::cerr << "pVal critical 2\n";
 	    org[d][b] = pVal;
-	    std::cerr << "pVal critical 3\n";
 	  }
 	}
       }
