@@ -611,7 +611,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   Face orB_sing; // backup of <orb>. We take a single entry. Not sure it is correct
   int nrback;
   std::vector<Face> orb;
-  std::vector<Face> org; // intersected (mapped) basic orbits of <G>
+  std::vector<std::vector<int>> org; // intersected (mapped) basic orbits of <G>
   Tplusinfinity<int> blen(true, 0);
   int dd, branch; // branch is level where $Lstab\ne Rstab$ starts
   std::vector<int> range;    // range for construction of <orb>
@@ -695,7 +695,8 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	NextRBasePoint(rbase.partition, rbase, G.identity);
 	if (image.perm.status == int_true)
 	  rbase.fix.push_back(Fixcells(rbase.partition));
-	Face eNewF(range.size());
+	std::cerr << "Before the constructor of Face\n";
+	std::vector<int> eNewF(range.size(), 0);
 	std::cerr << "Before the org push_back |range|=" << range.size() << " |org|=" << org.size() << "\n";
 	org.push_back(eNewF);
 	std::cerr << " After the org push_back\n";
@@ -741,11 +742,15 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	      DoOper=true;
 	  }
 	  if (DoOper) {
+	    std::cerr << "pVal critical 1\n";
 	    orb[d][b] = true;
+	    std::cerr << "pVal critical 2\n";
 	    org[d][b] = pVal;
+	    std::cerr << "pVal critical 3\n";
 	  }
 	}
       }
+      std::cerr << "After pVal loop\n";
     }
     if (d == 1 && ForAll(G.labels, [&](Telt const& x){return PowAct(a, x) == a;})) {
       orb[d][a]=true; // ensure a is a possible image (can happen if acting on permutations with more points)
@@ -961,8 +966,9 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   std::cerr << "PartitionBacktrack step 7\n";
     
   int lenD=rbase.domain[rbase.domain.size()-1];
-  for (int i=0; i<lenD; i++)
+  for (int i=0; i<=lenD; i++)
     range.push_back(i);
+  std::cerr << "|range|=" << range.size() << "\n";
   permPlusBool<Telt> rep = PBEnumerate(0, !repr);
   std::cerr << "PartitionBacktrack step 8\n";
   if (!repr) {
@@ -1018,6 +1024,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
   std::cerr << "After bool print\n";
   int n=G.n;
   std::vector<int> Omega = MovedPoints(G);
+  std::cerr << "n=" << n << " |Omega|=" << Omega.size() << "\n";
   if (repr && Phi.size() != Psi.size())
     return {int_fail, {}, {}};
   if (IsSubset(Phi, Omega) || ForAll(Omega, [&](int const &p) -> bool {return !Phi[p];})) {
