@@ -228,19 +228,34 @@ bool ProcessFixpoint_image(imageType<Telt> & image, int const& pnt, int & img, i
 template<typename Telt>
 bool IsTrivialRBase(rbaseType<Telt> const& rbase)
 {
-  std::cerr << "IsTrivialRBase rbase.level.status=" << GetIntTypeNature(rbase.level.status) << "\n";
+  std::cerr << "IsTrivialRBase : IsInt()=";
+  if (rbase.level.status == int_int)
+    std::cerr << "true  value_int=" << rbase.level.value_int;
+  else
+    std::cerr << "false";
   if (rbase.level.status == int_int) {
-    std::cerr << "  int_int case value_int=" << rbase.level.value_int << "\n";
+  }
+  std::cerr << "\n";
+  //
+  std::cerr << "IsTrivialRBase : stab=";
+  if (rbase.level.status == int_stablev) {
+    int eLev=rbase.level.eLev;
+    std::cerr << "true  eLev=" << eLev << "  |genlabels|=" << rbase.level.Stot.stabilizer[eLev].genlabels.size();
+  }
+  else {
+    std::cerr << "false";
+  }
+  std::cerr << "\n";
+  //
+  if (rbase.level.status == int_int) {
     if (rbase.level.value_int <= 1)
       return true;
   }
   if (rbase.level.status == int_stablev) {
     int eLev=rbase.level.eLev;
-    std::cerr << "  int_stablev case eLev=" << eLev << " |genlabels|=" << rbase.level.Stot.stabilizer[eLev].genlabels.size() << "\n";
     if (rbase.level.Stot.stabilizer[eLev].genlabels.size() == 0)
       return true;
   }
-  std::cerr << "Returning false\n";
   return false;
 }
 
@@ -440,7 +455,7 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
 template<typename Telt>
 void NextRBasePoint(Partition & P, rbaseType<Telt> & rbase, Telt const& TheId)
 {
-  std::cerr << "Working with NextRBasePoint rbase.level2.status=" << GetIntTypeNature(rbase.level2.status) << "\n";
+  //  std::cerr << "Working with NextRBasePoint rbase.level2.status=" << GetIntTypeNature(rbase.level2.status) << "\n";
   //  RawPrintPartition(P);
   std::vector<int> lens = P.lengths;
   std::vector<int> order = ClosedInterval(0, NumberCells(P));
@@ -457,17 +472,17 @@ void NextRBasePoint(Partition & P, rbaseType<Telt> & rbase, Telt const& TheId)
   
   
   int k = PositionProperty(lens, [](int const& x) -> int {return x != 1;});
-  std::cerr << "Starting at k=" << k << "\n";
+  //  std::cerr << "Starting at k=" << k << "\n";
   int l = -1;
   if (rbase.level.status == int_int) {
     l = 0;
   }
   else {
     while (true) {
-      std::cerr << "Before PositionProperty operation len[k]=" << lens[k] << "\n";
+      //      std::cerr << "Before PositionProperty operation len[k]=" << lens[k] << "\n";
       l = PositionProperty(ClosedInterval(0, lens[k]), [&](int const& i) -> bool {
 	  return !IsFixedStabilizer(rbase.level.Stot, rbase.level.eLev, P.points[i+P.firsts[order[k]]]);});
-      std::cerr << "At k=" << k << " found l=" << l << "\n";
+      //      std::cerr << "At k=" << k << " found l=" << l << "\n";
       if (l != -1)
 	break;
       k++;
@@ -735,6 +750,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	// Do     not  add the   identity    element  in the  subgroup
 	// construction.
 	if (wasTriv) {
+	  std::cerr << "wasTriv Critical step 1\n";
 	  // In the subgroup case, assign to  <L> and <R> stabilizer
 	  // chains when the R-base is complete.
 	  StabChainOptions<Tint> options = GetStandardOptions<Tint>(n);
