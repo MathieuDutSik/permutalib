@@ -204,15 +204,19 @@ bool ProcessFixpoint_image(imageType<Telt> & image, int const& pnt, int & img, i
 template<typename Telt>
 bool IsTrivialRBase(rbaseType<Telt> const& rbase)
 {
+  std::cerr << "rbase.level.status=" << GetIntTypeNature(rbase.level.status) << "\n";
   if (rbase.level.status == int_int) {
+    std::cerr << "  int_int case value_int=" << rbase.level.value_int << "\n";
     if (rbase.level.value_int <= 1)
       return true;
   }
   if (rbase.level.status == int_stablev) {
     int eLev=rbase.level.eLev;
+    std::cerr << "  int_stablev case eLev=" << eLev << " |genlabels|=" << rbase.level.Stot.stabilizer[eLev].genlabels.size() << "\n";
     if (rbase.level.Stot.stabilizer[eLev].genlabels.size() == 0)
       return true;
   }
+  std::cerr << "Returning false\n";
   return false;
 }
 
@@ -283,11 +287,11 @@ bool MeetPartitionStrat(rbaseType<Telt> const& rbase, imageType<Telt> & image, P
 template<typename Telt>
 std::vector<singStrat> StratMeetPartition(rbaseType<Telt> & rbase, Partition & P, Partition const& S, Telt const& g)
 {
-  std::cerr << "StratMeetPartition begin P\n";
-  RawPrintPartition(P);
-  std::cerr << "StratMeetPartition begin S\n";
-  RawPrintPartition(S);
-  std::cerr << "Now working\n";
+  //  std::cerr << "StratMeetPartition begin P\n";
+  //  RawPrintPartition(P);
+  //  std::cerr << "StratMeetPartition begin S\n";
+  //  RawPrintPartition(S);
+  //  std::cerr << "Now working\n";
   std::vector<singStrat> strat;
   std::vector<int> cellsP = P.cellno;
   if (!g.isIdentity()) {
@@ -299,27 +303,27 @@ std::vector<singStrat> StratMeetPartition(rbaseType<Telt> & rbase, Partition & P
       }
     }
   }
-  PrintVectDebug("P.cellno=", P.cellno);
-  PrintVectDebug("cellsP=", cellsP);
+  //  PrintVectDebug("P.cellno=", P.cellno);
+  //  PrintVectDebug("cellsP=", cellsP);
   // If <S> is just a set, it is interpreted as partition ( <S>|<S>^compl ).
   int nrcells = NumberCells(S) - 1;
 
   for (int s=0; s<nrcells; s++) {
     // now split with cell number s of S.
-    std::cerr << "s=" << s << "\n";
+    //    std::cerr << "s=" << s << "\n";
     std::vector<int> p=Cell(S, s);
-    PrintVectDebug("p", p);
+    //    PrintVectDebug("p", p);
     
     std::vector<int> p2;
     for (auto & eVal : p)
       p2.push_back(cellsP[eVal]);
-    PrintVectDebug("p2", p2);
+    //    PrintVectDebug("p2", p2);
     CollectedResult<int> p3=Collected(p2);
     std::vector<int> splits;
     for (int h=0; h<int(p3.LVal.size()); h++) {
       // a cell will split iff it contains more points than are in the s-cell
-      std::cerr << "h=" << h << " mult=" << p3.LMult[h] << " val=" << p3.LVal[h] << "\n";
-      std::cerr << "Before if test\n";
+      //      std::cerr << "h=" << h << " mult=" << p3.LMult[h] << " val=" << p3.LVal[h] << "\n";
+      //      std::cerr << "Before if test\n";
       if (P.lengths[p3.LVal[h]] > p3.LMult[h])
         splits.push_back(p3.LVal[h]);
     }
@@ -396,17 +400,18 @@ template<typename Telt>
 void NextRBasePoint(Partition & P, rbaseType<Telt> & rbase, Telt const& TheId)
 {
   std::cerr << "Working with NextRBasePoint rbase.level2.status=" << GetIntTypeNature(rbase.level2.status) << "\n";
-  RawPrintPartition(P);
+  //  RawPrintPartition(P);
   std::vector<int> lens = P.lengths;
   std::vector<int> order = ClosedInterval(0, NumberCells(P));
-  std::cerr << "Before SortParallel\n";
-  PrintVectDebug(" lens", lens);
-  PrintVectDebug("order", order);
+  PrintVectDebug("lens", lens);
+  //  std::cerr << "Before SortParallel\n";
+  //  PrintVectDebug(" lens", lens);
+  //  PrintVectDebug("order", order);
   //
   SortParallel(lens, order);
-  std::cerr << "After SortParallel\n";
-  PrintVectDebug(" lens", lens);
-  PrintVectDebug("order", order);
+  //  std::cerr << "After SortParallel\n";
+  //  PrintVectDebug(" lens", lens);
+  //  PrintVectDebug("order", order);
   //
   
   
@@ -427,11 +432,11 @@ void NextRBasePoint(Partition & P, rbaseType<Telt> & rbase, Telt const& TheId)
       k++;
     }
   }
-  std::cerr << "k=" << k << " l=" << l << "\n";
-  std::cerr << "order[k]=" << order[k] << "\n";
-  std::cerr << "P.firsts[order[k]]=" << P.firsts[order[k]] << "\n";
+  //  std::cerr << "k=" << k << " l=" << l << "\n";
+  //  std::cerr << "order[k]=" << order[k] << "\n";
+  //  std::cerr << "P.firsts[order[k]]=" << P.firsts[order[k]] << "\n";
   int p = P.points[ P.firsts[ order[k] ] + l ];
-  std::cerr << "p=" << p << "\n";
+  //  std::cerr << "p=" << p << "\n";
   RegisterRBasePoint(P, rbase, p, TheId);
 }
 
@@ -648,7 +653,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   std::vector<int> oldcel_cellno;
   std::cerr << "PartitionBacktrack step 3\n";
   std::function<permPlusBool<Telt>(int const&,bool const&)> PBEnumerate = [&](int const& d, bool const & wasTriv) -> permPlusBool<Telt> {
-    std::cerr << "Beginning of PBEnumerate\n";
+    std::cerr << "PBEnumerate, step 1, d=" << d << " wasTriv=" << wasTriv << "\n";
     permPlusBool<Telt> oldprm, oldprm2;
     int a;                // current R-base point
     permPlusBool<Telt> t; // group element constructed, to be handed upwards
@@ -657,10 +662,11 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     boost::dynamic_bitset<>::size_type b;        // image of base point currently being considered
 
     if (image.perm.status == int_false) {
-      std::cerr << "PBEnumerate, case 1, image.perm.status=" << GetIntTypeNature(image.perm.status) << "\n";
+      std::cerr << "PBEnumerate, EXIT 1, image.perm.status=" << GetIntTypeNature(image.perm.status) << "\n";
       return {int_fail, {}};
     }
     image.depth = d;
+    std::cerr << "PBEnumerate, step 2\n";
 
     // Store the original values of <image.*>.
     int undoto = NumberCells(image.partition);
@@ -671,15 +677,19 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       oldcel_cellno = image.partition.cellno;
       oldprm = image.perm;
     }
+    std::cerr << "PBEnumerate, step 3\n";
     if (image.level2.status != int_false)
       oldprm2 = image.perm2;
     else
       oldprm2.status = int_false;
+    std::cerr << "PBEnumerate, step 4 d=" << d << " |rbase.base|=" << rbase.base.size() << "\n";
     // Recursion comes to an end  if all base  points have been prescribed
     // images.
     if (d >= int(rbase.base.size())) {
+      std::cerr << "Matching d >= int(rbase.base.size()) test\n";
       if (IsTrivialRBase(rbase)) {
 	blen = rbase.base.size();
+	std::cerr << "IsTrivialRBase matching test blen=" << blen << " wasTriv=" << wasTriv << "\n";
 	// Do     not  add the   identity    element  in the  subgroup
 	// construction.
 	if (wasTriv) {
@@ -690,7 +700,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  options.reduced = false;
 	  L = StabChainOp<Telt,Tint>(StrongGeneratorsStabChain(L,0), options);
 	  R = L;
-	  std::cerr << "PBEnumerate, case 2\n";
+	  std::cerr << "PBEnumerate, EXIT 2\n";
 	  return {int_fail,{}};
 	}
 	else {
@@ -701,17 +711,17 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    prm = image.perm;
 	  if (image.level2.status != int_false) {
 	    if (SiftedPermutation(image.level2.Stot, image.level2.eLev, prm.val * Inverse(image.perm2.val)).isIdentity()) {
-	      std::cerr << "PBEnumerate, case 3\n";
+	      std::cerr << "PBEnumerate, EXIT 3\n";
 	      return prm;
 	    }
 	  }
 	  else {
 	    if (Pr(prm.val)) {
-	      std::cerr << "PBEnumerate, case 4\n";
+	      std::cerr << "PBEnumerate, EXIT 4\n";
 	      return {int_perm, prm.val};
 	    }
 	  }
-	  std::cerr << "PBEnumerate, case 5\n";
+	  std::cerr << "PBEnumerate, EXIT 5\n";
 	  return {int_fail, {}};
 	}
 	// Construct the   next refinement  level. This  also  initializes
@@ -721,9 +731,12 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	//	if (!repr) {
 	//	  oldcel = StructuralCopy( oldcel );
 	//	}
+	std::cerr << "Not matching IsTrivialRBase test\n";
 	NextRBasePoint(rbase.partition, rbase, G.identity);
+	std::cerr << "After NextRBasePoint\n";
 	if (image.perm.status == int_true)
 	  rbase.fix.push_back(Fixcells(rbase.partition));
+	std::cerr << "After Fixcells insert\n";
 	std::vector<int> eNewF(range.size(), 0);
 	org.push_back(eNewF);
 	if (repr) {
@@ -737,6 +750,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       }
     }
     a = rbase.base[d];
+    std::cerr << "PBEnumerate, step 5\n";
     
     // Intersect  the current cell of <P>  with  the mapped basic orbit of
     // <G> (and also with the one of <H> in the intersection case).
@@ -752,10 +766,9 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       }
     }
     else {
-      //      std::cerr << "Before call to BlistList d=" << d << " |orb|=" << orb.size() << "\n";
+      std::cerr << "|orb|=" << orb.size() << "\n";
       AssignationVectorGapStyle(orb, d, BlistList(range, {}));
-      //      std::cerr << "After  call to BlistList\n";
-				// line below needs to be checked.
+      // line below needs to be checked.
       for (auto & pVal : rbase.lev[d].Stot.stabilizer[0].orbit) {
 	b = PowAct(pVal, image.perm.val);
 	if (oldcel_cellno[b] == rbase.where[d]) {
@@ -775,10 +788,12 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       }
       std::cerr << "After pVal loop\n";
     }
+    std::cerr << "PBEnumerate, step 6\n";
     if (d == 1 && ForAll(G.labels, [&](Telt const& x){return PowAct(a, x) == a;})) {
       orb[d][a]=true; // ensure a is a possible image (can happen if acting on permutations with more points)
     }
     orB_sing = orb[d];
+    std::cerr << "PBEnumerate, step 7\n";
     
     // Loop  over the candidate images  for the  current base point. First
     // the special case image = base up to current level.
@@ -794,23 +809,26 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       // candidate list.
       SubtractBlist(orb[d], BlistList(range, L.stabilizer[d].orbit));
     }
+    std::cerr << "PBEnumerate, step 8\n";
     
     // Only the early points of the orbit have to be considered.
     m = SizeBlist( orB_sing );
     if (m < int(L.stabilizer[d].orbit.size()) ) {
-      std::cerr << "PBEnumerate, case 6\n";
+      std::cerr << "PBEnumerate, EXIT 6\n";
       return {int_fail,{}};
     }
     max = PositionNthTrueBlist(orB_sing, m - L.stabilizer[d].orbit.size());
+    std::cerr << "PBEnumerate, step 9\n";
     
     if (wasTriv && a > max) {
       m--;
       if (m < int(L.stabilizer[d].orbit.size()) ) {
-	std::cerr << "PBEnumerate, case 7\n";
+	std::cerr << "PBEnumerate, EXIT 7\n";
 	return {int_fail,{}};
       }
       max = PositionNthTrueBlist( orB_sing, m - L.stabilizer[d].orbit.size());
     }
+    std::cerr << "PBEnumerate, step 10\n";
     // Now the other possible images.
     b = orb[d].find_first();
     while (b != boost::dynamic_bitset<>::npos) {
@@ -891,7 +909,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  //   need  only find  a representative  because we already
 	  //   know the stabilizer of <L> at an earlier level.
 	  if (repr || !wasTriv) {
-	    std::cerr << "PBEnumerate, case 8\n";
+	    std::cerr << "PBEnumerate, EXIT 8\n";
 	    return t;
 	  }
 	  else {
@@ -902,7 +920,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    //	      AddGeneratorsExtendSchreierTree( L[ dd ], {t});
 	    AddGeneratorsExtendSchreierTree(L, 0, {t.val});
 	    if (m < int(L.stabilizer[d].orbit.size())) {
-	      std::cerr << "PBEnumerate, case 9\n";
+	      std::cerr << "PBEnumerate, EXIT 9\n";
 	      return {int_fail,{}};
 	    }
 	    max = PositionNthTrueBlist( orB_sing, m - L.stabilizer[d].orbit.size());
@@ -920,7 +938,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       }
       
     }
-    std::cerr << "PBEnumerate, case 10\n";
+    std::cerr << "PBEnumerate, step 11, EXIT 10\n";
     return {int_fail, {}};
   };
   std::cerr << "PartitionBacktrack step 4\n";

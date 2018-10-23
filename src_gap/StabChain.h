@@ -664,6 +664,7 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & Stot, int const& eLev, st
     ListAtt[i]=i;
   Face old=BlistList(ListAtt, Stot.stabilizer[eLev].genlabels);
   old[0]=true;
+  /*
   std::cerr << "old =";
   for (int i=0; i<int(old.size()); i++)
     std::cerr << " " << old[i];
@@ -671,7 +672,7 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & Stot, int const& eLev, st
   std::cerr << "Before genlabels =";
   for (auto & eVal : Stot.stabilizer[eLev].genlabels)
     std::cerr << " " << eVal;
-  std::cerr << "\n";
+    std::cerr << "\n";*/
   Face ald=old;
   for (auto & gen : newgens) {
     int pos = PositionVect(Stot.labels, gen);
@@ -687,6 +688,7 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & Stot, int const& eLev, st
 	Stot.stabilizer[eLev].genlabels.push_back(pos);
     }
   }
+  /*
   std::cerr << "Before test old =";
   for (int i=0; i<int(old.size()); i++)
     std::cerr << " " << old[i];
@@ -698,21 +700,23 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & Stot, int const& eLev, st
   std::cerr << "After genlabels =";
   for (auto & eVal : Stot.stabilizer[eLev].genlabels)
     std::cerr << " " << eVal;
-  std::cerr << "\n";
+    std::cerr << "\n";*/
   int len = Stot.stabilizer[eLev].orbit.size();
   int i=0;
   if (Stot.UseCycle) {
+    /*
     std::cerr << "Before cycles =";
     for (int u=0; u<int(Stot.stabilizer[eLev].cycles.size()); u++)
       std::cerr << " " << Stot.stabilizer[eLev].cycles[u];
     std::cerr << "\n";
+    */
     while (i < int(Stot.stabilizer[eLev].orbit.size())) {
-      std::cerr << "i=" << i << "\n";
+      //      std::cerr << "i=" << i << "\n";
       for (int& j : Stot.stabilizer[eLev].genlabels) {
-	std::cerr << "  j=" << j << "\n";
+	//	std::cerr << "  j=" << j << "\n";
 	if (i > len-1 || old[j] == 0) {
 	  int img=SlashAct(Stot.stabilizer[eLev].orbit[i], Stot.labels[j]);
-	  std::cerr << "    After the test img=" << img << "\n";
+	  //	  std::cerr << "    After the test img=" << img << "\n";
 	  if (Stot.stabilizer[eLev].transversal[img] != -1) {
 	    Stot.stabilizer[eLev].cycles[i]=true;
 	  }
@@ -725,10 +729,11 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & Stot, int const& eLev, st
       }
       i++;
     }
+    /*
     std::cerr << "After cycles =";
     for (int u=0; u<int(Stot.stabilizer[eLev].cycles.size()); u++)
       std::cerr << " " << Stot.stabilizer[eLev].cycles[u];
-    std::cerr << "\n";
+      std::cerr << "\n";*/
   }
   else {
     while (i < int(Stot.stabilizer[eLev].orbit.size())) {

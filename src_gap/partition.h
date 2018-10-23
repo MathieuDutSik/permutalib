@@ -3,6 +3,8 @@
 
 #include "PermGroup.h"
 
+//#define DEBUG_PARTITION
+
 namespace permutalib {
 
 struct Partition {
@@ -108,9 +110,11 @@ Partition GetPartition(std::vector<std::vector<int>> const& list)
       cellno[eVal] = iPart;
   }
   Partition P{points, firsts, lengths, cellno};
+#ifdef DEBUG_PARTITION
   std::cerr << "After GetPartition operation P=\n";
   RawPrintPartition(P);
   CheckConsistencyPartition("GetPartition", P);
+#endif
   return P;
 }
 
@@ -225,9 +229,11 @@ int SplitCell_Kernel(Partition & P, int const& i, std::function<bool(int)> const
     pos++;
   }
 
+#ifdef DEBUG_PARTITION
   std::cerr << "After SplitCell_Kernel operation P=\n";
   RawPrintPartition(P);
   CheckConsistencyPartition("Output SplitCell_Kernel", P);
+#endif
   return idxMov;
 }
 
@@ -264,9 +270,11 @@ int SplitCell_Face(Partition & P, int const& i, Face const& f, int const& j, Tel
 
 int IsolatePoint(Partition & P, int const& a)
 {
+#ifdef DEBUG_PARTITION
   CheckConsistencyPartition("Input IsolatePoint", P);
   std::cerr << "Input Partition\n";
   RawPrintPartition(P);
+#endif
   int nbPart=P.firsts.size();
   int iPart=P.cellno[a];
   int eFirst=P.firsts[iPart];
@@ -290,10 +298,12 @@ int IsolatePoint(Partition & P, int const& a)
   P.firsts.push_back(l);
   P.lengths.push_back(1);
 
+#ifdef DEBUG_PARTITION
   std::cerr << "After IsolatePoint operation P=\n";
   std::cerr << "Output partition\n";
   RawPrintPartition(P);
-  CheckConsistencyPartition("Outout IsolatePoint", P);
+  CheckConsistencyPartition("Output IsolatePoint", P);
+#endif
   return iPart;
 }
 
@@ -315,9 +325,11 @@ int UndoRefinement(Partition & P)
   }
   P.firsts.pop_back();
   P.lengths.pop_back();
+#ifdef DEBUG_PARTITION
   std::cerr << "After UndoRefinement operation P=\n";
   RawPrintPartition(P);
   CheckConsistencyPartition("Output UndoRefinement", P);
+#endif
   return m;
 }
 
