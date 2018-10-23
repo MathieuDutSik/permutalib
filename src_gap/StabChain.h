@@ -1043,7 +1043,7 @@ bool ChangeStabChain(StabChain<Telt> & Stot, int const& TheLev, std::vector<int>
   int basSiz=base.size();
   while (eLev < int(Stot.stabilizer.size())-1 || i < basSiz) {
     int old=BasePoint(Stot, eLev);
-    std::cerr << "eLev=" << eLev << "\n";
+    //    std::cerr << "eLev=" << eLev << "\n";
     if (Stot.stabilizer[eLev].genlabels.size() == 0 && (reduced == int_true || i >= basSiz)) {
       RemoveStabChain(Stot);
       i = basSiz;
@@ -1090,6 +1090,7 @@ bool ChangeStabChain(StabChain<Telt> & Stot, int const& TheLev, std::vector<int>
       eLev++;
     }
   }
+  std::cerr << "Before ConjugateStabChain cnj=" << cnj << "\n";
   if (!cnj.isIdentity())
     ConjugateStabChain(Stot, TheLev, cnj);
   return true;

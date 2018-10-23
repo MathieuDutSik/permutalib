@@ -14,6 +14,28 @@ struct Partition {
   std::vector<int> cellno;
 };
 
+void NicePrintPartition(std::string const& str, Partition const& P)
+{
+  int nbPart=P.firsts.size();
+  std::cerr << str << " = [";
+  for (int iPart=0; iPart<nbPart; iPart++) {
+    if (iPart > 0)
+      std::cerr << ", ";
+    int eFirst=P.firsts[iPart];
+    int len=P.lengths[iPart];
+    std::cerr << "[";
+    for (int i=0; i<len; i++) {
+      if (i >0)
+	std::cerr << ", ";
+      int ePt = P.points[eFirst + i];
+      std::cerr << ePt;
+    }
+    std::cerr << "]";
+  }
+  std::cerr << "]\n";
+}
+
+ 
 void RawPrintPartition(Partition const& P)
 {
   auto prt=[](std::vector<int> const& V) -> void {
@@ -279,7 +301,7 @@ int IsolatePoint(Partition & P, int const& a)
   int iPart=P.cellno[a];
   int eFirst=P.firsts[iPart];
   int len=P.lengths[iPart];
-  std::cerr << "a=" << a << " iPart=" << iPart << " eFirst=" << eFirst << " len=" << len << "\n";
+  //  std::cerr << "a=" << a << " iPart=" << iPart << " eFirst=" << eFirst << " len=" << len << "\n";
   if (len == 1)
     return -1;
   int pos=-1;
@@ -289,7 +311,7 @@ int IsolatePoint(Partition & P, int const& a)
       pos=j;
   }
   int l=eFirst + len-1;
-  std::cerr << "pos=" << pos << " l=" << l << "\n";
+  //  std::cerr << "pos=" << pos << " l=" << l << "\n";
   P.points[pos] = P.points[l];
   P.points[l]=a;
   //  int m=P.firsts.size() + 1;

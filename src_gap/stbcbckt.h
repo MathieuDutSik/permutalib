@@ -136,6 +136,25 @@ struct rbaseType {
 
 
 template<typename Telt>
+void PrintRBaseLevel(std::string const& str, rbaseType<Telt> const& rbase)
+{
+  if (rbase.level.status == int_int) {
+    std::cerr << str << " PRBL rbase.level, integer : " << rbase.level.value_int << "\n";
+  }
+  else {
+    if (rbase.level.status == int_stablev) {
+      int eLev=rbase.level.eLev;
+      std::cerr << str << " PRBL rbase.level, eLev=" << eLev << " record : " << rbase.level.Stot.stabilizer[eLev].genlabels.size() << "\n";
+    }
+    else {
+      std::cerr << str << " PRBL rbase.level=" << GetIntTypeNature(rbase.level.status) << "\n";
+    }
+  }
+}
+
+
+ 
+template<typename Telt>
 bool ProcessFixpoint_rbase(rbaseType<Telt> & rbase, int const& pnt)
 {
   if (rbase.level2.status != int_true && rbase.level2.status != int_false) {
@@ -204,7 +223,7 @@ bool ProcessFixpoint_image(imageType<Telt> & image, int const& pnt, int & img, i
 template<typename Telt>
 bool IsTrivialRBase(rbaseType<Telt> const& rbase)
 {
-  std::cerr << "rbase.level.status=" << GetIntTypeNature(rbase.level.status) << "\n";
+  std::cerr << "IsTrivialRBase rbase.level.status=" << GetIntTypeNature(rbase.level.status) << "\n";
   if (rbase.level.status == int_int) {
     std::cerr << "  int_int case value_int=" << rbase.level.value_int << "\n";
     if (rbase.level.value_int <= 1)
@@ -370,10 +389,16 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
   rbase.lev.push_back(rbase.level);
   rbase.base.push_back(pnt);
   int k = IsolatePoint(P, pnt);
+  NicePrintPartition("After IsolatePoint P", P);
+  if (!ProcessFixpoint_rbase(rbase, pnt)) {
+    std::cerr << "INFO: Warning R-base point is already fixed\n";
+  }
   rbase.where.push_back(k);
   int len=rbase.rfm.size();
   rbase.rfm.push_back({});
+  std::cerr << "Before P.lengths test k=" << k << " len=" << len << "\n";
   if (P.lengths[k] == 1) {
+    std::cerr << "Matching P.lengths test\n";
     int pnt = FixpointCellNo(P, k);
     ProcessFixpoint_rbase(rbase, pnt);
     rbase.rfm[len].push_back(Refinement({pnt,k}));
@@ -381,15 +406,24 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
   if (rbase.level2.status != int_false) {
     auto MainInsert=[&](StabChainPlusLev<Telt> const& lev) -> void {
       if (lev.status != int_int) {
-	Partition O = OrbitsPartition(StrongGeneratorsStabChain(lev.Stot, lev.eLev), rbase.domain);
+	std::vector<Telt> LGen = StrongGeneratorsStabChain(lev.Stot, lev.eLev);
+	std::cerr << "LGen = ";
+	WriteStdVectorGAP(std::cerr, LGen);
+	std::cerr << "\n";
+	Partition O = OrbitsPartition(LGen, rbase.domain);
+	NicePrintPartition("Before StratMeetPartition O", O);
 	std::vector<singStrat> strat = StratMeetPartition(rbase, P, O, TheId);
 	rbase.rfm[len].push_back(Refinement({O,strat}));
       }
     };
-    if (rbase.level2.status == int_true)
+    if (rbase.level2.status == int_true) {
+      std::cerr << "Before call to MainInsert(level)\n";
       MainInsert(rbase.level);
-    else
+    }
+    else {
+      std::cerr << "Before call to MainInsert(level2)\n";
       MainInsert(rbase.level2);
+    }
   }
 }
 
@@ -436,7 +470,8 @@ void NextRBasePoint(Partition & P, rbaseType<Telt> & rbase, Telt const& TheId)
   //  std::cerr << "order[k]=" << order[k] << "\n";
   //  std::cerr << "P.firsts[order[k]]=" << P.firsts[order[k]] << "\n";
   int p = P.points[ P.firsts[ order[k] ] + l ];
-  //  std::cerr << "p=" << p << "\n";
+  std::cerr << "p=" << p << "\n";
+  NicePrintPartition("Before RegisterRBasePoint P", P);
   RegisterRBasePoint(P, rbase, p, TheId);
 }
 
@@ -733,7 +768,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	//	}
 	std::cerr << "Not matching IsTrivialRBase test\n";
 	NextRBasePoint(rbase.partition, rbase, G.identity);
-	std::cerr << "After NextRBasePoint\n";
+	PrintRBaseLevel("After NextRBasePoint", rbase);
 	if (image.perm.status == int_true)
 	  rbase.fix.push_back(Fixcells(rbase.partition));
 	std::cerr << "After Fixcells insert\n";
@@ -786,7 +821,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  }
 	}
       }
-      std::cerr << "After pVal loop\n";
+      //      std::cerr << "After pVal loop\n";
     }
     std::cerr << "PBEnumerate, step 6\n";
     if (d == 1 && ForAll(G.labels, [&](Telt const& x){return PowAct(a, x) == a;})) {
@@ -802,6 +837,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       // Refinements that start with '_' must be executed even when base
       // = image since they modify image.data, etc.
       RRefine(rbase, image, true);
+      PrintRBaseLevel("After RRefine", rbase);
       // Recursion.
       PBEnumerate(d + 1, true);
       image.depth = d;
