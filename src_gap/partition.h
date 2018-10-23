@@ -425,9 +425,9 @@ Partition TrivialPartition(std::vector<int> const& Omega)
 }
 
 template<typename Telt>
-Partition OrbitsPartition(std::vector<Telt> const& gens, std::vector<int> const& Omega)
+Partition OrbitsPartition(std::vector<Telt> const& gens, int const&n, std::vector<int> const& Omega)
 {
-  return GetPartition(OrbitsPerms(gens, Omega));
+  return GetPartition(OrbitsPerms(gens, n, Omega));
 }
 
 

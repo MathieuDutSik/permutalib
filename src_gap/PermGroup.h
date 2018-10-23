@@ -24,11 +24,10 @@ int SmallestMovedPoint(std::vector<Telt> const& LGen)
 
 
 template<typename Telt>
-std::vector<int> OrbitPerms(std::vector<Telt> const& gens, int const& d)
+std::vector<int> OrbitPerms(std::vector<Telt> const& gens, int const& n, int const& d)
 {
   std::vector<int> orb;
-  int siz=gens[0].size();
-  Face eFace(siz);
+  Face eFace(n);
   auto InsertValue=[&](int const& val) -> void {
     orb.push_back(val);
     eFace[val]=1;
@@ -54,11 +53,10 @@ std::vector<int> OrbitPerms(std::vector<Telt> const& gens, int const& d)
 
 
 template<typename Telt>
-std::vector<std::vector<int>> OrbitsPerms(std::vector<Telt> const& gens, std::vector<int> const& D)
+std::vector<std::vector<int>> OrbitsPerms(std::vector<Telt> const& gens, int const&n, std::vector<int> const& D)
 {
   std::vector<std::vector<int>> orbs;
-  int max=gens[0].size();
-  Face dom(max);
+  Face dom(n);
   for (auto & eV : D)
     dom[eV]=1;
   while(true) {

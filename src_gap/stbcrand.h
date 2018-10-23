@@ -832,6 +832,7 @@ StabChain<Telt> StabChainRandomPermGroup(std::vector<Telt> const& gens, Telt con
   }
   //
   int degree = LargestMovedPoint( gens);
+  int n=degree;
   paramOpt param;
   std::vector<int> UsedKnownBase;
   if (options.knownBase.size() > 0 && int(options.knownBase.size()) < 4 + LogInt(degree,10)) {
@@ -876,7 +877,7 @@ StabChain<Telt> StabChainRandomPermGroup(std::vector<Telt> const& gens, Telt con
     for (int u=0; u<degree; u++)
       TheBase[u]=u;
     base=Concatenation(givenbase, DifferenceVect(TheBase, givenbase));
-    std::vector<std::vector<int>> orbits2 = OrbitsPerms(gens,TheBase);
+    std::vector<std::vector<int>> orbits2 = OrbitsPerms(gens, n, TheBase);
     for (auto & eOrb : orbits2)
       if (eOrb.size() > 1)
 	orbits.push_back(eOrb);
@@ -892,7 +893,6 @@ StabChain<Telt> StabChainRandomPermGroup(std::vector<Telt> const& gens, Telt con
   }
 
   bool ready=false;
-  int n=degree;
   StabChain<Telt> Stot = EmptyStabChain<Telt>(n);
   std::vector<Telt> eNew=gens;
   Telt result;
@@ -1085,7 +1085,7 @@ std::pair<bool,Telt> VerifySGS(StabChain<Telt> const& Stot, std::vector<int> con
 	  for (auto & eIdx : temp.stabilizer[0].genlabels)
 	    longer.push_back(temp.labels[eIdx]);
 	  longer.push_back(gen);
-	  std::vector<int> orbit = OrbitPerms(longer, temp.stabilizer[0].orbit[0]);
+	  std::vector<int> orbit = OrbitPerms(longer, n, temp.stabilizer[0].orbit[0]);
 	  std::vector<std::vector<int>> blks = Blocks_from_seed(longer, orbit, set);
 	  if (blks.size() * blks.size() != orbit.size()) {
 	    result = {false, Telt(n)};

@@ -248,6 +248,8 @@ int BasePoint(StabChain<Telt> const& Stot, int const& eLev)
   int siz=Stot.stabilizer.size();
   if (eLev >= siz)
     return -1;
+  if (Stot.stabilizer[eLev].orbit.size() == 0)
+    return -1;
   return Stot.stabilizer[eLev].orbit[0];
 }
 
@@ -1041,8 +1043,10 @@ bool ChangeStabChain(StabChain<Telt> & Stot, int const& TheLev, std::vector<int>
   int i=0;
   int eLev=TheLev;
   int basSiz=base.size();
+  std::cerr << "ChangeStabChain |base|=" << basSiz << "\n";
   while (eLev < int(Stot.stabilizer.size())-1 || i < basSiz) {
     int old=BasePoint(Stot, eLev);
+    std::cerr << "ChangeStabChain old=" << old << "\n";
     //    std::cerr << "eLev=" << eLev << "\n";
     if (Stot.stabilizer[eLev].genlabels.size() == 0 && (reduced == int_true || i >= basSiz)) {
       RemoveStabChain(Stot);

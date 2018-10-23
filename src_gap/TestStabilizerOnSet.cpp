@@ -43,6 +43,7 @@ int main(int argc, char *argv[])
     }
     permutalib::StabChain<Telt> eG2 = permutalib::Stabilizer_OnSets<Telt,Tint>(eG, eFace);
     std::cerr << "eG2=" << eG2 << "\n";
+    std::cerr << "|eG2|=" << permutalib::Order<Telt,Tint>(eG2) << "\n";
   }
   catch (TerminalException const& e) {
     exit(e.eVal);

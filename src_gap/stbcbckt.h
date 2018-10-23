@@ -157,8 +157,11 @@ void PrintRBaseLevel(std::string const& str, rbaseType<Telt> const& rbase)
 template<typename Telt>
 bool ProcessFixpoint_rbase(rbaseType<Telt> & rbase, int const& pnt)
 {
+  std::cerr << "ProcessFixpoint_rbase beginning\n";
   if (rbase.level2.status != int_true && rbase.level2.status != int_false) {
+    std::cerr << "Before ChangeStabChain level2, eLev=" << rbase.level2.eLev << "\n";
     ChangeStabChain(rbase.level2.Stot, rbase.level2.eLev, {pnt}, int_true);
+    std::cerr << " After ChangeStabChain level2\n";
     if (BasePoint(rbase.level2) == pnt) 
       rbase.level2.eLev++;
   }
@@ -166,7 +169,9 @@ bool ProcessFixpoint_rbase(rbaseType<Telt> & rbase, int const& pnt)
     rbase.level.value_int--;
   }
   else {
+    std::cerr << "Before ChangeStabChain level, eLev=" << rbase.level.eLev << "\n";
     ChangeStabChain(rbase.level.Stot, rbase.level.eLev, {pnt}, int_true);
+    std::cerr << " After ChangeStabChain level\n";
     if (BasePoint(rbase.level) == pnt) {
       rbase.level.eLev++;
     }
@@ -400,7 +405,9 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
   if (P.lengths[k] == 1) {
     std::cerr << "Matching P.lengths test\n";
     int pnt = FixpointCellNo(P, k);
+    std::cerr << "Section P.lengths after FixpointCellNo pnt=" << pnt << "\n";
     ProcessFixpoint_rbase(rbase, pnt);
+    std::cerr << "Section P.lengths after ProcessFixpoint_rbase\n";
     rbase.rfm[len].push_back(Refinement({pnt,k}));
   }
   if (rbase.level2.status != int_false) {
@@ -410,7 +417,7 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
 	std::cerr << "LGen = ";
 	WriteStdVectorGAP(std::cerr, LGen);
 	std::cerr << "\n";
-	Partition O = OrbitsPartition(LGen, rbase.domain);
+	Partition O = OrbitsPartition(LGen, lev.Stot.n, rbase.domain);
 	NicePrintPartition("Before StratMeetPartition O", O);
 	std::vector<singStrat> strat = StratMeetPartition(rbase, P, O, TheId);
 	rbase.rfm[len].push_back(Refinement({O,strat}));
