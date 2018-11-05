@@ -19,7 +19,7 @@ CLOCAL          = -I../src_number -I../src_basic -I../src_comb -I/usr/include
 #CFLAGS 		= -I$(BOOST_INCDIR) -I$(GMP_INCDIR) 
 CFLAGS 		= -I$(BOOST_INCDIR)
 
-LIBS		= -lm $(GMP_CXX_LINK) -pthread
+LIBS		= $(GMP_CXX_LINK)
 
 %.o: %.cpp
 	@echo

@@ -756,7 +756,8 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  StabChainOptions<Tint> options = GetStandardOptions<Tint>(n);
 	  options.base = rbase.base;
 	  options.reduced = false;
-	  L = StabChainOp<Telt,Tint>(StrongGeneratorsStabChain(L,0), options);
+	  L = StabChainOp_stabchain_nofalse<Telt,Tint>(L, options);
+	  std::cerr << "|L|=" << L.stabilizer.size() << "\n";
 	  R = L;
 	  std::cerr << "PBEnumerate, EXIT 2\n";
 	  return {int_fail,{}};
@@ -1202,6 +1203,21 @@ StabChain<Telt> Stabilizer_OnSets(StabChain<Telt> const& G, Face const& Phi)
   bool repr=false;
   return RepOpSetsPermGroup<Telt,Tint>(G, repr, Phi, Phi).stab;
 }
+
+
+
+template<typename Telt,typename Tint>
+std::pair<bool,Telt> RepresentativeAction_OnSets(StabChain<Telt> const& G, Face const& f1, Face const& f2)
+{
+  std::cerr << "Beginning of RepresentativeAction_OnSets\n";
+  bool repr=true;
+  ResultPBT<Telt> eRec = RepOpSetsPermGroup<Telt,Tint>(G, repr, f1, f2);
+  if (eRec.nature == int_fail)
+    return {false, {}};
+  return {true, eRec.res};
+}
+
+
 
 
 }
