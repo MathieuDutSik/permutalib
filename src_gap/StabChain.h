@@ -1043,7 +1043,11 @@ bool ChangeStabChain(StabChain<Telt> & Stot, int const& TheLev, std::vector<int>
   int i=0;
   int eLev=TheLev;
   int basSiz=base.size();
-  std::cerr << "ChangeStabChain |base|=" << basSiz << "\n";
+  std::cerr << "ChangeStabChain base= [";
+  for (auto & eVal : base) {
+    std::cerr << " " << eVal;
+  }
+  std::cerr << " ]\n";
   while (eLev < int(Stot.stabilizer.size())-1 || i < basSiz) {
     int old=BasePoint(Stot, eLev);
     std::cerr << "ChangeStabChain old=" << old << "\n";
