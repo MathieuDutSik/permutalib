@@ -75,19 +75,18 @@ CreateExampleOnSetCase:=function(FileName, GRP, sizSet)
 end;
 
 
-DoMathieu:=false;
-if DoMathieu then
-  for eSize in [1..12]
-  do
-    eFile:=Concatenation("ExampleM24_", String(eSize));
-    CreateExampleOnSetCase(eFile, MathieuGroup(24), eSize);
-  od;
-  #
-  for eSize in [1..6]
-  do
-    eFile:=Concatenation("ExampleM12_", String(eSize));
-    CreateExampleOnSetCase(eFile, MathieuGroup(12), eSize);
-  od;
+DoMathieu24:=false;
+if DoMathieu24 then
+  eSize:=12;
+  eFile:=Concatenation("ExampleM24_", String(eSize));
+  CreateExampleOnSetCase(eFile, MathieuGroup(24), eSize);
+fi;
+
+DoMathieu12:=false;
+if DoMathieu12 then
+  eSize:=6;
+  eFile:=Concatenation("ExampleM12_", String(eSize));
+  CreateExampleOnSetCase(eFile, MathieuGroup(12), eSize);
 fi;
 
 DoSym6:=false;
@@ -112,9 +111,7 @@ fi;
 
 DoSym5:=true;
 if DoSym5 then
-  for eSize in [2..2]
-  do
-    eFile:=Concatenation("ExampleSym5_", String(eSize));
-    CreateExampleOnSetCase(eFile, Group([(1,2,3,4,5),(1,2)]), eSize);
-  od;
+  eSize:=2;
+  eFile:=Concatenation("ExampleSym5_", String(eSize));
+  CreateExampleOnSetCase(eFile, Group([(1,2,3,4,5),(1,2)]), eSize);
 fi;

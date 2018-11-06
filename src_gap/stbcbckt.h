@@ -45,17 +45,21 @@ permPlusBool<Telt> ExtendedT(Telt const& t, int const& pnt, int& img, int const&
     img = SlashAct(img, t);
   else
     img = simg;
-    
   // If <G> fixes <pnt>, nothing more can  be changed, so test whether <pnt>
   // = <img>.
   int bpt = BasePoint(S.Stot, S.eLev);
+  std::cerr << "img=" << img << " bpt=" << bpt << "\n";
   if (bpt != pnt) {
-    if (pnt != img)
+    if (pnt != img) {
+      std::cerr << "ExtendedT, return false 1\n";
       return {int_false,{}};
-    else
+    }
+    else {
       return {int_perm, t};
+    }
   }
   if (S.Stot.stabilizer[S.eLev].transversal[img] == -1) {
+    std::cerr << "ExtendedT, return false 2\n";
     return {int_false,{}};
   }
   //      Telt u = InverseRepresentative(S.Stot, S.eLev, img);
@@ -126,6 +130,14 @@ struct dataType {
 // Therefore if they are assigned as shared pointer from rbase.level
 // a priori the value change with rbase.level and rbase.level2
 // rbase.orbit is used in the computation (Wrong sizes to be resolved)
+//
+// What is apparent in runs is that there is a link between rbase.lev[d] and rbase.level
+// We have Add(rbase.lev, rbase.level)
+// Later rbase.level is changed and the value of rbase.lev[d] accordingly as well. This proves the
+// existence of a link which is otherwise hard to find explicitly.
+//
+// The critical thing is therefore to find out when the .level is changed.
+// We have to find out the formalism underlying the use of lev[d].
 // 
 template<typename Telt>
 struct rbaseType {
@@ -155,7 +167,7 @@ void PrintRBaseLevel(rbaseType<Telt> const& rbase, std::string const& str)
   else {
     if (rbase.level.status == int_stablev) {
       int eLev=rbase.level.eLev;
-      std::cerr << str << " PRBL rbase.level, eLev=" << eLev << " record, |genlabels|=" << rbase.level.Stot.stabilizer[eLev].genlabels.size() << " orbit=" << PrintTopOrbit(rbase.level.Stot) << "\n";
+      std::cerr << str << " PRBL rbase.level, eLev=" << eLev << " record, |genlabels|=" << rbase.level.Stot.stabilizer[eLev].genlabels.size() << " orbit=" << PrintTopOrbit(rbase.level.Stot, rbase.level.eLev) << "\n";
     }
     else {
       std::cerr << str << " PRBL rbase.level=" << GetIntTypeNature(rbase.level.status) << "\n";
@@ -213,9 +225,12 @@ template<typename Telt>
 bool ProcessFixpoint_image(imageType<Telt> & image, int const& pnt, int & img, int const& simg)
 {
   if (image.perm.status != int_true) {
+    std::cerr << "Case image.perm.status = true\n";
     permPlusBool<Telt> t = ExtendedT(image.perm.val, pnt, img, simg, image.level);
-    if (t.status == int_false)
+    if (t.status == int_false) {
+      std::cerr << "Returning false 1\n";
       return false;
+    }
     else {
       if (BasePoint(image.level ) == pnt)
         image.level.eLev++;
@@ -223,9 +238,12 @@ bool ProcessFixpoint_image(imageType<Telt> & image, int const& pnt, int & img, i
     image.perm = t;
   }
   if (image.level2.status != int_false) {
+    std::cerr << "Case image.perm.status = false\n";
     permPlusBool<Telt> t = ExtendedT(image.perm2.val, pnt, img, -1, image.level2);
-    if (t.status == int_false)
+    if (t.status == int_false) {
+      std::cerr << "Returning false 2\n";
       return false;
+    }
     else {
       if (BasePoint(image.level2 ) == pnt)
         image.level2.eLev++;
@@ -462,6 +480,7 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
       MainInsert(rbase.level2);
     }
   }
+  //  rbase.lev.push_back(rbase.level);
 }
 
 
@@ -885,7 +904,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       std::cerr << "ORBcpp: Before pVal loop d=" << d << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
       std::cerr << "RBASEcpp: List(rbase.lev, x->x.orbit) = [";
       for (auto & eRec : rbase.lev) {
-	std::cerr << ", " << PrintTopOrbit(eRec.Stot);
+	std::cerr << ", " << PrintTopOrbit(eRec.Stot, eRec.eLev);
       }
       std::cerr << "]\n";
       for (auto & pVal : rbase.lev[d].Stot.stabilizer[rbase.lev[d].eLev].orbit) {
@@ -996,8 +1015,9 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	// refinement was impossible, give up for this image.
 	AssignationVectorGapStyle(image.bimg, d, b_int);
 	IsolatePoint( image.partition, b_int );
-	
-	if (ProcessFixpoint_image(image, a, b_int, org[d][b_int]))
+	bool val = ProcessFixpoint_image(image, a, b_int, org[d][b_int]);
+	std::cerr << "a=" << a << " b_int=" << b_int << " org[d][b_int]=" << org[d][b_int] << " val=" << val << "\n";
+	if (val)
 	  t.status = RRefine(rbase, image, false);
 	else
 	  t.status = int_fail;
