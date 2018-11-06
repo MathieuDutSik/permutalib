@@ -44,9 +44,11 @@ int main(int argc, char *argv[])
     permutalib::StabChain<Telt> eG2 = permutalib::Stabilizer_OnSets<Telt,Tint>(eG, eFace);
     std::cerr << "eG2=" << eG2 << "\n";
     std::cerr << "|eG2|=" << permutalib::Order<Telt,Tint>(eG2) << "\n";
+    std::cerr << "Normal completion of the program\n";
   }
   catch (TerminalException const& e) {
+    std::cerr << "Excptional completion of the program\n";
     exit(e.eVal);
   }
-  std::cerr << "Completion of the program\n";
+  return 0;
 }

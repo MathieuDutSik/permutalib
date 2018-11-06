@@ -109,20 +109,6 @@ int UnderscoreNature(int const& nature)
 }
 
 
-template<typename Telt>
-std::string PrintTopOrbit(StabChain<Telt> const& Stot)
-{
-  int len=Stot.stabilizer[0].orbit.size();
-  std::string str = "[ ";
-  for (int u=0; u<len; u++) {
-    if (u>0)
-      str += ", ";
-    str += std::to_string(Stot.stabilizer[0].orbit[u]);
-  }
-  str += " ]";
-  return str;
-}
-
  
 
 template<typename Telt>
@@ -902,7 +888,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	std::cerr << ", " << PrintTopOrbit(eRec.Stot);
       }
       std::cerr << "]\n";
-      for (auto & pVal : rbase.lev[d].Stot.stabilizer[0].orbit) {
+      for (auto & pVal : rbase.lev[d].Stot.stabilizer[rbase.lev[d].eLev].orbit) {
 	b = PowAct(pVal, image.perm.val);
 	std::cerr << "pVal=" << pVal << " b=" << b << "\n";
 	if (oldcel_cellno[b] == rbase.where[d]) {

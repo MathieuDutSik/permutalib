@@ -1028,6 +1028,22 @@ void ConjugateStabChain(StabChain<Telt> & Stot, int const& TheLev, Telt const& c
   //  throw TerminalException{1};
 }
 
+template<typename Telt>
+std::string PrintTopOrbit(StabChain<Telt> const& Stot)
+{
+  if (Stot.stabilizer.size() == 0) {
+    return "unset";
+  }
+  int len=Stot.stabilizer[0].orbit.size();
+  std::string str = "[ ";
+  for (int u=0; u<len; u++) {
+    if (u>0)
+      str += ", ";
+    str += std::to_string(Stot.stabilizer[0].orbit[u]);
+  }
+  str += " ]";
+  return str;
+}
 
 
 
@@ -1048,6 +1064,7 @@ bool ChangeStabChain(StabChain<Telt> & Stot, int const& TheLev, std::vector<int>
     std::cerr << " " << eVal;
   }
   std::cerr << " ]\n";
+  std::cerr << "ChangeStabChain CPP 1 orbit=" << PrintTopOrbit(Stot) << "\n";
   while (eLev < int(Stot.stabilizer.size())-1 || i < basSiz) {
     int old=BasePoint(Stot, eLev);
     std::cerr << "ChangeStabChain old=" << old << "\n";
@@ -1098,9 +1115,11 @@ bool ChangeStabChain(StabChain<Telt> & Stot, int const& TheLev, std::vector<int>
       eLev++;
     }
   }
+  std::cerr << "ChangeStabChain CPP 2 orbit=" << PrintTopOrbit(Stot) << "\n";
   std::cerr << "Before ConjugateStabChain cnj=" << cnj << "\n";
   if (!cnj.isIdentity())
     ConjugateStabChain(Stot, TheLev, cnj);
+  std::cerr << "ChangeStabChain CPP 3 orbit=" << PrintTopOrbit(Stot) << "\n";
   return true;
 }
 
