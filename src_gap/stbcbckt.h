@@ -171,7 +171,7 @@ struct rbaseType {
 
 
 template<typename Telt>
-std::string ListOrbitOfRbaseLEV(rbaseType const& rbase)
+std::string ListOrbitOfRbaseLEV(rbaseType<Telt> const& rbase)
 {
   std::string str = "[ ";
   int sizLev=rbase.lev.size();

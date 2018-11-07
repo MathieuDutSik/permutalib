@@ -1052,18 +1052,19 @@ std::string PrintTopOrbit(StabChain<Telt> const& Stot, int const& TheLev)
 //  reduced = 0  corresponds to reduced = false in GAP code
 //  reduced = 1  corresponds to reduced = true in GAP code
 template<typename Telt>
-bool ChangeStabChain(StabChain<Telt> & Stot, int const& TheLev, std::vector<int> const& base, int const& reduced)
+bool ChangeStabChain(StabChain<Telt> & Gtot, int const& TheLev, std::vector<int> const& base, int const& reduced)
 {
-  Telt cnj = Stot.identity;
+  Telt cnj = Gtot.identity;
   std::vector<int> newBase;
   int i=0;
   int eLev=TheLev;
   int basSiz=base.size();
-  std::cerr << "ChangeStabChain base= [";
+  std::cerr << "ChangeStabChain TheLev=" << TheLev << " base= [";
   for (auto & eVal : base) {
     std::cerr << " " << eVal;
   }
   std::cerr << " ]\n";
+  StabChain<Telt> Stot = Gtot; // TODO: We have to be better for the S
   std::cerr << "ChangeStabChain CPP 1 orbit=" << PrintTopOrbit(Stot, TheLev) << "\n";
   while (eLev < int(Stot.stabilizer.size())-1 || i < basSiz) {
     int old=BasePoint(Stot, eLev);
@@ -1105,6 +1106,7 @@ bool ChangeStabChain(StabChain<Telt> & Stot, int const& TheLev, std::vector<int>
       }
     }
     else if (PositionVect(newBase, old) != -1 || (reduced == int_true && Stot.stabilizer[eLev].orbit.size() == 1)) {
+      std::cerr << "Stabilizer shift in ChangeStabChain\n";
       int nbStab=Stot.stabilizer.size();
       for (int u=eLev; u<nbStab-1; u++)
 	Stot.stabilizer[u] = Stot.stabilizer[u+1];
