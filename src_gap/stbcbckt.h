@@ -139,6 +139,18 @@ struct dataType {
 // The critical thing is therefore to find out when the .level is changed.
 // We have to find out the formalism underlying the use of lev[d].
 // 
+// FACTS:
+// ---The rbase changes over time.
+// ---rbase.lev[1].stabilizer is not the same as rbase.lev[2]
+// ---rbase.lev is changed at
+//    if not ProcessFixpoint( rbase, pnt )  then
+//    ProcessFixpoint( rbase, pnt );
+//    strat := StratMeetPartition( rbase, P, O ); # Which also uses ProcessFixpoint
+//    Therefore ProcessFixpoint seems to be the critical entry
+//      and the function used appears to be ChangeStabChain
+// ---After the KeyUpdating the rbase.level is NOT the same as rbase.lev[last]
+// ---
+
 template<typename Telt>
 struct rbaseType {
   std::vector<int> domain;
@@ -158,6 +170,29 @@ struct rbaseType {
 };
 
 
+template<typename Telt>
+std::string ListOrbitOfRbaseLEV(rbaseType const& rbase)
+{
+  std::string str = "[ ";
+  int sizLev=rbase.lev.size();
+  for (int iLev=0; iLev<sizLev; iLev++) {
+    if (iLev > 0)
+      str += ", ";
+    std::vector<int> eOrb=rbase.lev[iLev].Stot.stabilizer[rbase.lev[iLev].eLev].orbit;
+    int len=eOrb.size();
+    str += "[ ";
+    for (int u=0; u<len; u++) {
+      if (u>0)
+	str += ", ";
+      str += std::to_string(eOrb[u]);
+    }
+    str += " ]";
+  }
+  str += " ]";
+  return str;
+}
+
+ 
 template<typename Telt>
 void PrintRBaseLevel(rbaseType<Telt> const& rbase, std::string const& str)
 {
@@ -185,7 +220,7 @@ bool ProcessFixpoint_rbase(rbaseType<Telt> & rbase, int const& pnt)
     std::cerr << "Before ChangeStabChain level2, eLev=" << rbase.level2.eLev << "\n";
     ChangeStabChain(rbase.level2.Stot, rbase.level2.eLev, {pnt}, int_true);
     std::cerr << " After ChangeStabChain level2\n";
-    if (BasePoint(rbase.level2) == pnt) 
+    if (BasePoint(rbase.level2) == pnt)
       rbase.level2.eLev++;
   }
   if (rbase.level.status == int_int) {
@@ -443,6 +478,7 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
   if (!ProcessFixpoint_rbase(rbase, pnt)) {
     std::cerr << "INFO: Warning R-base point is already fixed\n";
   }
+  //  rbase.lev.push_back(rbase.level);
   PrintRBaseLevel(rbase, "RegisterRBasePoint CPP 2");
   rbase.where.push_back(k);
   int len=rbase.rfm.size();
@@ -907,6 +943,8 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	std::cerr << ", " << PrintTopOrbit(eRec.Stot, eRec.eLev);
       }
       std::cerr << "]\n";
+      std::cerr << "d=" << d << " |rbase.lev|=" << rbase.lev.size() << "\n";
+      std::cerr << "rbase.lev[d].eLev=" << rbase.lev[d].eLev << " |stabilizer|=" << rbase.lev[d].Stot.stabilizer.size() << "\n";
       for (auto & pVal : rbase.lev[d].Stot.stabilizer[rbase.lev[d].eLev].orbit) {
 	b = PowAct(pVal, image.perm.val);
 	std::cerr << "pVal=" << pVal << " b=" << b << "\n";
