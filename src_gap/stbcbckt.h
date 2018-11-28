@@ -52,7 +52,7 @@ permPlusBool<Telt> ExtendedT(Telt const& t, int const& pnt, int& img, int const&
   if (bpt != pnt) {
     if (pnt != img) {
       std::cerr << "ExtendedT, return false 1\n";
-      return {int_false,{}};
+      return {int_false, {}};
     }
     else {
       return {int_perm, t};
@@ -60,7 +60,7 @@ permPlusBool<Telt> ExtendedT(Telt const& t, int const& pnt, int& img, int const&
   }
   if (S.Stot.stabilizer[S.eLev].transversal[img] == -1) {
     std::cerr << "ExtendedT, return false 2\n";
-    return {int_false,{}};
+    return {int_false, {}};
   }
   //      Telt u = InverseRepresentative(S.Stot, S.eLev, img);
   //      t = LeftQuotient(u, t);
@@ -149,8 +149,20 @@ struct dataType {
 //    Therefore ProcessFixpoint seems to be the critical entry
 //      and the function used appears to be ChangeStabChain
 // ---After the KeyUpdating the rbase.level is NOT the same as rbase.lev[last]
-// ---
-
+//    This is because we have the increment    rbase.level := rbase.level.stabilizer;
+// ---ChangeStabChain is very complicated. We have S:=G, G not modified but
+//      G has been altered by the operation. But S is not the same as G in the end.
+//      So, the operations are just very complicated to follow.
+//         Three operations (may more) on S modify also G:
+//           StabChainForcePoint, InsertTrivialStabilizer and RemoveStabChain.
+//      Only one operation seems to make S different from G:
+//          The operations S:=S.stabilizer are operations that makes S different from G.
+//    Therefore the operations of ChangeStabChain appears to be understood.
+//    It can clearly be programmed down though that is reasonably non-trivial.
+//    But S does not show up later on.
+// ---We need to 
+// ---So we need to find an adequate mechanism for dealing with the problem
+//    of pointers.
 template<typename Telt>
 struct rbaseType {
   std::vector<int> domain;
@@ -337,7 +349,7 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
   rbase.lev = {};
   if (G.size() == 2) {
     if (IsId) {
-      rbase.level2.status=int_true;
+      rbase.level2.status = int_true;
       rbase.level2.Stot.UseCycle = false;
     }
     else {
@@ -349,7 +361,7 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
     }
   }
   else {
-    rbase.level2.status=int_false;
+    rbase.level2.status = int_false;
   }
   rbase.level = {int_stablev, -666, G[0], 0};
   for (auto & pnt : Fixcells(P))
@@ -1164,7 +1176,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   }
   if (IsBool(rbase.level2)) {
     std::cerr << "PartitionBacktrack step 5.2\n";
-    image.level2 = {int_false,-777,{},0};
+    image.level2 = {int_false, -777, {}, 0};
     std::cerr << "PartitionBacktrack step 5.3\n";
   }
   else {

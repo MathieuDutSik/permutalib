@@ -75,8 +75,8 @@ CreateExampleOnSetCase:=function(FileName, GRP, sizSet)
 end;
 
 
-#DoMathieu24:=true;
-DoMathieu24:=false;
+DoMathieu24:=true;
+#DoMathieu24:=false;
 if DoMathieu24 then
   eSize:=12;
   eFile:=Concatenation("ExampleM24_", String(eSize));
@@ -110,8 +110,8 @@ fi;
 # 
 
 
-DoSym5:=true;
-#DoSym5:=false;
+#DoSym5:=true;
+DoSym5:=false;
 if DoSym5 then
   eSize:=2;
   eFile:=Concatenation("ExampleSym5_", String(eSize));

@@ -31,7 +31,8 @@
   ---The attribute "relativeOrders" is related to pcgs and not needed here.
 */
 
-#include<vector>
+#include <vector>
+#include <memory>
 
 
 #include "PermGroup.h"
@@ -118,6 +119,23 @@ int GetLabelIndex_const(std::vector<Telt> const& labels, Telt const& u)
   return -1;
 }
 
+// The labels are put on top since they are all identical.
+// The stabilizers can be added in any way:
+// ---At the top of the chain
+// ---Removed in the middle
+// Therefore we need a data set that allows us to do that and
+// native std::vector are not adequate.
+// We choose to use the same structure of shared_ptr as the GAP
+// code.  
+
+ 
+template<typename Telt>
+struct CommonStabInfo {
+  int n;
+  Telt identity;
+  bool UseCycle;
+  std::vector<Telt> labels;
+};
 
 template<typename Telt>
 struct StabLevel {
@@ -132,19 +150,18 @@ struct StabLevel {
   std::vector<Telt> aux;
   int treedepth;
   int diam;
+  //
+  std::shared_ptr<CommonStabInfo<Telt>> comm;
+  std::shared_ptr<StabLevel<Telt>> stabilizer;
 };
+ 
+template<typename Telt>
+using StabChain<Telt> = std::shared_ptr<StabLevel<Telt>>;
 // other possible entries:
 // transimages, genimages, labelimages, idimage
 
 
-
- 
-// The labels are put on top since they are all identical.
-// The stabilizers can be added in any way:
-// ---At the top of the chain
-// ---Removed in the middle
-// Therefore we need a data set that allows us to do that and
-// native std::vector are not adequate.
+/*
 template<typename Telt>
 struct StabChain {
   int n;
@@ -153,6 +170,7 @@ struct StabChain {
   std::vector<Telt> labels;
   std::vector<StabLevel<Telt>> stabilizer;
 };
+*/
 
 template<typename Telt>
 std::ostream& operator<<(std::ostream& os, StabChain<Telt> const& Stot)
@@ -167,26 +185,30 @@ std::ostream& operator<<(std::ostream& os, StabChain<Telt> const& Stot)
     os << GapStyleString(eLabel);
   }
   os << "]\n";
-  int nbLev=Stot.stabilizer.size();
-  for (int iLev=0; iLev<nbLev; iLev++) {
+  int iLev=0;
+  StabChain<Telt> Sptr = Stot;
+  while(true) {
+    if (Sptr == NULL)
+      break;
     os << "iLev=" << iLev << "\n";
     os << "  transversal =";
-    for (auto & eVal : Stot.stabilizer[iLev].transversal) {
+    for (auto & eVal : Sptr->transversal) {
       if (eVal == -1)
 	os << " " << eVal;
       else
-	os << " " << Stot.labels[eVal];
+	os << " " << Sptr->comm->labels[eVal];
     }
     os << "\n";
     os << "  orbit=";
-    for (auto & eVal : Stot.stabilizer[iLev].orbit) {
+    for (auto & eVal : Sptr->orbit) {
       os << " " << eVal+1;
     }
     os << "\n";
     os << "  genlabels=";
-    for (auto & eVal : Stot.stabilizer[iLev].genlabels)
+    for (auto & eVal : Sptr->genlabels)
       os << " " << eVal;
     os << "\n";
+    Sptr = Sptr->stabilizer;
   }
   return os;
 }
@@ -1052,9 +1074,9 @@ std::string PrintTopOrbit(StabChain<Telt> const& Stot, int const& TheLev)
 //  reduced = 0  corresponds to reduced = false in GAP code
 //  reduced = 1  corresponds to reduced = true in GAP code
 template<typename Telt>
-bool ChangeStabChain(StabChain<Telt> & Gtot, int const& TheLev, std::vector<int> const& base, int const& reduced)
+bool ChangeStabChain(StabChain<Telt> & Stot, int const& TheLev, std::vector<int> const& base, int const& reduced)
 {
-  Telt cnj = Gtot.identity;
+  Telt cnj = Stot.identity;
   std::vector<int> newBase;
   int i=0;
   int eLev=TheLev;
@@ -1064,7 +1086,6 @@ bool ChangeStabChain(StabChain<Telt> & Gtot, int const& TheLev, std::vector<int>
     std::cerr << " " << eVal;
   }
   std::cerr << " ]\n";
-  StabChain<Telt> Stot = Gtot; // TODO: We have to be better for the S
   std::cerr << "ChangeStabChain CPP 1 orbit=" << PrintTopOrbit(Stot, TheLev) << "\n";
   while (eLev < int(Stot.stabilizer.size())-1 || i < basSiz) {
     int old=BasePoint(Stot, eLev);
