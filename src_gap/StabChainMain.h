@@ -25,14 +25,12 @@ StabChain<Telt> StabChainOp_listgen(std::vector<Telt> const& Lgen, StabChainOpti
   int n=options.n;
   StabChain<Telt> Stot = EmptyStabChain<Telt>(n);
   if (!IsTrivial_ListGen(Lgen)) {
-    int eLev=0;
     Stot.UseCycle=true;
     std::cerr << "Before call to StabChainStrong\n";
-    StabChainStrong(Stot, eLev, Lgen, options );
+    StabChainStrong(Stot, Lgen, options );
   }
   if (!options.reduced && options.base.size() > 0) {
-    int TheLev=0;
-    ExtendStabChain(Stot, TheLev, options.base);
+    ExtendStabChain(Stot, options.base);
   }
   /*
     The business with StabChainOptions look eminently dangerous and a reliable replacement
@@ -84,12 +82,6 @@ StabChain<Telt> StabChainOp_stabchain_nofalse(StabChain<Telt> const& G, StabChai
 
  
 
-
-
- 
-
-
- 
  
 template<typename Telt, typename Tint>
 Tint Order(StabChain<Telt> const& G)
