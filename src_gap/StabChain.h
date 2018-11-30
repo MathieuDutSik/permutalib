@@ -156,7 +156,7 @@ struct StabLevel {
 };
  
 template<typename Telt>
-using StabChain<Telt> = std::shared_ptr<StabLevel<Telt>>;
+using StabChain = std::shared_ptr<StabLevel<Telt>>;
 // other possible entries:
 // transimages, genimages, labelimages, idimage
 
@@ -175,10 +175,10 @@ struct StabChain {
 template<typename Telt>
 std::ostream& operator<<(std::ostream& os, StabChain<Telt> const& Stot)
 {
-  os << "n=" << Stot.n << " identity=" << GapStyleString(Stot.identity) << "\n";
+  os << "n=" << Stot->comm->n << " identity=" << GapStyleString(Stot->comm->identity) << "\n";
   os << "labels=[";
   bool IsFirst=true;
-  for (auto & eLabel : Stot.labels) {
+  for (auto & eLabel : Stot->comm->labels) {
     if (!IsFirst)
       os << " , ";
     IsFirst=false;
@@ -228,7 +228,7 @@ StabChain<Telt> RestrictedStabChain(StabChain<Telt> const& Stot, int const& eLev
 
 
 template<typename Telt>
-  StabLevel<Telt> EmptyStabLevel(std::shared<CommonStabInfo<Telt> const& comm)
+StabLevel<Telt> EmptyStabLevel(std::shared_ptr<CommonStabInfo<Telt>> const& comm)
 {
   std::vector<int> transversal;
   std::vector<int> orbit;
@@ -248,8 +248,7 @@ template<typename Telt>
 StabChain<Telt> EmptyStabChain(int const& n)
 {
   Telt id(n);
-  EmptyStabLevel<Telt> lev;
-  make_shared<CommonStabInfo<Telt>> comm = std::make_shared({n, id, false, {id}});
+  std::shared_ptr<CommonStabInfo<Telt>> comm = std::make_shared({n, id, false, {id}});
   return std::make_shared<StabLevel<Telt>>(EmptyStabLevel<Telt>(comm));
 }
 
@@ -257,7 +256,7 @@ StabChain<Telt> EmptyStabChain(int const& n)
 template<typename Telt>
 StabChain<Telt> EmptyStabChainPlusNode(int const& n, int const& bas)
 {
-  StabChain<Telt> S = EmptyStabChain(n);
+  StabChain<Telt> S = EmptyStabChain<Telt>(n);
   S->orbit.push_back(bas);
   return S;
 }
@@ -361,7 +360,7 @@ Telt SiftedPermutation(StabChain<Telt> const& S, Telt const& g)
       if (img == bpt)
 	break;
       int idx = Sptr->transversal[img];
-      gW = gW * Stot->comm->labels[idx];
+      gW = gW * Sptr->comm->labels[idx];
       img = PowAct(bpt, gW);
     }
     Sptr = Sptr->stabilizer;
@@ -415,13 +414,13 @@ std::vector<Telt> StrongGeneratorsStabChain(StabChain<Telt> const& S)
     int siz = Sptr->genlabels.size();
     if (siz == 0)
       break;
-    for (auto & pos : Stot.stabilizer[iLev].genlabels)
+    for (auto & pos : Sptr->genlabels)
       sgs_set.insert(pos);
     Sptr = Sptr->stabilizer;
   }
   std::vector<Telt> sgs;
   for (auto & ePos : sgs_set)
-    sgs.push_back(Stot.labels[ePos]);
+    sgs.push_back(S->comm->labels[ePos]);
   return sgs;
 }
 
@@ -631,13 +630,13 @@ StabChain<Telt> StabChainBaseStrongGenerators(std::vector<int> const& base, std:
 
 
 template<typename Telt>
-void AddGeneratorsExtendSchreierTree(StabChain<Telt> & Stot, int const& eLev, std::vector<Telt> const& newgens)
+void AddGeneratorsExtendSchreierTree(StabChain<Telt> & Stot, std::vector<Telt> const& newgens)
 {
-  int nbLabel=Stot.labels.size();
+  int nbLabel=Stot->comm->size();
   std::vector<int> ListAtt(nbLabel);
   for (int i=0; i<nbLabel; i++)
     ListAtt[i]=i;
-  Face old=BlistList(ListAtt, Stot.stabilizer[eLev].genlabels);
+  Face old=BlistList(ListAtt, Stot->genlabels);
   old[0]=true;
   /*
   std::cerr << "old =";
@@ -650,17 +649,17 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & Stot, int const& eLev, st
     std::cerr << "\n";*/
   Face ald=old;
   for (auto & gen : newgens) {
-    int pos = PositionVect(Stot.labels, gen);
+    int pos = PositionVect(Stot->comm->labels, gen);
     if (pos == -1) {
-      Stot.labels.push_back(gen);
+      Stot->comm->labels.push_back(gen);
       old.push_back(false);
       ald.push_back(true);
-      int posG=Stot.labels.size() - 1;
-      Stot.stabilizer[eLev].genlabels.push_back(posG);
+      int posG=Stot->comm->labels.size() - 1;
+      Stot->genlabels.push_back(posG);
     }
     else {
       if (!ald[pos])
-	Stot.stabilizer[eLev].genlabels.push_back(pos);
+	Stot->genlabels.push_back(pos);
     }
   }
   /*
@@ -676,29 +675,29 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & Stot, int const& eLev, st
   for (auto & eVal : Stot.stabilizer[eLev].genlabels)
     std::cerr << " " << eVal;
     std::cerr << "\n";*/
-  int len = Stot.stabilizer[eLev].orbit.size();
+  int len = Stot->orbit.size();
   int i=0;
-  if (Stot.UseCycle) {
+  if (Stot->comm->UseCycle) {
     /*
     std::cerr << "Before cycles =";
     for (int u=0; u<int(Stot.stabilizer[eLev].cycles.size()); u++)
       std::cerr << " " << Stot.stabilizer[eLev].cycles[u];
     std::cerr << "\n";
     */
-    while (i < int(Stot.stabilizer[eLev].orbit.size())) {
+    while (i < int(Stot->orbit.size())) {
       //      std::cerr << "i=" << i << "\n";
-      for (int& j : Stot.stabilizer[eLev].genlabels) {
+      for (int& j : Stot->genlabels) {
 	//	std::cerr << "  j=" << j << "\n";
 	if (i > len-1 || old[j] == 0) {
-	  int img=SlashAct(Stot.stabilizer[eLev].orbit[i], Stot.labels[j]);
+	  int img=SlashAct(Stot->orbit[i], Stot.labels[j]);
 	  //	  std::cerr << "    After the test img=" << img << "\n";
-	  if (Stot.stabilizer[eLev].transversal[img] != -1) {
-	    Stot.stabilizer[eLev].cycles[i]=true;
+	  if (Stot->transversal[img] != -1) {
+	    Stot->cycles[i]=true;
 	  }
 	  else {
-	    Stot.stabilizer[eLev].transversal[img]=j;
-	    Stot.stabilizer[eLev].orbit.push_back(img);
-	    Stot.stabilizer[eLev].cycles.push_back(false);
+	    Stot->transversal[img]=j;
+	    Stot->orbit.push_back(img);
+	    Stot->cycles.push_back(false);
 	  }
 	}
       }
@@ -711,13 +710,13 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & Stot, int const& eLev, st
       std::cerr << "\n";*/
   }
   else {
-    while (i < int(Stot.stabilizer[eLev].orbit.size())) {
-      for (int& j : Stot.stabilizer[eLev].genlabels) {
+    while (i < int(Stot->orbit.size())) {
+      for (int& j : Stot->genlabels) {
 	if (i > len || old[j] == 0) {
-	  int img=SlashAct(Stot.stabilizer[eLev].orbit[i], Stot.labels[j]);
-	  if (Stot.stabilizer[eLev].transversal[img] == -1) {
-	    Stot.stabilizer[eLev].transversal[img]=j;
-	    Stot.stabilizer[eLev].orbit.push_back(img);
+	  int img=SlashAct(Stot->orbit[i], Stot->comm->labels[j]);
+	  if (Stot->transversal[img] == -1) {
+	    Stot->transversal[img]=j;
+	    Stot->orbit.push_back(img);
 	  }
 	}
       }
@@ -725,6 +724,9 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & Stot, int const& eLev, st
     }
   }
 }
+
+
+
 
 template<typename Telt>
 void ChooseNextBasePoint(StabChain<Telt> & Stot, std::vector<int> const& base, std::vector<Telt> const& newgens)
@@ -972,8 +974,6 @@ void ConjugateStabChain(StabChain<Telt> & Stot, Telt const& cnj)
   auto map=[&](int const& x) -> int {
     return cnj.at(x);
   };
-  //  int n=Stot.n;
-  int nbLev=Stot->.stabilizer.size();
   StabChain<Telt> Sptr = Stot;
   while(true) {
     if (Sptr == nullptr)
@@ -1013,7 +1013,7 @@ std::string PrintTopOrbit(StabChain<Telt> const& Stot)
   for (int u=0; u<len; u++) {
     if (u>0)
       str += ", ";
-    str += std::to_string(Sptr->orbit[u]);
+    str += std::to_string(Stot->orbit[u]);
   }
   str += " ]";
   return str;
@@ -1056,7 +1056,7 @@ bool ChangeStabChain(StabChain<Telt> & Stot, std::vector<int> const& base, int c
       if (reduced == int_reducedm1) {
 	newBase.push_back(newpnt);
 	if (newpnt != old) {
-	  if (IsFixedStabilizer(Stot, eLev, newpnt)) {
+	  if (IsFixedStabilizer(Sptr, newpnt)) {
 	    InsertTrivialStabilizer(Stot, eLev, newpnt);
 	  }
 #ifdef DEBUG_GROUP
@@ -1245,25 +1245,34 @@ Telt MinimalElementCosetStabChain(StabChain<Telt> const& Stot, Telt const& g)
 
 
 
-template<typename Telt>
-StabChain<Telt> HomomorphismMapping(StabChain<Telt> const& Stot, std::function<Telt(Telt const&)> const& f)
+template<typename Telt, typename Tret>
+StabChain<Tret> HomomorphismMapping(StabChain<Telt> const& Stot, std::function<Tret(Telt const&)> const& f)
 {
-  Telt idMap = f(Stot.identity);
+  Tret idMap = f(Stot.identity);
   int nMap=idMap.size();
-  auto fVector =[&](std::vector<Telt> const& V) -> std::vector<Telt> {
-    std::vector<Telt> Vret;
+  auto fVector =[&](std::vector<Telt> const& V) -> std::vector<Tret> {
+    std::vector<Tret> Vret;
     for (auto & eElt : V)
       Vret.push_back(f(eElt));
     return Vret;
   };
-  std::vector<Telt> labelsMap = fVector(Stot.labels);
-  std::vector<StabLevel<Telt>> stabilizerMap;
+  std::vector<Tret> labelsMap = fVector(Stot.labels);
+  std::shared_ptr<CommonStabInfo<Tret>> comm = std::make_shared({nMap, idMap, Stot->comm->UseCycle, labelsMap});
+
+  StabChain<Telt> Sptr = Stot;
+  StabChain<Tret> Swork = nullptr;
+  StabChain<Tret> Sreturn = nullptr;
   
-  for (auto & eLevel : Stot.stabilizer) {
-    StabLevel<Telt> eLevelMap{eLevel.transversal, eLevel.orbit, eLevel.genlabels, eLevel.cycles, fVector(eLevel.treegen), fVector(eLevel.treegeninv), fVector(eLevel.aux), eLevel.treedepth, eLevel.diam};
-    stabilizerMap.push_back(eLevelMap);
+  while(true) {
+    if (Sptr == nullptr)
+      break;
+    Swork = std::make_shared<StabLevel<Telt>>({Sptr->transversal, Sptr->orbit, Sptr->genlabels, Sptr->cycles, fVector(Sptr->treegen), fVector(Sptr->treegeninv), fVector(Sptr->aux), Sptr->treedepth, Sptr->diam, comm, nullptr});
+    if (Sreturn == nullptr)
+      Sreturn = Swork;
+    Sptr = Sptr->stabilizer;
+    Swork = Swork->stabilizer;
   }
-  return {nMap, idMap, Stot.UseCycle, labelsMap, stabilizerMap};
+  return Sreturn;
 }
 
 
