@@ -1087,7 +1087,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    int largMov=LargestMovedPoint(LGenB);
 	    StabChainOptions<Tint> options = GetStandardOptions<Tint>(n);
 	    options.base = ClosedInterval(0, largMov);
-	    R_list[d+1] = StabChainOp(LGenB, options);
+	    R_list[d+1] = StabChainOp_listgen(LGenB, options);
 	  }
 	}
 	//	PrintVectorORB("orb", orb);

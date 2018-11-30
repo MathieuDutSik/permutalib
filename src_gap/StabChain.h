@@ -250,7 +250,7 @@ StabChain<Telt> RestrictedStabChain(StabChain<Telt> const& Stot, int const& eLev
 template<typename Telt>
 StabLevel<Telt> EmptyStabLevel(std::shared_ptr<CommonStabInfo<Telt>> const& comm)
 {
-  std::vector<int> transversal;
+  std::vector<int> transversal = std::vector<int>(comm->n);
   std::vector<int> orbit;
   std::vector<int> genlabels;
   Face cycles;
@@ -577,11 +577,16 @@ template<typename Telt>
 bool IsTrivial(StabChain<Telt> const& G)
 {
   std::set<int> LIdx;
-  for (auto & eChain : G.stabilizer)
-    for (auto & eIdx : eChain.genlabels)
+  StabChain<Telt> Sptr = G;
+  while(true) {
+    if (Sptr == nullptr)
+      break;
+    for (auto & eIdx : Sptr->genlabels)
       LIdx.insert(eIdx);
+    Sptr = Sptr->stabilizer;
+  }
   for (auto & eIdx : LIdx) {
-    if (!G.labels[eIdx].isIdentity())
+    if (!G->comm->labels[eIdx].isIdentity())
       return false;
   }
   return true;

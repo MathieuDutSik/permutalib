@@ -357,34 +357,26 @@ void SCRMakeStabStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, pa
       return -1;
     };
     int firstmove = GetFirst();
-    if (eLev == nbLev-1) {
+    if (S->stabilizer == nullptr) {
       S->orbit = {firstmove};
       S->transversal = std::vector<int>(n, -1);
       S->transversal[S->orbit[0]]  = GetLabelIndex_const(S->comm->labels, S->comm->identity);
       S->genlabels    = {};
       S->treegen      = {};
       S->treegeninv   = {};
-      StabLevel<Telt> TheLevel;
-      TheLevel.diam=0;
-      TheLevel.treedepth=0;
-      Stot.stabilizer.push_back(TheLevel);
+      S->stabilizer = EmptyStabChain<Telt>(n);
       if (!correct)
 	basesize[where[S->orbit[0]]]++;
       missing = DifferenceVect( missing, {firstmove});
     }
     else {
       if (PositionVect(base,firstmove) < PositionVect(base,S->orbit[0])) {
-	StabLevel<Telt> TheLevel;
-	TheLevel.diam=0;
-	TheLevel.treedepth=0;
-	TheLevel.transversal = std::vector<int>(n, -1);
-	TheLevel.transversal[firstmove]  = GetLabelIndex_const(S->comm->labels, S->comm->identity);
-	TheLevel.orbit = {firstmove};
-	TheLevel.genlabels = S->genlabels;
-	//
-	auto iter=Stot.stabilizer.begin();
-	iter += eLev;
-	Stot.stabilizer.insert(iter, TheLevel);
+	StabChain<Telt> Snew = EmptyStabChain<Telt>(n);
+	Snew->transversal[firstmove]  = GetLabelIndex_const(S->comm->labels, S->comm->identity);
+	Snew->orbit = {firstmove};
+	Snew->genlabels = S->genlabels;
+	Snew->stabilizer = S;
+	S = Snew;
 	if (!correct)
 	  basesize[where[S->orbit[0]]]++;
 	missing = DifferenceVect( missing, {firstmove} );
@@ -672,7 +664,7 @@ Telt VerifyStabilizer(StabChain<Telt> const& S, Telt const& z, std::vector<int> 
   std::vector<int> orb{pt2};
   int j = 1;
   while (j <= int(orb.size()) ) {
-    for (auto & iGen : stab.genlabels) {
+    for (auto & iGen : stab->genlabels) {
       int k = SlashAct(orb[j], S->comm->labels[iGen]);
       if (transversal[k] == -1) {
 	transversal[k] = iGen;
@@ -691,7 +683,7 @@ Telt VerifyStabilizer(StabChain<Telt> const& S, Telt const& z, std::vector<int> 
       transversal[i] = GetLabelIndex_const(S->comm->labels, S->comm->identity);
       int j = 0;
       while (j < int(orb.size()) ) {
-	for (auto & iGen : stab.genlabels) {
+	for (auto & iGen : stab->genlabels) {
 	  int k = SlashAct(orb[j], S->comm->labels[iGen]);
 	  if (transversal[k] == -1) {
 	    transversal[k] = iGen;
@@ -1030,7 +1022,8 @@ template<typename Telt>
 std::pair<bool,Telt> VerifySGS(StabChain<Telt> const& S, std::vector<int> const& missing, bool const& correct) 
 {
   int n = S->comm->n;
-  int len = Stot.stabilizer.size();
+  std::vector<StabChain<Telt>> list = ListStabChain(S);
+  int len = list.size();
   // list := ListStabChain(S);
   std::pair<bool, Telt> result = {true, S->comm->identity};
   //
@@ -1040,13 +1033,13 @@ std::pair<bool,Telt> VerifySGS(StabChain<Telt> const& S, std::vector<int> const&
   //
   int i = 0;
   while (i < len && result.second.isIdentity()) {
-    StabChain<Telt> temp = RestrictedStabChain(Stot, len-1-i);
-    InsertTrivialStabilizer(temp, len-i, Stot.stabilizer[len -i].orbit[0]);
+    StabChain<Telt> temp = StructuralCopy(list[len-1-i]);
+    InsertTrivialStabilizer(temp, list[len - i]->orbit[0]);
     int gencount = 0;
-    while (gencount < int(Stot.stabilizer[len - i].genlabels.size()) && result.second.isIdentity()) {
+    while (gencount < int(list[len - i]->genlabels.size()) && result.second.isIdentity()) {
       gencount++;
-      int posgen=Stot.stabilizer[len - i].genlabels[gencount];
-      Telt gen = Stot->comm->labels[posgen];
+      int posgen=list[len - i]->genlabels[gencount-1];
+      Telt gen = S->comm->labels[posgen];
       std::vector<int> set = VectorAsSet(temp->orbit);
       if (set == OnSets(set,gen)) {
 	if (correct) {
@@ -1090,7 +1083,7 @@ std::pair<bool,Telt> VerifySGS(StabChain<Telt> const& S, std::vector<int> const&
 	    std::function<Telt(Telt const&)> f = MapElementToSetPlusBlocks<Telt>(blks, n);
 	    temp2 = HomomorphismMapping(temp, f);
 	    newgen = f(gen);
-	    InsertTrivialStabilizer(temp2, len-i, n + pos);
+	    InsertTrivialStabilizer(temp2, n + pos);
 	  }
 	}
 	if (i == 0 && set.size() == 1) {
@@ -1108,7 +1101,7 @@ std::pair<bool,Telt> VerifySGS(StabChain<Telt> const& S, std::vector<int> const&
 	      int point = GetNonTrivialPointInBlock(block, leader);
 	      newgen = Product(CosetRepAsWord(S->comm->labels, leader, point, temp2->transversal)); 
 	      temp2 = temp2->stabilizer;
-	      InsertTrivialStabilizer(temp2, len-i, leader);
+	      InsertTrivialStabilizer(temp2, leader);
 	      AddGeneratorsExtendSchreierTree(temp2, {newgen});
 	      result.second = VerifyStabilizer(temp2, newgen, missing, correct);
 	      if (leader > n) {
