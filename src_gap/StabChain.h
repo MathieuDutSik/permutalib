@@ -268,7 +268,7 @@ template<typename Telt>
 StabChain<Telt> EmptyStabChain(int const& n)
 {
   Telt id(n);
-  std::shared_ptr<CommonStabInfo<Telt>> comm = std::make_shared<CommonStabInfo<Telt>>({n, id, false, {id}});
+  std::shared_ptr<CommonStabInfo<Telt>> comm = std::make_shared<CommonStabInfo<Telt>>(CommonStabInfo<Telt>({n, id, false, {id}}));
   return std::make_shared<StabLevel<Telt>>(EmptyStabLevel<Telt>(comm));
 }
 
@@ -653,7 +653,7 @@ StabChain<Telt> StabChainBaseStrongGenerators(std::vector<int> const& base, std:
 template<typename Telt>
 void AddGeneratorsExtendSchreierTree(StabChain<Telt> & Stot, std::vector<Telt> const& newgens)
 {
-  int nbLabel=Stot->comm->size();
+  int nbLabel=Stot->comm->labels.size();
   std::vector<int> ListAtt(nbLabel);
   for (int i=0; i<nbLabel; i++)
     ListAtt[i]=i;
@@ -917,7 +917,7 @@ bool StabChainSwap(StabChain<Telt> & Stot)
     while (i != a) {
       int posGen=Stot->transversal[i];
       img = PowAct(img, Stot->comm->labels[posGen]);
-      i = PowAct(i, Stot->labels[posGen]);
+      i = PowAct(i, Stot->comm->labels[posGen]);
     }
     if (Stot->stabilizer->transversal[img] != -1) {
       Telt gen = Stot->comm->identity;
@@ -953,7 +953,7 @@ bool StabChainSwap(StabChain<Telt> & Stot)
   };
   MapAtLevel(Ttot);
   if (Tstab->orbit.size() == 1)
-    Stot->stabilizer = Stot->stablizer->stabilizer;
+    Stot->stabilizer = Stot->stabilizer->stabilizer;
   else
     MapAtLevel(Tstab->stabilizer);
   return true;
@@ -1269,7 +1269,7 @@ Telt MinimalElementCosetStabChain(StabChain<Telt> const& Stot, Telt const& g)
 template<typename Telt, typename Tret>
 StabChain<Tret> HomomorphismMapping(StabChain<Telt> const& Stot, std::function<Tret(Telt const&)> const& f)
 {
-  Tret idMap = f(Stot.identity);
+  Tret idMap = f(Stot->comm->identity);
   int nMap=idMap.size();
   auto fVector =[&](std::vector<Telt> const& V) -> std::vector<Tret> {
     std::vector<Tret> Vret;
@@ -1278,7 +1278,7 @@ StabChain<Tret> HomomorphismMapping(StabChain<Telt> const& Stot, std::function<T
     return Vret;
   };
   std::vector<Tret> labelsMap = fVector(Stot.labels);
-  std::shared_ptr<CommonStabInfo<Tret>> comm = std::make_shared<CommonStabInfo<Tret>>({nMap, idMap, Stot->comm->UseCycle, labelsMap});
+  std::shared_ptr<CommonStabInfo<Tret>> comm = std::make_shared<CommonStabInfo<Tret>>(CommonStabInfo<Tret>({nMap, idMap, Stot->comm->UseCycle, labelsMap}));
 
   StabChain<Telt> Sptr = Stot;
   StabChain<Tret> Swork = nullptr;

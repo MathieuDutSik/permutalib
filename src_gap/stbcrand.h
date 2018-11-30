@@ -316,7 +316,7 @@ void SCRSchTree(StabChain<Telt> & S, std::vector<Telt> const& newgens )
     S->treegeninv.push_back(eGenInv);
     S->orbit = {S.orbit[0]};
     S->transversal = std::vector<int>(n, -1);
-    S->transversal[S->orbit[0]] = GetLabelIndex(S->comm->labels, Stot->comm->identity);
+    S->transversal[S->orbit[0]] = GetLabelIndex(S->comm->labels, S->comm->identity);
     S->treedepth = 0;
     int list5=0;
     while(true) {
@@ -344,11 +344,9 @@ void SCRSchTree(StabChain<Telt> & S, std::vector<Telt> const& newgens )
 
 
 template<typename Telt>
-void SCRMakeStabStrong(StabChain<Telt> & Stot, int const& eLev, std::vector<Telt> const& newgens, paramOpt const& param, std::vector<std::vector<int>> const& orbits, std::vector<int> const& where, std::vector<int> & basesize, std::vector<int> const& base, bool const& correct, std::vector<int> & missing, bool const& top)
+void SCRMakeStabStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, paramOpt const& param, std::vector<std::vector<int>> const& orbits, std::vector<int> const& where, std::vector<int> & basesize, std::vector<int> const& base, bool const& correct, std::vector<int> & missing, bool const& top)
 {
-  int nbLev=Stot.stabilizer.size();
-  int n=Stot.n;
-  StabLevel<Telt> & S = Stot.stabilizer[eLev];
+  int n=S->comm->n;
   if (newgens.size() > 0) {
     auto GetFirst=[&]() -> int {
       for (auto & eBas : base) {
@@ -360,12 +358,12 @@ void SCRMakeStabStrong(StabChain<Telt> & Stot, int const& eLev, std::vector<Telt
     };
     int firstmove = GetFirst();
     if (eLev == nbLev-1) {
-      S.orbit = {firstmove};
-      S.transversal = std::vector<int>(n, -1);
-      S.transversal[S.orbit[0]]  = GetLabelIndex_const(Stot.labels, Stot.identity);
-      S.genlabels = {};
-      S.treegen     = {};
-      S.treegeninv               = {};
+      S->orbit = {firstmove};
+      S->transversal = std::vector<int>(n, -1);
+      S->transversal[S->orbit[0]]  = GetLabelIndex_const(S->comm->labels, S->comm->identity);
+      S->genlabels    = {};
+      S->treegen      = {};
+      S->treegeninv   = {};
       StabLevel<Telt> TheLevel;
       TheLevel.diam=0;
       TheLevel.treedepth=0;
@@ -380,7 +378,7 @@ void SCRMakeStabStrong(StabChain<Telt> & Stot, int const& eLev, std::vector<Telt
 	TheLevel.diam=0;
 	TheLevel.treedepth=0;
 	TheLevel.transversal = std::vector<int>(n, -1);
-	TheLevel.transversal[firstmove]  = GetLabelIndex_const(Stot.labels, Stot.identity);
+	TheLevel.transversal[firstmove]  = GetLabelIndex_const(S->comm->labels, S->comm->identity);
 	TheLevel.orbit = {firstmove};
 	TheLevel.genlabels = S.genlabels;
 	//
@@ -392,55 +390,55 @@ void SCRMakeStabStrong(StabChain<Telt> & Stot, int const& eLev, std::vector<Telt
 	missing = DifferenceVect( missing, {firstmove} );
       }
     }
-    if (!top || S.genlabels.size() == 0) {
+    if (!top || S->genlabels.size() == 0) {
       for (auto & eGen : newgens) {
-	int posGen=GetLabelIndex(Stot.labels, eGen);
+	int posGen=GetLabelIndex(S->comm->labels, eGen);
 	S.genlabels.push_back(posGen);
       }
     }
-    SCRSchTree(Stot, eLev, newgens);
+    SCRSchTree(S, newgens);
     int nbGen=newgens.size();
     for (int iGen=0; iGen<nbGen; iGen++) {
       int jGen=nbGen-1-iGen;
       Telt g = SCRSift(Stot, eLev, newgens[jGen]);
       if (!g.isIdentity()) {
-	SCRMakeStabStrong(Stot, eLev+1, {g}, param, orbits, where, basesize, base, correct, missing, false);
-	S.diam=S.treedepth + Stot.stabilizer[eLev+1].diam;
-	S.aux=Concatenation(S.treegen, S.treegeninv, Stot.stabilizer[eLev+1].aux);
+	SCRMakeStabStrong(S->stabilizer, {g}, param, orbits, where, basesize, base, correct, missing, false);
+	S->diam = S->treedepth + S->stabilizer->diam;
+	S->aux  = Concatenation(S->treegen, S->treegeninv, S->stabilizer->aux);
       }
     }
   }
-  std::vector<Telt> gen = Concatenation(S.treegen,S.treegeninv,std::vector<Telt>({Stot.identity}));
-  std::vector<Telt> inv = Concatenation(S.treegeninv,S.treegen,std::vector<Telt>({Stot.identity}));
-  int len = S.aux.size();
-  Telt w = Stot.identity;
+  std::vector<Telt> gen = Concatenation(S->treegen,S->treegeninv,std::vector<Telt>({S->comm->identity}));
+  std::vector<Telt> inv = Concatenation(S->treegeninv,S->treegen,std::vector<Telt>({S->comm->identity}));
+  int len = S->aux.size();
+  Telt w = S->comm->identity;
   if (len > 1) {
     Telt ran1 = SCRRandomPerm<Telt>(len);
     Face string = SCRRandomString(len);
     for (int x=0; x<len; x++) {
       int ximg=PowAct(x, ran1);
       if (string[x] == 1)
-	w = w*S.aux[ximg];
+	w = w*S->aux[ximg];
     }
   }
   else {
-    w=S.aux[1];
+    w=S->aux[1];
   }
   int mlimit=1;
   int m=0;
   while (m < mlimit) {
     m++;
     int ran = RandomInteger(int(S.orbit.size()));
-    std::vector<Telt> coset = CosetRepAsWord(Stot.labels, S.orbit[0], S.orbit[ran], S.transversal);
+    std::vector<Telt> coset = CosetRepAsWord(S->comm->labels, S->orbit[0], S->orbit[ran], S->transversal);
     coset = InverseAsWord(coset,gen,inv);
     if (!w.isIdentity()) {
       coset.push_back(w);
-      std::pair<std::vector<Telt>, int> residue = SiftAsWord(Stot, eLev, coset);
+      std::pair<std::vector<Telt>, int> residue = SiftAsWord(S, coset);
       if (residue.second > 0) {
 	Telt g = Product(residue.first);
-	SCRMakeStabStrong(Stot, eLev+1, {g}, param, orbits, where, basesize, base, correct, missing, false);
-	S.diam = S.treedepth + Stot.stabilizer[eLev+1].diam;
-	S.aux = Concatenation(S.treegen, S.treegeninv, Stot.stabilizer[eLev+1].aux);
+	SCRMakeStabStrong(S->stabilizer, {g}, param, orbits, where, basesize, base, correct, missing, false);
+	S->diam = S->treedepth + S->stabilizer->diam;
+	S->aux = Concatenation(S->treegen, S->treegeninv, S->stabilizer->aux);
 	m = 0;
       }
       else if (correct) {
@@ -449,9 +447,9 @@ void SCRMakeStabStrong(StabChain<Telt> & Stot, int const& eLev, std::vector<Telt
 	  l++;
 	  if (ImageInWord(missing[l],residue.first) != missing[l]) {
 	    Telt g = Product(residue.first);
-	    SCRMakeStabStrong(Stot, eLev+1, {g}, param, orbits, where, basesize, base, correct, missing, false);
-	    S.diam = S.treedepth + Stot.stabilizer[eLev+1].diam;
-	    S.aux = Concatenation(S.treegen, S.treegeninv, Stot.stabilizer[eLev+1].aux);
+	    SCRMakeStabStrong(S->stabilizer, {g}, param, orbits, where, basesize, base, correct, missing, false);
+	    S->diam = S->treedepth + S->stabilizer->diam;
+	    S->aux = Concatenation(S->treegen, S->treegeninv, S->stabilizer->aux);
 	    m = 0;
 	    l = missing.size();
 	  }
@@ -469,9 +467,9 @@ void SCRMakeStabStrong(StabChain<Telt> & Stot, int const& eLev, std::vector<Telt
 	      int ran=RandomInteger(int(orbits[l].size()));
 	      if (ImageInWord(orbits[l][ran],residue.first) != orbits[l][ran]) {
 		Telt g = Product(residue.first);
-		SCRMakeStabStrong(Stot, eLev+1, {g}, param, orbits, where, basesize, base, correct, missing, false);
-		S.diam = S.treedepth + Stot.stabilizer[eLev+1].diam;
-		S.aux = Concatenation(S.treegen,S.treegeninv,Stot.stabilizer[eLev+1].aux);
+		SCRMakeStabStrong(S->stabilizer, {g}, param, orbits, where, basesize, base, correct, missing, false);
+		S->diam = S->treedepth + S->stabilizer->diam;
+		S->aux = Concatenation(S.treegen, S->treegeninv, S->stabilizer->aux);
 		m = 0;
 		j = jlimit;
 		l = orbits.size();
@@ -483,9 +481,9 @@ void SCRMakeStabStrong(StabChain<Telt> & Stot, int const& eLev, std::vector<Telt
 	    while (j < int(orbits[l].size())) {
 	      if (ImageInWord(orbits[l][j],residue.first) != orbits[l][j]) {
 		Telt g = Product(residue.first);
-		SCRMakeStabStrong(Stot, eLev+1, {g}, param, orbits, where, basesize, base, correct, missing, false);
-		S.diam = S.treedepth + Stot.stabilizer[eLev+1].diam;
-		S.aux = Concatenation(S.treegen, S.treegeninv, Stot.stabilizer[eLev+1].aux);
+		SCRMakeStabStrong(S->stabilizer, {g}, param, orbits, where, basesize, base, correct, missing, false);
+		S->diam = S->treedepth + S->stabilizer->diam;
+		S->aux = Concatenation(S->treegen, S->treegeninv, S->stabilizer->aux);
 		m = 0;
 		j = orbits[l].size();
 		l = orbits.size();
@@ -539,10 +537,10 @@ Telt SCRStrongGenTest(StabChain<Telt> const& S, paramOpt const& param, std::vect
   int l, j;
   while (k < param.param1) {
     k++;
-    int len=S.aux.size();
-    std::vector<Telt> w = GetWpair(S.aux, k, param, S->comm->identity);
+    int len=S->aux.size();
+    std::vector<Telt> w = GetWpair(S->aux, k, param, S->comm->identity);
     int m = 0;
-    int mlimit = param.param2*S.diam;
+    int mlimit = param.param2*S->diam;
     while (m < mlimit) {
       m++;
       std::vector<Telt> ranword = RandomElmAsWord(S);
@@ -607,7 +605,7 @@ Telt SCRStrongGenTest2(StabChain<Telt> const& S, paramOpt const& param)
   while (k < param.param3) {
     k++;
     int len = S->aux.size();
-    std::vector<Telt> w = GetWpair(S->aux, k, param, Stot.identity);
+    std::vector<Telt> w = GetWpair(S->aux, k, param, S->comm->identity);
     int m = 0;
     int mlimit = param.param4 * S->diam;
     while (m < mlimit) {
@@ -619,7 +617,7 @@ Telt SCRStrongGenTest2(StabChain<Telt> const& S, paramOpt const& param)
 	  break;
 	if (T->genlabels.size() > 0)
 	  break;
-        int p = Random(Stot.stabilizer[uLev].orbit);
+        int p = Random(S->orbit);
 	while (p != T->orbit[0]) {
 	  int pos= T->transversal[p];
 	  Telt eElt = S->comm->labels[pos];
@@ -770,7 +768,7 @@ Telt VerifyStabilizer(StabChain<Telt> const& S, Telt const& z, std::vector<int> 
 	  where2[ipZ]=1;
 	  for (auto & pnt : orb) {
 	    for (auto & iGen : stabpt2->genlabels) {
-	      Telt gen = chain.labels[iGen];
+	      Telt gen = chain->comm->labels[iGen];
 	      int img = PowAct(pnt, gen);
 	      if (!where2[img]) {
 		orb.push_back(img);
@@ -779,12 +777,12 @@ Telt VerifyStabilizer(StabChain<Telt> const& S, Telt const& z, std::vector<int> 
 	    }
 	  }
 	}
-	std::vector<Telt> w1 = CosetRepAsWord(Stot.labels, pt1, leaders[where1[i]], S->transversal);
-	std::vector<Telt> w2 = CosetRepAsWord(Stot.labels, leaders[where1[i]], i, transversal); 
-	std::vector<Telt> w3 = CosetRepAsWord(Stot.labels, leaders[where1[ipZ]], ipZ, transversal);
+	std::vector<Telt> w1 = CosetRepAsWord(S->comm->labels, pt1, leaders[where1[i]], S->transversal);
+	std::vector<Telt> w2 = CosetRepAsWord(S->comm->labels, leaders[where1[i]], i, transversal); 
+	std::vector<Telt> w3 = CosetRepAsWord(S->comm->labels, leaders[where1[ipZ]], ipZ, transversal);
 	std::vector<Telt> w4;
 	if (where1[i] != where1[ipZ]) {
-	  w4 = CosetRepAsWord(Stot.labels, pt1, leaders[where1[ipZ]], S->transversal);
+	  w4 = CosetRepAsWord(S->comm->labels, pt1, leaders[where1[ipZ]], S->transversal);
 	}
 	else {
 	  w4 = w1;
@@ -902,15 +900,12 @@ StabChain<Telt> StabChainRandomPermGroup(std::vector<Telt> const& gens, Telt con
   }
 
   bool ready=false;
-  StabChain<Telt> Stot = EmptyStabChain<Telt>(n);
+  StabChain<Telt> S = EmptyStabChain<Telt>(n);
   std::vector<Telt> eNew=gens;
   Telt result;
   while(!ready) {
-    int eLevLoc=0; // almost certainly wrong
-    SCRMakeStabStrong(Stot, eLevLoc, eNew, param, orbits, where, basesize, base, correct, missing, true);
-    Tint size = 1;
-    for (auto const& eStab : Stot.stabilizer)
-      size *= eStab.orbit.size();
+    SCRMakeStabStrong(S, eNew, param, orbits, where, basesize, base, correct, missing, true);
+    Tint size = SizeStabChain<Telt,Tint>(S);
     if (size == order || size == limit) {
       ready = true;
     }
@@ -919,18 +914,17 @@ StabChain<Telt> StabChainRandomPermGroup(std::vector<Telt> const& gens, Telt con
         result = Telt(n);
 	if (options.random == 1000) {
 	  Telt result;
-	  int eLev=0; // certainly wrong
 	  if (correct) {
 	    paramOpt param{1, 10 / S->diam, 0, 0, 0, 0};
 	    result = SCRStrongGenTest(S, param, orbits, basesize, base, correct, missing);
 	  }
 	  else {
-	    paramOpt param{0, 0, 1, 10 / Stot.stabilizer[eLev].diam, 0, 0};
+	    paramOpt param{0, 0, 1, 10 / S->diam, 0, 0};
 	    result = SCRStrongGenTest2(S, param);
 	  }
 	  std::pair<bool,Telt> resultComp = {true, result};
 	  if (result.isIdentity()) {
-	    resultComp = VerifySGS(Stot,missing,correct);
+	    resultComp = VerifySGS(S, missing, correct);
 	    result=resultComp.second;
 	  }
 	  if (resultComp.first && result.isIdentity()) {
@@ -941,8 +935,7 @@ StabChain<Telt> StabChainRandomPermGroup(std::vector<Telt> const& gens, Telt con
 	  else {
 	    if (!resultComp.first) {
 	      while(true) {
-		int eLev=0; // certainly wrong
-		paramOpt param{0, 0, 1, 10 / Stot.stabilizer[eLev].diam, 0, 0};
+		paramOpt param{0, 0, 1, 10 / S->diam, 0, 0};
 		result = SCRStrongGenTest2(S, param);
 		if (!result.isIdentity())
 		  break;
@@ -958,8 +951,7 @@ StabChain<Telt> StabChainRandomPermGroup(std::vector<Telt> const& gens, Telt con
 	      warning++;
 	      if (warning > 5)
 		std::cerr << "Warning, computed and given size differ\n";
-	      int eLev=0; // certainly wrong
-	      result = SCRStrongGenTest(Stot, eLev, param, orbits, basesize, base, correct, missing);
+	      result = SCRStrongGenTest(S, param, orbits, basesize, base, correct, missing);
 	    }
 	  }
 	  else {
@@ -967,10 +959,9 @@ StabChain<Telt> StabChainRandomPermGroup(std::vector<Telt> const& gens, Telt con
 	      warning++;
 	      if (warning > 5)
 		std::cerr << "Warning, computed and given size differ\n";
-	      int eLev=0; // certainly wrong
-	      result=SCRStrongGenTest(Stot, eLev, param, orbits, basesize, base, correct, missing);
+	      result=SCRStrongGenTest(S, param, orbits, basesize, base, correct, missing);
 	      if (result.isIdentity()) 
-		result=SCRStrongGenTest2(Stot, eLev, param);
+		result=SCRStrongGenTest2(S, param);
 	    }
 	  }
 	  eNew = {result};
@@ -978,18 +969,17 @@ StabChain<Telt> StabChainRandomPermGroup(std::vector<Telt> const& gens, Telt con
       }
       else {
 	if (options.random == 1000) {
-	  int eLev=0; // certainly wrong
 	  if (correct) {
-	    paramOpt param{1,10/Stot.stabilizer[eLev].diam,0,0,0,0};
-	    result = SCRStrongGenTest(Stot, eLev, param, orbits, basesize, base, correct, missing);
+	    paramOpt param{1, 10/S->diam, 0, 0, 0, 0};
+	    result = SCRStrongGenTest(S, param, orbits, basesize, base, correct, missing);
 	  }
 	  else {
-	    paramOpt param{0,0,1,10/Stot.stabilizer[eLev].diam,0,0};
-	    result = SCRStrongGenTest2(Stot, eLev, param);
+	    paramOpt param{0, 0, 1, 10/S->diam, 0, 0};
+	    result = SCRStrongGenTest2(S, param);
 	  }
 	  std::pair<bool,Telt> resultComp = {true, result};
 	  if (resultComp.first && result.isIdentity()) {
-	    resultComp = VerifySGS(Stot,missing,correct);
+	    resultComp = VerifySGS(S, missing, correct);
 	    result = resultComp.second;
 	  }
 	  if (resultComp.first && result.isIdentity()) {
@@ -998,9 +988,8 @@ StabChain<Telt> StabChainRandomPermGroup(std::vector<Telt> const& gens, Telt con
 	  else {
 	    if (!resultComp.first) {
 	      while(true) {
-		int eLev=0; // certainly wrong
-		paramOpt param{0,0,1,10/Stot.stabilizer[eLev].diam,0,0};
-		result = SCRStrongGenTest2(Stot, eLev, param);
+		paramOpt param{0, 0, 1, 10/S->diam, 0, 0};
+		result = SCRStrongGenTest2(S, param);
 		if (!result.isIdentity())
 		  break;
 	      }
@@ -1009,8 +998,7 @@ StabChain<Telt> StabChainRandomPermGroup(std::vector<Telt> const& gens, Telt con
 	  }
 	}
 	else {
-	  int eLev=0; // almost certainly wrong
-	  result =SCRStrongGenTest(Stot, eLev, param, orbits, basesize, base, correct, missing);
+	  result =SCRStrongGenTest(S, param, orbits, basesize, base, correct, missing);
 	  if (!result.isIdentity()) {
 	    eNew = {result};
 	  }
@@ -1019,8 +1007,7 @@ StabChain<Telt> StabChainRandomPermGroup(std::vector<Telt> const& gens, Telt con
 	      ready = true;
 	    }
 	    else {
-	      int eLev=0; // certainly wrong
-	      result=SCRStrongGenTest2(Stot, eLev, param);
+	      result=SCRStrongGenTest2(S, param);
 	      if (result.isIdentity()) {
 		ready =true;
 	      }
@@ -1033,19 +1020,19 @@ StabChain<Telt> StabChainRandomPermGroup(std::vector<Telt> const& gens, Telt con
       }
     }
   }
-  return Stot;
+  return S;
 }
 
 
 
 // Is the Stot really a const function? Not sure really.
 template<typename Telt>
-std::pair<bool,Telt> VerifySGS(StabChain<Telt> const& Stot, std::vector<int> const& missing, bool const& correct) 
+std::pair<bool,Telt> VerifySGS(StabChain<Telt> const& S, std::vector<int> const& missing, bool const& correct) 
 {
-  int n = Stot.n;
+  int n = S->comm->n;
   int len = Stot.stabilizer.size();
   // list := ListStabChain(S);
-  std::pair<bool, Telt> result = {true, Stot.identity};
+  std::pair<bool, Telt> result = {true, S->comm->identity};
   //
   std::vector<int> TotSet(n);
   for (int i=0; i<n; i++)
@@ -1059,12 +1046,12 @@ std::pair<bool,Telt> VerifySGS(StabChain<Telt> const& Stot, std::vector<int> con
     while (gencount < int(Stot.stabilizer[len - i].genlabels.size()) && result.second.isIdentity()) {
       gencount++;
       int posgen=Stot.stabilizer[len - i].genlabels[gencount];
-      Telt gen = Stot.labels[posgen];
+      Telt gen = Stot->comm->labels[posgen];
       std::vector<int> set = VectorAsSet(temp.stabilizer[0].orbit);
       if (set == OnSets(set,gen)) {
 	if (correct) {
 	  int eLevLoc=0; // almost certainly wrong
-	  std::pair<std::vector<Telt>, int> residue = SiftAsWord(temp, eLevLoc, {gen});
+	  std::pair<std::vector<Telt>, int> residue = SiftAsWord(temp, {gen});
 	  if (residue.second != 0) {
 	    result.second = Product(residue.first);
 	  }
@@ -1079,7 +1066,7 @@ std::pair<bool,Telt> VerifySGS(StabChain<Telt> const& Stot, std::vector<int> con
 	  }
 	}
 	else {
-	  result.second = SCRSift(temp, 0, gen);
+	  result.second = SCRSift(temp, gen);
 	}
       }
       else {
@@ -1091,10 +1078,10 @@ std::pair<bool,Telt> VerifySGS(StabChain<Telt> const& Stot, std::vector<int> con
 	}
 	else {
 	  std::vector<Telt> longer;
-	  for (auto & eIdx : temp.stabilizer[0].genlabels)
-	    longer.push_back(temp.labels[eIdx]);
+	  for (auto & eIdx : temp->genlabels)
+	    longer.push_back(temp->comm->labels[eIdx]);
 	  longer.push_back(gen);
-	  std::vector<int> orbit = OrbitPerms(longer, n, temp.stabilizer[0].orbit[0]);
+	  std::vector<int> orbit = OrbitPerms(longer, n, temp->orbit[0]);
 	  std::vector<std::vector<int>> blks = Blocks_from_seed(longer, orbit, set);
 	  if (blks.size() * blks.size() != orbit.size()) {
 	    result = {false, Telt(n)};
@@ -1108,27 +1095,25 @@ std::pair<bool,Telt> VerifySGS(StabChain<Telt> const& Stot, std::vector<int> con
 	  }
 	}
 	if (i == 0 && set.size() == 1) {
-	  int eLen=CycleLength(newgen, temp2.stabilizer[0].orbit[0]);
+	  int eLen=CycleLength(newgen, temp2->orbit[0]);
 	  result.second = PowerGroupElement(newgen, eLen);
-	  int eLevLoc=0;
-	  AddGeneratorsExtendSchreierTree(temp2, eLevLoc, {newgen});
+	  AddGeneratorsExtendSchreierTree(temp2, {newgen});
 	}
 	else {
 	  if (result.second.isIdentity()) {
-	    int eLevLoc=0;
-	    AddGeneratorsExtendSchreierTree(temp2, eLevLoc, {newgen} );
-	    std::vector<std::vector<int>> blks = Blocks_without_seed(temp2.labels, temp2.stabilizer[0].orbit);
+	    AddGeneratorsExtendSchreierTree(temp2, {newgen} );
+	    std::vector<std::vector<int>> blks = Blocks_without_seed(temp2->comm->labels, temp2->orbit);
 	    if (blks.size() > 1) {
-	      int leader = temp2.stabilizer[0].orbit[0];
+	      int leader = temp2->orbit[0];
 	      std::vector<int> block = GetBlock(blks, leader);
 	      int point = GetNonTrivialPointInBlock(block, leader);
-	      newgen = Product(CosetRepAsWord(Stot.labels, leader, point, temp2.stabilizer[0].transversal)); 
-	      temp2 = RestrictedStabChain(temp2, 1);
+	      newgen = Product(CosetRepAsWord(S->comm->labels, leader, point, temp2->transversal)); 
+	      temp2 = temp2->stabilizer;
 	      InsertTrivialStabilizer(temp2, len-i, leader);
-	      AddGeneratorsExtendSchreierTree(temp2, eLevLoc, {newgen});
-	      result.second = VerifyStabilizer(temp2, eLevLoc, newgen, missing, correct);
+	      AddGeneratorsExtendSchreierTree(temp2, {newgen});
+	      result.second = VerifyStabilizer(temp2, newgen, missing, correct);
 	      if (leader > n) {
-		AddGeneratorsExtendSchreierTree(temp, eLevLoc, {RestrictedPermNC(newgen, TotSet)});
+		AddGeneratorsExtendSchreierTree(temp, {RestrictedPermNC(newgen, TotSet)});
 	      }
 	      else {
 		temp = temp2;
@@ -1136,13 +1121,12 @@ std::pair<bool,Telt> VerifySGS(StabChain<Telt> const& Stot, std::vector<int> con
 	      gencount--;
 	    }
 	    else {
-	      result.second = VerifyStabilizer(temp2, eLevLoc, newgen, missing, correct); 
-	      if (temp2.stabilizer[0].orbit[0] >= n) {
-		AddGeneratorsExtendSchreierTree(temp, eLevLoc, {gen});
+	      result.second = VerifyStabilizer(temp2, newgen, missing, correct); 
+	      if (temp2->orbit[0] >= n) {
+		AddGeneratorsExtendSchreierTree(temp, {gen});
 	      }
 	    }
-	    int eLev=0; // almost certainly wrong
-	    if (!result.second.isIdentity() && temp2.stabilizer[eLev].orbit[0] >= n) {
+	    if (!result.second.isIdentity() && temp2->orbit[0] >= n) {
 	      result.second = RestrictedPermNC(result.second, TotSet);
 	    }
 	  }
