@@ -350,12 +350,12 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
   if (G.size() == 2) {
     if (IsId) {
       rbase.level2.status = int_true;
-      rbase.level2.Stot.UseCycle = false;
+      rbase.level2.Stot->comm->UseCycle = false;
     }
     else {
       rbase.level2 = {int_stablev, -555, G[1], 0};
       std::cerr << "rbase Before bool print\n";
-      std::cerr << "bool=" << rbase.level2.Stot.UseCycle << "\n";
+      std::cerr << "bool=" << rbase.level2.Stot->comm->UseCycle << "\n";
       std::cerr << "rbase After bool print\n";
       rbase.lev2 = {};
     }
@@ -509,7 +509,7 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
     std::cerr << "Matching the ! false test\n";
     auto MainInsert=[&](StabChainPlusLev<Telt> const& lev) -> void {
       if (lev.status != int_int) {
-	std::vector<Telt> LGen = StrongGeneratorsStabChain(lev.Stot, lev.eLev);
+	std::vector<Telt> LGen = StrongGeneratorsStabChain(lev.Stot);
 	std::cerr << "LGen = ";
 	WriteStdVectorGAP(std::cerr, LGen);
 	std::cerr << "\n";
@@ -807,7 +807,7 @@ void PrintVectorORB(std::string const& str, std::vector<Face> const& eV)
 template<typename Telt, typename Tint>
 ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(Telt const&)> const& Pr, bool const& repr, rbaseType<Telt> & rbase, dataType<Telt> const& data, StabChain<Telt> & L, StabChain<Telt> & R)
 {
-  int n=G.n;
+  int n=G->comm->n;
   std::cerr << "PartitionBacktrack step 1\n";
   std::cerr << "rbase.level2.status=" << GetIntTypeNature(rbase.level2.status) << "\n";
   imageType<Telt> image;
@@ -911,7 +911,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	//	}
 	std::cerr << "Not matching IsTrivialRBase test\n";
         PrintRBaseLevel(rbase, "Before NextRBasePoint");
-	NextRBasePoint(rbase.partition, rbase, G.identity);
+	NextRBasePoint(rbase.partition, rbase, G->comm->identity);
 	PrintRBaseLevel(rbase, " After NextRBasePoint");
 	if (image.perm.status == int_true)
 	  rbase.fix.push_back(Fixcells(rbase.partition));
@@ -1085,7 +1085,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    //	    R[ d + 1 ] = R[ d ].stabilizer;
 	  }
 	  else {
-	    std::vector<Telt> LGen = StrongGeneratorsStabChain( R, d);
+	    std::vector<Telt> LGen = StrongGeneratorsStabChain( R);
 	    std::vector<Telt> LGenB = Filtered(LGen, [&](Telt const& gen) -> bool {return PowAct(b_int, gen) == b_int;});
 	    //	    R[ d + 1 ] := rec( generators := Filtered( R[ d + 1 ], gen -> b ^ gen = b ) );
 	    int largMov=LargestMovedPoint(LGenB);
@@ -1139,7 +1139,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	if (R.stabilizer[d].transversal[b] != -1)
 	  SubtractBlist(orb[d], BlistList(range, R.stabilizer[d].orbit));
 	else
-	  SubtractBlistOrbitStabChain(orb[d], StrongGeneratorsStabChain(R, d), b_int);
+	  SubtractBlistOrbitStabChain(orb[d], StrongGeneratorsStabChain(R), b_int);
 	std::cerr << "ORBcpp 2: After subtract d=" << d << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
 	b = orb[d].find_next(b);
 	std::cerr << "End of the loop. Now b=" << b << "\n";
@@ -1157,8 +1157,8 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   if (IsTrivial(G)) {
     if (!repr)
       return {int_group, G, {}};
-    if (Pr(G.identity))
-      return {int_perm,{},G.identity};
+    if (Pr(G->comm->identity))
+      return {int_perm,{},G->comm->identity};
     else
       return {int_fail,{},{}};
   }
@@ -1181,18 +1181,18 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   }
   else {
     std::cerr << "PartitionBacktrack step 5.4\n";
-    std::cerr << "bool=" << rbase.level2.Stot.UseCycle << "\n";
+    std::cerr << "bool=" << rbase.level2.Stot->comm->UseCycle << "\n";
     std::cerr << "PartitionBacktrack step 5.4.1\n";
     image.level2 = rbase.level2;
     std::cerr << "PartitionBacktrack step 5.5\n";
-    image.perm2  = {int_perm, G.identity};
+    image.perm2  = {int_perm, G->comm->identity};
     std::cerr << "PartitionBacktrack step 5.6\n";
   }
   std::cerr << "PartitionBacktrack step 6\n";
     
   // If  <Pr> is  function,   multiply  permutations. Otherwise, keep   them
   // factorized.
-  image.perm = {int_perm, G.identity};
+  image.perm = {int_perm, G->comm->identity};
   //  image.level = rbase.chain;
     
   if (repr) {
@@ -1269,9 +1269,9 @@ template<typename Telt, typename Tint>
 ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, Face const& Phi, Face const& Psi)
 {
   std::cerr << "Beginning of RepOpSetsPermGroup\n";
-  std::cerr << "UseCycle=" << G.UseCycle << "\n";
+  std::cerr << "UseCycle=" << G->comm->UseCycle << "\n";
   std::cerr << "After bool print\n";
-  int n=G.n;
+  int n=G->comm->n;
   std::vector<int> Omega = MovedPoints(G);
   std::cerr << "n=" << n << " |Omega|=" << Omega.size() << "\n";
   if (repr && Phi.size() != Psi.size())
@@ -1281,7 +1281,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
       if (Difference_face(Phi, Omega) != Difference_face(Psi, Omega))
 	return {int_fail, {}, {}};
       else
-	return {int_perm,{},G.identity};
+	return {int_perm, {}, G->comm->identity};
     }
     else {
       return {int_group, G, {}};
@@ -1309,13 +1309,13 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
 
 
   auto GetSubgroup=[&](Face const& Ph) -> StabChain<Telt> {
-    std::vector<Telt> LGen = StrongGeneratorsStabChain(G, 0);
+    std::vector<Telt> LGen = StrongGeneratorsStabChain(G);
     std::cerr << "GetSubgroup, |LGen|=" << LGen.size() << "\n";
     std::cerr << "GetSubgroup, LGen=";
     for (auto & eGen : LGen)
       std::cerr << " " << eGen;
     std::cerr << "\n";
-    std::vector<Telt> sgs=Filtered(StrongGeneratorsStabChain(G, 0), [&](Telt const& g)->bool{return OnSets(Ph, g) == Ph;});
+    std::vector<Telt> sgs=Filtered(StrongGeneratorsStabChain(G), [&](Telt const& g)->bool{return OnSets(Ph, g) == Ph;});
     return MinimalStabChain<Telt,Tint>(sgs, n);
   };
   
@@ -1339,7 +1339,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
     return true;
   };
   std::cerr << "Before call to PartitionBacktrack\n";
-  std::cerr << "bool=" << rbase.level2.Stot.UseCycle << "\n";
+  std::cerr << "bool=" << rbase.level2.Stot->comm->UseCycle << "\n";
   std::cerr << "After bool print\n";
   return PartitionBacktrack<Telt,Tint>( G, Pr, repr, rbase, {Q}, L, R );
 }

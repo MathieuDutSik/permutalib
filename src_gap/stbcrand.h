@@ -191,20 +191,23 @@ int ImageInWord(int const& x, std::vector<Telt> const& word)
 
 
 template<typename Telt>
-std::pair<std::vector<Telt>,int> SiftAsWord(StabChain<Telt> const& Stot, int const& eLev, std::vector<Telt> const& perm)
+std::pair<std::vector<Telt>,int> SiftAsWord(StabChain<Telt> const& S, std::vector<Telt> const& perm)
 {
-  int len=Stot.stabilizer.size();
   int index=0;
   std::vector<Telt> word = perm;
-  for (int iLev=eLev; iLev<len; iLev++) {
+  StabChain<Telt> Sptr = S;
+  while(true) {
+    if (Sptr == nullptr)
+      break;
     index++;
-    int pnt=Stot.stabilizer[iLev].orbit[0];
+    int pnt=Sptr->orbit[0];
     int y=ImageInWord(pnt,word);
-    if (Stot.stabilizer[iLev].transversal[y] == -1)
+    if (Sptr->transversal[y] == -1)
       return {word, index};
-    std::vector<Telt> coset=CosetRepAsWord(Stot.labels, pnt, y, Stot.stabilizer[iLev].transversal);
+    std::vector<Telt> coset=CosetRepAsWord(Stot.labels, pnt, y, Sptr->transversal);
     for (auto & eElt : coset)
       word.push_back(eElt);
+    Sptr = Sptr->stabilizer;
   }
   index=0;
   return {word,index};
@@ -212,17 +215,24 @@ std::pair<std::vector<Telt>,int> SiftAsWord(StabChain<Telt> const& Stot, int con
 
 
 template<typename Telt>
-std::vector<Telt> RandomElmAsWord(StabChain<Telt> const& Stot, int const& eLev)
+std::vector<Telt> RandomElmAsWord(StabChain<Telt> const& S)
 {
   std::vector<Telt> word;
-  int len=Stot.stabilizer.size();
-  for (int iLev=eLev; iLev<len; iLev++) {
-    int sizOrb=Stot.stabilizer[iLev].orbit.size();
+  StabChain<Telt> Sptr = S;
+  while (true) {
+    if (Sptr == nullptr)
+      break;
+    int sizOrb=Sptr->orbit.size();
+#ifdef TRUE_RANDOM
     int pos=rand() % sizOrb;
+#else
+    Write your code here
+#endif
     int ePt=Stot.stabilizer[iLev].orbit[0];
     int fPt=Stot.stabilizer[iLev].orbit[pos];
     std::vector<Telt> coset = CosetRepAsWord(Stot.labels, ePt, fPt, Stot.stabilizer[iLev].transversal);
     word.insert(word.end(), coset.begin(), coset.end());
+    Sptr = Sptr->stabilizer;
   }
   return word;
 }
@@ -230,11 +240,13 @@ std::vector<Telt> RandomElmAsWord(StabChain<Telt> const& Stot, int const& eLev)
 
 
 template<typename Telt>
-Telt SCRSift(StabChain<Telt> const& Stot, int const& eLev, Telt const& g)
+Telt SCRSift(StabChain<Telt> const& S, Telt const& g)
 {
-  int len=Stot.stabilizer.size();
   Telt gRet=g;
-  for (int iLev=eLev; iLev<len; iLev++) {
+  StabChain<Telt> Sptr = S;
+  while(true) {
+    if (Sptr == nullptr)
+      break;
     int bpt=Stot.stabilizer[iLev].orbit[0];
     if (Stot.stabilizer[iLev].transversal[PowAct(bpt, gRet)] == -1)
       return gRet;
@@ -245,6 +257,7 @@ Telt SCRSift(StabChain<Telt> const& Stot, int const& eLev, Telt const& g)
       int pos=Stot.stabilizer[iLev].transversal[img];
       gRet=gRet * Stot.labels[pos];
     }
+    Sptr = Sptr->stabilizer;
   }
   return gRet;
 }
@@ -289,49 +302,48 @@ Telt Product(std::vector<Telt> const& eList)
 
   
 template<typename Telt>
-void SCRSchTree(StabChain<Telt> & Stot, int const& eLev, std::vector<Telt> const& newgens )
+void SCRSchTree(StabChain<Telt> & S, std::vector<Telt> const& newgens )
 {
-  int n=Stot.n;
-  StabLevel<Telt> & S = Stot.stabilizer[eLev];
-  noticeType l= SCRNotice_A(S.orbit, S.transversal, newgens);
+  int n=S->comm->n;
+  noticeType l= SCRNotice_A(S->orbit, S->transversal, newgens);
   if (l.res)
     return;
   int i = l.i;
   int j = l.j;
   Telt witness = newgens[j];
   while(true) {
-    std::vector<Telt> word = CosetRepAsWord(Stot.labels, S.orbit[0], S.orbit[i], S.transversal);
+    std::vector<Telt> word = CosetRepAsWord(Stot.labels, S->orbit[0], S->orbit[i], S->transversal);
     Telt g = Product(word);
     Telt eGen = Inverse(g) * witness;
     Telt eGenInv = Inverse(witness) * g;
-    S.treegen.push_back(eGen);
-    S.treegeninv.push_back(eGenInv);
-    S.orbit = {S.orbit[0]};
-    S.transversal = std::vector<int>(n, -1);
-    S.transversal[S.orbit[0]] = GetLabelIndex(Stot.labels, Stot.identity);
-    S.treedepth = 0;
+    S->treegen.push_back(eGen);
+    S->treegeninv.push_back(eGenInv);
+    S->orbit = {S.orbit[0]};
+    S->transversal = std::vector<int>(n, -1);
+    S->transversal[S.orbit[0]] = GetLabelIndex(Stot.labels, Stot.identity);
+    S->treedepth = 0;
     int list5=0;
     while(true) {
-      if (S.treedepth >= 2*int(S.treegen.size()))
+      if (S->treedepth >= 2*int(S->treegen.size()))
 	break;
-      SCRExtend(Stot.labels, S.orbit, S.transversal, S.treegen, S.treegeninv, list5);
-      if (int(S.orbit.size()) == list5) {
+      SCRExtend(S->comm->labels, S->orbit, S->transversal, S->treegen, S->treegeninv, list5);
+      if (int(S->orbit.size()) == list5) {
 	break;
       }
       else {
-	S.treedepth++;
+	S->treedepth++;
       }
     }
-    l = SCRNotice_B(S.orbit, S.transversal, S.genlabels, Stot.labels);
+    l = SCRNotice_B(S->orbit, S->transversal, S->genlabels, S->comm->labels);
     if (l.res)
       break;
     i = l.i;
     j = l.j;
-    int posGen=S.genlabels[j];
-    witness = Stot.labels[posGen];
+    int posGen=S->genlabels[j];
+    witness = S->labels[posGen];
   }
-  S.aux  = Concatenation(S.treegen, S.treegeninv, Stot.stabilizer[eLev+1].aux);
-  S.diam = S.treedepth + Stot.stabilizer[eLev+1].diam;
+  S->aux  = Concatenation(S->treegen, S->treegeninv, Stot->stabilizer->aux);
+  S->diam = S->treedepth + S->stabilizer->diam;
 }
 
 
@@ -525,26 +537,25 @@ std::vector<Telt> GetWpair(std::vector<Telt> const& Saux, int const& k, paramOpt
 
 
 template<typename Telt>
-Telt SCRStrongGenTest(StabChain<Telt> const& Stot, int const& eLev, paramOpt const& param, std::vector<std::vector<int>> const& orbits, std::vector<int> const& basesize, std::vector<int> const& base, bool const& correct, std::vector<int> const& missing)
+Telt SCRStrongGenTest(StabChain<Telt> const& S, paramOpt const& param, std::vector<std::vector<int>> const& orbits, std::vector<int> const& basesize, std::vector<int> const& base, bool const& correct, std::vector<int> const& missing)
 {
-  StabLevel<Telt> const& S = Stot.stabilizer[eLev];
   int k = 0;
   int l, j;
   while (k < param.param1) {
     k++;
     int len=S.aux.size();
-    std::vector<Telt> w = GetWpair(S.aux, k, param, Stot.identity);
+    std::vector<Telt> w = GetWpair(S.aux, k, param, S->comm->identity);
     int m = 0;
     int mlimit = param.param2*S.diam;
     while (m < mlimit) {
       m++;
-      std::vector<Telt> ranword = RandomElmAsWord(Stot, eLev);
+      std::vector<Telt> ranword = RandomElmAsWord(S);
       int i = 0;
       while (i < 2) {
         i++;
 	if (!w[i-1].isIdentity()) {
 	  ranword.push_back(w[i-1]);
-	  std::pair<std::vector<Telt>, int> residue = SiftAsWord(Stot, eLev, ranword);
+	  std::pair<std::vector<Telt>, int> residue = SiftAsWord(S, ranword);
 	  if (residue.second > 0) {
 	    return Product(residue.first);
 	  }
@@ -588,7 +599,7 @@ Telt SCRStrongGenTest(StabChain<Telt> const& Stot, int const& eLev, paramOpt con
     if (len <= 2*k)
       k = param.param1;
   }
-  return Stot.identity;
+  return S->comm->identity;
 }
 
 

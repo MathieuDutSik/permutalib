@@ -248,7 +248,7 @@ template<typename Telt>
 StabChain<Telt> EmptyStabChain(int const& n)
 {
   Telt id(n);
-  std::shared_ptr<CommonStabInfo<Telt>> comm = std::make_shared({n, id, false, {id}});
+  std::shared_ptr<CommonStabInfo<Telt>> comm = std::make_shared<CommonStabInfo<Telt>>({n, id, false, {id}});
   return std::make_shared<StabLevel<Telt>>(EmptyStabLevel<Telt>(comm));
 }
 
@@ -591,14 +591,15 @@ int LargestMovedPoint(std::vector<Telt> const& LGen)
   return eMov;
 }
 
-// Most likely very buggy
+
+
 template<typename Telt>
-void InsertTrivialStabilizer(StabChain<Telt> & Stot, int const& eLev, int const& pnt)
+void InsertTrivialStabilizer(StabChain<Telt> & Stot, int const& pnt)
 {
-  StabLevel<Telt> eStab;
-  Stot.stabilizer.emplace(Stot.stabilizer.begin() + eLev + 1, eStab);
-  Stot.stabilizer[eLev+1] = Stot.stabilizer[eLev];
-  InitializeSchreierTree(Stot, eLev, pnt);
+  StabChain<Telt> Supp = std::make_shared<StabLevel<Telt>>(EmptyStabLevel<Telt>(Stot->comm));
+  Supp->stabilizer = Stot;
+  Stot = Supp;
+  InitializeSchreierTree(Stot, pnt);
 }
 
 
@@ -619,7 +620,7 @@ StabChain<Telt> StabChainBaseStrongGenerators(std::vector<int> const& base, std:
     for (int i=0; i<nbGen; i++)
       if (status[i] == 1)
 	sgsFilt.push_back(sgs[i]);
-    InsertTrivialStabilizer(Stot, iBas, pnt);
+    InsertTrivialStabilizer(Stot, pnt);
     AddGeneratorsExtendSchreierTree(Stot, iBas, sgsFilt);
     for (int i=0; i<nbGen; i++)
       if (status[i] == 1 && PowAct(pnt, sgs[i]) != pnt)
@@ -769,7 +770,7 @@ void ChooseNextBasePoint(StabChain<Telt> & Stot, std::vector<int> const& base, s
   std::cerr << "BPT/POS bpt=" << bpt << " pos=" << pos << "\n";
   if ((pos != -1 && i < pos) || (pos == -1 && i<int(base.size())) || (pos == -1 && pnt < bpt)) {
     std::cerr << "ChooseNextBasePoint: InsertTrivialStabilizer pnt=" << pnt << " bpt=" << bpt << " pos=" << pos << "\n";
-    InsertTrivialStabilizer(Stot, eLev, pnt);
+    InsertTrivialStabilizer(Stot, pnt);
     if (Stot->comm->UseCycle) {
       Face eFace(1);
       eFace[0] = 0;
@@ -782,10 +783,10 @@ void ChooseNextBasePoint(StabChain<Telt> & Stot, std::vector<int> const& base, s
 
 
 template<typename Telt, typename Tint>
-void StabChainStrong(StabChain<Telt> & Stot, int const& eLev, std::vector<Telt> const& newgens, StabChainOptions<Tint> const& options)
+void StabChainStrong(StabChain<Telt> & Stot, std::vector<Telt> const& newgens, StabChainOptions<Tint> const& options)
 {
   std::cerr << " |newgens|=" << newgens.size() << "\n";
-  ChooseNextBasePoint(Stot, eLev, options.base, newgens);
+  ChooseNextBasePoint(Stot, options.base, newgens);
   
   int pnt = Stot->orbit[0];
   int len = Stot->orbit.size();
@@ -1057,7 +1058,7 @@ bool ChangeStabChain(StabChain<Telt> & Stot, std::vector<int> const& base, int c
 	newBase.push_back(newpnt);
 	if (newpnt != old) {
 	  if (IsFixedStabilizer(Sptr, newpnt)) {
-	    InsertTrivialStabilizer(Stot, eLev, newpnt);
+	    InsertTrivialStabilizer(Sptr, newpnt);
 	  }
 #ifdef DEBUG_GROUP
 	  else {
@@ -1083,7 +1084,7 @@ bool ChangeStabChain(StabChain<Telt> & Stot, std::vector<int> const& base, int c
     }
     else if (PositionVect(newBase, old) != -1 || (reduced == int_true && Sptr->orbit.size() == 1)) {
       std::cerr << "Stabilizer shift in ChangeStabChain\n";
-      Sptr->stabilizer = S->stabilizer->stabilizer;
+      Sptr->stabilizer = Sptr->stabilizer->stabilizer;
     }
     else {
       newBase.push_back(old);
@@ -1136,7 +1137,7 @@ bool TestEqualityAtLevel(StabChain<Telt> const& L, StabChain<Telt> const& R, int
     if (Lptr != nullptr && Rptr == nullptr)
       return false;
     if (Lptr == nullptr)
-      return;
+      break;
     if (Lptr->orbit != R->orbit)
       return false;
     if (Lptr->transversal.size() != Rptr->transversal.size())
@@ -1257,7 +1258,7 @@ StabChain<Tret> HomomorphismMapping(StabChain<Telt> const& Stot, std::function<T
     return Vret;
   };
   std::vector<Tret> labelsMap = fVector(Stot.labels);
-  std::shared_ptr<CommonStabInfo<Tret>> comm = std::make_shared({nMap, idMap, Stot->comm->UseCycle, labelsMap});
+  std::shared_ptr<CommonStabInfo<Tret>> comm = std::make_shared<CommonStabInfo<Tret>>({nMap, idMap, Stot->comm->UseCycle, labelsMap});
 
   StabChain<Telt> Sptr = Stot;
   StabChain<Tret> Swork = nullptr;
