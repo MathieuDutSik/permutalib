@@ -46,7 +46,7 @@ permPlusBool<Telt> ExtendedT(Telt const& t, int const& pnt, int& img, int const&
     img = simg;
   // If <G> fixes <pnt>, nothing more can  be changed, so test whether <pnt>
   // = <img>.
-  int bpt = BasePoint(S.Stot, S.eLev);
+  int bpt = BasePoint(S.Stot);
   std::cerr << "img=" << img << " bpt=" << bpt << "\n";
   if (bpt != pnt) {
     if (pnt != img) {
@@ -57,13 +57,13 @@ permPlusBool<Telt> ExtendedT(Telt const& t, int const& pnt, int& img, int const&
       return {int_perm, t};
     }
   }
-  if (S.Stot.stabilizer[S.eLev].transversal[img] == -1) {
+  if (S.Stot->transversal[img] == -1) {
     std::cerr << "ExtendedT, return false 2\n";
     return {int_false, {}};
   }
   //      Telt u = InverseRepresentative(S.Stot, S.eLev, img);
   //      t = LeftQuotient(u, t);
-  return {int_perm, LeftQuotient(InverseRepresentative(S.Stot, S.eLev, img), t)};
+  return {int_perm, LeftQuotient(InverseRepresentative(S.Stot, img), t)};
 }
 
 
@@ -78,7 +78,7 @@ bool IsBool(StabChainPlusLev<Telt> const& S)
 template<typename Telt>
 int BasePoint(StabChainPlusLev<Telt> const& S)
 {
-  return BasePoint(S.Stot, S.eLev);
+  return BasePoint(S.Stot);
 }
  
 struct singStrat {
@@ -189,7 +189,7 @@ std::string ListOrbitOfRbaseLEV(rbaseType<Telt> const& rbase)
   for (int iLev=0; iLev<sizLev; iLev++) {
     if (iLev > 0)
       str += ", ";
-    std::vector<int> eOrb=rbase.lev[iLev].Stot.stabilizer[rbase.lev[iLev].eLev].orbit;
+    std::vector<int> eOrb=rbase.lev[iLev].Stot->orbit;
     int len=eOrb.size();
     str += "[ ";
     for (int u=0; u<len; u++) {
@@ -212,8 +212,7 @@ void PrintRBaseLevel(rbaseType<Telt> const& rbase, std::string const& str)
   }
   else {
     if (rbase.level.status == int_stablev) {
-      int eLev=rbase.level.eLev;
-      std::cerr << str << " PRBL rbase.level, eLev=" << eLev << " record, |genlabels|=" << rbase.level.Stot.stabilizer[eLev].genlabels.size() << " orbit=" << PrintTopOrbit(rbase.level.Stot, rbase.level.eLev) << "\n";
+      std::cerr << str << " PRBL rbase.level record, |genlabels|=" << rbase.level.Stot->genlabels.size() << " orbit=" << PrintTopOrbit(rbase.level.Stot) << "\n";
     }
     else {
       std::cerr << str << " PRBL rbase.level=" << GetIntTypeNature(rbase.level.status) << "\n";
@@ -232,17 +231,17 @@ bool ProcessFixpoint_rbase(rbaseType<Telt> & rbase, int const& pnt)
     ChangeStabChain(rbase.level2.Stot, {pnt}, int_true);
     std::cerr << " After ChangeStabChain level2\n";
     if (BasePoint(rbase.level2) == pnt)
-      rbase.level2 = rbase.level2.stabilizer;
+      rbase.level2.Stot = rbase.level2.Stot->stabilizer;
   }
   if (rbase.level.status == int_int) {
     rbase.level.value_int--;
   }
   else {
-    std::cerr << "Before ChangeStabChain level, eLev=" << rbase.level.eLev << "\n";
+    std::cerr << "Before ChangeStabChain level\n";
     ChangeStabChain(rbase.level.Stot, {pnt}, int_true);
     std::cerr << " After ChangeStabChain level\n";
     if (BasePoint(rbase.level) == pnt) {
-      rbase.level.eLev++;
+      rbase.level.Stot = rbase.level.Stot->stabilizer;
     }
     else {
       return false;
@@ -279,7 +278,7 @@ bool ProcessFixpoint_image(imageType<Telt> & image, int const& pnt, int & img, i
     }
     else {
       if (BasePoint(image.level ) == pnt)
-        image.level.eLev++;
+        image.level.Stot = image.level.Stot->stabilizer;
     }
     image.perm = t;
   }
@@ -292,7 +291,7 @@ bool ProcessFixpoint_image(imageType<Telt> & image, int const& pnt, int & img, i
     }
     else {
       if (BasePoint(image.level2 ) == pnt)
-        image.level2 = image.level2.stabilizer;
+        image.level2.Stot = image.level2.Stot->stabilizer;
     }
     image.perm2 = t;
   }
@@ -360,7 +359,7 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
   else {
     rbase.level2.status = int_false;
   }
-  rbase.level = {int_stablev, -666, G[0], 0};
+  rbase.level = {int_stablev, -666, G[0]};
   for (auto & pnt : Fixcells(P))
     ProcessFixpoint_rbase(rbase, pnt);
   return rbase;
@@ -510,7 +509,7 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
 	std::cerr << "LGen = ";
 	WriteStdVectorGAP(std::cerr, LGen);
 	std::cerr << "\n";
-	Partition O = OrbitsPartition(LGen, lev.Stot.n, rbase.domain);
+	Partition O = OrbitsPartition(LGen, lev.Stot->comm->n, rbase.domain);
 	NicePrintPartition("Before StratMeetPartition O", O);
 	std::vector<singStrat> strat = StratMeetPartition(rbase, P, O, TheId);
 	rbase.rfm[len].push_back(Refinement({O,strat}));
@@ -560,7 +559,7 @@ void NextRBasePoint(Partition & P, rbaseType<Telt> & rbase, Telt const& TheId)
     while (true) {
       //      std::cerr << "Before PositionProperty operation len[k]=" << lens[k] << "\n";
       l = PositionProperty(ClosedInterval(0, lens[k]), [&](int const& i) -> bool {
-	  return !IsFixedStabilizer(rbase.level.Stot, rbase.level.eLev, P.points[i+P.firsts[order[k]]]);});
+	  return !IsFixedStabilizer(rbase.level.Stot, P.points[i+P.firsts[order[k]]]);});
       //      std::cerr << "At k=" << k << " found l=" << l << "\n";
       if (l != -1)
 	break;
@@ -818,6 +817,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   std::vector<int> range;    // range for construction of <orb>
   Partition oldcel;       // old value of <image.partition.cellno>
   std::vector<int> oldcel_cellno;
+  std::vector<StabChain<Telt>> L_list, R_list;
   std::cerr << "PartitionBacktrack step 3\n";
   std::function<permPlusBool<Telt>(int const&,bool const&)> PBEnumerate = [&](int const& d, bool const & wasTriv) -> permPlusBool<Telt> {
     std::cerr << "PBEnumerate, step 1, d=" << d << " wasTriv=" << wasTriv << "\n";
@@ -870,10 +870,10 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  StabChainOptions<Tint> options = GetStandardOptions<Tint>(n);
 	  options.base = rbase.base;
 	  options.reduced = false;
-	  L = StabChainOp_stabchain_nofalse<Telt,Tint>(L, options);
-	  std::cerr << "|L|=" << L.stabilizer.size() << "\n";
+	  L_list = ListStabChain(StabChainOp_stabchain_nofalse<Telt,Tint>(L, options));
+	  std::cerr << "|L|=" << L_list.size() << "\n";
 	  std::cerr << "wasTriv Critical step 2\n";
-	  R = L;
+	  R_list = L_list;
 	  std::cerr << "wasTriv Critical step 3\n";
 	  std::cerr << "PBEnumerate, EXIT 2\n";
 	  return {int_fail,{}};
@@ -918,9 +918,9 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	if (repr) {
 	  // In  the representative  case,  change  the   stabilizer
 	  // chains of <L> and <R>.
-	  ChangeStabChain(L[d], {rbase.base[d]}, int_false);
+	  ChangeStabChain(L_list[d], {rbase.base[d]}, int_false);
 	  //	  L[ d + 1 ] := L[ d ].stabilizer;
-	  ChangeStabChain(R[d], {rbase.base[d]}, int_false);
+	  ChangeStabChain(R_list[d], {rbase.base[d]}, int_false);
 	  //	  R[ d + 1 ] := R[ d ].stabilizer;
 	}
       }
@@ -949,7 +949,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       std::cerr << "ORBcpp: Before pVal loop d=" << d << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
       std::cerr << "RBASEcpp: List(rbase.lev, x->x.orbit) = [";
       for (auto & eRec : rbase.lev) {
-	std::cerr << ", " << PrintTopOrbit(eRec.Stot, eRec.eLev);
+	std::cerr << ", " << PrintTopOrbit(eRec.Stot);
       }
       std::cerr << "]\n";
       std::cerr << "d=" << d << " |rbase.lev|=" << rbase.lev.size() << "\n";
@@ -996,7 +996,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       // Now we  can  remove  the  entire   <R>-orbit of <a>  from   the
       // candidate list.
       std::cerr << "ORBcpp 1: Before subtract d=" << d << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
-      SubtractBlist(orb[d], BlistList(range, L.stabilizer[d].orbit));
+      SubtractBlist(orb[d], BlistList(range, L_list[d]->orbit));
       std::cerr << "ORBcpp 1: After subtract d=" << d << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
     }
     std::cerr << "PBEnumerate, step 8\n";
@@ -1005,11 +1005,11 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     //    PrintVectorORB("orb", orb);
     //    PrintVectorORB("orB", orB);
     m = SizeBlist( orB[d] );
-    if (m < int(L.stabilizer[d].orbit.size()) ) {
+    if (m < int(L_list[d]->orbit.size()) ) {
       std::cerr << "PBEnumerate, EXIT 6\n";
       return {int_fail,{}};
     }
-    max = PositionNthTrueBlist(orB[d], m - L.stabilizer[d].orbit.size());
+    max = PositionNthTrueBlist(orB[d], m - L_list[d]->orbit.size());
     std::cerr << "PBEnumerate, step 9\n";
     std::cerr << "wasTriv=" << wasTriv << " a=" << a << " max=" << max << "\n";
     //    PrintVectorORB("orb", orb);
@@ -1017,12 +1017,12 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     
     if (wasTriv && a > max) {
       m--;
-      std::cerr << "m=" << m << " Length(L[d].orbit)=" << L.stabilizer[d].orbit.size() << "\n";
-      if (m < int(L.stabilizer[d].orbit.size()) ) {
+      std::cerr << "m=" << m << " Length(L[d].orbit)=" << L_list[d]->orbit.size() << "\n";
+      if (m < int(L_list[d]->orbit.size()) ) {
 	std::cerr << "PBEnumerate, EXIT 7\n";
 	return {int_fail,{}};
       }
-      max = PositionNthTrueBlist( orB[d], m - L.stabilizer[d].orbit.size());
+      max = PositionNthTrueBlist( orB[d], m - L_list[d]->orbit.size());
     }
     std::cerr << "PBEnumerate, step 10\n";
     // Now the other possible images.
@@ -1034,7 +1034,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       if (!repr && !wasTriv) {
 	dd = branch;
 	while (dd < d) {
-	  if (IsInBasicOrbit(L[dd], a) && !PBIsMinimal(range, R.stabilizer[dd].orbit[0], b_int, R, d))
+	  if (IsInBasicOrbit(L_list[dd], a) && !PBIsMinimal(range, R_list[dd]->orbit[0], b_int, R_list[d]))
 	    dd = d + 1;
 	  else
 	    dd = dd + 1;
@@ -1077,7 +1077,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    branch = d;
 	  }
 	  if (2 * d <= blen) {
-	    ChangeStabChain(R[d], {b_int}, int_false);
+	    ChangeStabChain(R_list[d], {b_int}, int_false);
 	    //	    R[ d + 1 ] = R[ d ].stabilizer;
 	  }
 	  else {
@@ -1087,7 +1087,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    int largMov=LargestMovedPoint(LGenB);
 	    StabChainOptions<Tint> options = GetStandardOptions<Tint>(n);
 	    options.base = ClosedInterval(0, largMov);
-	    StabChainStrong(R, d+1, LGenB, options);
+	    R_list[d+1] = StabChainOp(LGenB, options);
 	  }
 	}
 	//	PrintVectorORB("orb", orb);
@@ -1119,12 +1119,12 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    //   enlarged <L>. Reset <R> to the enlarged <L>.
 	    //	    for (int dd=0; dd<d; dd++)
 	    //	      AddGeneratorsExtendSchreierTree( L[ dd ], {t});
-	    AddGeneratorsExtendSchreierTree(L, 0, {t.val});
-	    if (m < int(L.stabilizer[d].orbit.size())) {
+	    AddGeneratorsExtendSchreierTree(L_list[dd], {t.val});
+	    if (m < int(L_list[d]->orbit.size())) {
 	      std::cerr << "PBEnumerate, EXIT 9\n";
 	      return {int_fail,{}};
 	    }
-	    max = PositionNthTrueBlist( orB[d], m - L.stabilizer[d].orbit.size());
+	    max = PositionNthTrueBlist( orB[d], m - L_list[d]->orbit.size());
 	    SetStabChainFromLevel(R, L, d);
 	  }
 	}
@@ -1132,8 +1132,8 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	// Now  we can remove the   entire <R>-orbit  of <b> from  the
 	// candidate list.
 	std::cerr << "ORBcpp 2: Before subtract d=" << d << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
-	if (R.stabilizer[d].transversal[b] != -1)
-	  SubtractBlist(orb[d], BlistList(range, R.stabilizer[d].orbit));
+	if (R_list[d]->transversal[b] != -1)
+	  SubtractBlist(orb[d], BlistList(range, R_list[d]->orbit));
 	else
 	  SubtractBlistOrbitStabChain(orb[d], StrongGeneratorsStabChain(R), b_int);
 	std::cerr << "ORBcpp 2: After subtract d=" << d << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
@@ -1154,9 +1154,9 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     if (!repr)
       return {int_group, G, {}};
     if (Pr(G->comm->identity))
-      return {int_perm,{},G->comm->identity};
+      return {int_perm, {}, G->comm->identity};
     else
-      return {int_fail,{},{}};
+      return {int_fail, {}, {}};
   }
   std::cerr << "PartitionBacktrack step 5\n";
     

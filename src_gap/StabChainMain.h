@@ -52,16 +52,15 @@ StabChain<Telt> StabChainOp_listgen(std::vector<Telt> const& Lgen, StabChainOpti
 template<typename Telt, typename Tint>
 std::pair<bool, StabChain<Telt>> StabChainOp_stabchain(StabChain<Telt> const& G, StabChainOptions<Tint> const& options)
 {
-  StabChain<Telt> S = G;
-  int TheLev=0;
+  StabChain<Telt> S = StructuralCopy(G);
   if (options.base.size() > 0) {
-    if (!ChangeStabChain(S, TheLev, options.base, options.reduced)) {
+    if (!ChangeStabChain(S, options.base, options.reduced)) {
       return {false,{}};
     }
   }
   else {
     if (options.reduced) {
-      ReduceStabChain(S, TheLev);
+      ReduceStabChain(S);
     }
   }
   return {true,S};
