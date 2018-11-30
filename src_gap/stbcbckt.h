@@ -33,7 +33,6 @@ struct StabChainPlusLev {
   int status; // possible values in {int_false, int_true, int_int, int_stablev} 
   int value_int;
   StabChain<Telt> Stot;
-  int eLev;
 };
 
 
@@ -229,18 +228,18 @@ bool ProcessFixpoint_rbase(rbaseType<Telt> & rbase, int const& pnt)
 {
   std::cerr << "ProcessFixpoint_rbase beginning\n";
   if (rbase.level2.status != int_true && rbase.level2.status != int_false) {
-    std::cerr << "Before ChangeStabChain level2, eLev=" << rbase.level2.eLev << "\n";
-    ChangeStabChain(rbase.level2.Stot, rbase.level2.eLev, {pnt}, int_true);
+    std::cerr << "Before ChangeStabChain level2\n";
+    ChangeStabChain(rbase.level2.Stot, {pnt}, int_true);
     std::cerr << " After ChangeStabChain level2\n";
     if (BasePoint(rbase.level2) == pnt)
-      rbase.level2.eLev++;
+      rbase.level2 = rbase.level2.stabilizer;
   }
   if (rbase.level.status == int_int) {
     rbase.level.value_int--;
   }
   else {
     std::cerr << "Before ChangeStabChain level, eLev=" << rbase.level.eLev << "\n";
-    ChangeStabChain(rbase.level.Stot, rbase.level.eLev, {pnt}, int_true);
+    ChangeStabChain(rbase.level.Stot, {pnt}, int_true);
     std::cerr << " After ChangeStabChain level\n";
     if (BasePoint(rbase.level) == pnt) {
       rbase.level.eLev++;
@@ -293,7 +292,7 @@ bool ProcessFixpoint_image(imageType<Telt> & image, int const& pnt, int & img, i
     }
     else {
       if (BasePoint(image.level2 ) == pnt)
-        image.level2.eLev++;
+        image.level2 = image.level2.stabilizer;
     }
     image.perm2 = t;
   }
@@ -315,8 +314,7 @@ bool IsTrivialRBase(rbaseType<Telt> const& rbase)
   //
   std::cerr << "IsTrivialRBase : stab=";
   if (rbase.level.status == int_stablev) {
-    int eLev=rbase.level.eLev;
-    std::cerr << "true  eLev=" << eLev << "  |genlabels|=" << rbase.level.Stot.stabilizer[eLev].genlabels.size();
+    std::cerr << "  |genlabels|=" << rbase.level.Stot->genlabels.size();
   }
   else {
     std::cerr << "false";
@@ -328,8 +326,7 @@ bool IsTrivialRBase(rbaseType<Telt> const& rbase)
       return true;
   }
   if (rbase.level.status == int_stablev) {
-    int eLev=rbase.level.eLev;
-    if (rbase.level.Stot.stabilizer[eLev].genlabels.size() == 0)
+    if (rbase.level.Stot->genlabels.size() == 0)
       return true;
   }
   return false;
@@ -353,7 +350,7 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
       rbase.level2.Stot->comm->UseCycle = false;
     }
     else {
-      rbase.level2 = {int_stablev, -555, G[1], 0};
+      rbase.level2 = {int_stablev, -555, G[1]};
       std::cerr << "rbase Before bool print\n";
       std::cerr << "bool=" << rbase.level2.Stot->comm->UseCycle << "\n";
       std::cerr << "rbase After bool print\n";
@@ -655,10 +652,10 @@ int RRefine(rbaseType<Telt> & rbase, imageType<Telt> & image, bool const& uscore
 
 		       
 template<typename Telt>
-bool PBIsMinimal(std::vector<int> const& range, int const& a, int const& b, StabChain<Telt> const& Stot, int const& eLev)
+bool PBIsMinimal(std::vector<int> const& range, int const& a, int const& b, StabChain<Telt> const& S)
 {
-  if (IsInBasicOrbit(Stot, eLev, b)) {
-    for (auto & pVal : Stot.stabilizer[eLev].orbit) {
+  if (IsInBasicOrbit(S, b)) {
+    for (auto & pVal : S->orbit) {
       if (a > pVal)
         return false;
     }
@@ -666,7 +663,7 @@ bool PBIsMinimal(std::vector<int> const& range, int const& a, int const& b, Stab
   }
   if (b < a)
     return false;
-  if (IsFixedStabilizer(Stot, eLev, b))
+  if (IsFixedStabilizer(S, b))
     return true;
 
   std::vector<int> orb{b};
@@ -678,8 +675,8 @@ bool PBIsMinimal(std::vector<int> const& range, int const& a, int const& b, Stab
       break;
     for (int i=pos; i<siz; i++) {
       int pnt=orb[i];
-      for (auto & lVal : Stot.stabilizer[eLev].genlabels) {
-        int img = PowAct(pnt, Stot.labels[lVal]);
+      for (auto & lVal : S->genlabels) {
+        int img = PowAct(pnt, S->comm->labels[lVal]);
         if (!old[img]) {
           if (img < a)
             return false;
@@ -888,7 +885,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  else
 	    prm = image.perm;
 	  if (image.level2.status != int_false) {
-	    if (SiftedPermutation(image.level2.Stot, image.level2.eLev, prm.val * Inverse(image.perm2.val)).isIdentity()) {
+	    if (SiftedPermutation(image.level2.Stot, prm.val * Inverse(image.perm2.val)).isIdentity()) {
 	      std::cerr << "PBEnumerate, EXIT 3\n";
 	      return prm;
 	    }
@@ -921,9 +918,9 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	if (repr) {
 	  // In  the representative  case,  change  the   stabilizer
 	  // chains of <L> and <R>.
-	  ChangeStabChain(L, d, {rbase.base[d]}, int_false);
+	  ChangeStabChain(L[d], {rbase.base[d]}, int_false);
 	  //	  L[ d + 1 ] := L[ d ].stabilizer;
-	  ChangeStabChain(R, d, {rbase.base[d]}, int_false);
+	  ChangeStabChain(R[d], {rbase.base[d]}, int_false);
 	  //	  R[ d + 1 ] := R[ d ].stabilizer;
 	}
       }
@@ -938,7 +935,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       if (image.level2.status != int_false) {
 	b = orb[d].find_first();
 	while (b != boost::dynamic_bitset<>::npos) {
-	  if (!IsInBasicOrbit(rbase.lev2[d].Stot, rbase.lev2[d].eLev, SlashAct(b, image.perm2.val))) 
+	  if (!IsInBasicOrbit(rbase.lev2[d].Stot, SlashAct(b, image.perm2.val))) 
 	    orb[d][b] = false;
 	  b = orb[d].find_next(b);
 	}
@@ -956,8 +953,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       }
       std::cerr << "]\n";
       std::cerr << "d=" << d << " |rbase.lev|=" << rbase.lev.size() << "\n";
-      std::cerr << "rbase.lev[d].eLev=" << rbase.lev[d].eLev << " |stabilizer|=" << rbase.lev[d].Stot.stabilizer.size() << "\n";
-      for (auto & pVal : rbase.lev[d].Stot.stabilizer[rbase.lev[d].eLev].orbit) {
+      for (auto & pVal : rbase.lev[d].Stot->orbit) {
 	b = PowAct(pVal, image.perm.val);
 	std::cerr << "pVal=" << pVal << " b=" << b << "\n";
 	if (oldcel_cellno[b] == rbase.where[d]) {
@@ -966,7 +962,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    DoOper=true;
 	  if (!DoOper) {
 	    std::cerr << "d=" << d << " |rbase.lev2|=" << rbase.lev2.size() << "\n";
-	    if (IsInBasicOrbit(rbase.lev2[d].Stot, rbase.lev2[d].eLev, SlashAct(b,image.perm2.val)))
+	    if (IsInBasicOrbit(rbase.lev2[d].Stot, SlashAct(b,image.perm2.val)))
 	      DoOper=true;
 	  }
 	  if (DoOper) {
@@ -979,7 +975,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       //      std::cerr << "After pVal loop\n";
     }
     std::cerr << "PBEnumerate, step 6\n";
-    if (d == 1 && ForAll(G.labels, [&](Telt const& x){return PowAct(a, x) == a;})) {
+    if (d == 1 && ForAll(G->comm->labels, [&](Telt const& x){return PowAct(a, x) == a;})) {
       orb[d][a]=true; // ensure a is a possible image (can happen if acting on permutations with more points)
       std::cerr << "ORBcpp: After assignation d=" << d << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
     }
@@ -1038,7 +1034,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       if (!repr && !wasTriv) {
 	dd = branch;
 	while (dd < d) {
-	  if (IsInBasicOrbit(L, dd, a) && !PBIsMinimal(range, R.stabilizer[dd].orbit[0], b_int, R, d))
+	  if (IsInBasicOrbit(L[dd], a) && !PBIsMinimal(range, R.stabilizer[dd].orbit[0], b_int, R, d))
 	    dd = d + 1;
 	  else
 	    dd = dd + 1;
@@ -1081,7 +1077,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    branch = d;
 	  }
 	  if (2 * d <= blen) {
-	    ChangeStabChain(R, d, {b_int}, int_false);
+	    ChangeStabChain(R[d], {b_int}, int_false);
 	    //	    R[ d + 1 ] = R[ d ].stabilizer;
 	  }
 	  else {
@@ -1176,7 +1172,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   }
   if (IsBool(rbase.level2)) {
     std::cerr << "PartitionBacktrack step 5.2\n";
-    image.level2 = {int_false, -777, {}, 0};
+    image.level2 = {int_false, -777, {}};
     std::cerr << "PartitionBacktrack step 5.3\n";
   }
   else {

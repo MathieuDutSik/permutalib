@@ -302,9 +302,8 @@ int BasePoint(StabChain<Telt> const& S)
 template<typename Telt>
 void RemoveStabChain(StabChain<Telt> & Stot)
 {
-  Telt TheId=Stot.identity;
-  Stot.stabilizer.clear();
-  Stot.stabilizer[0].genlabels.clear();
+  Stot->stabilizer == nullptr;
+  Stot->genlabels.clear();
 }
 
 
@@ -494,7 +493,7 @@ std::vector<Telt> ElementsStabChain(StabChain<Telt> const& Stot)
       while (PowAct(eLev.orbit[0], rep) != pnt) {
 	int jpt=SlashAct(pnt, rep);
 	int idx=Stot.stabilizer[eLev].transversal[jpt];
-	rep=LeftQuotient(Stot.labels[idx], rep);
+	rep=LeftQuotient(Stot->comm->labels[idx], rep);
       }
       for (auto & eStb : elms)
 	NewElms.push_back(eStb * rep);
@@ -550,18 +549,23 @@ template<typename Telt>
 std::vector<int> MovedPoints(StabChain<Telt> const& S)
 {
   std::set<int> LIdx;
-  for (auto & eChain : S.stabilizer)
-    for (auto & eIdx : eChain.genlabels)
+  StabChain<Telt> Sptr = S;
+  while(true) {
+    if (Sptr == nullptr)
+      break;
+    for (auto & eIdx : Sptr->genlabels)
       LIdx.insert(eIdx);
+    Sptr = Sptr->stabilizer;
+  }
   auto IsMoved=[&](int const& ePt) -> bool {
     for (auto & eIdx : LIdx) {
-      if (S.labels[eIdx].at(ePt) != ePt)
+      if (S->comm->labels[eIdx].at(ePt) != ePt)
 	return true;
     }
     return false;
   };
   std::vector<int> LMoved;
-  int n=S.n;
+  int n=S->comm->n;
   for (int i=0; i<n; i++)
     if (IsMoved(i))
       LMoved.push_back(i);
@@ -621,6 +625,21 @@ void InsertTrivialStabilizer(StabChain<Telt> & Stot, int const& pnt)
   Stot = Supp;
   InitializeSchreierTree(Stot, pnt);
 }
+
+template<typename Telt>
+std::vector<StabChain<Telt>> ListStabChain(StabChain<Telt> const& S)
+{
+  std::vector<StabChain<Telt>> ListStab;
+  StabChain<Telt> Sptr = S;
+  while(true) {
+    if (Sptr == nullptr)
+      break;
+    ListStab.push_back(Sptr);
+    Sptr = Sptr->stabilizer;
+  }
+  return ListStab;
+}
+
 
 
 
@@ -710,7 +729,7 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & Stot, std::vector<Telt> c
       for (int& j : Stot->genlabels) {
 	//	std::cerr << "  j=" << j << "\n";
 	if (i > len-1 || old[j] == 0) {
-	  int img=SlashAct(Stot->orbit[i], Stot.labels[j]);
+	  int img=SlashAct(Stot->orbit[i], Stot->comm->labels[j]);
 	  //	  std::cerr << "    After the test img=" << img << "\n";
 	  if (Stot->transversal[img] != -1) {
 	    Stot->cycles[i]=true;
@@ -1253,7 +1272,7 @@ Telt MinimalElementCosetStabChain(StabChain<Telt> const& Stot, Telt const& g)
     int pp=SlashAct(pMin, gRet);
     while (bp != pp) {
       int pos=Sptr->transversal[pp];
-      gRet=LeftQuotient(Stot.labels[pos], gRet);
+      gRet=LeftQuotient(Stot->comm->labels[pos], gRet);
       pp = SlashAct(pMin, gRet);
     }
     Sptr = Sptr->stabilizer;
@@ -1277,7 +1296,7 @@ StabChain<Tret> HomomorphismMapping(StabChain<Telt> const& Stot, std::function<T
       Vret.push_back(f(eElt));
     return Vret;
   };
-  std::vector<Tret> labelsMap = fVector(Stot.labels);
+  std::vector<Tret> labelsMap = fVector(Stot->comm->labels);
   std::shared_ptr<CommonStabInfo<Tret>> comm = std::make_shared<CommonStabInfo<Tret>>(CommonStabInfo<Tret>({nMap, idMap, Stot->comm->UseCycle, labelsMap}));
 
   StabChain<Telt> Sptr = Stot;
@@ -1287,7 +1306,7 @@ StabChain<Tret> HomomorphismMapping(StabChain<Telt> const& Stot, std::function<T
   while(true) {
     if (Sptr == nullptr)
       break;
-    Swork = std::make_shared<StabLevel<Telt>>({Sptr->transversal, Sptr->orbit, Sptr->genlabels, Sptr->cycles, fVector(Sptr->treegen), fVector(Sptr->treegeninv), fVector(Sptr->aux), Sptr->treedepth, Sptr->diam, comm, nullptr});
+    Swork = std::make_shared<StabLevel<Telt>>(StabLevel<Telt>({Sptr->transversal, Sptr->orbit, Sptr->genlabels, Sptr->cycles, fVector(Sptr->treegen), fVector(Sptr->treegeninv), fVector(Sptr->aux), Sptr->treedepth, Sptr->diam, comm, nullptr}));
     if (Sreturn == nullptr)
       Sreturn = Swork;
     Sptr = Sptr->stabilizer;

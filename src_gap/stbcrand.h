@@ -314,7 +314,7 @@ void SCRSchTree(StabChain<Telt> & S, std::vector<Telt> const& newgens )
     Telt eGenInv = Inverse(witness) * g;
     S->treegen.push_back(eGen);
     S->treegeninv.push_back(eGenInv);
-    S->orbit = {S.orbit[0]};
+    S->orbit = {S->orbit[0]};
     S->transversal = std::vector<int>(n, -1);
     S->transversal[S->orbit[0]] = GetLabelIndex(S->comm->labels, S->comm->identity);
     S->treedepth = 0;
@@ -336,7 +336,7 @@ void SCRSchTree(StabChain<Telt> & S, std::vector<Telt> const& newgens )
     i = l.i;
     j = l.j;
     int posGen=S->genlabels[j];
-    witness = S->labels[posGen];
+    witness = S->comm->labels[posGen];
   }
   S->aux  = Concatenation(S->treegen, S->treegeninv, S->stabilizer->aux);
   S->diam = S->treedepth + S->stabilizer->diam;
@@ -369,38 +369,38 @@ void SCRMakeStabStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, pa
       TheLevel.treedepth=0;
       Stot.stabilizer.push_back(TheLevel);
       if (!correct)
-	basesize[where[S.orbit[0]]]++;
+	basesize[where[S->orbit[0]]]++;
       missing = DifferenceVect( missing, {firstmove});
     }
     else {
-      if (PositionVect(base,firstmove) < PositionVect(base,S.orbit[0])) {
+      if (PositionVect(base,firstmove) < PositionVect(base,S->orbit[0])) {
 	StabLevel<Telt> TheLevel;
 	TheLevel.diam=0;
 	TheLevel.treedepth=0;
 	TheLevel.transversal = std::vector<int>(n, -1);
 	TheLevel.transversal[firstmove]  = GetLabelIndex_const(S->comm->labels, S->comm->identity);
 	TheLevel.orbit = {firstmove};
-	TheLevel.genlabels = S.genlabels;
+	TheLevel.genlabels = S->genlabels;
 	//
 	auto iter=Stot.stabilizer.begin();
 	iter += eLev;
 	Stot.stabilizer.insert(iter, TheLevel);
 	if (!correct)
-	  basesize[where[S.orbit[0]]]++;
+	  basesize[where[S->orbit[0]]]++;
 	missing = DifferenceVect( missing, {firstmove} );
       }
     }
     if (!top || S->genlabels.size() == 0) {
       for (auto & eGen : newgens) {
 	int posGen=GetLabelIndex(S->comm->labels, eGen);
-	S.genlabels.push_back(posGen);
+	S->genlabels.push_back(posGen);
       }
     }
     SCRSchTree(S, newgens);
     int nbGen=newgens.size();
     for (int iGen=0; iGen<nbGen; iGen++) {
       int jGen=nbGen-1-iGen;
-      Telt g = SCRSift(Stot, eLev, newgens[jGen]);
+      Telt g = SCRSift(S, newgens[jGen]);
       if (!g.isIdentity()) {
 	SCRMakeStabStrong(S->stabilizer, {g}, param, orbits, where, basesize, base, correct, missing, false);
 	S->diam = S->treedepth + S->stabilizer->diam;
@@ -428,7 +428,7 @@ void SCRMakeStabStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, pa
   int m=0;
   while (m < mlimit) {
     m++;
-    int ran = RandomInteger(int(S.orbit.size()));
+    int ran = RandomInteger(int(S->orbit.size()));
     std::vector<Telt> coset = CosetRepAsWord(S->comm->labels, S->orbit[0], S->orbit[ran], S->transversal);
     coset = InverseAsWord(coset,gen,inv);
     if (!w.isIdentity()) {
@@ -469,7 +469,7 @@ void SCRMakeStabStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, pa
 		Telt g = Product(residue.first);
 		SCRMakeStabStrong(S->stabilizer, {g}, param, orbits, where, basesize, base, correct, missing, false);
 		S->diam = S->treedepth + S->stabilizer->diam;
-		S->aux = Concatenation(S.treegen, S->treegeninv, S->stabilizer->aux);
+		S->aux = Concatenation(S->treegen, S->treegeninv, S->stabilizer->aux);
 		m = 0;
 		j = jlimit;
 		l = orbits.size();
@@ -610,7 +610,7 @@ Telt SCRStrongGenTest2(StabChain<Telt> const& S, paramOpt const& param)
     int mlimit = param.param4 * S->diam;
     while (m < mlimit) {
       m++;
-      Telt ranelement = S->identity;
+      Telt ranelement = S->comm->identity;
       StabChain<Telt> T = S;
       while(true) {
 	if (T == nullptr)
@@ -1047,10 +1047,9 @@ std::pair<bool,Telt> VerifySGS(StabChain<Telt> const& S, std::vector<int> const&
       gencount++;
       int posgen=Stot.stabilizer[len - i].genlabels[gencount];
       Telt gen = Stot->comm->labels[posgen];
-      std::vector<int> set = VectorAsSet(temp.stabilizer[0].orbit);
+      std::vector<int> set = VectorAsSet(temp->orbit);
       if (set == OnSets(set,gen)) {
 	if (correct) {
-	  int eLevLoc=0; // almost certainly wrong
 	  std::pair<std::vector<Telt>, int> residue = SiftAsWord(temp, {gen});
 	  if (residue.second != 0) {
 	    result.second = Product(residue.first);
