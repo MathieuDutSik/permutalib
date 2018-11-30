@@ -213,7 +213,27 @@ std::ostream& operator<<(std::ostream& os, StabChain<Telt> const& Stot)
   return os;
 }
 
- 
+
+
+template<typename Telt>
+StabChain<Telt> StructuralCopy(StabChain<Telt> const& S)
+{
+  if (S == nullptr)
+    return nullptr;
+  std::shared_ptr<CommonStabInfo<Telt>> comm_new = std::make_shared<CommonStabInfo<Telt>>(*(S->comm));
+  StabChain<Telt> Sptr = S;
+  StabChain<Telt> Sret = nullptr;
+  while(true) {
+    if (Sptr == nullptr)
+      break;
+    Sret = std::make_shared<StabLevel<Telt>>(*Sptr);
+    //
+    Sptr = Sptr->stabilizer;
+    Sret = Sret->stabilizer;
+  }
+  return Sret;
+}
+
 
  
 template<typename Telt>

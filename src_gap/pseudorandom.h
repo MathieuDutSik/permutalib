@@ -56,6 +56,16 @@ InfoPseudoRandom* GetPseudoRandom()
  
  
 
+int RandomInteger(int const& val)
+{
+#ifdef TRUE_RANDOM
+  return rand() % val;
+#else
+  return rand() % val;
+#endif
+}
+
+ 
 
 void RandomShift(InfoPseudoRandom* R)
 {
