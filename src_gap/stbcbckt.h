@@ -344,9 +344,10 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
   rbase.partition = P;
   rbase.lev = {};
   if (G.size() == 2) {
+    int n = GetNumberPoint(P);
     if (IsId) {
       rbase.level2.status = int_true;
-      rbase.level2.Stot->comm->UseCycle = false;
+      rbase.level2.Stot = EmptyStabChain<Telt>(n);
     }
     else {
       rbase.level2 = {int_stablev, -555, G[1]};

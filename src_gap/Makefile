@@ -1,5 +1,6 @@
-PROGRAM	= TestStabilizerOnSet
-#PROGRAM	= TestCompilation TestSymmetricGroup TestStabilizerOnSet
+#PROGRAM	= TestStabilizerOnSet
+PROGRAM	= TestCompilation TestSymmetricGroup TestStabilizerOnSet
+#PROGRAM	= TestSymmetricGroup
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

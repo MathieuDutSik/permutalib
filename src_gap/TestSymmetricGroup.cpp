@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
   try {
     using Telt = permutalib::DoubleSidedPerm;
     using Tint = mpz_class;
-    int n=10;
+    int n=5;
     std::vector<int> ePermV1(n);
     for (int i=0; i<n; i++) {
       int iNext=i+1;

@@ -141,8 +141,11 @@ Partition GetPartition(std::vector<std::vector<int>> const& list)
 }
 
 
-
- 
+int GetNumberPoint(Partition const& ePartition)
+{
+  int nbPoint = ePartition.points.size();
+  return nbPoint;
+}
 
 
 int NumberCells(Partition const& ePartition)

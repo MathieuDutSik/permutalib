@@ -16,6 +16,7 @@ template<typename Telt, typename Tint>
 StabChain<Telt> StabChainOp_listgen(std::vector<Telt> const& Lgen, StabChainOptions<Tint> const& options)
 {
   int degree = LargestMovedPoint( Lgen );
+  std::cerr << "degree=" << degree << "\n";
   if (degree > 100) {
     std::cerr << "SEARCH : Before call to StabChainRandomPermGroup\n";
     Telt TheId(degree);
@@ -23,14 +24,14 @@ StabChain<Telt> StabChainOp_listgen(std::vector<Telt> const& Lgen, StabChainOpti
   }
   std::cerr << "SEARCH : Doing the ordinary Schreier Sims\n";
   int n=options.n;
-  StabChain<Telt> Stot = EmptyStabChain<Telt>(n);
+  StabChain<Telt> S = EmptyStabChain<Telt>(n);
   if (!IsTrivial_ListGen(Lgen)) {
-    Stot->comm->UseCycle=true;
+    S->comm->UseCycle=true;
     std::cerr << "Before call to StabChainStrong\n";
-    StabChainStrong(Stot, Lgen, options );
+    StabChainStrong(S, Lgen, options );
   }
   if (!options.reduced && options.base.size() > 0) {
-    ExtendStabChain(Stot, options.base);
+    ExtendStabChain(S, options.base);
   }
   /*
     The business with StabChainOptions look eminently dangerous and a reliable replacement
@@ -44,7 +45,7 @@ StabChain<Telt> StabChainOp_listgen(std::vector<Telt> const& Lgen, StabChainOpti
         fi;
         StabChainOptions( G ).random := options.random;
 	fi;*/  
-  return Stot;
+  return S;
 }
 
 
@@ -55,7 +56,7 @@ std::pair<bool, StabChain<Telt>> StabChainOp_stabchain(StabChain<Telt> const& G,
   StabChain<Telt> S = StructuralCopy(G);
   if (options.base.size() > 0) {
     if (!ChangeStabChain(S, options.base, options.reduced)) {
-      return {false,{}};
+      return {false, {}};
     }
   }
   else {
@@ -63,7 +64,7 @@ std::pair<bool, StabChain<Telt>> StabChainOp_stabchain(StabChain<Telt> const& G,
       ReduceStabChain(S);
     }
   }
-  return {true,S};
+  return {true, S};
 }
 
 
@@ -96,6 +97,7 @@ StabChain<Telt> MinimalStabChain(std::vector<Telt> const& LGen, int const& n)
   StabChainOptions<Tint> options = GetStandardOptions<Tint>(n);
   int largMov=LargestMovedPoint(LGen);
   options.base = ClosedInterval(0, largMov);
+  std::cerr << "Before StabChainOp_listgen\n";
   return StabChainOp_listgen(LGen, options);
 }
 
