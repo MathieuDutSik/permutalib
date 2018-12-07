@@ -335,17 +335,28 @@ Telt InverseRepresentative(StabChain<Telt> const& S, int const& pnt)
   int bpt=S->orbit[0];
   Telt rep=S->comm->identity;
   int pntw=pnt;
+#undef DEBUG_INV_REP
+#define DEBUG_INV_REP
   std::cerr << "INVREP CPP bpt=" << (bpt+1) << " pnt=" << (pntw+1) << "\n";
+#endif
   while(pntw != bpt) {
     int idx=S->transversal[pntw];
     Telt te=S->comm->labels[idx];
+#define DEBUG_INV_REP
     std::cerr << "INVREP CPP te=" << te << "\n";
+#endif
     pntw=PowAct(pntw, te);
+#define DEBUG_INV_REP
     std::cerr << "INVREP CPP   pnt=" << (pntw+1) << "\n";
+#endif
     rep = rep * te;
+#define DEBUG_INV_REP
     std::cerr << "INVREP CPP   rep=" << rep << "\n";
+#endif
   }
+#define DEBUG_INV_REP
   std::cerr << "INVREP CPP return rep=" << rep << "\n";
+#endif
   return rep;
 }
 
@@ -744,29 +755,25 @@ std::string GapStringTVector(std::vector<T> const& f)
 template<typename Telt>
 void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> const& newgens)
 {
+#undef DEBUG_ADD_GEN_SCH
+#ifdef DEBUG_ADD_GEN_SCH
   std::cerr << "AGEST CPP : Beginning of AddGeneratorsExtendSchreierTree\n";
   std::cerr << "AGEST CPP 1: genlabels=" << GapStringIntVector(S->genlabels) << "\n";
+#endif
   int nbLabel=S->comm->labels.size();
   std::vector<int> ListAtt(nbLabel);
   for (int i=0; i<nbLabel; i++)
     ListAtt[i]=i;
   Face old=BlistList(ListAtt, S->genlabels);
   old[0]=true;
-  /*
-  std::cerr << "old =";
-  for (int i=0; i<int(old.size()); i++)
-    std::cerr << " " << old[i];
-  std::cerr << "\n";
-  std::cerr << "Before genlabels =";
-  for (auto & eVal : S.stabilizer[eLev].genlabels)
-    std::cerr << " " << eVal;
-    std::cerr << "\n";*/
   Face ald=old;
+#ifdef DEBUG_ADD_GEN_SCH
   std::cerr << "AGEST CPP newgens=" << GapStringTVector(newgens) << "\n";
   std::cerr << "AGEST CPP 1: old=" << GapStringBoolVector(old) << "\n";
   std::cerr << "AGEST CPP 1: ald=" << GapStringBoolVector(ald) << "\n";
   std::cerr << "AGEST CPP labels=" << GapStringTVector(S->comm->labels) << "\n";
   std::cerr << "AGEST CPP 2: genlabels=" << GapStringIntVector(S->genlabels) << "\n";
+#endif
   for (auto & gen : newgens) {
     int pos = PositionVect(S->comm->labels, gen);
     if (pos == -1) {
@@ -774,73 +781,64 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
       old.push_back(false);
       ald.push_back(true);
       int posG=S->comm->labels.size() - 1;
+#ifdef DEBUG_ADD_GEN_SCH
       std::cerr << "AGEST CPP  genlabels insert 1: pos=" << (posG+1) << "\n";
+#endif
       S->genlabels.push_back(posG);
     }
     else {
       if (!ald[pos]) {
+#ifdef DEBUG_ADD_GEN_SCH
 	std::cerr << "AGEST CPP  genlabels insert 2: pos=" << (pos+1) << "\n";
+#endif
 	S->genlabels.push_back(pos);
       }
     }
   }
+#ifdef DEBUG_ADD_GEN_SCH
   std::cerr << "AGEST CPP 2: old=" << GapStringBoolVector(old) << "\n";
   std::cerr << "AGEST CPP 2: ald=" << GapStringBoolVector(ald) << "\n";
+#endif
   
-  /*
-  std::cerr << "Before test old =";
-  for (int i=0; i<int(old.size()); i++)
-    std::cerr << " " << old[i];
-  std::cerr << "\n";
-  std::cerr << "transversal =";
-  for (int i=0; i<int(S.stabilizer[eLev].transversal.size()); i++)
-    std::cerr << " " << S.stabilizer[eLev].transversal[i];
-  std::cerr << "\n";
-  std::cerr << "After genlabels =";
-  for (auto & eVal : S.stabilizer[eLev].genlabels)
-    std::cerr << " " << eVal;
-    std::cerr << "\n";*/
   int len = S->orbit.size();
   int i=0;
   if (S->comm->UseCycle) {
+#ifdef DEBUG_ADD_GEN_SCH
     std::cerr << "AGEST CPP Cycles len=" << len << "\n";
-    /*
-    std::cerr << "Before cycles =";
-    for (int u=0; u<int(S.stabilizer[eLev].cycles.size()); u++)
-      std::cerr << " " << S.stabilizer[eLev].cycles[u];
-    std::cerr << "\n";
-    */
+#endif
     while (i < int(S->orbit.size())) {
+#ifdef DEBUG_ADD_GEN_SCH
       std::cerr << "  AGEST CPP i=" << (i +1) << "\n";
-      //      std::cerr << "i=" << i << "\n";
+#endif
       for (int& j : S->genlabels) {
-	//	std::cerr << "  j=" << j << "\n";
 	if (i > len-1 || old[j] == 0) {
 	  int img=SlashAct(S->orbit[i], S->comm->labels[j]);
+#ifdef DEBUG_ADD_GEN_SCH
 	  std::cerr << "    AGEST CPP img=" << (img +1) << " g=" << S->comm->labels[j] << "\n";
-	  //	  std::cerr << "    After the test img=" << img << "\n";
+#endif
 	  if (S->transversal[img] != -1) {
 	    S->cycles[i]=true;
+#ifdef DEBUG_ADD_GEN_SCH
 	    std::cerr << "      AGEST CPP assign true\n";
+#endif
 	  }
 	  else {
 	    S->transversal[img]=j;
 	    S->orbit.push_back(img);
+#ifdef DEBUG_ADD_GEN_SCH
 	    std::cerr << "      AGEST CPP insert img\n";
+#endif
 	    S->cycles.push_back(false);
 	  }
 	}
       }
       i++;
     }
-    /*
-    std::cerr << "After cycles =";
-    for (int u=0; u<int(S.stabilizer[eLev].cycles.size()); u++)
-      std::cerr << " " << S.stabilizer[eLev].cycles[u];
-      std::cerr << "\n";*/
   }
   else {
+#ifdef DEBUG_ADD_GEN_SCH
     std::cerr << "AGEST CPP No Cycles len=" << len << "\n";
+#endif
     while (i < int(S->orbit.size())) {
       for (int& j : S->genlabels) {
 	if (i > len || old[j] == 0) {
