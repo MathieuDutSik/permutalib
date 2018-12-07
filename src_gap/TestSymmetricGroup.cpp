@@ -8,7 +8,14 @@ int main(int argc, char *argv[])
   try {
     using Telt = permutalib::DoubleSidedPerm;
     using Tint = mpz_class;
-    int n=5;
+    if (argc != 2) {
+      std::cerr << "The program is used as\n";
+      std::cerr << "TestSymmetricGroup [n]\n";
+      throw TerminalException{1};
+    }
+    int n;
+    (void)sscanf(argv[1], "%d", &n);
+    //
     std::vector<int> ePermV1(n);
     for (int i=0; i<n; i++) {
       int iNext=i+1;
