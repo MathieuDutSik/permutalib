@@ -336,25 +336,25 @@ Telt InverseRepresentative(StabChain<Telt> const& S, int const& pnt)
   Telt rep=S->comm->identity;
   int pntw=pnt;
 #undef DEBUG_INV_REP
-#define DEBUG_INV_REP
+#ifdef DEBUG_INV_REP
   std::cerr << "INVREP CPP bpt=" << (bpt+1) << " pnt=" << (pntw+1) << "\n";
 #endif
   while(pntw != bpt) {
     int idx=S->transversal[pntw];
     Telt te=S->comm->labels[idx];
-#define DEBUG_INV_REP
+#ifdef DEBUG_INV_REP
     std::cerr << "INVREP CPP te=" << te << "\n";
 #endif
     pntw=PowAct(pntw, te);
-#define DEBUG_INV_REP
+#ifdef DEBUG_INV_REP
     std::cerr << "INVREP CPP   pnt=" << (pntw+1) << "\n";
 #endif
     rep = rep * te;
-#define DEBUG_INV_REP
+#ifdef DEBUG_INV_REP
     std::cerr << "INVREP CPP   rep=" << rep << "\n";
 #endif
   }
-#define DEBUG_INV_REP
+#ifdef DEBUG_INV_REP
   std::cerr << "INVREP CPP return rep=" << rep << "\n";
 #endif
   return rep;
