@@ -83,7 +83,7 @@ void PrintVectDebug(std::string const& str, std::vector<T> const& V)
   std::cerr << "\n";
 }
 
- 
+
 
 template<typename T, typename Telt>
 std::vector<T> PermutedAct(std::vector<T> const& V, Telt const& g)
@@ -96,8 +96,8 @@ std::vector<T> PermutedAct(std::vector<T> const& V, Telt const& g)
   }
   return Vret;
 }
- 
- 
+
+
 template<typename Telt>
 int GetLabelIndex(std::vector<Telt> & labels, Telt const& u)
 {
@@ -126,9 +126,9 @@ int GetLabelIndex_const(std::vector<Telt> const& labels, Telt const& u)
 // Therefore we need a data set that allows us to do that and
 // native std::vector are not adequate.
 // We choose to use the same structure of shared_ptr as the GAP
-// code.  
+// code.
 
- 
+
 template<typename Telt>
 struct CommonStabInfo {
   int n;
@@ -153,7 +153,7 @@ struct StabLevel {
   std::shared_ptr<CommonStabInfo<Telt>> comm;
   std::shared_ptr<StabLevel<Telt>> stabilizer;
 };
- 
+
 template<typename Telt>
 using StabChain = std::shared_ptr<StabLevel<Telt>>;
 // other possible entries:
@@ -189,8 +189,13 @@ std::ostream& operator<<(std::ostream& os, StabChain<Telt> const& Stot)
   while(true) {
     if (Sptr == nullptr)
       break;
-    os << "iLev=" << iLev << "\n";
-    os << "  transversal =";
+    os << "CPP iLev=" << iLev << "\n";
+    os << "CPP  orbit =";
+    for (auto & eVal : Sptr->orbit) {
+      os << " " << eVal+1;
+    }
+    os << "\n";
+    os << "CPP  transversal =";
     for (auto & eVal : Sptr->transversal) {
       if (eVal == -1)
 	os << " " << eVal;
@@ -198,15 +203,12 @@ std::ostream& operator<<(std::ostream& os, StabChain<Telt> const& Stot)
 	os << " " << Sptr->comm->labels[eVal];
     }
     os << "\n";
-    os << "  orbit =";
-    for (auto & eVal : Sptr->orbit) {
-      os << " " << eVal+1;
-    }
-    os << "\n";
+    /*
     os << "  genlabels =";
     for (auto & eVal : Sptr->genlabels)
       os << " " << eVal;
     os << "\n";
+    */
     Sptr = Sptr->stabilizer;
     iLev++;
   }
@@ -218,7 +220,7 @@ std::ostream& operator<<(std::ostream& os, StabChain<Telt> const& Stot)
 template<typename Telt>
 StabChain<Telt> StructuralCopy(StabChain<Telt> const& S)
 {
-  std::cerr << "Begin of StructuralCopy\n";
+  std::cerr << "CPP Begin of StructuralCopy\n";
   if (S == nullptr)
     return nullptr;
   std::shared_ptr<CommonStabInfo<Telt>> comm_new = std::make_shared<CommonStabInfo<Telt>>(*(S->comm));
@@ -236,7 +238,7 @@ StabChain<Telt> StructuralCopy(StabChain<Telt> const& S)
 }
 
 
- 
+
 template<typename Telt>
 StabChain<Telt> RestrictedStabChain(StabChain<Telt> const& Stot, int const& eLev)
 {
@@ -264,7 +266,7 @@ StabLevel<Telt> EmptyStabLevel(std::shared_ptr<CommonStabInfo<Telt>> const& comm
 }
 
 
- 
+
 template<typename Telt>
 StabChain<Telt> EmptyStabChain(int const& n)
 {
@@ -284,8 +286,8 @@ StabChain<Telt> EmptyStabChainPlusNode(int const& n, int const& bas)
 }
 
 
- 
- 
+
+
 template<typename Telt>
 int BasePoint(StabChain<Telt> const& S)
 {
@@ -297,8 +299,8 @@ int BasePoint(StabChain<Telt> const& S)
 }
 
 
- 
- 
+
+
 
 // almost certainly wrong code below.
 template<typename Telt>
@@ -337,25 +339,25 @@ Telt InverseRepresentative(StabChain<Telt> const& S, int const& pnt)
   int pntw=pnt;
 #undef DEBUG_INV_REP
 #ifdef DEBUG_INV_REP
-  std::cerr << "INVREP CPP bpt=" << (bpt+1) << " pnt=" << (pntw+1) << "\n";
+  std::cerr << "CPP INVREP bpt=" << (bpt+1) << " pnt=" << (pntw+1) << "\n";
 #endif
   while(pntw != bpt) {
     int idx=S->transversal[pntw];
     Telt te=S->comm->labels[idx];
 #ifdef DEBUG_INV_REP
-    std::cerr << "INVREP CPP te=" << te << "\n";
+    std::cerr << "CPP INVREP te=" << te << "\n";
 #endif
     pntw=PowAct(pntw, te);
 #ifdef DEBUG_INV_REP
-    std::cerr << "INVREP CPP   pnt=" << (pntw+1) << "\n";
+    std::cerr << "CPP INVREP   pnt=" << (pntw+1) << "\n";
 #endif
     rep = rep * te;
 #ifdef DEBUG_INV_REP
-    std::cerr << "INVREP CPP   rep=" << rep << "\n";
+    std::cerr << "CPP INVREP   rep=" << rep << "\n";
 #endif
   }
 #ifdef DEBUG_INV_REP
-  std::cerr << "INVREP CPP return rep=" << rep << "\n";
+  std::cerr << "CPP INVREP return rep=" << rep << "\n";
 #endif
   return rep;
 }
@@ -380,17 +382,17 @@ std::vector<Telt> InverseRepresentativeWord(StabChain<Telt> const& S, int const&
 template<typename Telt>
 Telt SiftedPermutation(StabChain<Telt> const& S, Telt const& g)
 {
-  std::cerr << "Begining of SiftedPermutation\n";
+  std::cerr << "CPP Begining of SiftedPermutation\n";
   Telt gW=g;
-  std::cerr << "Before shared pointer copy\n";
+  //  std::cerr << "CPP Before shared pointer copy\n";
   StabChain<Telt> Sptr = S;
-  std::cerr << " After shared pointer copy\n";
+  //  std::cerr << "CPP After shared pointer copy\n";
   while(true) {
     if (Sptr->stabilizer == nullptr || gW.isIdentity())
       return gW;
-    std::cerr << "|Sptr->orbit|=" << Sptr->orbit.size() << "\n";
+    std::cerr << "CPP |Sptr->orbit|=" << Sptr->orbit.size() << "\n";
     int bpt = Sptr->orbit[0];
-    std::cerr << "bpt=" << bpt << "\n";
+    std::cerr << "CPP bpt=" << bpt << "\n";
     int img = PowAct(bpt, gW);
     if (Sptr->transversal[img] == -1)
       return gW;
@@ -469,7 +471,7 @@ template<typename Telt>
 Telt LargestElementStabChain(StabChain<Telt> const& S)
 {
   StabChain<Telt> Sptr = S;
-  
+
   Telt rep=Sptr->identity;
   while(true) {
     if (Sptr == nullptr)
@@ -499,7 +501,7 @@ Telt LargestElementStabChain(StabChain<Telt> const& S)
   return rep;
 }
 
- 
+
 /*
 template<typename Telt>
 std::vector<Telt> ElementsStabChain(StabChain<Telt> const& Stot)
@@ -757,8 +759,8 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
 {
 #undef DEBUG_ADD_GEN_SCH
 #ifdef DEBUG_ADD_GEN_SCH
-  std::cerr << "AGEST CPP : Beginning of AddGeneratorsExtendSchreierTree\n";
-  std::cerr << "AGEST CPP 1: genlabels=" << GapStringIntVector(S->genlabels) << "\n";
+  std::cerr << "CPP AGEST : Beginning of AddGeneratorsExtendSchreierTree\n";
+  std::cerr << "CPP AGEST 1: genlabels=" << GapStringIntVector(S->genlabels) << "\n";
 #endif
   int nbLabel=S->comm->labels.size();
   std::vector<int> ListAtt(nbLabel);
@@ -768,11 +770,11 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
   old[0]=true;
   Face ald=old;
 #ifdef DEBUG_ADD_GEN_SCH
-  std::cerr << "AGEST CPP newgens=" << GapStringTVector(newgens) << "\n";
-  std::cerr << "AGEST CPP 1: old=" << GapStringBoolVector(old) << "\n";
-  std::cerr << "AGEST CPP 1: ald=" << GapStringBoolVector(ald) << "\n";
-  std::cerr << "AGEST CPP labels=" << GapStringTVector(S->comm->labels) << "\n";
-  std::cerr << "AGEST CPP 2: genlabels=" << GapStringIntVector(S->genlabels) << "\n";
+  std::cerr << "CPP AGEST newgens=" << GapStringTVector(newgens) << "\n";
+  std::cerr << "CPP AGEST 1: old=" << GapStringBoolVector(old) << "\n";
+  std::cerr << "CPP AGEST 1: ald=" << GapStringBoolVector(ald) << "\n";
+  std::cerr << "CPP AGEST labels=" << GapStringTVector(S->comm->labels) << "\n";
+  std::cerr << "CPP AGEST 2: genlabels=" << GapStringIntVector(S->genlabels) << "\n";
 #endif
   for (auto & gen : newgens) {
     int pos = PositionVect(S->comm->labels, gen);
@@ -782,51 +784,51 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
       ald.push_back(true);
       int posG=S->comm->labels.size() - 1;
 #ifdef DEBUG_ADD_GEN_SCH
-      std::cerr << "AGEST CPP  genlabels insert 1: pos=" << (posG+1) << "\n";
+      std::cerr << "CPP AGEST  genlabels insert 1: pos=" << (posG+1) << "\n";
 #endif
       S->genlabels.push_back(posG);
     }
     else {
       if (!ald[pos]) {
 #ifdef DEBUG_ADD_GEN_SCH
-	std::cerr << "AGEST CPP  genlabels insert 2: pos=" << (pos+1) << "\n";
+	std::cerr << "CPP AGEST  genlabels insert 2: pos=" << (pos+1) << "\n";
 #endif
 	S->genlabels.push_back(pos);
       }
     }
   }
 #ifdef DEBUG_ADD_GEN_SCH
-  std::cerr << "AGEST CPP 2: old=" << GapStringBoolVector(old) << "\n";
-  std::cerr << "AGEST CPP 2: ald=" << GapStringBoolVector(ald) << "\n";
+  std::cerr << "CPP AGEST 2: old=" << GapStringBoolVector(old) << "\n";
+  std::cerr << "CPP AGEST 2: ald=" << GapStringBoolVector(ald) << "\n";
 #endif
-  
+
   int len = S->orbit.size();
   int i=0;
   if (S->comm->UseCycle) {
 #ifdef DEBUG_ADD_GEN_SCH
-    std::cerr << "AGEST CPP Cycles len=" << len << "\n";
+    std::cerr << "CPP AGEST Cycles len=" << len << "\n";
 #endif
     while (i < int(S->orbit.size())) {
 #ifdef DEBUG_ADD_GEN_SCH
-      std::cerr << "  AGEST CPP i=" << (i +1) << "\n";
+      std::cerr << "CPP   AGEST i=" << (i +1) << "\n";
 #endif
       for (int& j : S->genlabels) {
 	if (i > len-1 || old[j] == 0) {
 	  int img=SlashAct(S->orbit[i], S->comm->labels[j]);
 #ifdef DEBUG_ADD_GEN_SCH
-	  std::cerr << "    AGEST CPP img=" << (img +1) << " g=" << S->comm->labels[j] << "\n";
+	  std::cerr << "CPP     AGEST img=" << (img +1) << " g=" << S->comm->labels[j] << "\n";
 #endif
 	  if (S->transversal[img] != -1) {
 	    S->cycles[i]=true;
 #ifdef DEBUG_ADD_GEN_SCH
-	    std::cerr << "      AGEST CPP assign true\n";
+	    std::cerr << "CPP       AGEST assign true\n";
 #endif
 	  }
 	  else {
 	    S->transversal[img]=j;
 	    S->orbit.push_back(img);
 #ifdef DEBUG_ADD_GEN_SCH
-	    std::cerr << "      AGEST CPP insert img\n";
+	    std::cerr << "CPP       AGEST insert img\n";
 #endif
 	    S->cycles.push_back(false);
 	  }
@@ -837,7 +839,7 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
   }
   else {
 #ifdef DEBUG_ADD_GEN_SCH
-    std::cerr << "AGEST CPP No Cycles len=" << len << "\n";
+    std::cerr << "CPP AGEST No Cycles len=" << len << "\n";
 #endif
     while (i < int(S->orbit.size())) {
       for (int& j : S->genlabels) {
@@ -916,55 +918,55 @@ void ChooseNextBasePoint(StabChain<Telt> & S, std::vector<int> const& base, std:
 template<typename Telt, typename Tint>
 void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, StabChainOptions<Tint> const& options)
 {
-  std::cerr << "Before StabChainStrong : |newgens|=" << newgens.size() << "\n";
-  std::cerr << "StabChainStrong CPP 1: genlabels=" << GapStringIntVector(S->genlabels) << "\n";
+  std::cerr << "CPP Before StabChainStrong : |newgens|=" << newgens.size() << "\n";
+  std::cerr << "CPP StabChainStrong 1: genlabels=" << GapStringIntVector(S->genlabels) << "\n";
   ChooseNextBasePoint(S, options.base, newgens);
-  std::cerr << "StabChainStrong CPP 2: genlabels=" << GapStringIntVector(S->genlabels) << "\n";
-  
+  std::cerr << "CPP StabChainStrong 2: genlabels=" << GapStringIntVector(S->genlabels) << "\n";
+
   int pnt = S->orbit[0];
   int len = S->orbit.size();
   int old = S->genlabels.size();
-  std::cerr << "Before AddGeneratorsExtendSchreierTree\n";
+  std::cerr << "CPP Before AddGeneratorsExtendSchreierTree\n";
   AddGeneratorsExtendSchreierTree(S, newgens);
-  
+
   //# If a new generator fixes the base point, put it into the stabilizer.
   for (auto & eGen : newgens)
     if (eGen.isIdentity() == false && PowAct(pnt, eGen) == pnt) {
-      std::cerr << "   1: Calling StabChainStrong with eGen=" << GapStyleString(eGen) << "\n";
+      std::cerr << "CPP   1: Calling StabChainStrong with eGen=" << GapStyleString(eGen) << "\n";
       StabChainStrong(S->stabilizer, {eGen}, options);
     }
-    
+
   // # Compute the Schreier generators (seems to work better backwards).
   std::vector<int> pnts = ClosedInterval(0, S->orbit.size());
   if (S->comm->UseCycle)
     pnts = ListBlist(pnts, S->cycles);
-  std::cerr << "   pnts =";
+  std::cerr << "CPP   pnts =";
   for (auto & eVal : pnts)
     std::cerr << " " << eVal;
-  std::cerr << " Usecycle=" << S->comm->UseCycle;
+  std::cerr << "CPP Usecycle=" << S->comm->UseCycle;
   if (S->comm->UseCycle) {
-    std::cerr << " cycles=";
+    std::cerr << "CPP cycles=";
     for (int i=0; i<int(S->orbit.size()); i++)
       std::cerr << " " << S->cycles[i];
   }
   std::cerr << "\n";
   int gen1=0;
-  std::cerr << "StabChainStrong CPP O=" << GapStringIntVector(S->orbit) << "\n";
+  std::cerr << "CPP StabChainStrong O=" << GapStringIntVector(S->orbit) << "\n";
   for (int& i : Reversed(pnts)) {
     int p=S->orbit[i];
-    std::cerr << "StabChainStrong CPP i=" << (i+1) << " p=" << (p+1) << "\n";
+    std::cerr << "CPP StabChainStrong i=" << (i+1) << " p=" << (p+1) << "\n";
     Telt rep=InverseRepresentative(S, p);
     if (i < len)
       gen1=old;
-    std::cerr << "StabChainStrong CPP gen1=" << gen1 << " rep=" << rep << "\n";
+    std::cerr << "CPP StabChainStrong gen1=" << gen1 << " rep=" << rep << "\n";
     for (int & j : ClosedInterval(gen1, S->genlabels.size())) {
       Telt g = S->comm->labels[ S->genlabels[j] ];
-      std::cerr << "StabChainStrong CPP   j=" << (j+1) << " g=" << g << "\n";
+      std::cerr << "CPP StabChainStrong   j=" << (j+1) << " g=" << g << "\n";
       if (S->transversal[ SlashAct(p, g) ] != S->genlabels[j]) {
         Telt sch = SiftedPermutation(S, Inverse(g*rep));
 	std::cerr << "CPP sch=" << sch << " g=" << g << " rep=" << rep << "\n";
 	if (!sch.isIdentity()) {
-	  std::cerr << "   2: Calling StabChainStrong with sch=" << GapStyleString(sch) << "\n";
+	  std::cerr << "CPP   2: Calling StabChainStrong with sch=" << GapStyleString(sch) << "\n";
 	  StabChainStrong(S->stabilizer, {sch}, options );
 	}
       }
@@ -1101,8 +1103,8 @@ T LabsLims(T const& lab, std::function<T(T const&)> const& hom, std::vector<T> &
 // that interest us.
 // The action that correspond to the code as written are
 // OnTuples(orbit, map) with map=cnj. This is the normal action on points.
-// OnTuples(labels, hom) with hom=cnj. This is the action by conjugacy: 
-// The action are therefore of the 
+// OnTuples(labels, hom) with hom=cnj. This is the action by conjugacy:
+// The action are therefore of the
 template<typename Telt>
 void ConjugateStabChain(StabChain<Telt> & Stot, Telt const& cnj)
 {
@@ -1169,15 +1171,19 @@ template<typename Telt>
 bool ChangeStabChain(StabChain<Telt> & Stot, std::vector<int> const& base, int const& reduced)
 {
   Telt cnj = Stot->comm->identity;
+  int idx=0;
+  auto KeyUpdating=[&](std::string const& str) {
+    std::cerr << "GAP At step " << idx << " S=G : , of " << str << "\n";
+  };
   std::vector<int> newBase;
   int i=0;
   int basSiz=base.size();
-  std::cerr << "ChangeStabChain CPP base = [";
+  std::cerr << "CPP ChangeStabChain base = [";
   for (auto & eVal : base) {
     std::cerr << " " << eVal;
   }
   std::cerr << " ]\n";
-  std::cerr << "ChangeStabChain CPP 1 orbit=" << PrintTopOrbit(Stot) << "\n";
+  std::cerr << "CPP ChangeStabChain 1 orbit=" << PrintTopOrbit(Stot) << "\n";
   StabChain<Telt> Sptr = Stot;
   while(true) {
     if (Sptr == nullptr)
@@ -1185,10 +1191,12 @@ bool ChangeStabChain(StabChain<Telt> & Stot, std::vector<int> const& base, int c
     if (i >= basSiz)
       break;
     int old=BasePoint(Stot);
-    std::cerr << "ChangeStabChain old=" << old << "\n";
+    KeyUpdating("After BasePoint");
+    std::cerr << "CPP ChangeStabChain old=" << old << "\n";
     //    std::cerr << "eLev=" << eLev << "\n";
     if (Sptr->genlabels.size() == 0 && (reduced == int_true || i >= basSiz)) {
       RemoveStabChain(Sptr);
+      KeyUpdating("After RemoveStabChain");
       i = basSiz;
     }
     else if (i < basSiz) {
@@ -1199,20 +1207,25 @@ bool ChangeStabChain(StabChain<Telt> & Stot, std::vector<int> const& base, int c
 	if (newpnt != old) {
 	  if (IsFixedStabilizer(Sptr, newpnt)) {
 	    InsertTrivialStabilizer(Sptr, newpnt);
+            KeyUpdating("After InsertTrivialStabilizer");
 	  }
 #ifdef DEBUG_GROUP
 	  else {
-	    std::cerr << "<base> must be an extension of base of <G>\n";
+	    std::cerr << "CPP <base> must be an extension of base of <G>\n";
 	    throw TerminalException{1};
 	  }
 #endif
 	}
 	Sptr = Sptr->stabilizer;
+        KeyUpdating("After S:=S.stabilizer 1");
       }
       else if (reduced == int_false || !IsFixedStabilizer(Sptr, newpnt )) {
 	if (Sptr->stabilizer != nullptr) {
-	  if (!StabChainForcePoint(Sptr, newpnt))
+	  if (!StabChainForcePoint(Sptr, newpnt)) {
+            KeyUpdating("After StabChainForcePoint, return false");
 	    return false;
+          }
+          KeyUpdating("After StabChainForcePoint, return true");
 	  cnj = LeftQuotient(InverseRepresentative(Sptr, newpnt), cnj);
 	}
 	else {
@@ -1223,7 +1236,7 @@ bool ChangeStabChain(StabChain<Telt> & Stot, std::vector<int> const& base, int c
       }
     }
     else if (PositionVect(newBase, old) != -1 || (reduced == int_true && Sptr->orbit.size() == 1)) {
-      std::cerr << "Stabilizer shift in ChangeStabChain\n";
+      std::cerr << "CPP Stabilizer shift in ChangeStabChain\n";
       Sptr->stabilizer = Sptr->stabilizer->stabilizer;
     }
     else {
@@ -1231,11 +1244,11 @@ bool ChangeStabChain(StabChain<Telt> & Stot, std::vector<int> const& base, int c
       Sptr = Sptr->stabilizer;
     }
   }
-  std::cerr << "ChangeStabChain CPP 2 orbit=" << PrintTopOrbit(Stot) << "\n";
-  std::cerr << "Before ConjugateStabChain cnj=" << cnj << "\n";
+  std::cerr << "CPP ChangeStabChain 2 orbit=" << PrintTopOrbit(Stot) << "\n";
+  std::cerr << "CPP Before ConjugateStabChain cnj=" << cnj << "\n";
   if (!cnj.isIdentity())
     ConjugateStabChain(Stot, cnj);
-  std::cerr << "ChangeStabChain CPP 3 orbit=" << PrintTopOrbit(Stot) << "\n";
+  std::cerr << "CPP ChangeStabChain 3 orbit=" << PrintTopOrbit(Stot) << "\n";
   return true;
 }
 
@@ -1266,7 +1279,7 @@ void InitializeSchreierTree(StabChain<Telt> & S, int const& pnt)
   S->transversal = transversal;
   std::cerr << "   Ending of InitializeSchreierTree\n";
 }
-    
+
 
 template<typename Telt>
 bool TestEqualityAtLevel(StabChain<Telt> const& L, StabChain<Telt> const& R, int const& lev)
@@ -1405,7 +1418,7 @@ StabChain<Tret> HomomorphismMapping(StabChain<Telt> const& Stot, std::function<T
   StabChain<Telt> Sptr = Stot;
   StabChain<Tret> Swork = nullptr;
   StabChain<Tret> Sreturn = nullptr;
-  
+
   while(true) {
     if (Sptr == nullptr)
       break;

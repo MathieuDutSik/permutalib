@@ -69,7 +69,8 @@ CreateExampleOnSetCase:=function(FileName, GRP, sizSet)
   od;
   AppendTo(output, "\n");
   CloseStream(output);
-
+  Print("|eG|=", Order(GRP), "\n");
+  Print("Before Stabilizer_OnSets\n");
   eStab:=Stabilizer(GRP, eSet, OnSets);
   Print("|eStab|=", Order(eStab), "\n");
 end;
@@ -100,14 +101,14 @@ if DoSym6 then
   #
 fi;
 
-# The case of Sym4 is simpler. However it is also solvable 
+# The case of Sym4 is simpler. However it is also solvable
 # and in that case GAP uses the PCGS algorithms that we do not
 # want to implement.
-# 
+#
 # Also, we need to put Group([(1,2,3,4,5),(1,2)])
 #       instead of SymmetricGroup(5)
 # because this triggers a different algo for the Symmetric group
-# 
+#
 
 
 DoSym5:=true;
@@ -116,4 +117,5 @@ if DoSym5 then
   eSize:=2;
   eFile:=Concatenation("ExampleSym5_", String(eSize));
   CreateExampleOnSetCase(eFile, Group([(1,2,3,4,5),(1,2)]), eSize);
+  Print("eFile=", eFile, "\n");
 fi;
