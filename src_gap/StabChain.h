@@ -74,6 +74,7 @@ std::string GetIntTypeNature(int const& val)
 
 
 
+
 template<typename T>
 void PrintVectDebug(std::string const& str, std::vector<T> const& V)
 {
@@ -170,6 +171,58 @@ struct StabChain {
   std::vector<StabLevel<Telt>> stabilizer;
 };
 */
+
+template<typename Telt>
+int GetStabilizerDepth(StabChain<Telt> const& Sptr)
+{
+  StabChain<Telt> Ssec = Sptr;
+  int dep = 0;
+  while(true) {
+    if (Ssec == nullptr)
+      break;
+    dep++;
+    Ssec = Ssec->stabilizer;
+  }
+  return dep;
+}
+
+
+template<typename Telt>
+std::string perm_to_string(Telt const& eVal)
+{
+  std::ostringstream os;
+  os << eVal;
+  std::string str=os.str();
+  return str;
+}
+
+
+template<typename Telt>
+std::string GetStringExpressionOfStabChain(StabChain<Telt> const& eRec)
+{
+  std::string strRet="record_";
+  StabChain<Telt> eStab = eRec;
+  while(true) {
+    if (eStab == nullptr)
+      break;
+    strRet += "orbit_[";
+    for (auto & eVal : eStab->orbit)
+      strRet += " " + std::to_string(eVal+1);
+    strRet += "]";
+    strRet += "_transversal_";
+    for (auto & eVal : eStab->transversal) {
+      if (eVal == -1)
+        strRet += " " + std::to_string(eVal);
+      else
+        strRet += " " + perm_to_string(eStab->comm->labels[eVal]);
+    }
+    eStab = eStab->stabilizer;
+  }
+  return strRet;
+}
+
+
+
 
 template<typename Telt>
 std::ostream& operator<<(std::ostream& os, StabChain<Telt> const& Stot)
@@ -306,7 +359,7 @@ int BasePoint(StabChain<Telt> const& S)
 template<typename Telt>
 void RemoveStabChain(StabChain<Telt> & Stot)
 {
-  std::cerr << "Doing RemoveStabChain\n";
+  std::cerr << "CPP Doing RemoveStabChain\n";
   Stot->stabilizer == nullptr;
   Stot->genlabels.clear();
 }
@@ -1163,17 +1216,42 @@ std::string PrintTopOrbit(StabChain<Telt> const& S)
 
 
 
+
 // value of reduced
 //  reduced = -1 corresponds to reduced = -1 in GAP code
 //  reduced = 0  corresponds to reduced = false in GAP code
 //  reduced = 1  corresponds to reduced = true in GAP code
 template<typename Telt>
-bool ChangeStabChain(StabChain<Telt> & Stot, std::vector<int> const& base, int const& reduced)
+bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int const& reduced)
 {
-  Telt cnj = Stot->comm->identity;
+  std::cerr << "CPP Beginning of ChangeStabChain\n";
+  Telt cnj = Gptr->comm->identity;
   int idx=0;
+  StabChain<Telt> Sptr = Gptr;
+  std::string strG_orig=GetStringExpressionOfStabChain(Gptr);
+  std::string strG_current=GetStringExpressionOfStabChain(Gptr);
+  std::string strS_current=GetStringExpressionOfStabChain(Sptr);
+
   auto KeyUpdating=[&](std::string const& str) {
-    std::cerr << "GAP At step " << idx << " S=G : , of " << str << "\n";
+    idx++;
+    std::string strGloc=GetStringExpressionOfStabChain(Gptr);
+    std::string strSloc=GetStringExpressionOfStabChain(Sptr);
+    std::cerr << "CPP KU At step " << idx << " of " << str << "\n";
+    if (strG_current == strGloc) {
+      std::cerr << "CPP   KU At step " << idx << " of " << str << " no change of G\n";
+    }
+    else {
+      std::cerr << "CPP   KU At step " << idx << " of " << str << " CHANGE of G\n";
+      strG_current=strGloc;
+    }
+    if (strS_current == strSloc) {
+      std::cerr << "CPP   KU At step " << idx << " of " << str << " no change of S\n";
+    }
+    else {
+      std::cerr << "CPP   KU At step " << idx << " of " << str << " CHANGE of S\n";
+      strS_current=strSloc;
+    }
+
   };
   std::vector<int> newBase;
   int i=0;
@@ -1183,16 +1261,22 @@ bool ChangeStabChain(StabChain<Telt> & Stot, std::vector<int> const& base, int c
     std::cerr << " " << eVal;
   }
   std::cerr << " ]\n";
-  std::cerr << "CPP ChangeStabChain 1 orbit=" << PrintTopOrbit(Stot) << "\n";
-  StabChain<Telt> Sptr = Stot;
-  while(true) {
-    if (Sptr == nullptr)
+  std::cerr << "CPP ChangeStabChain 1 orbit=" << PrintTopOrbit(Gptr) << "\n";
+  while(GetStabilizerDepth(Sptr) > 1 || i<basSiz) {
+    std::cerr << "CPP GetStabilizerDepth(S)=" << GetStabilizerDepth(Sptr) << "\n";
+    /*
+    if (Sptr == nullptr) {
+      std::cerr << "CPP leaving since Sptr == nullptr\n";
       break;
-    if (i >= basSiz)
+    }
+    if (i >= basSiz) {
+      std::cerr << "CPP leaving since i>= basSiz. i=" << i << " basSiz=" << basSiz << "\n";
       break;
-    int old=BasePoint(Stot);
+    }
+    */
+    int old=BasePoint(Sptr);
+    std::cerr << "CPP ChangeStabChain old=" << old << " i=" << i << " |base|=" << basSiz << "\n";
     KeyUpdating("After BasePoint");
-    std::cerr << "CPP ChangeStabChain old=" << old << "\n";
     //    std::cerr << "eLev=" << eLev << "\n";
     if (Sptr->genlabels.size() == 0 && (reduced == int_true || i >= basSiz)) {
       RemoveStabChain(Sptr);
@@ -1226,13 +1310,17 @@ bool ChangeStabChain(StabChain<Telt> & Stot, std::vector<int> const& base, int c
 	    return false;
           }
           KeyUpdating("After StabChainForcePoint, return true");
+          std::cerr << "CPP 1: cnj=" << cnj << "\n";
 	  cnj = LeftQuotient(InverseRepresentative(Sptr, newpnt), cnj);
+          std::cerr << "CPP 2: cnj=" << cnj << "\n";
 	}
 	else {
 	  InsertTrivialStabilizer(Sptr, newpnt);
+          KeyUpdating("After InsertTrivialStabilizer");
 	}
 	newBase.push_back(Sptr->orbit[0]);
 	Sptr = Sptr->stabilizer;
+        KeyUpdating("After S:=S.stabilizer 2");
       }
     }
     else if (PositionVect(newBase, old) != -1 || (reduced == int_true && Sptr->orbit.size() == 1)) {
@@ -1242,13 +1330,14 @@ bool ChangeStabChain(StabChain<Telt> & Stot, std::vector<int> const& base, int c
     else {
       newBase.push_back(old);
       Sptr = Sptr->stabilizer;
+      KeyUpdating("After S:=S.stabilizer 3");
     }
   }
-  std::cerr << "CPP ChangeStabChain 2 orbit=" << PrintTopOrbit(Stot) << "\n";
+  std::cerr << "CPP ChangeStabChain 2 orbit=" << PrintTopOrbit(Gptr) << "\n";
   std::cerr << "CPP Before ConjugateStabChain cnj=" << cnj << "\n";
   if (!cnj.isIdentity())
-    ConjugateStabChain(Stot, cnj);
-  std::cerr << "CPP ChangeStabChain 3 orbit=" << PrintTopOrbit(Stot) << "\n";
+    ConjugateStabChain(Gptr, cnj);
+  std::cerr << "CPP ChangeStabChain 3 orbit=" << PrintTopOrbit(Gptr) << "\n";
   return true;
 }
 
