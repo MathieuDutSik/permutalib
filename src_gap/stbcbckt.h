@@ -190,8 +190,35 @@ struct rbaseType {
   //
   std::vector<StabChainPlusLev<Telt>> lev2;
   StabChainPlusLev<Telt> level2;
+  //
+  std::vector<std::string> levkey;
 };
 
+
+template<typename Telt>
+void KeyUpdatingRbase(std::string const& str, rbaseType<Telt> & rbase)
+{
+  std::vector<std::string> ListKey;
+  for (auto & x : rbase.lev)
+    ListKey.push_back(GetStringExpressionOfStabChain(x.Stot));
+  //
+  size_t len = rbase.lev.size();
+  std::string strO = "[ ";
+  for (size_t u=0; u<len; u++) {
+    if (u>0)
+      strO += ", ";
+    strO += PrintTopOrbit(rbase.lev[u].Stot);
+  }
+  strO += " ]";
+  std::cerr << "CPP KUR: at " << str << " Lorbit=" << strO << "\n";
+  bool test = ListKey[len] == GetStringExpressionOfStabChain(rbase.level.Stot);
+  std::cerr << "CPP KUR: at " << str << " test_equality=" << test << "\n";
+  for (size_t i=0; i<len; i++)
+    if (i<rbase.levkey.size())
+      if (rbase.levkey[i] != ListKey[i])
+        std::cerr << "CPP  KUR: Change of key at i=" << i << "\n";
+  rbase.levkey = ListKey;
+}
 
 template<typename Telt>
 std::string ListOrbitOfRbaseLEV(rbaseType<Telt> const& rbase)
@@ -499,26 +526,33 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
   PrintRBaseLevel(rbase, "CPP RegisterRBasePoint 1");
   rbase.lev.push_back(rbase.level);
   rbase.base.push_back(pnt);
+  KeyUpdatingRbase("GAP RegisterRBasePoint 1", rbase);
   int k = IsolatePoint(P, pnt);
   NicePrintPartition("CPP After IsolatePoint P", P);
+  KeyUpdatingRbase("RegisterRBasePoint 1.1", rbase);
   if (!ProcessFixpoint_rbase(rbase, pnt)) {
     std::cerr << "CPP INFO: Warning R-base point is already fixed\n";
   }
   //  rbase.lev.push_back(rbase.level);
+  KeyUpdatingRbase("RegisterRBasePoint 1.2", rbase);
   PrintRBaseLevel(rbase, "CPP RegisterRBasePoint 2");
   rbase.where.push_back(k);
   int len=rbase.rfm.size();
   rbase.rfm.push_back({});
   std::cerr << "CPP Before P.lengths test k=" << k << " len=" << len << "\n";
+  KeyUpdatingRbase("RegisterRBasePoint 1.3", rbase);
   if (P.lengths[k] == 1) {
     std::cerr << "CPP Matching P.lengths test\n";
     int pnt = FixpointCellNo(P, k);
     std::cerr << "CPP Section P.lengths after FixpointCellNo pnt=" << pnt << "\n";
     ProcessFixpoint_rbase(rbase, pnt);
+    KeyUpdatingRbase("RegisterRBasePoint 1.4", rbase);
     std::cerr << "CPP Section P.lengths after ProcessFixpoint_rbase\n";
     rbase.rfm[len].push_back(Refinement({pnt,k}));
+    KeyUpdatingRbase("RegisterRBasePoint 1.5", rbase);
   }
   PrintRBaseLevel(rbase, "CPP RegisterRBasePoint 3");
+  KeyUpdatingRbase("RegisterRBasePoint 2", rbase);
   if (rbase.level2.status != int_false) {
     std::cerr << "CPP Matching the ! false test\n";
     auto MainInsert=[&](StabChainPlusLev<Telt> const& lev) -> void {
@@ -529,7 +563,9 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
 	std::cerr << "\n";
 	Partition O = OrbitsPartition(LGen, lev.Stot->comm->n, rbase.domain);
 	NicePrintPartition("CPP Before StratMeetPartition O", O);
+        KeyUpdatingRbase("RegisterRBasePoint 2.1", rbase);
 	std::vector<singStrat> strat = StratMeetPartition(rbase, P, O, TheId);
+        KeyUpdatingRbase("RegisterRBasePoint 2.2", rbase);
 	rbase.rfm[len].push_back(Refinement({O,strat}));
       }
     };
@@ -543,6 +579,7 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
     }
   }
   //  rbase.lev.push_back(rbase.level);
+  KeyUpdatingRbase("RegisterRBasePoint 3", rbase);
 }
 
 

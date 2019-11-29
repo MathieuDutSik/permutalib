@@ -1333,11 +1333,13 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
       KeyUpdating("After S:=S.stabilizer 3");
     }
   }
+  std::cerr << "CPP LEAVE GetStabilizerDepth(Sptr)=" << GetStabilizerDepth(Sptr) << " i=" << i << " |base|=" << basSiz << "\n";
   std::cerr << "CPP ChangeStabChain 2 orbit=" << PrintTopOrbit(Gptr) << "\n";
   std::cerr << "CPP Before ConjugateStabChain cnj=" << cnj << "\n";
   if (!cnj.isIdentity())
     ConjugateStabChain(Gptr, cnj);
   std::cerr << "CPP ChangeStabChain 3 orbit=" << PrintTopOrbit(Gptr) << "\n";
+  std::cerr << "CPP Leaving ChangeStabChain\n";
   return true;
 }
 
