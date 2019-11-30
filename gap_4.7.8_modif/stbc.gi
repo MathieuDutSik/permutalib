@@ -1131,7 +1131,9 @@ local   G,  base,  reduced,
     # Get the arguments.
     G := arg[ 1 ];
     strG_orig:=GetStringExpressionOfStabChain(G);
-    strG_current:=GetStringExpressionOfStabChain(G);
+    strG_current:=strG_orig;
+    Print("GAP we have strG_XY\n");
+    Print("GAP GetStabilizerDepth = ", GetStabilizerDepth(G), "\n");
     base := arg[ 2 ];
     if Length( arg ) > 2  then  reduced := arg[ 3 ];
                           else  reduced := true;      fi;
@@ -1139,6 +1141,7 @@ local   G,  base,  reduced,
     cnj := G.identity;
     S := G;
     strS_current:=GetStringExpressionOfStabChain(S);
+    Print("GAP we have strS_current\n");
     idx:=0;
     KeyUpdating:=function(str)
       local strGloc, strSloc;
@@ -1260,7 +1263,7 @@ local   G,  base,  reduced,
         fi;
 
     od;
-    Print("GAP LEAVE IsBound(S.stabilizer)=", IsBound(S.stabilizer), " i=", i, " |base|=", Length(base), "\n");
+    Print("GAP LEAVE GetStabilizerDepth(S)=", GetStabilizerDepth(S), " i=", i, " |base|=", Length(base), "\n");
     strG_final:=GetStringExpressionOfStabChain(G);
     strS:=GetStringExpressionOfStabChain(S);
 #    Print("GAP ChangeStabChainOPER G change: ", strG_orig=strG_final, "\n");

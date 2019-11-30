@@ -1168,21 +1168,35 @@ T LabsLims(T const& lab, std::function<T(T const&)> const& hom, std::vector<T> &
 template<typename Telt>
 void ConjugateStabChain(StabChain<Telt> & Stot, Telt const& cnj)
 {
+#undef DEBUG_CONJ_STAB_CHAIN
   int n=Stot->comm->n;
   Telt cnjInv=~cnj;
   auto hom=[&](Telt const& x) -> Telt {
-    return cnjInv*x*cnj;
+#ifdef DEBUG_CONJ_STAB_CHAIN
+    std::cerr << "hom: cnj=" << cnj << " x=" << x << " cnjInv=" << cnjInv << "\n";
+#endif
+    Telt retV = cnjInv*x*cnj;
+#ifdef DEBUG_CONJ_STAB_CHAIN
+    std::cerr << "retV=" << retV << "\n";
+#endif
+    return retV;
   };
   auto map=[&](int const& x) -> int {
     return cnj.at(x);
   };
   StabChain<Telt> Sptr = Stot;
+#ifdef DEBUG_CONJ_STAB_CHAIN
   std::cerr << "ConjugateStabChain, step 1\n";
+#endif
   while(true) {
+#ifdef DEBUG_CONJ_STAB_CHAIN
     std::cerr << "ConjugateStabChain, step 2\n";
+#endif
     if (Sptr == nullptr)
       break;
+#ifdef DEBUG_CONJ_STAB_CHAIN
     std::cerr << "ConjugateStabChain, step 3\n";
+#endif
     if (Sptr->transversal.size() > 0) {
       std::vector<int> NewTransversal(n);
       //      std::cerr << "Before loop n=" << n << "\n";
@@ -1197,21 +1211,25 @@ void ConjugateStabChain(StabChain<Telt> & Stot, Telt const& cnj)
       //      std::cerr << " After loop\n";
       Sptr->transversal=NewTransversal;
     }
+#ifdef DEBUG_CONJ_STAB_CHAIN
     std::cerr << "ConjugateStabChain, step 4\n";
+#endif
     Sptr->treegen = ListT(Sptr->treegen, hom);
-    std::cerr << "ConjugateStabChain, step 5\n";
     Sptr->treegeninv = ListT(Sptr->treegeninv, hom);
-    std::cerr << "ConjugateStabChain, step 6\n";
     Sptr->aux = ListT(Sptr->aux, hom);
-    std::cerr << "ConjugateStabChain, step 7\n";
     Sptr->orbit = ListT(Sptr->orbit, map);
-    std::cerr << "ConjugateStabChain, step 8\n";
     Sptr = Sptr->stabilizer;
+#ifdef DEBUG_CONJ_STAB_CHAIN
     std::cerr << "ConjugateStabChain, step 9\n";
+#endif
   }
+#ifdef DEBUG_CONJ_STAB_CHAIN
   std::cerr << "ConjugateStabChain, step 10\n";
-  Sptr->comm->labels = ListT(Sptr->comm->labels, hom);
+#endif
+  Stot->comm->labels = ListT(Stot->comm->labels, hom);
+#ifdef DEBUG_CONJ_STAB_CHAIN
   std::cerr << "ConjugateStabChain, step 11\n";
+#endif
   //  std::cerr << "Now we need to program ConjugateStabChain\n";
   //  throw TerminalException{1};
 }
@@ -1244,13 +1262,17 @@ template<typename Telt>
 bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int const& reduced)
 {
   std::cerr << "CPP Beginning of ChangeStabChain\n";
-  Telt cnj = Gptr->comm->identity;
-  int idx=0;
-  StabChain<Telt> Sptr = Gptr;
   std::string strG_orig=GetStringExpressionOfStabChain(Gptr);
-  std::string strG_current=GetStringExpressionOfStabChain(Gptr);
+  std::string strG_current=strG_orig;
+  std::cerr << "CPP we have strG_XY\n";
+  std::cerr << "CPP GetStabilizerDepth = " << GetStabilizerDepth(Gptr) << "\n";
+  Telt cnj = Gptr->comm->identity;
+  std::cerr << "CPP we have cnj\n";
+  StabChain<Telt> Sptr = Gptr;
   std::string strS_current=GetStringExpressionOfStabChain(Sptr);
+  std::cerr << "CPP we have strS_current\n";
 
+  int idx=0;
   auto KeyUpdating=[&](std::string const& str) {
     idx++;
     std::string strGloc=GetStringExpressionOfStabChain(Gptr);
@@ -1281,7 +1303,7 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
   }
   std::cerr << " ]\n";
   std::cerr << "CPP ChangeStabChain 1 orbit=" << PrintTopOrbit(Gptr) << "\n";
-  while(GetStabilizerDepth(Sptr) > 1 || i<basSiz) {
+  while (GetStabilizerDepth(Sptr) > 1 || i<basSiz) {
     std::cerr << "CPP GetStabilizerDepth(S)=" << GetStabilizerDepth(Sptr) << "\n";
     /*
     if (Sptr == nullptr) {
@@ -1352,7 +1374,7 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
       KeyUpdating("After S:=S.stabilizer 3");
     }
   }
-  std::cerr << "CPP LEAVE GetStabilizerDepth(Sptr)=" << GetStabilizerDepth(Sptr) << " i=" << i << " |base|=" << basSiz << "\n";
+  std::cerr << "CPP LEAVE GetStabilizerDepth(S)=" << GetStabilizerDepth(Sptr) << " i=" << (i+1) << " |base|=" << basSiz << "\n";
   std::cerr << "CPP ChangeStabChain 2 orbit=" << PrintTopOrbit(Gptr) << "\n";
   std::cerr << "CPP Before ConjugateStabChain cnj=" << cnj << "\n";
   if (!cnj.isIdentity())
