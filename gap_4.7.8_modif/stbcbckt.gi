@@ -62,7 +62,8 @@ PrintRBaseLevel:=function(rbase, str)
     Print(str, " PRBL rbase.level, integer : ", rbase.level, "\n");
   else
     if IsRecord(rbase.level) then
-      Print(str, " PRBL rbase.level, record, |genlabels|=", Length(rbase.level.genlabels));
+      Print(str, " PRBL rbase.level, record, |genlabels|=", Length(rbase.level.genlabels), "\n");
+      Print(str, " PRBL");
       if IsBound(rbase.level.orbit) then
         Print(" orbit=", rbase.level.orbit);
       else
@@ -974,8 +975,10 @@ InstallGlobalFunction( AddRefinement, function( rbase, func, args )
     if    Length( args ) = 0
        or not IsList( args[ Length( args ) ] )
        or Length( args[ Length( args ) ] ) <> 0  then
+#        Print("Before Refinement insert |rbase.rfm| 1,2=", Length(rbase.rfm), ", ", Length(rbase.rfm[Length(rbase.rfm)]), "\n");
         Add( rbase.rfm[ Length( rbase.rfm ) ], rec( func := func,
                                                     args := args ) );
+#        Print(" After Refinement insert |rbase.rfm| 1,2=", Length(rbase.rfm), ", ", Length(rbase.rfm[Length(rbase.rfm)]), "\n");
         Info( InfoBckt, 1, "Refinement ", func, ": ",
                 NumberCells( rbase.partition ), " cells" );
     fi;
@@ -1086,7 +1089,7 @@ InstallGlobalFunction( RegisterRBasePoint, function( P, rbase, pnt )
     PrintRBaseLevel(rbase, "GAP RegisterRBasePoint 2");
     Add( rbase.where, k );
     Add( rbase.rfm, [  ] );
-    Print("GAP Before P.lengths test k=", k, "\n");
+    Print("GAP Before P.lengths test k=", k, " len=", Length(rbase.rfm), "\n");
     KeyUpdatingRbase("RegisterRBasePoint 1.3", rbase);
     if P.lengths[ k ] = 1  then
         Print("GAP Matching P.lengths test\n");

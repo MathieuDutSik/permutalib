@@ -7,6 +7,7 @@
 #include "Combinatorics.h"
 #include "COMB_Vectors.h"
 #include "plus_infinity.h"
+
 /*
 #############################################################################
 ##
@@ -211,7 +212,7 @@ void KeyUpdatingRbase(std::string const& str, rbaseType<Telt> & rbase)
   }
   strO += " ]";
   std::cerr << "CPP KUR: at " << str << " Lorbit=" << strO << "\n";
-  bool test = ListKey[len] == GetStringExpressionOfStabChain(rbase.level.Stot);
+  bool test = ListKey[len-1] == GetStringExpressionOfStabChain(rbase.level.Stot);
   std::cerr << "CPP KUR: at " << str << " test_equality=" << test << "\n";
   for (size_t i=0; i<len; i++)
     if (i<rbase.levkey.size())
@@ -251,7 +252,8 @@ void PrintRBaseLevel(rbaseType<Telt> const& rbase, std::string const& str)
   }
   else {
     if (rbase.level.status == int_stablev) {
-      std::cerr << str << " PRBL rbase.level record, |genlabels|=" << rbase.level.Stot->genlabels.size() << " orbit=" << PrintTopOrbit(rbase.level.Stot) << "\n";
+      std::cerr << str << " PRBL rbase.level, record, |genlabels|=" << rbase.level.Stot->genlabels.size() << "\n";
+      std::cerr << str << " PRBL orbit=" << PrintTopOrbit(rbase.level.Stot) << "\n";
     }
     else {
       std::cerr << str << " PRBL rbase.level=" << GetIntTypeNature(rbase.level.status) << "\n";
@@ -539,7 +541,7 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
   rbase.where.push_back(k);
   int len=rbase.rfm.size();
   rbase.rfm.push_back({});
-  std::cerr << "CPP Before P.lengths test k=" << k << " len=" << len << "\n";
+  std::cerr << "CPP Before P.lengths test k=" << k << " len=" << rbase.rfm.size() << "\n";
   KeyUpdatingRbase("RegisterRBasePoint 1.3", rbase);
   if (P.lengths[k] == 1) {
     std::cerr << "CPP Matching P.lengths test\n";

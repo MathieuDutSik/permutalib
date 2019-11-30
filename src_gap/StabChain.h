@@ -202,13 +202,17 @@ std::string GetStringExpressionOfStabChain(StabChain<Telt> const& eRec)
 {
   std::string strRet="record_";
   StabChain<Telt> eStab = eRec;
+  //srd::cerr << "GetStringExpressionOfStabChain, step 1\n";
   while(true) {
+    //srd::cerr << "GetStringExpressionOfStabChain, step 2\n";
     if (eStab == nullptr)
       break;
+    //srd::cerr << "GetStringExpressionOfStabChain, step 3\n";
     strRet += "orbit_[";
     for (auto & eVal : eStab->orbit)
       strRet += " " + std::to_string(eVal+1);
     strRet += "]";
+    //srd::cerr << "GetStringExpressionOfStabChain, step 4\n";
     strRet += "_transversal_";
     for (auto & eVal : eStab->transversal) {
       if (eVal == -1)
@@ -216,8 +220,11 @@ std::string GetStringExpressionOfStabChain(StabChain<Telt> const& eRec)
       else
         strRet += " " + perm_to_string(eStab->comm->labels[eVal]);
     }
+    //srd::cerr << "GetStringExpressionOfStabChain, step 5\n";
     eStab = eStab->stabilizer;
+    //srd::cerr << "GetStringExpressionOfStabChain, step 6\n";
   }
+  //srd::cerr << "GetStringExpressionOfStabChain, step 7\n";
   return strRet;
 }
 
@@ -1170,9 +1177,12 @@ void ConjugateStabChain(StabChain<Telt> & Stot, Telt const& cnj)
     return cnj.at(x);
   };
   StabChain<Telt> Sptr = Stot;
+  std::cerr << "ConjugateStabChain, step 1\n";
   while(true) {
+    std::cerr << "ConjugateStabChain, step 2\n";
     if (Sptr == nullptr)
       break;
+    std::cerr << "ConjugateStabChain, step 3\n";
     if (Sptr->transversal.size() > 0) {
       std::vector<int> NewTransversal(n);
       //      std::cerr << "Before loop n=" << n << "\n";
@@ -1187,12 +1197,21 @@ void ConjugateStabChain(StabChain<Telt> & Stot, Telt const& cnj)
       //      std::cerr << " After loop\n";
       Sptr->transversal=NewTransversal;
     }
+    std::cerr << "ConjugateStabChain, step 4\n";
     Sptr->treegen = ListT(Sptr->treegen, hom);
+    std::cerr << "ConjugateStabChain, step 5\n";
     Sptr->treegeninv = ListT(Sptr->treegeninv, hom);
+    std::cerr << "ConjugateStabChain, step 6\n";
     Sptr->aux = ListT(Sptr->aux, hom);
+    std::cerr << "ConjugateStabChain, step 7\n";
     Sptr->orbit = ListT(Sptr->orbit, map);
+    std::cerr << "ConjugateStabChain, step 8\n";
+    Sptr = Sptr->stabilizer;
+    std::cerr << "ConjugateStabChain, step 9\n";
   }
+  std::cerr << "ConjugateStabChain, step 10\n";
   Sptr->comm->labels = ListT(Sptr->comm->labels, hom);
+  std::cerr << "ConjugateStabChain, step 11\n";
   //  std::cerr << "Now we need to program ConjugateStabChain\n";
   //  throw TerminalException{1};
 }
@@ -1208,7 +1227,7 @@ std::string PrintTopOrbit(StabChain<Telt> const& S)
   for (int u=0; u<len; u++) {
     if (u>0)
       str += ", ";
-    str += std::to_string(S->orbit[u]);
+    str += std::to_string(S->orbit[u]+1);
   }
   str += " ]";
   return str;
