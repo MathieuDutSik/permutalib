@@ -53,7 +53,9 @@ StabChain<Telt> StabChainOp_listgen(std::vector<Telt> const& Lgen, StabChainOpti
 template<typename Telt, typename Tint>
 std::pair<bool, StabChain<Telt>> StabChainOp_stabchain(StabChain<Telt> const& G, StabChainOptions<Tint> const& options)
 {
+  std::cerr << "CPP Before call of StructuralCopy\n";
   StabChain<Telt> S = StructuralCopy(G);
+  std::cerr << "CPP After call of StructuralCopy\n";
   if (options.base.size() > 0) {
     if (!ChangeStabChain(S, options.base, options.reduced)) {
       return {false, {}};
@@ -71,7 +73,9 @@ std::pair<bool, StabChain<Telt>> StabChainOp_stabchain(StabChain<Telt> const& G,
 template<typename Telt, typename Tint>
 StabChain<Telt> StabChainOp_stabchain_nofalse(StabChain<Telt> const& G, StabChainOptions<Tint> const& options)
 {
+  std::cerr << "CPP Before call to StabChainOp_stabchain\n";
   std::pair<bool, StabChain<Telt>> eRec = StabChainOp_stabchain(G, options);
+  std::cerr << "CPP After call to StabChainOp_stabchain\n";
   if (!eRec.first) {
     std::cerr << "The nofalse has not been matched\n";
     throw TerminalException{1};

@@ -541,7 +541,7 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
   rbase.where.push_back(k);
   int len=rbase.rfm.size();
   rbase.rfm.push_back({});
-  std::cerr << "CPP Before P.lengths test k=" << k << " len=" << rbase.rfm.size() << "\n";
+  std::cerr << "CPP Before P.lengths test k=" << (k+1) << " len=" << rbase.rfm.size() << "\n";
   KeyUpdatingRbase("RegisterRBasePoint 1.3", rbase);
   if (P.lengths[k] == 1) {
     std::cerr << "CPP Matching P.lengths test\n";
@@ -927,6 +927,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  StabChainOptions<Tint> options = GetStandardOptions<Tint>(n);
 	  options.base = rbase.base;
 	  options.reduced = false;
+	  std::cerr << "CPP Before computation of ListStabChain\n";
 	  L_list = ListStabChain(StabChainOp_stabchain_nofalse<Telt,Tint>(L, options));
 	  std::cerr << "CPP |L|=" << L_list.size() << "\n";
 	  std::cerr << "CPP wasTriv Critical step 2\n";
@@ -975,9 +976,13 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	if (repr) {
 	  // In  the representative  case,  change  the   stabilizer
 	  // chains of <L> and <R>.
+          std::cerr << "CPP Before ChangeStabChain L_list[d]\n";
 	  ChangeStabChain(L_list[d], {rbase.base[d]}, int_false);
+          std::cerr << "CPP After ChangeStabChain L_list[d]\n";
 	  //	  L[ d + 1 ] := L[ d ].stabilizer;
+          std::cerr << "CPP Before ChangeStabChain R_list[d]\n";
 	  ChangeStabChain(R_list[d], {rbase.base[d]}, int_false);
+          std::cerr << "CPP After ChangeStabChain R_list[d]\n";
 	  //	  R[ d + 1 ] := R[ d ].stabilizer;
 	}
       }
@@ -1134,7 +1139,9 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    branch = d;
 	  }
 	  if (2 * d <= blen) {
+            std::cerr << "CPP Before ChangeStabChain R_list[d] 2\n";
 	    ChangeStabChain(R_list[d], {b_int}, int_false);
+            std::cerr << "CPP After ChangeStabChain R_list[d] 2\n";
 	    //	    R[ d + 1 ] = R[ d ].stabilizer;
 	  }
 	  else {

@@ -1132,7 +1132,6 @@ local   G,  base,  reduced,
     G := arg[ 1 ];
     strG_orig:=GetStringExpressionOfStabChain(G);
     strG_current:=strG_orig;
-    Print("GAP we have strG_XY\n");
     Print("GAP GetStabilizerDepth = ", GetStabilizerDepth(G), "\n");
     base := arg[ 2 ];
     if Length( arg ) > 2  then  reduced := arg[ 3 ];

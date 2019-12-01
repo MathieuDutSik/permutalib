@@ -280,19 +280,33 @@ std::ostream& operator<<(std::ostream& os, StabChain<Telt> const& Stot)
 template<typename Telt>
 StabChain<Telt> StructuralCopy(StabChain<Telt> const& S)
 {
-  std::cerr << "CPP Begin of StructuralCopy\n";
   if (S == nullptr)
     return nullptr;
   std::shared_ptr<CommonStabInfo<Telt>> comm_new = std::make_shared<CommonStabInfo<Telt>>(*(S->comm));
   StabChain<Telt> Sptr = S;
-  StabChain<Telt> Sret = nullptr;
+  std::vector<std::shared_ptr<StabLevel<Telt>>> ListPtr;
   while(true) {
     if (Sptr == nullptr)
       break;
-    Sret = std::make_shared<StabLevel<Telt>>(*Sptr);
-    //
+    ListPtr.push_back(Sptr);
     Sptr = Sptr->stabilizer;
-    Sret = Sret->stabilizer;
+  }
+  size_t len = ListPtr.size();
+  StabChain<Telt> Sret = nullptr;
+  for (size_t i=0; i<len; i++) {
+    size_t j = len - 1 - i;
+    std::shared_ptr<StabLevel<Telt>> S2 = std::make_shared<StabLevel<Telt>>(*ListPtr[j]);
+    S2->stabilizer = Sret;
+    S2->comm = comm_new;
+    Sret = S2;
+  }
+  std::string str1 = GetStringExpressionOfStabChain(S);
+  std::string str2 = GetStringExpressionOfStabChain(Sret);
+  if (str1 != str2) {
+    std::cerr << "We fail to have equality of entries\n";
+    std::cerr << "str1=" << str1 << "\n";
+    std::cerr << "str2=" << str2 << "\n";
+    throw TerminalException{1};
   }
   return Sret;
 }
@@ -1264,10 +1278,8 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
   std::cerr << "CPP Beginning of ChangeStabChain\n";
   std::string strG_orig=GetStringExpressionOfStabChain(Gptr);
   std::string strG_current=strG_orig;
-  std::cerr << "CPP we have strG_XY\n";
   std::cerr << "CPP GetStabilizerDepth = " << GetStabilizerDepth(Gptr) << "\n";
   Telt cnj = Gptr->comm->identity;
-  std::cerr << "CPP we have cnj\n";
   StabChain<Telt> Sptr = Gptr;
   std::string strS_current=GetStringExpressionOfStabChain(Sptr);
   std::cerr << "CPP we have strS_current\n";
