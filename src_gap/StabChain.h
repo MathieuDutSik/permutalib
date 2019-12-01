@@ -380,7 +380,6 @@ int BasePoint(StabChain<Telt> const& S)
 template<typename Telt>
 void RemoveStabChain(StabChain<Telt> & Stot)
 {
-  std::cerr << "CPP Doing RemoveStabChain\n";
   Stot->stabilizer == nullptr;
   Stot->genlabels.clear();
 }
@@ -727,7 +726,6 @@ void InsertTrivialStabilizer(StabChain<Telt> & Stot, int const& pnt)
   Supp->stabilizer = Stot;
   Stot = Supp;
   Stot->genlabels = Stot->stabilizer->genlabels;
-  std::cerr << "Before InitializeSchreierTree\n";
   InitializeSchreierTree(Stot, pnt);
 }
 
@@ -1328,10 +1326,11 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
     }
     */
     int old=BasePoint(Sptr);
-    std::cerr << "CPP ChangeStabChain old=" << old << " i=" << i << " |base|=" << basSiz << "\n";
+    std::cerr << "CPP ChangeStabChain old=" << (old+1) << " i=" << (i+1) << " |base|=" << basSiz << "\n";
     KeyUpdating("After BasePoint");
     //    std::cerr << "eLev=" << eLev << "\n";
     if (Sptr->genlabels.size() == 0 && (reduced == int_true || i >= basSiz)) {
+      std::cerr << "CPP Before RemoveStabChain\n";
       RemoveStabChain(Sptr);
       KeyUpdating("After RemoveStabChain");
       i = basSiz;
@@ -1413,7 +1412,7 @@ bool ReduceStabChain(StabChain<Telt> & Stot)
 template<typename Telt>
 void InitializeSchreierTree(StabChain<Telt> & S, int const& pnt)
 {
-  std::cerr << "Beginning of InitializeSchreierTree\n";
+  //  std::cerr << "Beginning of InitializeSchreierTree\n";
   int n=S->comm->n;
   //
   S->orbit = {pnt};
@@ -1421,7 +1420,7 @@ void InitializeSchreierTree(StabChain<Telt> & S, int const& pnt)
   std::vector<int> transversal(n, -1);
   transversal[pnt] = 0;
   S->transversal = transversal;
-  std::cerr << "   Ending of InitializeSchreierTree\n";
+  //  std::cerr << "   Ending of InitializeSchreierTree\n";
 }
 
 

@@ -112,11 +112,13 @@ void IntersectBlist(Face & a, Face const& b)
 
 void SubtractBlist(Face & a, Face const& b)
 {
+  std::cerr << "GAP Beginning of SubtractBlist\n";
   int siz=a.size();
   for (int i=0; i<siz; i++) {
     if (b[i] == 1)
       a[i]=0;
   }
+  std::cerr << "GAP End of SubtractBlist\n";
 }
 
 

@@ -145,7 +145,7 @@ InstallMethod( StabChainOp,"group and option",
     Print("GAP Call to StabChainOp (group and option)\n");
     # If a stabilizer chain <S> is already known, modify it.
     if HasStabChainMutable( G )  then
-        Print("GAP Case HaseStabChainMutable=true\n");
+#        Print("GAP Case HaseStabChainMutable=true\n");
         S := StructuralCopy( StabChainMutable( G ) );
         if IsBound( options.base )  then
             if not IsBound( options.reduced )  then
@@ -162,7 +162,7 @@ InstallMethod( StabChainOp,"group and option",
         Print("GAP End of HaseStabChainMutable=true section\n");
     # Otherwise construct a new GAP object <S>.
     else
-        Print("GAP Case HaseStabChainMutable=false\n");
+#        Print("GAP Case HaseStabChainMutable=false\n");
         CopyOptionsDefaults( G, options );
 
         # For solvable groups, use the pcgs algorithm.
@@ -1168,7 +1168,7 @@ local   G,  base,  reduced,
     end;
     newBase := [  ];
     i := 1;
-    Print("GAP ChangeStabChain base=", base, "\n");
+    Print("GAP ChangeStabChain base = ", base, "\n");
     Print("GAP ChangeStabChain 1 orbit=", PrintTopOrbit(G), "\n");
 #    while(true)
 #    do
@@ -1188,6 +1188,7 @@ local   G,  base,  reduced,
         # Cut off unwanted trivial stabilizers at the end.
         if     Length( S.genlabels ) = 0
            and ( reduced = true  or  i > Length( base ) )  then
+            Print("GAP Before RemoveStabChain\n");
             RemoveStabChain( S );
             KeyUpdating("After RemoveStabChain");
             i := Length( base ) + 1;

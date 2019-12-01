@@ -211,13 +211,14 @@ void KeyUpdatingRbase(std::string const& str, rbaseType<Telt> & rbase)
     strO += PrintTopOrbit(rbase.lev[u].Stot);
   }
   strO += " ]";
-  std::cerr << "CPP KUR: at " << str << " Lorbit=" << strO << "\n";
+  std::cerr << "CPP KUR: at " << str << "\n";
+  std::cerr << "CPP   Lorbit=" << strO << "\n";
   bool test = ListKey[len-1] == GetStringExpressionOfStabChain(rbase.level.Stot);
   std::cerr << "CPP KUR: at " << str << " test_equality=" << test << "\n";
   for (size_t i=0; i<len; i++)
     if (i<rbase.levkey.size())
       if (rbase.levkey[i] != ListKey[i])
-        std::cerr << "CPP  KUR: Change of key at i=" << i << "\n";
+        std::cerr << "CPP  KUR: Change of key at i=" << (i+1) << "\n";
   rbase.levkey = ListKey;
 }
 
@@ -560,7 +561,7 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
     auto MainInsert=[&](StabChainPlusLev<Telt> const& lev) -> void {
       if (lev.status != int_int) {
 	std::vector<Telt> LGen = StrongGeneratorsStabChain(lev.Stot);
-	std::cerr << "CPP LGen = ";
+	std::cerr << "CPP StrongGeneratorsStabChain(lev) = ";
 	WriteStdVectorGAP(std::cerr, LGen);
 	std::cerr << "\n";
 	Partition O = OrbitsPartition(LGen, lev.Stot->comm->n, rbase.domain);
@@ -594,7 +595,13 @@ void NextRBasePoint(Partition & P, rbaseType<Telt> & rbase, Telt const& TheId)
   //  RawPrintPartition(P);
   std::vector<int> lens = P.lengths;
   std::vector<int> order = ClosedInterval(0, NumberCells(P));
-  PrintVectDebug("lens", lens);
+  std::cerr << "CPP lens=[ ";
+  for (size_t i=0; i<lens.size(); i++) {
+    if (i>0)
+      std::cerr << ", ";
+    std::cerr << lens[i];
+  }
+  std::cerr << " ]\n";
   //  std::cerr << "Before SortParallel\n";
   //  PrintVectDebug(" lens", lens);
   //  PrintVectDebug("order", order);
@@ -627,7 +634,7 @@ void NextRBasePoint(Partition & P, rbaseType<Telt> & rbase, Telt const& TheId)
   //  std::cerr << "order[k]=" << order[k] << "\n";
   //  std::cerr << "P.firsts[order[k]]=" << P.firsts[order[k]] << "\n";
   int p = P.points[ P.firsts[ order[k] ] + l ];
-  std::cerr << "CPP p=" << p << "\n";
+  std::cerr << "CPP p=" << (p+1) << "\n";
   NicePrintPartition("CPP Before RegisterRBasePoint P", P);
   PrintRBaseLevel(rbase, "CPP Before RegisterRBasePoint");
   RegisterRBasePoint(P, rbase, p, TheId);
@@ -877,7 +884,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   std::vector<StabChain<Telt>> L_list, R_list;
   std::cerr << "CPP PartitionBacktrack step 3\n";
   std::function<permPlusBool<Telt>(int const&,bool const&)> PBEnumerate = [&](int const& d, bool const & wasTriv) -> permPlusBool<Telt> {
-    std::cerr << "CPP PBEnumerate, step 1, d=" << d << " wasTriv=" << wasTriv << "\n";
+    std::cerr << "CPP PBEnumerate, step 1, d=" << (d+1) << " wasTriv=" << wasTriv << "\n";
     //    PrintVectorORB("orb", orb);
     //    PrintVectorORB("orB", orB);
     permPlusBool<Telt> oldprm, oldprm2;
@@ -910,7 +917,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       oldprm2 = image.perm2;
     else
       oldprm2.status = int_false;
-    std::cerr << "CPP PBEnumerate, step 4 d=" << d << " |rbase.base|=" << rbase.base.size() << "\n";
+    std::cerr << "CPP PBEnumerate, step 4 d=" << (d+1) << " |rbase.base|=" << rbase.base.size() << "\n";
     // Recursion comes to an end  if all base  points have been prescribed
     // images.
     if (d >= int(rbase.base.size())) {
@@ -921,7 +928,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	// Do     not  add the   identity    element  in the  subgroup
 	// construction.
 	if (wasTriv) {
-	  std::cerr << "CPP wasTriv Critical step 1\n";
+	  std::cerr << "CPP wasTriv Critical, step 1\n";
 	  // In the subgroup case, assign to  <L> and <R> stabilizer
 	  // chains when the R-base is complete.
 	  StabChainOptions<Tint> options = GetStandardOptions<Tint>(n);
@@ -930,9 +937,9 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  std::cerr << "CPP Before computation of ListStabChain\n";
 	  L_list = ListStabChain(StabChainOp_stabchain_nofalse<Telt,Tint>(L, options));
 	  std::cerr << "CPP |L|=" << L_list.size() << "\n";
-	  std::cerr << "CPP wasTriv Critical step 2\n";
+	  std::cerr << "CPP wasTriv Critical, step 2\n";
 	  R_list = L_list;
-	  std::cerr << "CPP wasTriv Critical step 3\n";
+	  std::cerr << "CPP wasTriv Critical, step 3\n";
 	  std::cerr << "CPP PBEnumerate, EXIT 2\n";
 	  return {int_fail,{}};
 	}
@@ -1008,22 +1015,26 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       std::cerr << "CPP |orb|=" << orb.size() << "\n";
       AssignationVectorGapStyle(orb, d, BlistList(range, {}));
       // line below needs to be checked.
-      std::cerr << "CPP ORB: Before pVal loop d=" << d << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
-      std::cerr << "CPP RBASE: List(rbase.lev, x->x.orbit) = [";
+      std::cerr << "CPP ORB: Before pVal loop d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
+      std::cerr << "CPP RBASE: List(...) = [ ";
+      bool IsF=true;
       for (auto & eRec : rbase.lev) {
-	std::cerr << ", " << PrintTopOrbit(eRec.Stot);
+        if (!IsF)
+          std::cerr << ", ";
+        IsF=false;
+	std::cerr << PrintTopOrbit(eRec.Stot);
       }
-      std::cerr << "]\n";
-      std::cerr << "CPP d=" << d << " |rbase.lev|=" << rbase.lev.size() << "\n";
+      std::cerr << " ]\n";
+      //      std::cerr << "CPP d=" << d << " |rbase.lev|=" << rbase.lev.size() << "\n";
       for (auto & pVal : rbase.lev[d].Stot->orbit) {
 	b = PowAct(pVal, image.perm.val);
-	std::cerr << "CPP pVal=" << pVal << " b=" << b << "\n";
+	std::cerr << "CPP pVal=" << (pVal+1) << " b=" << (b+1) << "\n";
 	if (oldcel_cellno[b] == rbase.where[d]) {
 	  bool DoOper=false;
 	  if (image.level2.status == int_false)
 	    DoOper=true;
 	  if (!DoOper) {
-	    std::cerr << "CPP d=" << d << " |rbase.lev2|=" << rbase.lev2.size() << "\n";
+            //	    std::cerr << "CPP d=" << d << " |rbase.lev2|=" << rbase.lev2.size() << "\n";
 	    if (IsInBasicOrbit(rbase.lev2[d].Stot, SlashAct(b,image.perm2.val)))
 	      DoOper=true;
 	  }
@@ -1047,17 +1058,21 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     // Loop  over the candidate images  for the  current base point. First
     // the special case image = base up to current level.
     if (wasTriv) {
+      std::cerr << "CPP wasTriv Critical, step 4\n";
       AssignationVectorGapStyle(image.bimg, d, a);
+      std::cerr << "CPP wasTriv Critical, step 5\n";
       // Refinements that start with '_' must be executed even when base
       // = image since they modify image.data, etc.
       RRefine(rbase, image, true);
-      PrintRBaseLevel(rbase, "After RRefine");
+      PrintRBaseLevel(rbase, "CPP After RRefine");
       // Recursion.
       PBEnumerate(d + 1, true);
+      std::cerr << "CPP wasTriv Critical, step 6 d=" << d << "\n";
       image.depth = d;
       // Now we  can  remove  the  entire   <R>-orbit of <a>  from   the
       // candidate list.
       std::cerr << "CPP ORB 1: Before subtract d=" << d << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
+      std::cerr << "CPP L_list=" << L_list.size() << "\n";
       SubtractBlist(orb[d], BlistList(range, L_list[d]->orbit));
       std::cerr << "CPP ORB 1: After subtract d=" << d << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
     }

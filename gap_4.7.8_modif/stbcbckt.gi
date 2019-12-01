@@ -880,7 +880,8 @@ KeyUpdatingRbase:=function(str, rbase)
   ListKey:=List(rbase.lev, GetStringExpressionOfStabChain);
   len:=Length(rbase.lev);
 #  Print("GAP KU: at ", str, " IsIdenticalObj(..)=", IsIdenticalObj(rbase.level, rbase.lev[len]), "\n");
-  Print("GAP KUR: at ", str, " Lorbit=", List(rbase.lev, x->x.orbit), "\n");
+  Print("GAP KUR: at ", str, "\n");
+  Print("GAP   Lorbit=", List(rbase.lev, x->x.orbit), "\n");
   Print("GAP KUR: at ", str, " test_equality=", ListKey[len]=GetStringExpressionOfStabChain(rbase.level), "\n");
   for i in [1..len]
   do
@@ -947,7 +948,7 @@ InstallGlobalFunction( IsTrivialRBase, function( rbase )
     fi;
     Print("\n");
     #
-    Print("GAPIsTrivialRBase : stab=");
+    Print("GAP IsTrivialRBase : stab=");
     if IsRecord(rbase.level) then
       Print("true  |genlabels|=", Length(rbase.level.genlabels));
     else
@@ -956,14 +957,14 @@ InstallGlobalFunction( IsTrivialRBase, function( rbase )
     Print("\n");
     #
     if IsInt( rbase.level ) and rbase.level <= 1 then
-      Print("CPP IsTrivialRBase, leaving at case 1 with True\n");
+      Print("GAP IsTrivialRBase, leaving at case 1 with True\n");
       return true;
     fi;
     if IsRecord( rbase.level ) and Length( rbase.level.genlabels ) = 0 then
-      Print("CPP IsTrivialRBase, leaving at case 2 with True\n");
+      Print("GAP IsTrivialRBase, leaving at case 2 with True\n");
       return true;
     fi;
-    Print("CPP IsTrivialRBase, leaving at case 3 with False\n");
+    Print("GAP IsTrivialRBase, leaving at case 3 with False\n");
     return false;
 end );
 
@@ -1106,7 +1107,7 @@ InstallGlobalFunction( RegisterRBasePoint, function( P, rbase, pnt )
     if rbase.level2 <> false  then
         Print("GAP Matching the ! false test\n");
         if rbase.level2 = true  then
-	  Print("Before call to MainInsert(level)\n");
+	  Print("GAP Before call to MainInsert(level)\n");
 	  lev := rbase.level;
         else
 	  Print("GAP Before call to MainInsert(level2)\n");
@@ -1342,33 +1343,31 @@ InstallGlobalFunction( PartitionBacktrack,
         # Recursion comes to an end  if all base  points have been prescribed
         # images.
         if d > Length( rbase.base )  then
-	    Print("Matching d > Length(rbase.base) test\n");
+	    Print("GAP Matching d > Length(rbase.base) test\n");
             if IsTrivialRBase( rbase )  then
                 blen := Length( rbase.base );
-                Print("IsTrivialRBase matching test blen=", blen, " wasTriv=", wasTriv, "\n");
+                Print("GAP IsTrivialRBase matching test blen=", blen, " wasTriv=", wasTriv, "\n");
                 # Do     not  add the   identity    element  in the  subgroup
                 # construction.
                 if wasTriv  then
-                    Print("wasTriv Critical, step 1\n");
+                    Print("GAP wasTriv Critical, step 1\n");
                     # In the subgroup case, assign to  <L> and <R> stabilizer
                     # chains when the R-base is complete.
+                    Print("GAP Before computation of ListStabChain\n");
                     L := ListStabChain( CopyStabChain( StabChainOp( L,
                                  rec( base := rbase.base,
                                    reduced := false ) ) ) );
-                    Print("ListStabChain result, |L|=", Length(L), "\n");
-#                    Print(NullMat(5));
-                    Print("wasTriv Critical, step 2\n");
+                    Print("GAP |L|=", Length(L), "\n");
+                    Print("GAP wasTriv Critical, step 2\n");
                     R := ShallowCopy( L );
-                    Print("wasTriv Critical, step 3\n");
+                    Print("GAP wasTriv Critical, step 3\n");
 
                     if image.perm <> true  then
                         Info( InfoBckt, 1, "Stabilizer chain with depths ",
                                 DepthSchreierTrees( rbase.chain ) );
                     fi;
-#                    Print("wasTriv Critical, step 4\n");
                     Info( InfoBckt, 1, "Indices: ",
                           IndicesStabChain( L[ 1 ] ) );
-#                    Print("wasTriv Critical, step 5\n");
                     Print("GAP PBEnumerate, EXIT 2\n");
                     return fail;
 
@@ -1399,17 +1398,17 @@ InstallGlobalFunction( PartitionBacktrack,
             # Construct the   next refinement  level. This  also  initializes
             # <image.partition> for the case ``image = base point''.
             else
-	        Print("Not matching IsTrivialRBase test\n");
+	        Print("GAP Not matching IsTrivialRBase test\n");
                 if not repr  then
                     oldcel := StructuralCopy( oldcel );
                 fi;
-		PrintRBaseLevel(rbase, "Before NextRBasePoint");
+		PrintRBaseLevel(rbase, "GAP Before NextRBasePoint");
                 rbase.nextLevel( rbase.partition, rbase );
-		PrintRBaseLevel(rbase, " After NextRBasePoint");
+		PrintRBaseLevel(rbase, "GAP After NextRBasePoint");
                 if image.perm = true  then
                     Add( rbase.fix, Fixcells( rbase.partition ) );
                 fi;
-		Print("After Fixcells insert\n");
+		Print("GAP After Fixcells insert\n");
                 Add( org, ListWithIdenticalEntries( Length( range ), 0 ) );
                 if repr  then
 
@@ -1443,13 +1442,13 @@ InstallGlobalFunction( PartitionBacktrack,
                 od;
             fi;
         else
-	    Print("|orb|=", Length(orb), "\n");
+	    Print("GAP |orb|=", Length(orb), "\n");
             orb[ d ] := BlistList( range, [  ] );
 	    Print("GAP ORB: Before pVal loop d=", d, " orb[d]=", orb[d], "\n");
-	    Print("GAP RBASE: List(rbase.lev, x->x.orbit)=", List(rbase.lev, x->x.orbit), "\n");
+	    Print("GAP RBASE: List(...) = ", List(rbase.lev, x->x.orbit), "\n");
             for p  in rbase.lev[ d ].orbit  do
                 b := p ^ image.perm;
-		Print("pVal=", p, " b=", b, "\n");
+		Print("GAP pVal=", p, " b=", b, "\n");
                 if oldcel[ b ] = rbase.where[ d ]
                and ( image.level2 = false
                   or IsInBasicOrbit( rbase.lev2[d], b/image.perm2 ) )  then
@@ -1467,17 +1466,19 @@ InstallGlobalFunction( PartitionBacktrack,
 	fi;
 
         orB[ d ] := StructuralCopy( orb[ d ] );
-        Print("GAP PBEnumerate, step 7\n");
+        Print("GAP PBEnumerate, step 7, wasTriv=", wasTriv, "\n");
 
         # Loop  over the candidate images  for the  current base point. First
         # the special case ``image = base'' up to current level.
         if wasTriv  then
+            Print("GAP wasTriv Critical, step 4\n");
             image.bimg[ d ] := a;
+            Print("GAP wasTriv Critical, step 5\n");
 
             # Refinements that start with '_' must be executed even when base
             # = image since they modify `image.data' etc.
             RRefine( rbase, image, true );
-    	    PrintRBaseLevel(rbase, "After RRefine");
+    	    PrintRBaseLevel(rbase, "GAP After RRefine");
 
             # Recursion.
             PBEnumerate( d + 1, true );
