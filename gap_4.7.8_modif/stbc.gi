@@ -806,13 +806,15 @@ end );
 #F  StabChainForcePoint( <S>, <pnt> ) . . . . . . . .  force <pnt> into orbit
 ##
 InstallGlobalFunction( StabChainForcePoint, function( S, pnt )
-
+    Print("GAP Beginning of StabChainForcePoint\n");
     # Do nothing if <pnt> is already in the orbit of <S>.
     if    not IsBound( S.translabels )
        or not IsBound( S.translabels[ pnt ] )  then
+        Print("GAP Matching the first test\n");
 
         # If all generators of <S> fix <pnt>, insert a trivial stabilizer.
         if IsFixedStabilizer( S, pnt )  then
+            Print("GAP Matching the second test\n");
             InsertTrivialStabilizer( S, pnt );
 
         # Get  <pnt> in   the orbit   of   the stabilizer and  swap   the two
@@ -840,7 +842,7 @@ InstallGlobalFunction( StabChainSwap, function( S )
             img,        # image $b^{Rep(S,pnt)^-}$
             gen,        # new generator of $T_b$
             i;          # loop variable
-
+    Print("CPP Beginning of StabChainSwap\n");
     # get the two basepoints $a$ and $b$ that we have to switch
     a := S.orbit[ 1 ];
     b := S.stabilizer.orbit[ 1 ];

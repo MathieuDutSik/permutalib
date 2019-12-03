@@ -1104,7 +1104,7 @@ std::vector<Telt> GetListGenerators(StabChain<Telt> const& Stot)
 template<typename Telt>
 bool StabChainSwap(StabChain<Telt> & Stot)
 {
-  std::cerr << "CPP   Running StabChainSwap\n";
+  std::cerr << "CPP Beginning of StabChainSwap\n";
   int n=Stot->comm->n;
   int a = Stot->orbit[0];
   int b = Stot->stabilizer->orbit[0];
