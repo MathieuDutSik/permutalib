@@ -936,7 +936,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  options.reduced = false;
 	  std::cerr << "CPP Before computation of ListStabChain\n";
 	  L_list = ListStabChain(StabChainOp_stabchain_nofalse<Telt,Tint>(L, options));
-	  std::cerr << "CPP |L|=" << L_list.size() << "\n";
+	  std::cerr << "CPP ListStabChain |L|=" << L_list.size() << "\n";
 	  std::cerr << "CPP wasTriv Critical, step 2\n";
 	  R_list = L_list;
 	  std::cerr << "CPP wasTriv Critical, step 3\n";
@@ -1009,7 +1009,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  b = orb[d].find_next(b);
 	}
       }
-      std::cerr << "CPP ORB: Case image.perm=true d=" << d << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
+      std::cerr << "CPP ORB: Case image.perm=true d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
     }
     else {
       std::cerr << "CPP |orb|=" << orb.size() << "\n";
@@ -1067,14 +1067,14 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       PrintRBaseLevel(rbase, "CPP After RRefine");
       // Recursion.
       PBEnumerate(d + 1, true);
-      std::cerr << "CPP wasTriv Critical, step 6 d=" << d << "\n";
+      std::cerr << "CPP wasTriv Critical, step 6 d=" << (d+1) << "\n";
       image.depth = d;
       // Now we  can  remove  the  entire   <R>-orbit of <a>  from   the
       // candidate list.
-      std::cerr << "CPP ORB 1: Before subtract d=" << d << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
-      std::cerr << "CPP L_list=" << L_list.size() << "\n";
+      std::cerr << "CPP ORB 1: Before subtract d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
+      std::cerr << "CPP |L|=" << L_list.size() << "\n";
       SubtractBlist(orb[d], BlistList(range, L_list[d]->orbit));
-      std::cerr << "CPP ORB 1: After subtract d=" << d << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
+      std::cerr << "CPP ORB 1: After subtract d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
     }
     std::cerr << "CPP PBEnumerate, step 8\n";
 
@@ -1210,14 +1210,14 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 
 	// Now  we can remove the   entire <R>-orbit  of <b> from  the
 	// candidate list.
-	std::cerr << "CPP ORB 2: Before subtract d=" << d << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
+	std::cerr << "CPP ORB 2: Before subtract d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
 	if (R_list[d]->transversal[b] != -1)
 	  SubtractBlist(orb[d], BlistList(range, R_list[d]->orbit));
 	else
 	  SubtractBlistOrbitStabChain(orb[d], StrongGeneratorsStabChain(R), b_int);
-	std::cerr << "CPP ORB 2: After subtract d=" << d << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
+	std::cerr << "CPP ORB 2: After subtract d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
 	b = orb[d].find_next(b);
-	std::cerr << "CPP End of the loop. Now b=" << b << "\n";
+	std::cerr << "CPP End of the loop. Now b=" << (b+1) << "\n";
       }
 
     }

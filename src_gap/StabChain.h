@@ -276,6 +276,16 @@ std::ostream& operator<<(std::ostream& os, StabChain<Telt> const& Stot)
 }
 
 
+template<typename Telt>
+StabChain<Telt> ShallowCopy(StabChain<Telt> const& S)
+{
+  StabLevel<Telt> Sret = *S;
+  Sret.comm = S->comm;
+  Sret.stabilizer = S->stabilizer;
+  return std::make_shared<StabLevel<Telt>>(Sret);
+}
+
+
 
 template<typename Telt>
 StabChain<Telt> StructuralCopy(StabChain<Telt> const& S)
@@ -682,10 +692,9 @@ bool IsTrivial(StabChain<Telt> const& G)
       LIdx.insert(eIdx);
     Sptr = Sptr->stabilizer;
   }
-  for (auto & eIdx : LIdx) {
+  for (auto & eIdx : LIdx)
     if (!G->comm->labels[eIdx].isIdentity())
       return false;
-  }
   return true;
 }
 
@@ -709,23 +718,40 @@ int LargestMovedPoint(std::vector<Telt> const& LGen)
     }
   }
   int eMov=0;
-  for (int u=0; u<n; u++) {
+  for (int u=0; u<n; u++)
     if (Status[u] == 0)
       eMov=u;
-  }
   eMov++;
   return eMov;
 }
 
-
+template<typename Telt>
+void InitializeSchreierTree(StabChain<Telt> & S, int const& pnt)
+{
+  //  std::cerr << "Beginning of InitializeSchreierTree\n";
+  int n=S->comm->n;
+  //
+  S->orbit = {pnt};
+  //
+  std::vector<int> transversal(n, -1);
+  transversal[pnt] = 0;
+  S->transversal = transversal;
+  //  std::cerr << "   Ending of InitializeSchreierTree\n";
+}
 
 template<typename Telt>
 void InsertTrivialStabilizer(StabChain<Telt> & Stot, int const& pnt)
 {
-  StabChain<Telt> Supp = std::make_shared<StabLevel<Telt>>(EmptyStabLevel<Telt>(Stot->comm));
-  Supp->stabilizer = Stot;
-  Stot = Supp;
-  Stot->genlabels = Stot->stabilizer->genlabels;
+  Stot->stabilizer = ShallowCopy(Stot);
+  Stot->transversal = {};
+  Stot->orbit = {};
+  Stot->genlabels = {};
+  Stot->cycles = Face(Stot->comm->n);
+  Stot->treegen = {};
+  Stot->treegen = {};
+  Stot->aux = {};
+  Stot->treedepth = -1;
+  Stot->diam = -1;
   InitializeSchreierTree(Stot, pnt);
 }
 
@@ -1050,8 +1076,11 @@ void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, Stab
 template<typename Telt>
 bool StabChainForcePoint(StabChain<Telt> & Stot, int const& pnt)
 {
+  std::cerr << "CPP Beginning of StabChainForcePoint\n";
   if (Stot->transversal[pnt] == -1) {
+    std::cerr << "CPP Matching the first test\n";
     if (IsFixedStabilizer(Stot, pnt )) {
+      std::cerr << "CPP Matching the second test\n";
       InsertTrivialStabilizer(Stot, pnt);
     }
     else {
@@ -1075,7 +1104,7 @@ std::vector<Telt> GetListGenerators(StabChain<Telt> const& Stot)
 template<typename Telt>
 bool StabChainSwap(StabChain<Telt> & Stot)
 {
-  std::cerr << "   Running StabChainSwap\n";
+  std::cerr << "CPP   Running StabChainSwap\n";
   int n=Stot->comm->n;
   int a = Stot->orbit[0];
   int b = Stot->stabilizer->orbit[0];
@@ -1273,10 +1302,9 @@ std::string PrintTopOrbit(StabChain<Telt> const& S)
 template<typename Telt>
 bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int const& reduced)
 {
-  std::cerr << "CPP Beginning of ChangeStabChain\n";
   std::string strG_orig=GetStringExpressionOfStabChain(Gptr);
   std::string strG_current=strG_orig;
-  std::cerr << "CPP GetStabilizerDepth = " << GetStabilizerDepth(Gptr) << "\n";
+  std::cerr << "CPP Beginning ChangeStabChain, GetStabilizerDepth = " << GetStabilizerDepth(Gptr) << "\n";
   Telt cnj = Gptr->comm->identity;
   StabChain<Telt> Sptr = Gptr;
   std::string strS_current=GetStringExpressionOfStabChain(Sptr);
@@ -1287,6 +1315,7 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
     idx++;
     std::string strGloc=GetStringExpressionOfStabChain(Gptr);
     std::string strSloc=GetStringExpressionOfStabChain(Sptr);
+    std::cerr << "CPP KU At " << idx << " of " << str << " dep(G)/dep(S)=" << GetStabilizerDepth(Gptr) << "/" << GetStabilizerDepth(Sptr) << "\n";
     std::cerr << "CPP KU At step " << idx << " of " << str << "\n";
     if (strG_current == strGloc) {
       std::cerr << "CPP   KU At step " << idx << " of " << str << " no change of G\n";
@@ -1307,31 +1336,28 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
   std::vector<int> newBase;
   int i=0;
   int basSiz=base.size();
-  std::cerr << "CPP ChangeStabChain base = [";
+  std::cerr << "CPP ChangeStabChain base = [ ";
+  bool IsF=true;
   for (auto & eVal : base) {
-    std::cerr << " " << eVal;
+    if (!IsF)
+      std::cerr << ", ";
+    IsF=false;
+    std::cerr << (eVal+1);
   }
   std::cerr << " ]\n";
   std::cerr << "CPP ChangeStabChain 1 orbit=" << PrintTopOrbit(Gptr) << "\n";
   while (GetStabilizerDepth(Sptr) > 1 || i<basSiz) {
-    std::cerr << "CPP GetStabilizerDepth(S)=" << GetStabilizerDepth(Sptr) << "\n";
-    /*
-    if (Sptr == nullptr) {
-      std::cerr << "CPP leaving since Sptr == nullptr\n";
-      break;
-    }
-    if (i >= basSiz) {
-      std::cerr << "CPP leaving since i>= basSiz. i=" << i << " basSiz=" << basSiz << "\n";
-      break;
-    }
-    */
+    std::cerr << "CPP GetStabilizerDepth(S)=" << GetStabilizerDepth(Sptr) << " GetStabilizerDepth(G)=" << GetStabilizerDepth(Gptr) << "\n";
     int old=BasePoint(Sptr);
     std::cerr << "CPP ChangeStabChain old=" << (old+1) << " i=" << (i+1) << " |base|=" << basSiz << "\n";
     KeyUpdating("After BasePoint");
     //    std::cerr << "eLev=" << eLev << "\n";
     if (Sptr->genlabels.size() == 0 && (reduced == int_true || i >= basSiz)) {
       std::cerr << "CPP Before RemoveStabChain\n";
+      int dep1=GetStabilizerDepth(Sptr);
       RemoveStabChain(Sptr);
+      int dep2=GetStabilizerDepth(Sptr);
+      std::cerr << "CPP RemoveStabChain dep1=" << dep1 << " dep2=" << dep2 << "\n";
       KeyUpdating("After RemoveStabChain");
       i = basSiz;
     }
@@ -1342,7 +1368,10 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
 	newBase.push_back(newpnt);
 	if (newpnt != old) {
 	  if (IsFixedStabilizer(Sptr, newpnt)) {
+            int dep1=GetStabilizerDepth(Sptr);
 	    InsertTrivialStabilizer(Sptr, newpnt);
+            int dep2=GetStabilizerDepth(Sptr);
+            std::cerr << "CPP InsertTrivialStabilizer1 dep1=" << dep1 << " dep2=" << dep2 << "\n";
             KeyUpdating("After InsertTrivialStabilizer");
 	  }
 #ifdef DEBUG_GROUP
@@ -1357,6 +1386,7 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
       }
       else if (reduced == int_false || !IsFixedStabilizer(Sptr, newpnt )) {
 	if (Sptr->stabilizer != nullptr) {
+          KeyUpdating("Before StabChainForcePoint");
 	  if (!StabChainForcePoint(Sptr, newpnt)) {
             KeyUpdating("After StabChainForcePoint, return false");
 	    return false;
@@ -1367,7 +1397,10 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
           std::cerr << "CPP 2: cnj=" << cnj << "\n";
 	}
 	else {
+          int dep1=GetStabilizerDepth(Sptr);
 	  InsertTrivialStabilizer(Sptr, newpnt);
+          int dep2=GetStabilizerDepth(Sptr);
+          std::cerr << "CPP InsertTrivialStabilizer2 dep1=" << dep1 << " dep2=" << dep2 << "\n";
           KeyUpdating("After InsertTrivialStabilizer");
 	}
 	newBase.push_back(Sptr->orbit[0]);
@@ -1377,7 +1410,10 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
     }
     else if (PositionVect(newBase, old) != -1 || (reduced == int_true && Sptr->orbit.size() == 1)) {
       std::cerr << "CPP Stabilizer shift in ChangeStabChain\n";
+      int dep1=GetStabilizerDepth(Sptr);
       Sptr->stabilizer = Sptr->stabilizer->stabilizer;
+      int dep2=GetStabilizerDepth(Sptr);
+      std::cerr << "CPP Manual Removal dep1=" << dep1 << " dep2=" << dep2 << "\n";
     }
     else {
       newBase.push_back(old);
@@ -1386,6 +1422,8 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
     }
   }
   std::cerr << "CPP LEAVE GetStabilizerDepth(S)=" << GetStabilizerDepth(Sptr) << " i=" << (i+1) << " |base|=" << basSiz << "\n";
+  std::cerr << "CPP Ending ChangeStabChain, GetStabilizerDepth(G) = " << GetStabilizerDepth(Gptr) << "\n";
+  std::cerr << "CPP Ending ChangeStabChain, GetStabilizerDepth(S) = " << GetStabilizerDepth(Sptr) << "\n";
   std::cerr << "CPP ChangeStabChain 2 orbit=" << PrintTopOrbit(Gptr) << "\n";
   std::cerr << "CPP Before ConjugateStabChain cnj=" << cnj << "\n";
   if (!cnj.isIdentity())
@@ -1398,6 +1436,7 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
 template<typename Telt>
 bool ExtendStabChain(StabChain<Telt> & Stot, std::vector<int> const& base)
 {
+  std::cerr << "CPP Beginning of ExtendStabChain\n";
   return ChangeStabChain(Stot, base, int_reducedm1);
 }
 
@@ -1409,19 +1448,6 @@ bool ReduceStabChain(StabChain<Telt> & Stot)
 }
 
 
-template<typename Telt>
-void InitializeSchreierTree(StabChain<Telt> & S, int const& pnt)
-{
-  //  std::cerr << "Beginning of InitializeSchreierTree\n";
-  int n=S->comm->n;
-  //
-  S->orbit = {pnt};
-  //
-  std::vector<int> transversal(n, -1);
-  transversal[pnt] = 0;
-  S->transversal = transversal;
-  //  std::cerr << "   Ending of InitializeSchreierTree\n";
-}
 
 
 template<typename Telt>

@@ -145,12 +145,13 @@ InstallMethod( StabChainOp,"group and option",
     Print("GAP Call to StabChainOp (group and option)\n");
     # If a stabilizer chain <S> is already known, modify it.
     if HasStabChainMutable( G )  then
-#        Print("GAP Case HaseStabChainMutable=true\n");
+        Print("GAP Case HaseStabChainMutable=true\n");
         S := StructuralCopy( StabChainMutable( G ) );
         if IsBound( options.base )  then
             if not IsBound( options.reduced )  then
                 options.reduced := DefaultStabChainOptions.reduced;
             fi;
+            Print("Before ChangeStabChain, step 1\n");
             if not ChangeStabChain( S, options.base, options.reduced )
                then
                 return false;
@@ -162,7 +163,7 @@ InstallMethod( StabChainOp,"group and option",
         Print("GAP End of HaseStabChainMutable=true section\n");
     # Otherwise construct a new GAP object <S>.
     else
-#        Print("GAP Case HaseStabChainMutable=false\n");
+        Print("GAP Case HaseStabChainMutable=false\n");
         CopyOptionsDefaults( G, options );
 
         # For solvable groups, use the pcgs algorithm.
@@ -201,12 +202,14 @@ InstallMethod( StabChainOp,"group and option",
 	    SetPcgsElementaryAbelianSeries(G,pcgs);
 	    S := CopyStabChain(S); # keep the pcgs' pristine stabchain
 	    if IsBound(options.base) then
+              Print("Before ChangeStabChain, step 2\n");
 	      ChangeStabChain( S, options.base, options.reduced );
 	    fi;
 	  fi;
 	elif UseNonPortedMethods and IsRecord(pcgs) then
 	  S:=pcgs.stabChain;
 	  if IsBound(options.base) then
+            Print("Before ChangeStabChain, step 3\n");
 	    ChangeStabChain( S, options.base, options.reduced );
 	  fi;
         else
@@ -1127,12 +1130,11 @@ InstallGlobalFunction(ChangeStabChain,function( arg )
 local   G,  base,  reduced,
         cnj,  S,  newBase,  old,  new,  i,
         strG_orig, strG_current, strS_current, strG_final, strS, idx, KeyUpdating;
-    Print("GAP Beginning of ChangeStabChain\n");
     # Get the arguments.
     G := arg[ 1 ];
     strG_orig:=GetStringExpressionOfStabChain(G);
     strG_current:=strG_orig;
-    Print("GAP GetStabilizerDepth = ", GetStabilizerDepth(G), "\n");
+    Print("GAP Beginning ChangeStabChain, GetStabilizerDepth = ", GetStabilizerDepth(G), "\n");
     base := arg[ 2 ];
     if Length( arg ) > 2  then  reduced := arg[ 3 ];
                           else  reduced := true;      fi;
@@ -1148,6 +1150,7 @@ local   G,  base,  reduced,
       strSloc:=GetStringExpressionOfStabChain(S);
       idx:=idx+1;
 #      Print("GAP KU At step ", idx, " S=G : ", strGloc=strSloc, " of ", str, "\n");
+      Print("GAP KU At ", idx, " of ", str, " dep(G)/dep(S)=", GetStabilizerDepth(G), "/", GetStabilizerDepth(S), "\n");
       Print("GAP KU At step ", idx, " of ", str, "\n");
       if strG_current=strGloc then
         Print("GAP   KU At step ", idx, " of ", str, " no change of G\n");
@@ -1181,7 +1184,7 @@ local   G,  base,  reduced,
 #          break;
 #        fi;
      while IsBound( S.stabilizer )  or  i <= Length( base )  do
-        Print("GAP GetStabilizerDepth(S)=", GetStabilizerDepth(S), "\n");
+        Print("GAP GetStabilizerDepth(S)=", GetStabilizerDepth(S), " GetStabilizerDepth(G)=", GetStabilizerDepth(G), "\n");
         old := BasePoint( S );
         Print("GAP ChangeStabChain old=", old, " i=", i, " |base|=", Length(base), "\n");
         KeyUpdating("After BasePoint");
@@ -1189,7 +1192,10 @@ local   G,  base,  reduced,
         if     Length( S.genlabels ) = 0
            and ( reduced = true  or  i > Length( base ) )  then
             Print("GAP Before RemoveStabChain\n");
+            dep1:=GetStabilizerDepth(S);
             RemoveStabChain( S );
+            dep2:=GetStabilizerDepth(S);
+            Print("GAP RemoveStabChain dep1=", dep1, " dep2=", dep2, "\n");
             KeyUpdating("After RemoveStabChain");
             i := Length( base ) + 1;
 
@@ -1203,7 +1209,10 @@ local   G,  base,  reduced,
                 AddSet( newBase, new );
                 if new <> old  then
                     if IsFixedStabilizer( S, new )  then
+                        dep1:=GetStabilizerDepth(S);
                         InsertTrivialStabilizer( S, new );
+                        dep2:=GetStabilizerDepth(S);
+                        Print("GAP InsertTrivialStabilizer1 dep1=", dep1, " dep2=", dep2, "\n");
                         KeyUpdating("After InsertTrivialStabilizer");
                     else
                         Error("<base> must be an extension of base of <G>");
@@ -1215,6 +1224,7 @@ local   G,  base,  reduced,
             # Base change. Return `false' if <S> turns out to be incorrect.
             elif reduced = false  or  not IsFixedStabilizer( S, new )  then
                 if IsBound( S.stabilizer )  then
+                    KeyUpdating("Before StabChainForcePoint");
                     if not StabChainForcePoint( S, new )  then
                         KeyUpdating("After StabChainForcePoint, return false");
                         return false;
@@ -1225,7 +1235,10 @@ local   G,  base,  reduced,
                                    cnj );
                     Print("GAP 2: cnj=", cnj, "\n");
                 else
+                    dep1:=GetStabilizerDepth(S);
                     InsertTrivialStabilizer( S, new );
+                    dep2:=GetStabilizerDepth(S);
+                    Print("GAP InsertTrivialStabilizer2 dep1=", dep1, " dep2=", dep2, "\n");
                     KeyUpdating("After InsertTrivialStabilizer");
                 fi;
                 AddSet( newBase, S.orbit[ 1 ] );
@@ -1250,7 +1263,10 @@ local   G,  base,  reduced,
                 Unbind( S.transversal );
             fi;
             if IsBound( S.stabilizer.stabilizer )  then
+                dep1:=GetStabilizerDepth(S);
                 S.stabilizer := S.stabilizer.stabilizer;
+                dep2:=GetStabilizerDepth(S);
+                Print("GAP Manual Removal dep1=", dep1, " dep2=", dep2, "\n");
             else
                 Unbind( S.stabilizer );
             fi;
@@ -1264,6 +1280,8 @@ local   G,  base,  reduced,
 
     od;
     Print("GAP LEAVE GetStabilizerDepth(S)=", GetStabilizerDepth(S), " i=", i, " |base|=", Length(base), "\n");
+    Print("GAP Ending ChangeStabChain, GetStabilizerDepth(G) = ", GetStabilizerDepth(G), "\n");
+    Print("GAP Ending ChangeStabChain, GetStabilizerDepth(S) = ", GetStabilizerDepth(S), "\n");
     strG_final:=GetStringExpressionOfStabChain(G);
     strS:=GetStringExpressionOfStabChain(S);
 #    Print("GAP ChangeStabChainOPER G change: ", strG_orig=strG_final, "\n");

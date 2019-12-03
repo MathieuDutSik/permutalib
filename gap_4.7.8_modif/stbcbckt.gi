@@ -1319,7 +1319,7 @@ InstallGlobalFunction( PartitionBacktrack,
 
         Print("GAP PBEnumerate, step 1, d=", d, " wasTriv=", wasTriv, "\n");
         if image.perm = false  then
-            Print("GAP PBEnumerate, EXIT 1\n");
+            Print("GAP PBEnumerate, EXIT 1 |L|=", Length(L), "\n");
             return fail;
         fi;
         image.depth := d;
@@ -1353,11 +1353,12 @@ InstallGlobalFunction( PartitionBacktrack,
                     Print("GAP wasTriv Critical, step 1\n");
                     # In the subgroup case, assign to  <L> and <R> stabilizer
                     # chains when the R-base is complete.
-                    Print("GAP Before computation of ListStabChain\n");
+                    Print("GAP Before computation of ListStabChain |L|=", Order(L), "\n");
+                    Print("GAP L=", L, " base=", rbase.base, "\n");
                     L := ListStabChain( CopyStabChain( StabChainOp( L,
                                  rec( base := rbase.base,
                                    reduced := false ) ) ) );
-                    Print("GAP |L|=", Length(L), "\n");
+                    Print("GAP ListStabChain |L|=", Length(L), "\n");
                     Print("GAP wasTriv Critical, step 2\n");
                     R := ShallowCopy( L );
                     Print("GAP wasTriv Critical, step 3\n");
@@ -1368,7 +1369,7 @@ InstallGlobalFunction( PartitionBacktrack,
                     fi;
                     Info( InfoBckt, 1, "Indices: ",
                           IndicesStabChain( L[ 1 ] ) );
-                    Print("GAP PBEnumerate, EXIT 2\n");
+                    Print("GAP PBEnumerate, EXIT 2 |L|=", Length(L), "\n");
                     return fail;
 
                 else
@@ -1384,14 +1385,14 @@ InstallGlobalFunction( PartitionBacktrack,
                         if SiftedPermutation( image.level2,
                                    prm / UnslicedPerm@( image.perm2 ) )
                            = image.level2.identity  then
-                            Print("GAP PBEnumerate, EXIT 3\n");
+                            Print("GAP PBEnumerate, EXIT 3 |L|=", Length(L), "\n");
                             return prm;
                         fi;
                     elif Pr( prm )  then
-                        Print("GAP PBEnumerate, EXIT 4\n");
+                        Print("GAP PBEnumerate, EXIT 4 |L|=", Length(L), "\n");
                         return UnslicedPerm@( prm );
                     fi;
-                    Print("GAP PBEnumerate, EXIT 5\n");
+                    Print("GAP PBEnumerate, EXIT 5 |L|=", Length(L), "\n");
                     return fail;
                 fi;
 
@@ -1487,6 +1488,7 @@ InstallGlobalFunction( PartitionBacktrack,
             # Now we  can  remove  the  entire   <R>-orbit of <a>  from   the
             # candidate list.
             Print("GAP ORB 1: Before subtract d=", d, " orb[d]=", orb[d], "\n");
+            Print("GAP |L|=", Length(L), "\n");
             SubtractBlist( orb[ d ], BlistList( range, L[ d ].orbit ) );
             Print("GAP ORB 1: After subtract d=", d, " orb[d]=", orb[d], "\n");
 
@@ -1496,19 +1498,19 @@ InstallGlobalFunction( PartitionBacktrack,
         # Only the early points of the orbit have to be considered.
         m := SizeBlist( orB[ d ] );
         if m < Length( L[ d ].orbit )  then
-            Print("GAP PBEnumerate, EXIT 6\n");
+            Print("GAP PBEnumerate, EXIT 6 |L|=", Length(L), "\n");
             return fail;
         fi;
         max := PositionNthTrueBlist( orB[ d ],
                        m - Length( L[ d ].orbit ) + 1 );
         Print("GAP PBEnumerate, step 9\n");
-	Print("wasTriv=", wasTriv, " a=", a, " max=", max, "\n");
+	Print("GAP wasTriv=", wasTriv, " a=", a, " max=", max, "\n");
 
         if wasTriv  and  a > max  then
             m := m - 1;
-	    Print("Before test m=", m, " Length(L[d].orbit)=", Length(L[d].orbit), "\n");
+	    Print("GAP Before test m=", m, " Length(L[d].orbit)=", Length(L[d].orbit), "\n");
             if m < Length( L[ d ].orbit )  then
-                Print("GAP PBEnumerate, EXIT 7\n");
+                Print("GAP PBEnumerate, EXIT 7 |L|=", Length(L), "\n");
                 return fail;
             fi;
             max := PositionNthTrueBlist( orB[ d ],
@@ -1522,7 +1524,7 @@ InstallGlobalFunction( PartitionBacktrack,
             b := fail;
         fi;
         while b <> fail  do
-	    Print("b=", b, "\n");
+	    Print("GAP b=", b, "\n");
 
             # Try to prune the node with prop 8(ii) of Leon's paper.
             if not repr  and  not wasTriv  and  IsBound( R[ d ].orbit )  then
@@ -1540,7 +1542,7 @@ InstallGlobalFunction( PartitionBacktrack,
             else
                 dd := d;
             fi;
-            Print("dd=", dd, " d=", d, "\n");
+            Print("GAP dd=", dd, " d=", d, "\n");
             if dd = d  then
 
                 # Undo the  changes made to  <image.partition>, <image.level>
@@ -1567,7 +1569,7 @@ InstallGlobalFunction( PartitionBacktrack,
                 image.bimg[ d ] := b;
                 IsolatePoint( image.partition, b );
                 val:=ProcessFixpoint( image, a, b, org[ d ][ b ] );
-		Print("a=", a, " b=", b, " org[d][b]=", org[d][b], " val=", val, "\n");
+		Print("GAP a=", a, " b=", b, " org[d][b]=", org[d][b], " val=", val, "\n");
                 if val  then
 #Error(a," ",b," ",Cells(rbase.partition),Cells(image.partition));
                     t := RRefine( rbase, image, false );
@@ -1627,7 +1629,7 @@ InstallGlobalFunction( PartitionBacktrack,
                     #   need  only find  a representative  because we already
                     #   know the stabilizer of <L> at an earlier level.
                     if repr  or  not wasTriv  then
-                        Print("GAP PBEnumerate, EXIT 8\n");
+                        Print("GAP PBEnumerate, EXIT 8 |L|=", Length(L), "\n");
                         return t;
 
                     # Subgroup case, base  <> image at current level: Enlarge
@@ -1640,13 +1642,15 @@ InstallGlobalFunction( PartitionBacktrack,
                         Info( InfoBckt, 1, "Level ", d,
                                 ": ", IndicesStabChain( L[ 1 ] ) );
                         if m < Length( L[ d ].orbit )  then
-                            Print("GAP PBEnumerate, EXIT 9\n");
+                            Print("GAP PBEnumerate, EXIT 9 |L|=", Length(L), "\n");
                             return fail;
                         fi;
                         max := PositionNthTrueBlist( orB[ d ],
                                        m - Length( L[ d ].orbit ) + 1 );
+                        Print("GAP Before |R|=", Length(R), " |L|=", Length(L), "\n");
                         R{ [ d .. Length( rbase.base ) ] } := List(
                         L{ [ d .. Length( rbase.base ) ] }, CopyStabChain );
+                        Print("GAP After |R|=", Length(R), " |L|=", Length(L), "\n");
                     fi;
 
                 fi;
@@ -1666,13 +1670,13 @@ InstallGlobalFunction( PartitionBacktrack,
             fi;
 
             b := Position( orb[ d ], true, b );
-	    Print("End of loop, Now b=", b, "\n");
+	    Print("GAP End of loop, Now b=", b, "\n");
             if b <> fail  and  b > max  then
                 b := fail;
             fi;
         od;
 
-        Print("GAP PBEnumerate, step 11, EXIT 10\n");
+        Print("GAP PBEnumerate, step 11, EXIT 10 |L|=", Length(L), "\n");
         return fail;
     end;
 
@@ -2496,7 +2500,8 @@ InstallGlobalFunction( RepOpSetsPermGroup, function( arg )
     else
         R := L;
     fi;
-    Print("Orders: |R|=", Order(R), " |L|=", Order(L), "\n");
+    Print(" Orders: |R|=", Order(R), " |L|=", Order(L), "\n");
+#    Print("Lengths: |R|=", Length(R), " |L|=", Length(L), "\n");
 
 
     # Construct an R-base.

@@ -8,10 +8,9 @@
 
 namespace permutalib {
 
-  
+
 // The main function
 // Right now we do not implement the PCGS algorithm
-//
 template<typename Telt, typename Tint>
 StabChain<Telt> StabChainOp_listgen(std::vector<Telt> const& Lgen, StabChainOptions<Tint> const& options)
 {
@@ -30,6 +29,7 @@ StabChain<Telt> StabChainOp_listgen(std::vector<Telt> const& Lgen, StabChainOpti
     std::cerr << "Before call to StabChainStrong\n";
     StabChainStrong(S, Lgen, options );
   }
+  std::cerr << "Before the ExtendStabChain section reduced=" << options.reduced << " |base|=" << options.base.size() << "\n";
   if (!options.reduced && options.base.size() > 0) {
     ExtendStabChain(S, options.base);
   }
@@ -44,7 +44,7 @@ StabChain<Telt> StabChainOp_listgen(std::vector<Telt> const& Lgen, StabChainOpti
                                       options.random );
         fi;
         StabChainOptions( G ).random := options.random;
-	fi;*/  
+	fi;*/
   return S;
 }
 
@@ -80,18 +80,18 @@ StabChain<Telt> StabChainOp_stabchain_nofalse(StabChain<Telt> const& G, StabChai
   }
   return eRec.second;
 }
- 
 
- 
 
- 
+
+
+
 template<typename Telt, typename Tint>
 Tint Order(StabChain<Telt> const& G)
 {
   return SizeStabChain<Telt,Tint>(G);
 }
 
- 
+
 
 template<typename Telt, typename Tint>
 StabChain<Telt> MinimalStabChain(std::vector<Telt> const& LGen, int const& n)
