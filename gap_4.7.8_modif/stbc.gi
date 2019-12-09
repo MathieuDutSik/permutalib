@@ -231,6 +231,7 @@ InstallMethod( StabChainOp,"group and option",
                     if not IsBound( options.base )  then
                         options.base := [  ];
                     fi;
+                    Print("GAP options=", options, "\n");
                     S.cycles := [  ];
                     Print("GAP Before call to StabChainStrong\n");
                     StabChainStrong( S, GeneratorsOfGroup( G ), options );
@@ -553,29 +554,39 @@ InstallGlobalFunction( AddGeneratorsExtendSchreierTree, function( S, new )
             old,  ald,  # genlabels before extension
             len,        # initial length of the orbit of <S>
             img,        # image during orbit algorithm
+            debug_fct,  # whether to debug or not the program
             i,  j;      # loop variable
 
-#    Print("AGEST GAP : Beginning of AddGeneratorsExtendSchreierTree\n");
-#    Print("AGEST GAP 1: genlabels=", S.genlabels, "\n");
+    debug_fct:=true;
+    if debug_fct then
+      Print("GAP AGEST : Beginning of AddGeneratorsExtendSchreierTree\n");
+      Print("GAP AGEST 1: genlabels=", S.genlabels, "\n");
+    fi;
     # Put in the new labels.
     old := BlistList( [ 1 .. Length( S.labels ) ], S.genlabels );
     old[ 1 ] := true;
     ald := StructuralCopy( old );
-#    Print("AGEST GAP newgens=", new, "\n");
-#    Print("AGEST GAP 1: old=", old, "\n");
-#    Print("AGEST GAP 1: ald=", ald, "\n");
-#    Print("AGEST GAP labels=", S.labels, "\n");
-#    Print("AGEST GAP 2: genlabels=", S.genlabels, "\n");
+    if debug_fct then
+      Print("GAP AGEST newgens=", new, "\n");
+      Print("GAP AGEST 1: old=", old, "\n");
+      Print("GAP AGEST 1: ald=", ald, "\n");
+      Print("GAP AGEST labels=", S.labels, "\n");
+      Print("GAP AGEST 2: genlabels=", S.genlabels, "\n");
+    fi;
     for gen  in new  do
         pos := Position( S.labels, gen );
         if pos = fail  then
             Add( S.labels, gen );
             Add( old, false );
             Add( ald, true );
-#            Print("AGEST GAP  genlabels insert 1: pos=", Length(S.labels), "\n");
+            if debug_fct then
+              Print("GAP AGEST  genlabels insert 1: pos=", Length(S.labels), "\n");
+            fi;
             Add( S.genlabels, Length( S.labels ) );
         elif not ald[ pos ]  then
-#            Print("AGEST GAP  genlabels insert 2: pos=", pos, "\n");
+            if debug_fct then
+              Print("GAP AGEST  genlabels insert 2: pos=", pos, "\n");
+            fi;
             Add( S.genlabels, pos );
         fi;
         if     IsBound( S.generators )
@@ -583,32 +594,46 @@ InstallGlobalFunction( AddGeneratorsExtendSchreierTree, function( S, new )
             Add( S.generators, gen );
         fi;
     od;
-#    Print("AGEST GAP 2: old=", old, "\n");
-#    Print("AGEST GAP 2: ald=", ald, "\n");
+    if debug_fct then
+      Print("GAP AGEST 2: old=", old, "\n");
+      Print("GAP AGEST 2: ald=", ald, "\n");
+    fi;
 
     # Extend the orbit and the transversal with the new labels.
     len := Length( S.orbit );
     i := 1;
 
     if IsBound( S.cycles )  then
-#        Print("AGEST GAP Cycles len=", len, "\n");
+        if debug_fct then
+          Print("GAP AGEST Cycles len=", len, "\n");
+        fi;
         while i <= Length( S.orbit )  do
-#            Print("  AGEST GAP i=", i, "\n");
+            if debug_fct then
+              Print("GAP   AGEST i=", i, "\n");
+            fi;
             for j  in S.genlabels  do
 
                 # Use new labels for old points, all labels for new points.
                 if i > len  or  not old[ j ]  then
                     img := S.orbit[ i ] / S.labels[ j ];
-#                    Print("    AGEST GAP img=", img, " g=", S.labels[j], "\n");
+                    if debug_fct then
+                      Print("GAP     AGEST img=", img, " g=", S.labels[j], "\n");
+                    fi;
                     if IsBound( S.translabels[ img ] )  then
                         S.cycles[ i ] := true;
-#                        Print("      AGEST GAP assign true\n");
+                        if debug_fct then
+                          Print("GAP       AGEST assign true\n");
+                        fi;
                     else
                         S.translabels[ img ] := j;
                         S.transversal[ img ] := S.labels[ j ];
-                        Print("AddGeneratorsSchreierTree S.transversal[img]=", S.transversal[img], "\n");
+                        if debug_fct then
+                          Print("GAP       AGEST S.transversal[img]=", S.transversal[img], "\n");
+                        fi;
                         Add( S.orbit, img );
-#                        Print("      AGEST GAP insert img\n");
+                        if debug_fct then
+                          Print("GAP       AGEST insert img\n");
+                        fi;
                         Add( S.cycles, false );
                     fi;
                 fi;
@@ -618,7 +643,9 @@ InstallGlobalFunction( AddGeneratorsExtendSchreierTree, function( S, new )
         od;
 
     else
-#        Print("AGEST GAP No Cycles len=", len, "\n");
+        if debug_fct then
+          Print("GAP AGEST No Cycles len=", len, "\n");
+        fi;
         while i <= Length( S.orbit )  do
             for j  in S.genlabels  do
 
@@ -645,6 +672,7 @@ end );
 InstallGlobalFunction( ChooseNextBasePoint, function( S, base, newgens )
     local   i,  pnt,  bpt,  pos;
 
+    Print("GAP base = ", base, "\n");
     i := 1;
     while     i <= Length( base )
           and ForAll( newgens, gen -> base[ i ] ^ gen = base[ i ] )  do
@@ -668,9 +696,11 @@ InstallGlobalFunction( ChooseNextBasePoint, function( S, base, newgens )
         bpt := infinity;
         pos := fail;
     fi;
+    Print("GAP BPT/POS bpt=", bpt, " pos=", pos, "\n");
     if    pos <> fail  and  i < pos              # (1)
        or pos =  fail  and  i <= Length( base )  # (2)
        or pos =  fail  and  pnt < bpt  then      # (3)
+        Print("GAP pnt=", pnt, " bpt=", bpt, " pos=", pos, "\n");
 #        Print("ChooseNextBasePoint: Before InsertTrivialStabilizer, S=\n");
 #        MyPrintStabChain(S);
         InsertTrivialStabilizer( S, pnt );
@@ -678,12 +708,13 @@ InstallGlobalFunction( ChooseNextBasePoint, function( S, base, newgens )
 #        MyPrintStabChain(S);
         if IsBound( S.stabilizer.cycles )  then
             S.cycles := [ false ];
+            Print("GAP   Initializing cycles\n");
         elif IsBound( S.stabilizer.relativeOrders )  then
             Unbind( S.stabilizer.relativeOrders );
             Unbind( S.stabilizer.base           );
         fi;
     fi;
-
+    Print("GAP Exiting ChooseNextBasePoint\n");
 end );
 
 #############################################################################
@@ -701,6 +732,7 @@ InstallGlobalFunction( StabChainStrong, function( S, newgens, options )
             g,          # one of these labels
             sch,        # Schreier generator for '<S>.stabilizer'
             img,  i,  j;# loop variables
+    Print("GAP Begin StabChainStrong : newgens=", newgens, "\n");
     Print("GAP StabChainStrong 1: genlabels=", S.genlabels, "\n");
     # It is possible to prescribe a new operation domain for each level.
     if IsPermOnEnumerator( S.identity )  then
@@ -723,11 +755,13 @@ InstallGlobalFunction( StabChainStrong, function( S, newgens, options )
     pnt := S.orbit[ 1 ];
     len := Length( S.orbit );
     old := Length( S.genlabels );
+    Print("GAP Before AddGeneratorsExtendSchreierTree\n");
     AddGeneratorsExtendSchreierTree( S, newgens );
 
     # If a new generator fixes the base point, put it into the stabilizer.
     for gen  in newgens  do
         if gen <> S.identity  and  pnt ^ gen = pnt  then
+            Print("CPP   1: Calling StabChainStrong with eGen=", gen, "\n");
             StabChainStrong( S.stabilizer, [ gen ], options );
         fi;
     od;
@@ -737,6 +771,11 @@ InstallGlobalFunction( StabChainStrong, function( S, newgens, options )
         pnts := ListBlist( [ 1 .. Length( S.orbit ) ], S.cycles );
     else
         pnts := [ 1 .. Length( S.orbit ) ];
+    fi;
+    Print("GAP pnts = ", pnts, "\n");
+    Print("GAP Usecycle=", IsBound(S.cycles), "\n");
+    if IsBound(S.cycles) then
+      Print("GAP cycles=", S.cycles, "\n");
     fi;
     gen1 := 1;
     Print("GAP StabChainStrong O=", S.orbit, "\n");
@@ -842,7 +881,7 @@ InstallGlobalFunction( StabChainSwap, function( S )
             img,        # image $b^{Rep(S,pnt)^-}$
             gen,        # new generator of $T_b$
             i;          # loop variable
-    Print("CPP Beginning of StabChainSwap\n");
+    Print("GAP Beginning of StabChainSwap\n");
     # get the two basepoints $a$ and $b$ that we have to switch
     a := S.orbit[ 1 ];
     b := S.stabilizer.orbit[ 1 ];
@@ -1130,7 +1169,7 @@ end;
 ##
 InstallGlobalFunction(ChangeStabChain,function( arg )
 local   G,  base,  reduced,
-        cnj,  S,  newBase,  old,  new,  i,
+        cnj,  S,  newBase,  old,  new,  i, dep1, dep2, 
         strG_orig, strG_current, strS_current, strG_final, strS, idx, KeyUpdating;
     # Get the arguments.
     G := arg[ 1 ];
@@ -1154,6 +1193,8 @@ local   G,  base,  reduced,
 #      Print("GAP KU At step ", idx, " S=G : ", strGloc=strSloc, " of ", str, "\n");
       Print("GAP KU At ", idx, " of ", str, " dep(G)/dep(S)=", GetStabilizerDepth(G), "/", GetStabilizerDepth(S), "\n");
       Print("GAP KU At step ", idx, " of ", str, "\n");
+      Print("GAP sgs(G) = ", StrongGeneratorsStabChain(G), "\n");
+      Print("GAP sgs(S) = ", StrongGeneratorsStabChain(S), "\n");
       if strG_current=strGloc then
         Print("GAP   KU At step ", idx, " of ", str, " no change of G\n");
       else
@@ -1284,6 +1325,8 @@ local   G,  base,  reduced,
     Print("GAP LEAVE GetStabilizerDepth(S)=", GetStabilizerDepth(S), " i=", i, " |base|=", Length(base), "\n");
     Print("GAP Ending ChangeStabChain, GetStabilizerDepth(G) = ", GetStabilizerDepth(G), "\n");
     Print("GAP Ending ChangeStabChain, GetStabilizerDepth(S) = ", GetStabilizerDepth(S), "\n");
+    Print("GAP sgs(G) = ", StrongGeneratorsStabChain(G), "\n");
+    Print("GAP sgs(S) = ", StrongGeneratorsStabChain(S), "\n");
     strG_final:=GetStringExpressionOfStabChain(G);
     strS:=GetStringExpressionOfStabChain(S);
 #    Print("GAP ChangeStabChainOPER G change: ", strG_orig=strG_final, "\n");
@@ -1422,20 +1465,31 @@ end );
 #F  InverseRepresentative( <S>, <pnt> ) . .  perm mapping <pnt> to base point
 ##
 InstallGlobalFunction( InverseRepresentative, function( S, pnt )
-local   bpt,  rep,te;
+    local   bpt,  rep, te, fct_debug;
 
     bpt := S.orbit[ 1 ];
     rep := S.identity;
-#    Print("INVREP GAP bpt=", bpt, " pnt=", pnt, "\n");
+    fct_debug:=true;
+    if fct_debug then
+      Print("INVREP GAP bpt=", bpt, " pnt=", pnt, "\n");
+    fi;
     while pnt <> bpt  do
 	te:=S.transversal[pnt];
-#        Print("INVREP GAP te=", te, "\n");
+        if fct_debug then
+          Print("INVREP GAP te=", te, "\n");
+        fi;
 	pnt:=pnt^te;
-#        Print("INVREP GAP   pnt=", pnt, "\n");
+        if fct_debug then
+          Print("INVREP GAP   pnt=", pnt, "\n");
+        fi;
         rep := rep * te;
-#        Print("INVREP GAP   rep=", rep, "\n");
+        if fct_debug then
+          Print("INVREP GAP   rep=", rep, "\n");
+        fi;
     od;
-#    Print("INVREP GAP return rep=", rep, "\n");
+    if fct_debug then
+      Print("INVREP GAP return rep=", rep, "\n");
+    fi;
     return rep;
 end );
 

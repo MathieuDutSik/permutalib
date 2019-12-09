@@ -184,8 +184,9 @@ InstallGlobalFunction( ExtendedT, function( t, pnt, img, simg, G )
     # If <G> fixes <pnt>, nothing more can  be changed, so test whether <pnt>
     # = <img>.
     bpt := BasePoint( G );
-    Print("GAP img=", img, " bpt=", bpt, "\n");
+    Print("GAP img=", img, " bpt=", bpt, " pnt=", pnt, "\n");
     if bpt <> pnt  then
+        Print("GAP Case bpt != pnt\n");
         if pnt <> img  then
 	    Print("GAP ExtendedT, return false 1\n");
             return false;
@@ -205,6 +206,8 @@ InstallGlobalFunction( ExtendedT, function( t, pnt, img, simg, G )
         od;
         t!.length := len;
     else
+        Print("GAP Final case t=", t, "\n");
+        Print("GAP sgs(S.Stot)=", StrongGeneratorsStabChain(G), "\n");
         t := LeftQuotient( InverseRepresentative( G, img ), t );
     fi;
 
@@ -222,7 +225,7 @@ NicePrintPartition:=function(str, P)
     eSet:=[eFirst..eFirst+len-1];
     Add(retV, P.points{eSet});
   od;
-  Print(str, " =", retV, "\n");
+  Print(str, " = ", retV, "\n");
 end;
 
 
@@ -1077,7 +1080,7 @@ InstallGlobalFunction( RegisterRBasePoint, function( P, rbase, pnt )
     PrintRBaseLevel(rbase, "GAP RegisterRBasePoint 1");
     Add( rbase.lev, rbase.level );
     Add( rbase.base, pnt );
-    KeyUpdatingRbase("GAP RegisterRBasePoint 1", rbase);
+    KeyUpdatingRbase("RegisterRBasePoint 1", rbase);
     k := IsolatePoint( P, pnt );
     NicePrintPartition("GAP After IsolatePoint P", P);
     Info( InfoBckt, 1, "Level ", Length( rbase.base ), ": ", pnt, ", ",
@@ -1300,8 +1303,14 @@ InstallGlobalFunction( PartitionBacktrack,
 	   val,          # return value of test
            i,  dd,  p;   # loop variables
 
-
-
+    Print("GAP PartitionBacktrack step 1\n");
+    
+    Print("GAP sgs(G)=", G, "\n");
+    Print("GAP sgs(L)=", L, "\n");
+    Print("GAP sgs(R)=", R, "\n");
+#    Print("GAP sgs(G)=", StrongGeneratorsStabChain(G), "\n");
+#    Print("GAP sgs(L)=", StrongGeneratorsStabChain(L), "\n");
+#    Print("GAP sgs(R)=", StrongGeneratorsStabChain(R), "\n");
 #############################################################################
 ##
 #F      PBEnumerate( ... )  . . . . . . . recursive enumeration of a subgroup
@@ -1483,6 +1492,7 @@ InstallGlobalFunction( PartitionBacktrack,
 
             # Recursion.
             PBEnumerate( d + 1, true );
+            Print("GAP wasTriv Critical, step 6 d=", d, "\n");
             image.depth := d;
 
             # Now we  can  remove  the  entire   <R>-orbit of <a>  from   the

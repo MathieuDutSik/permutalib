@@ -38,7 +38,7 @@ public:
     ListVal=v1;
     ListRev=v2;
   }
-  ~DoubleSidedPerm() 
+  ~DoubleSidedPerm()
   {
   }
   DoubleSidedPerm(DoubleSidedPerm const& ePerm)
@@ -116,12 +116,12 @@ bool operator!=(DoubleSidedPerm const& v1, DoubleSidedPerm const& v2)
   return false;
 }
 
- 
+
 bool operator<(DoubleSidedPerm const& v1, DoubleSidedPerm const& v2)
 {
   int siz1=v1.size();
   int siz2=v2.size();
-  if (siz1 != siz2) 
+  if (siz1 != siz2)
     return siz1<siz2;
   int siz=siz1;
   for (int i=0; i<siz; i++) {
@@ -130,7 +130,7 @@ bool operator<(DoubleSidedPerm const& v1, DoubleSidedPerm const& v2)
   }
   return false;
 }
- 
+
 DoubleSidedPerm operator~(DoubleSidedPerm const& ePerm)
 {
   return DoubleSidedPerm(ePerm.getListRev(), ePerm.getListVal());
@@ -146,7 +146,7 @@ DoubleSidedPerm operator*(DoubleSidedPerm const& v1, DoubleSidedPerm const& v2)
     std::cerr << "Error in the DoubleSidedPerm product\n";
     throw TerminalException{1};
   }
-#endif  
+#endif
   std::vector<int> vVal(siz), vRev(siz);
   for (int i=0; i<siz; i++) {
     int j=v1.at(i);
@@ -168,7 +168,7 @@ DoubleSidedPerm Conjugation(DoubleSidedPerm const& v1, DoubleSidedPerm const& v2
     std::cerr << "Error in the DoubleSidedPerm conjugation\n";
     throw TerminalException{1};
   }
-#endif  
+#endif
   std::vector<int> v(siz);
   for (int i=0; i<siz; i++) {
     int j=v1[i];
@@ -241,7 +241,7 @@ std::string GapStyleStringShift(DoubleSidedPerm const& ePerm, int const& eShift)
   int n=ePerm.size();
   std::vector<int> ListStat(n,1);
   std::string eRet;
-  
+
   for (int i=0; i<n; i++) {
     if (ListStat[i] == 1) {
       int eFirst=i;
@@ -282,7 +282,7 @@ std::ostream& operator<<(std::ostream& os, DoubleSidedPerm const& ePerm)
   os << GapStyleStringShift(ePerm,1);
   return os;
 }
-  
+
 }
 
 #endif

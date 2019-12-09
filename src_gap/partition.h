@@ -17,22 +17,22 @@ struct Partition {
 void NicePrintPartition(std::string const& str, Partition const& P)
 {
   int nbPart=P.firsts.size();
-  std::cerr << str << " = [";
+  std::cerr << str << " = [ ";
   for (int iPart=0; iPart<nbPart; iPart++) {
     if (iPart > 0)
       std::cerr << ", ";
     int eFirst=P.firsts[iPart];
     int len=P.lengths[iPart];
-    std::cerr << "[";
+    std::cerr << "[ ";
     for (int i=0; i<len; i++) {
       if (i >0)
 	std::cerr << ", ";
       int ePt = P.points[eFirst + i];
-      std::cerr << ePt;
+      std::cerr << (ePt+1);
     }
-    std::cerr << "]";
+    std::cerr << " ]";
   }
-  std::cerr << "]\n";
+  std::cerr << " ]\n";
 }
 
  

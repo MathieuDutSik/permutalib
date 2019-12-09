@@ -32,9 +32,10 @@ int main(int argc, char *argv[])
       LGen[iGen] = ePerm;
     }
     std::cerr.setf(std::ios::boolalpha);
-    std::cerr << "CPP Before call to MinimalStabChain\n";
     //
-    permutalib::StabChain<Telt> eG = permutalib::MinimalStabChain<Telt,Tint>(LGen, n);
+    std::cerr << "CPP Before call to MinimalStabChain\n";
+    //    permutalib::StabChain<Telt> eG = permutalib::MinimalStabChain<Telt,Tint>(LGen, n);
+    permutalib::StabChain<Telt> eG = permutalib::StabChainOp_group_options<Telt,Tint>(LGen, n);
     std::cerr << "CPP After call to MinimalStabChain\n";
     std::cerr << "CPP eG=" << eG << "\n";
     //
