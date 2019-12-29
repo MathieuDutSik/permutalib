@@ -877,9 +877,9 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 {
   int n=G->comm->n;
   std::cerr << "CPP PartitionBacktrack step 1\n";
-  std::cerr << "CPP sgs(G)=" << GapStringTVector(StrongGeneratorsStabChain(G)) << "\n";
-  std::cerr << "CPP sgs(L)=" << GapStringTVector(StrongGeneratorsStabChain(L)) << "\n";
-  std::cerr << "CPP sgs(R)=" << GapStringTVector(StrongGeneratorsStabChain(R)) << "\n";
+  std::cerr << "CPP sgs(G)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(G))) << "\n";
+  std::cerr << "CPP sgs(L)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(L))) << "\n";
+  std::cerr << "CPP sgs(R)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(R))) << "\n";
   imageType<Telt> image;
   std::vector<Face> orB; // backup of <orb>. We take a single entry. Not sure it is correct
   int nrback;
@@ -891,6 +891,12 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   Partition oldcel;       // old value of <image.partition.cellno>
   std::vector<int> oldcel_cellno;
   std::vector<StabChain<Telt>> L_list, R_list;
+  auto PrintRBaseLevels=[&]() -> void {
+    int len=rbase.lev.size();
+    for (int eD=0; eD<len; eD++) {
+      std::cerr << "CPP rbase.lev[" << (eD+1) << "]=" << GapStringTVector(StrongGeneratorsStabChain(rbase.lev[eD].Stot)) << "\n";
+    }
+  };
   std::function<permPlusBool<Telt>(int const&,bool const&)> PBEnumerate = [&](int const& d, bool const & wasTriv) -> permPlusBool<Telt> {
     std::cerr << "CPP PBEnumerate, step 1, d=" << (d+1) << " wasTriv=" << wasTriv << "\n";
     //    PrintVectorORB("orb", orb);
@@ -1063,7 +1069,8 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     }
     AssignationVectorGapStyle(orB, d, orb[d]);
     std::cerr << "CPP PBEnumerate, step 7, wasTriv=" << wasTriv << "\n";
-
+    PrintRBaseLevels();
+    
     // Loop  over the candidate images  for the  current base point. First
     // the special case image = base up to current level.
     if (wasTriv) {
@@ -1131,15 +1138,18 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       }
       std::cerr << "CPP dd=" << (dd+1) << " d=" << (d+1) << "\n";
       if (dd == d) {
+        std::cerr << "CPP equality dd=d\n";
 	// Undo the  changes made to  <image.partition>, <image.level>
 	// and <image.perm>.
 	for (int i=undoto+1; i<NumberCells(image.partition); i++)
 	  UndoRefinement(image.partition);
 	if (image.perm.status != int_true) {
+          std::cerr << "CPP assignation image.level\n";
 	  image.level = rbase.lev[d];
 	  image.perm = oldprm;
 	}
 	if (image.level2.status != int_false) {
+          std::cerr << "CPP assignation image.level2\n";
 	  image.level2 = rbase.lev2[d];
 	  image.perm2  = oldprm2;
 	}

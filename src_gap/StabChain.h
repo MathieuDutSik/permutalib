@@ -847,6 +847,21 @@ std::string GapStringTVector(std::vector<T> const& f)
   return os.str();
 }
 
+template<typename T>
+std::vector<T> SortVector(std::vector<T> const& f)
+{
+  std::vector<T> RetF = f;
+  sort(RetF.begin(), RetF.end(),
+       [](T const& x, T const& y) -> bool {
+         if (x<y)
+           return true;
+         return false;
+       });
+  return RetF;
+}
+
+
+
 
 
 template<typename Telt>

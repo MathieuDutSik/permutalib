@@ -1305,14 +1305,21 @@ InstallGlobalFunction( PartitionBacktrack,
 	   nrback,	 # backtrack counter
 	   bail,	 # do we want to bail out quickly?
 	   val,          # return value of test
+           PrintRBaseLevels, 
            i,  dd,  p;   # loop variables
 
     Print("GAP PartitionBacktrack step 1\n");
     
-    Print("GAP sgs(G)=", StrongGeneratorsStabChain(StabChainMutable(G)), "\n");
-    Print("GAP sgs(L)=", StrongGeneratorsStabChain(StabChainMutable(L)), "\n");
-    Print("GAP sgs(R)=", StrongGeneratorsStabChain(StabChainMutable(R)), "\n");
-
+    Print("GAP sgs(G)=", Set(StrongGeneratorsStabChain(StabChainMutable(G))), "\n");
+    Print("GAP sgs(L)=", Set(StrongGeneratorsStabChain(StabChainMutable(L))), "\n");
+    Print("GAP sgs(R)=", Set(StrongGeneratorsStabChain(StabChainMutable(R))), "\n");
+    PrintRBaseLevels:=function()
+      local eD;
+      for eD in [1..Length(rbase.lev)]
+      do
+        Print("GAP rbase.lev[", eD, "]=", StrongGeneratorsStabChain(rbase.lev[eD]), "\n");
+      od;
+    end;
 #############################################################################
 ##
 #F      PBEnumerate( ... )  . . . . . . . recursive enumeration of a subgroup
@@ -1479,6 +1486,7 @@ InstallGlobalFunction( PartitionBacktrack,
 
         orB[ d ] := StructuralCopy( orb[ d ] );
         Print("GAP PBEnumerate, step 7, wasTriv=", wasTriv, "\n");
+        PrintRBaseLevels();
 
         # Loop  over the candidate images  for the  current base point. First
         # the special case ``image = base'' up to current level.
@@ -1556,13 +1564,14 @@ InstallGlobalFunction( PartitionBacktrack,
             fi;
             Print("GAP dd=", dd, " d=", d, "\n");
             if dd = d  then
-
+                Print("GAP equality dd=d\n");
                 # Undo the  changes made to  <image.partition>, <image.level>
                 # and <image.perm>.
                 for i  in [ undoto+1 .. NumberCells( image.partition ) ]  do
                     UndoRefinement( image.partition );
                 od;
                 if image.perm <> true  then
+                    Print("GAP assignation image.level\n");
                     image.level := rbase.lev[ d ];
                     if IsSlicedPerm( image.perm )  then
                         image.perm!.length := oldprm;
@@ -1572,6 +1581,7 @@ InstallGlobalFunction( PartitionBacktrack,
                     fi;
                 fi;
                 if image.level2 <> false  then
+                    Print("GAP assignation image.level2\n");
                     image.level2 := rbase.lev2[ d ];
                     image.perm2  := oldprm2;
                 fi;
