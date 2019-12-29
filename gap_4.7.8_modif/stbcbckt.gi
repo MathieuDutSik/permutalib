@@ -1309,12 +1309,11 @@ InstallGlobalFunction( PartitionBacktrack,
 
     Print("GAP PartitionBacktrack step 1\n");
     
-    Print("GAP sgs(G)=", G, "\n");
-    Print("GAP sgs(L)=", L, "\n");
-    Print("GAP sgs(R)=", R, "\n");
     Print("GAP sgs(G)=", StrongGeneratorsStabChain(StabChainMutable(G)), "\n");
     Print("GAP sgs(L)=", StrongGeneratorsStabChain(StabChainMutable(L)), "\n");
     Print("GAP sgs(R)=", StrongGeneratorsStabChain(StabChainMutable(R)), "\n");
+    Print("GAP 1 : rbase.level2.status=", rbase.level2.status, "\n");
+
 #############################################################################
 ##
 #F      PBEnumerate( ... )  . . . . . . . recursive enumeration of a subgroup

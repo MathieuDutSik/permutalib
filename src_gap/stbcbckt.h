@@ -880,9 +880,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   std::cerr << "CPP sgs(G)=" << GapStringTVector(StrongGeneratorsStabChain(G)) << "\n";
   std::cerr << "CPP sgs(L)=" << GapStringTVector(StrongGeneratorsStabChain(L)) << "\n";
   std::cerr << "CPP sgs(R)=" << GapStringTVector(StrongGeneratorsStabChain(R)) << "\n";
-  std::cerr << "CPP rbase.level2.status=" << GetIntTypeNature(rbase.level2.status) << "\n";
   imageType<Telt> image;
-  std::cerr << "CPP PartitionBacktrack step 2\n";
   std::vector<Face> orB; // backup of <orb>. We take a single entry. Not sure it is correct
   int nrback;
   std::vector<Face> orb;
@@ -893,7 +891,6 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   Partition oldcel;       // old value of <image.partition.cellno>
   std::vector<int> oldcel_cellno;
   std::vector<StabChain<Telt>> L_list, R_list;
-  std::cerr << "CPP PartitionBacktrack step 3\n";
   std::function<permPlusBool<Telt>(int const&,bool const&)> PBEnumerate = [&](int const& d, bool const & wasTriv) -> permPlusBool<Telt> {
     std::cerr << "CPP PBEnumerate, step 1, d=" << (d+1) << " wasTriv=" << wasTriv << "\n";
     //    PrintVectorORB("orb", orb);
@@ -1237,7 +1234,6 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     std::cerr << "CPP PBEnumerate, step 11, EXIT 10\n";
     return {int_fail, {}};
   };
-  std::cerr << "CPP PartitionBacktrack step 4\n";
 
   nrback=0; // count the number of times we jumped up
 
@@ -1250,11 +1246,9 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     else
       return {int_fail, {}, {}};
   }
-  std::cerr << "CPP PartitionBacktrack step 5\n";
 
   // Construct the <image>.
   image.data=data;
-  std::cerr << "CPP PartitionBacktrack step 5.1\n";
   image.depth=1;
   if (repr) {
     image.partition = data.P;
@@ -1263,20 +1257,12 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     image.partition = rbase.partition;
   }
   if (IsBool(rbase.level2)) {
-    std::cerr << "CPP PartitionBacktrack step 5.2\n";
     image.level2 = {int_false, -777, {}};
-    std::cerr << "CPP PartitionBacktrack step 5.3\n";
   }
   else {
-    std::cerr << "CPP PartitionBacktrack step 5.4\n";
-    std::cerr << "CPP bool=" << rbase.level2.Stot->comm->UseCycle << "\n";
-    std::cerr << "CPP PartitionBacktrack step 5.4.1\n";
     image.level2 = rbase.level2;
-    std::cerr << "CPP PartitionBacktrack step 5.5\n";
     image.perm2  = {int_perm, G->comm->identity};
-    std::cerr << "CPP PartitionBacktrack step 5.6\n";
   }
-  std::cerr << "CPP PartitionBacktrack step 6\n";
 
   // If  <Pr> is  function,   multiply  permutations. Otherwise, keep   them
   // factorized.
@@ -1302,14 +1288,11 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     //    L := ListStabChain( CopyStabChain( StabChainMutable( L ) ) );
     //    R := ListStabChain( CopyStabChain( StabChainMutable( R ) ) );
   }
-  std::cerr << "CPP PartitionBacktrack step 7\n";
 
   int lenD=rbase.domain[rbase.domain.size()-1];
   for (int i=0; i<=lenD; i++)
     range.push_back(i);
-  std::cerr << "CPP |range|=" << range.size() << "\n";
   permPlusBool<Telt> rep = PBEnumerate(0, !repr);
-  std::cerr << "CPP PartitionBacktrack step 8\n";
   if (!repr) {
     return {int_group, L, {}};
   }
@@ -1319,7 +1302,6 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     else
       return {int_fail, {}, {}};
   }
-  std::cerr << "CPP PartitionBacktrack step 9\n";
 }
 
 bool IsSubset(Face const& f, std::vector<int> const& g)
