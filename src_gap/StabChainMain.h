@@ -72,9 +72,9 @@ std::pair<bool, StabChain<Telt>> StabChainOp_stabchain(StabChain<Telt> const& G,
 template<typename Telt, typename Tint>
 StabChain<Telt> StabChainOp_stabchain_nofalse(StabChain<Telt> const& G, StabChainOptions<Tint> const& options)
 {
-  std::cerr << "CPP Before call to StabChainOp_stabchain\n";
+  //  std::cerr << "CPP Before call to StabChainOp_stabchain\n";
   std::pair<bool, StabChain<Telt>> eRec = StabChainOp_stabchain(G, options);
-  std::cerr << "CPP After call to StabChainOp_stabchain\n";
+  //  std::cerr << "CPP After call to StabChainOp_stabchain\n";
   if (!eRec.first) {
     std::cerr << "CPP The nofalse has not been matched\n";
     throw TerminalException{1};

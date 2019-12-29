@@ -54,6 +54,7 @@ std::string STRING_VectInt(std::vector<int> const& V)
 template<typename Telt>
 permPlusBool<Telt> ExtendedT(Telt const& t, int const& pnt, int& img, int const& simg, StabChainPlusLev<Telt> const& S)
 {
+  std::cerr << "CPP ExtendedT sgs(S.Stot)=" << GapStringTVector(StrongGeneratorsStabChain(S.Stot)) << "\n";
   if (simg == -1)
     img = SlashAct(img, t);
   else
@@ -317,6 +318,7 @@ template<typename Telt>
 bool ProcessFixpoint_image(imageType<Telt> & image, int const& pnt, int & img, int const& simg)
 {
   if (image.perm.status != int_true) {
+    std::cerr << "CPP PFI  sgs(level)=" << GapStringTVector(StrongGeneratorsStabChain(image.level.Stot)) << "\n";
     std::cerr << "CPP Case image.perm.status = true\n";
     permPlusBool<Telt> t = ExtendedT(image.perm.val, pnt, img, simg, image.level);
     if (t.status == int_false) {
@@ -330,6 +332,7 @@ bool ProcessFixpoint_image(imageType<Telt> & image, int const& pnt, int & img, i
     image.perm = t;
   }
   if (image.level2.status != int_false) {
+    std::cerr << "CPP PFI sgs(level2)=" << GapStringTVector(StrongGeneratorsStabChain(image.level2.Stot)) << "\n";
     std::cerr << "CPP Case image.perm.status = false\n";
     permPlusBool<Telt> t = ExtendedT(image.perm2.val, pnt, img, -1, image.level2);
     if (t.status == int_false) {
@@ -428,6 +431,7 @@ bool MeetPartitionStrat(rbaseType<Telt> const& rbase, imageType<Telt> & image, P
     return false;
   for (auto & pRec : strat) {
     int eFix=FixpointCellNo(image.partition, pRec.i);
+    std::cerr << "CPP ProcessFixpoint_image, Case MeetPartitionStrat\n";
     if ((pRec.p == -1 && !ProcessFixpoint_image(image, pRec.s, eFix, -1)) ||
 	(pRec.p != -1 && SplitCell_Partition(image.partition, pRec.p, S, pRec.s, g, pRec.i ) != pRec.i))
       return false;
@@ -647,6 +651,7 @@ template<typename Telt>
 bool Refinements_ProcessFixpoint(rbaseType<Telt> & rbase, imageType<Telt> & image, int const& pnt, int const& cellnum)
 {
  int img = FixpointCellNo(image.partition, cellnum);
+ std::cerr << "CPP ProcessFixpoint_image, Case Refinements_ProcessFixpoint\n";
  return ProcessFixpoint_image(image, pnt, img, -1);
 }
 
@@ -940,7 +945,8 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  StabChainOptions<Tint> options = GetStandardOptions<Tint>(n);
 	  options.base = rbase.base;
 	  options.reduced = false;
-	  std::cerr << "CPP Before computation of ListStabChain\n";
+	  std::cerr << "CPP Before computation of ListStabChain Order(L)=" << Order<Telt,mpz_class>(L) << "\n";
+          std::cerr << "CPP sgs(L)=" << GapStringTVector(StrongGeneratorsStabChain(L)) << " base=" << GapStringIntVector(rbase.base) << "\n";
 	  L_list = ListStabChain(StabChainOp_stabchain_nofalse<Telt,Tint>(L, options));
 	  std::cerr << "CPP ListStabChain |L|=" << L_list.size() << "\n";
 	  std::cerr << "CPP wasTriv Critical, step 2\n";
@@ -1050,13 +1056,13 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  }
 	}
       }
-      std::cerr << "CPP ORB: After pVal loop d=" << d << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
+      std::cerr << "CPP ORB: After pVal loop d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
       //      std::cerr << "After pVal loop\n";
     }
     std::cerr << "CPP PBEnumerate, step 6\n";
-    if (d == 1 && ForAll(G->comm->labels, [&](Telt const& x){return PowAct(a, x) == a;})) {
+    if (d == 0 && ForAll(G->comm->labels, [&](Telt const& x){return PowAct(a, x) == a;})) {
       orb[d][a]=true; // ensure a is a possible image (can happen if acting on permutations with more points)
-      std::cerr << "CPP ORB: After assignation d=" << d << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
+      std::cerr << "CPP ORB: After assignation d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
     }
     AssignationVectorGapStyle(orB, d, orb[d]);
     std::cerr << "CPP PBEnumerate, step 7, wasTriv=" << wasTriv << "\n";
@@ -1112,7 +1118,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     b = orb[d].find_first();
     while (b != boost::dynamic_bitset<>::npos) {
       int b_int = int(b);
-      std::cerr << "CPP b=" << (b+1) << " b_int=" << (b_int+1) << "\n";
+      std::cerr << "CPP b=" << (b+1) << "\n";
       // Try to prune the node with prop 8(ii) of Leon paper.
       if (!repr && !wasTriv) {
 	dd = branch;
@@ -1144,6 +1150,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	// refinement was impossible, give up for this image.
 	AssignationVectorGapStyle(image.bimg, d, b_int);
 	IsolatePoint( image.partition, b_int );
+        std::cerr << "CPP ProcessFixpoint_image, Case PartitionBacktrack 1\n";
 	bool val = ProcessFixpoint_image(image, a, b_int, org[d][b_int]);
 	std::cerr << "CPP a=" << a << " b_int=" << b_int << " org[d][b_int]=" << org[d][b_int] << " val=" << val << "\n";
 	if (val)
@@ -1285,8 +1292,10 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     else {
       std::vector<int> fix  = Fixcells(rbase.partition);
       std::vector<int> fixP = Fixcells(image.partition);
-      for (int i=0; i<int(fix.size()); i++)
+      for (int i=0; i<int(fix.size()); i++) {
+        std::cerr << "CPP ProcessFixpoint_image, Case PartitionBacktrack 2\n";
 	ProcessFixpoint_image(image, fix[i], fixP[i], -1);
+      }
     }
     // In   the representative case,   assign  to <L>  and <R>  stabilizer
     // chains.

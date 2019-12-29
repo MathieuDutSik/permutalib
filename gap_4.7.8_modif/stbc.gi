@@ -142,16 +142,14 @@ InstallMethod( StabChainOp,"group and option",
 
     UseNonPortedMethods:=false;
 
-    Print("GAP Call to StabChainOp (group and option)\n");
+#    Print("GAP Call to StabChainOp (group and option)\n");
     # If a stabilizer chain <S> is already known, modify it.
     if HasStabChainMutable( G )  then
-        Print("GAP Case HaseStabChainMutable=true\n");
         S := StructuralCopy( StabChainMutable( G ) );
         if IsBound( options.base )  then
             if not IsBound( options.reduced )  then
                 options.reduced := DefaultStabChainOptions.reduced;
             fi;
-            Print("Before ChangeStabChain, step 1\n");
             if not ChangeStabChain( S, options.base, options.reduced )
                then
                 return false;
@@ -160,7 +158,7 @@ InstallMethod( StabChainOp,"group and option",
             Print("GAP Before ReduceStabChain\n");
             ReduceStabChain( S );
         fi;
-        Print("GAP End of HaseStabChainMutable=true section\n");
+#        Print("GAP End of HaseStabChainMutable=true section\n");
     # Otherwise construct a new GAP object <S>.
     else
         Print("GAP Case HaseStabChainMutable=false\n");
@@ -268,7 +266,6 @@ InstallMethod( StabChainOp,"group and option",
         fi;
         StabChainOptions( G ).random := options.random;
     fi;
-    Print("StainChainOp, before calling SetStabChainMutable\n");
     SetStabChainMutable( G, S );
     return S;
 end );
@@ -1471,24 +1468,24 @@ InstallGlobalFunction( InverseRepresentative, function( S, pnt )
     rep := S.identity;
     fct_debug:=true;
     if fct_debug then
-      Print("INVREP GAP bpt=", bpt, " pnt=", pnt, "\n");
+      Print("GAP INVREP bpt=", bpt, " pnt=", pnt, "\n");
     fi;
     while pnt <> bpt  do
 	te:=S.transversal[pnt];
         if fct_debug then
-          Print("INVREP GAP te=", te, "\n");
+          Print("GAP INVREP te=", te, "\n");
         fi;
 	pnt:=pnt^te;
         if fct_debug then
-          Print("INVREP GAP   pnt=", pnt, "\n");
+          Print("GAP INVREP   pnt=", pnt, "\n");
         fi;
         rep := rep * te;
         if fct_debug then
-          Print("INVREP GAP   rep=", rep, "\n");
+          Print("GAP INVREP   rep=", rep, "\n");
         fi;
     od;
     if fct_debug then
-      Print("INVREP GAP return rep=", rep, "\n");
+      Print("GAP INVREP return rep=", rep, "\n");
     fi;
     return rep;
 end );

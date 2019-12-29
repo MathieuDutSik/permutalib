@@ -176,6 +176,7 @@ end );
 ##
 InstallGlobalFunction( ExtendedT, function( t, pnt, img, simg, G )
     local   bpt,  len,  edg;
+    Print("GAP ExtendedT sgs(S.Stot)=", StrongGeneratorsStabChain(G), "\n");
 
     # Map the image with the part <t> that is already known.
     if simg = 0  then  img := img / t;
@@ -243,6 +244,7 @@ local  P,  p;
 
   P := image.partition;
   for p  in strat  do
+    Print("GAP ProcessFixpoint_image, Case MeetPartitionStrat\n");
     if p[1] =  0  and
       not ProcessFixpoint( image, p[2], FixpointCellNo( P, p[3] ) )
     or p[1] <> 0  and
@@ -1038,6 +1040,7 @@ InstallGlobalFunction( ProcessFixpoint, function( arg )
         pnt   := arg[ 2 ];
         img   := arg[ 3 ];
         if image.perm <> true  then
+            Print("GAP PFI  sgs(level)=", StrongGeneratorsStabChain(image.level), "\n");
 	    Print("GAP Case image.perm.status = true\n");
             if Length( arg ) = 4  then  simg := arg[ 4 ];
                                   else  simg := 0;         fi;
@@ -1051,6 +1054,7 @@ InstallGlobalFunction( ProcessFixpoint, function( arg )
             image.perm := t;
         fi;
         if image.level2 <> false  then
+            Print("GAP PFI sgs(level2)=", StrongGeneratorsStabChain(image.level2), "\n");
 	    Print("GAP Case image.perm.status = false\n");
             t := ExtendedT( image.perm2, pnt, img, 0, image.level2 );
             if t = false  then
@@ -1308,9 +1312,9 @@ InstallGlobalFunction( PartitionBacktrack,
     Print("GAP sgs(G)=", G, "\n");
     Print("GAP sgs(L)=", L, "\n");
     Print("GAP sgs(R)=", R, "\n");
-#    Print("GAP sgs(G)=", StrongGeneratorsStabChain(G), "\n");
-#    Print("GAP sgs(L)=", StrongGeneratorsStabChain(L), "\n");
-#    Print("GAP sgs(R)=", StrongGeneratorsStabChain(R), "\n");
+    Print("GAP sgs(G)=", StrongGeneratorsStabChain(StabChainMutable(G)), "\n");
+    Print("GAP sgs(L)=", StrongGeneratorsStabChain(StabChainMutable(L)), "\n");
+    Print("GAP sgs(R)=", StrongGeneratorsStabChain(StabChainMutable(R)), "\n");
 #############################################################################
 ##
 #F      PBEnumerate( ... )  . . . . . . . recursive enumeration of a subgroup
@@ -1362,8 +1366,8 @@ InstallGlobalFunction( PartitionBacktrack,
                     Print("GAP wasTriv Critical, step 1\n");
                     # In the subgroup case, assign to  <L> and <R> stabilizer
                     # chains when the R-base is complete.
-                    Print("GAP Before computation of ListStabChain |L|=", Order(L), "\n");
-                    Print("GAP L=", L, " base=", rbase.base, "\n");
+                    Print("GAP Before computation of ListStabChain Order(L)=", Order(L), "\n");
+                    Print("GAP sgs(L)=", StrongGeneratorsStabChain(StabChainMutable(L)), " base=", rbase.base, "\n");
                     L := ListStabChain( CopyStabChain( StabChainOp( L,
                                  rec( base := rbase.base,
                                    reduced := false ) ) ) );
@@ -1578,6 +1582,7 @@ InstallGlobalFunction( PartitionBacktrack,
                 # refinement was impossible, give up for this image.
                 image.bimg[ d ] := b;
                 IsolatePoint( image.partition, b );
+                Print("GAP ProcessFixpoint_image, Case PartitionBacktrack 1\n");
                 val:=ProcessFixpoint( image, a, b, org[ d ][ b ] );
 		Print("GAP a=", a, " b=", b, " org[d][b]=", org[d][b], " val=", val, "\n");
                 if val  then
@@ -1762,6 +1767,7 @@ InstallGlobalFunction( PartitionBacktrack,
             fix  := Fixcells( rbase.partition );
             fixP := Fixcells( image.partition );
             for i  in [ 1 .. Length( fix ) ]  do
+                Print("GAP ProcessFixpoint_image, Case PartitionBacktrack 2\n");
                 ProcessFixpoint( image, fix[ i ], fixP[ i ] );
             od;
         fi;
@@ -1800,6 +1806,7 @@ function( rbase, image, pnt, cellnum )
     local   img;
 
     img := FixpointCellNo( image.partition, cellnum );
+    Print("GAP ProcessFixpoint_image, Case Refinements_ProcessFixpoint\n");
     return ProcessFixpoint( image, pnt, img );
 end);
 Refinements.(STBBCKT_STRING_PROCESSFIX) := Refinements_ProcessFixpoint;
