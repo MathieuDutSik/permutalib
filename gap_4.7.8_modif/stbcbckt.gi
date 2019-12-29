@@ -1312,7 +1312,6 @@ InstallGlobalFunction( PartitionBacktrack,
     Print("GAP sgs(G)=", StrongGeneratorsStabChain(StabChainMutable(G)), "\n");
     Print("GAP sgs(L)=", StrongGeneratorsStabChain(StabChainMutable(L)), "\n");
     Print("GAP sgs(R)=", StrongGeneratorsStabChain(StabChainMutable(R)), "\n");
-    Print("GAP 1 : rbase.level2.status=", rbase.level2.status, "\n");
 
 #############################################################################
 ##
