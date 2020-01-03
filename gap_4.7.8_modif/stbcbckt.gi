@@ -58,10 +58,16 @@ BindGlobal("STBBCKT_STRING_TWOCLOSURE","TwoClosure");
 
 
 PrintRBaseLevel:=function(rbase, str)
+  local eD;
   if IsInt(rbase.level) then
     Print(str, " PRBL rbase.level, integer : ", rbase.level, "\n");
   else
     if IsRecord(rbase.level) then
+      Print(str, " |rbase.lev|=", Length(rbase.lev), "\n");
+      for eD in [1..Length(rbase.lev)]
+      do
+        Print("GAP rbase.lev[", eD, "]=", StrongGeneratorsStabChain(rbase.lev[eD]), "\n");
+      od;
       Print(str, " PRBL rbase.level, record, |genlabels|=", Length(rbase.level.genlabels), "\n");
       Print(str, " PRBL");
       if IsBound(rbase.level.orbit) then
@@ -881,22 +887,24 @@ end;
 
 
 KeyUpdatingRbase:=function(str, rbase)
-  local ListKey, i, len;
+  local ListKey, i, len, DoPrint;
   ListKey:=List(rbase.lev, GetStringExpressionOfStabChain);
   len:=Length(rbase.lev);
-#  Print("GAP KU: at ", str, " IsIdenticalObj(..)=", IsIdenticalObj(rbase.level, rbase.lev[len]), "\n");
-  Print("GAP KUR: at ", str, "\n");
-  Print("GAP   Lorbit=", List(rbase.lev, x->x.orbit), "\n");
-  Print("GAP KUR: at ", str, " test_equality=", ListKey[len]=GetStringExpressionOfStabChain(rbase.level), "\n");
-  for i in [1..len]
-  do
-    if IsBound(rbase.levkey[i]) then
-      if ListKey[i]<>rbase.levkey[i] then
-        Print("GAP  KUR: Change of key at i=", i, "\n");
+  DoPrint:=false;
+  if DoPrint then
+    Print("GAP KUR: at ", str, "\n");
+    Print("GAP   Lorbit=", List(rbase.lev, x->x.orbit), "\n");
+    Print("GAP KUR: at ", str, " test_equality=", ListKey[len]=GetStringExpressionOfStabChain(rbase.level), "\n");
+    for i in [1..len]
+    do
+      if IsBound(rbase.levkey[i]) then
+        if ListKey[i]<>rbase.levkey[i] then
+          Print("GAP  KUR: Change of key at i=", i, "\n");
+        fi;
       fi;
-    fi;
-    rbase.levkey[i] := ListKey[i];
-  od;
+      rbase.levkey[i] := ListKey[i];
+    od;
+  fi;
 end;
 
 
@@ -1102,8 +1110,10 @@ InstallGlobalFunction( RegisterRBasePoint, function( P, rbase, pnt )
     if P.lengths[ k ] = 1  then
         Print("GAP Matching P.lengths test\n");
         pnt := FixpointCellNo( P, k );
-	Print("GAP Section P.lengths after FixpointCellNo pnt=", pnt, "\n");
+        Print("GAP Section P.lengths after FixpointCellNo pnt=", pnt, "\n");
+        PrintRBaseLevel(rbase, "GAP RegisterRBasePoint 2.1");
         ProcessFixpoint( rbase, pnt );
+        PrintRBaseLevel(rbase, "GAP RegisterRBasePoint 2.2");
         KeyUpdatingRbase("RegisterRBasePoint 1.4", rbase);
 	Print("GAP Section P.lengths after ProcessFixpoint_rbase\n");
         AddRefinement( rbase, STBBCKT_STRING_PROCESSFIX, [ pnt, k ] );
@@ -1305,7 +1315,6 @@ InstallGlobalFunction( PartitionBacktrack,
 	   nrback,	 # backtrack counter
 	   bail,	 # do we want to bail out quickly?
 	   val,          # return value of test
-           PrintRBaseLevels,
            i,  dd,  p;   # loop variables
 
     Print("GAP PartitionBacktrack step 1\n");
@@ -1313,14 +1322,6 @@ InstallGlobalFunction( PartitionBacktrack,
     Print("GAP INIT sgs(G)=", Set(StrongGeneratorsStabChain(StabChainMutable(G))), "\n");
     Print("GAP INIT sgs(L)=", Set(StrongGeneratorsStabChain(StabChainMutable(L))), "\n");
     Print("GAP INIT sgs(R)=", Set(StrongGeneratorsStabChain(StabChainMutable(R))), "\n");
-    PrintRBaseLevels:=function()
-      local eD;
-      Print("GAP |rbase.lev|=", Length(rbase.lev), "\n");
-      for eD in [1..Length(rbase.lev)]
-      do
-        Print("GAP rbase.lev[", eD, "]=", StrongGeneratorsStabChain(rbase.lev[eD]), "\n");
-      od;
-    end;
 #############################################################################
 ##
 #F      PBEnumerate( ... )  . . . . . . . recursive enumeration of a subgroup
@@ -1343,7 +1344,7 @@ InstallGlobalFunction( PartitionBacktrack,
         fi;
         image.depth := d;
         Print("GAP PBEnumerate, step 2\n");
-        PrintRBaseLevels();
+        PrintRBaseLevel(rbase, "GAP Step 2");
 
         # Store the original values of <image.*>.
         undoto := NumberCells( image.partition );
@@ -1359,7 +1360,7 @@ InstallGlobalFunction( PartitionBacktrack,
         if image.level2 <> false  then  oldprm2 := image.perm2;
                                   else  oldprm2 := false;        fi;
         Print("GAP PBEnumerate, step 4 d=", d, " |rbase.base|=", Length(rbase.base), "\n");
-        PrintRBaseLevels();
+        PrintRBaseLevel(rbase, "GAP Step 4");
 
         # Recursion comes to an end  if all base  points have been prescribed
         # images.
@@ -1447,7 +1448,7 @@ InstallGlobalFunction( PartitionBacktrack,
         fi;
         a := rbase.base[ d ];
         Print("GAP PBEnumerate, step 5\n");
-        PrintRBaseLevels();
+        PrintRBaseLevel(rbase, "GAP Step 5");
         Info(InfoBckt,3,Ordinal(d)," basepoint: ",a);
 
         # Intersect  the current cell of <P>  with  the mapped basic orbit of
@@ -1482,7 +1483,7 @@ InstallGlobalFunction( PartitionBacktrack,
 	    Print("GAP ORB: After pVal loop d=", d, " orb[d]=", orb[d], "\n");
         fi;
         Print("GAP PBEnumerate, step 6\n");
-        PrintRBaseLevels();
+        PrintRBaseLevel(rbase, "GAP Step 6");
 	if d=1 and ForAll(GeneratorsOfGroup(G),x->a^x=a) then
 	  orb[d][a]:=true; # ensure a is a possible image (can happen if
 			  # acting on permutations with more points)
@@ -1491,7 +1492,7 @@ InstallGlobalFunction( PartitionBacktrack,
 
         orB[ d ] := StructuralCopy( orb[ d ] );
         Print("GAP PBEnumerate, step 7, wasTriv=", wasTriv, "\n");
-        PrintRBaseLevels();
+        PrintRBaseLevel(rbase, "GAP Step 7");
 
         # Loop  over the candidate images  for the  current base point. First
         # the special case ``image = base'' up to current level.

@@ -205,27 +205,30 @@ struct rbaseType {
 template<typename Telt>
 void KeyUpdatingRbase(std::string const& str, rbaseType<Telt> & rbase)
 {
+  bool DoPrint=false;
   std::vector<std::string> ListKey;
   for (auto & x : rbase.lev)
     ListKey.push_back(GetStringExpressionOfStabChain(x.Stot));
   //
-  size_t len = rbase.lev.size();
-  std::string strO = "[ ";
-  for (size_t u=0; u<len; u++) {
-    if (u>0)
-      strO += ", ";
-    strO += PrintTopOrbit(rbase.lev[u].Stot);
+  if (DoPrint) {
+    size_t len = rbase.lev.size();
+    std::string strO = "[ ";
+    for (size_t u=0; u<len; u++) {
+      if (u>0)
+        strO += ", ";
+      strO += PrintTopOrbit(rbase.lev[u].Stot);
+    }
+    strO += " ]";
+    std::cerr << "CPP KUR: at " << str << "\n";
+    std::cerr << "CPP   Lorbit=" << strO << "\n";
+    bool test = ListKey[len-1] == GetStringExpressionOfStabChain(rbase.level.Stot);
+    std::cerr << "CPP KUR: at " << str << " test_equality=" << test << "\n";
+    for (size_t i=0; i<len; i++)
+      if (i<rbase.levkey.size())
+        if (rbase.levkey[i] != ListKey[i])
+          std::cerr << "CPP  KUR: Change of key at i=" << (i+1) << "\n";
+    rbase.levkey = ListKey;
   }
-  strO += " ]";
-  std::cerr << "CPP KUR: at " << str << "\n";
-  std::cerr << "CPP   Lorbit=" << strO << "\n";
-  bool test = ListKey[len-1] == GetStringExpressionOfStabChain(rbase.level.Stot);
-  std::cerr << "CPP KUR: at " << str << " test_equality=" << test << "\n";
-  for (size_t i=0; i<len; i++)
-    if (i<rbase.levkey.size())
-      if (rbase.levkey[i] != ListKey[i])
-        std::cerr << "CPP  KUR: Change of key at i=" << (i+1) << "\n";
-  rbase.levkey = ListKey;
 }
 
 template<typename Telt>
@@ -259,6 +262,11 @@ void PrintRBaseLevel(rbaseType<Telt> const& rbase, std::string const& str)
   }
   else {
     if (rbase.level.status == int_stablev) {
+      int len=rbase.lev.size();
+      std::cerr << str << " |rbase.lev|=" << len << "\n";
+      for (int eD=0; eD<len; eD++) {
+        std::cerr << "CPP rbase.lev[" << (eD+1) << "]=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(rbase.lev[eD].Stot))) << "\n";
+      }
       std::cerr << str << " PRBL rbase.level, record, |genlabels|=" << rbase.level.Stot->genlabels.size() << "\n";
       std::cerr << str << " PRBL orbit=" << PrintTopOrbit(rbase.level.Stot) << "\n";
     }
@@ -557,7 +565,9 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
     std::cerr << "CPP Matching P.lengths test\n";
     int pnt = FixpointCellNo(P, k);
     std::cerr << "CPP Section P.lengths after FixpointCellNo pnt=" << (pnt+1) << "\n";
+    PrintRBaseLevel(rbase, "CPP RegisterRBasePoint 2.1");
     ProcessFixpoint_rbase(rbase, pnt);
+    PrintRBaseLevel(rbase, "CPP RegisterRBasePoint 2.2");
     KeyUpdatingRbase("RegisterRBasePoint 1.4", rbase);
     std::cerr << "CPP Section P.lengths after ProcessFixpoint_rbase\n";
     rbase.rfm[len].push_back(Refinement({pnt,k}));
@@ -891,13 +901,6 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   Partition oldcel;       // old value of <image.partition.cellno>
   std::vector<int> oldcel_cellno;
   std::vector<StabChain<Telt>> L_list, R_list;
-  auto PrintRBaseLevels=[&]() -> void {
-    int len=rbase.lev.size();
-    std::cerr << "CPP |rbase.lev|=" << len << "\n";
-    for (int eD=0; eD<len; eD++) {
-      std::cerr << "CPP rbase.lev[" << (eD+1) << "]=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(rbase.lev[eD].Stot))) << "\n";
-    }
-  };
   std::function<permPlusBool<Telt>(int const&,bool const&)> PBEnumerate = [&](int const& d, bool const & wasTriv) -> permPlusBool<Telt> {
     std::cerr << "CPP PBEnumerate, step 1, d=" << (d+1) << " wasTriv=" << wasTriv << "\n";
     //    PrintVectorORB("orb", orb);
@@ -915,7 +918,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     }
     image.depth = d;
     std::cerr << "CPP PBEnumerate, step 2\n";
-    PrintRBaseLevels();
+    PrintRBaseLevel(rbase, "CPP Step 2");
     //    PrintVectorORB("orb", orb);
     //    PrintVectorORB("orB", orB);
 
@@ -934,7 +937,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     else
       oldprm2.status = int_false;
     std::cerr << "CPP PBEnumerate, step 4 d=" << (d+1) << " |rbase.base|=" << rbase.base.size() << "\n";
-    PrintRBaseLevels();
+    PrintRBaseLevel(rbase, "CPP Step 4");
     // Recursion comes to an end  if all base  points have been prescribed
     // images.
     if (d >= int(rbase.base.size())) {
@@ -986,9 +989,6 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	// <image.partition> for the case ``image = base point''.
       }
       else {
-	//	if (!repr) {
-	//	  oldcel = StructuralCopy( oldcel );
-	//	}
 	std::cerr << "CPP Not matching IsTrivialRBase test\n";
         PrintRBaseLevel(rbase, "CPP Before NextRBasePoint");
 	NextRBasePoint(rbase.partition, rbase, G->comm->identity);
@@ -1014,7 +1014,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     }
     a = rbase.base[d];
     std::cerr << "CPP PBEnumerate, step 5\n";
-    PrintRBaseLevels();
+    PrintRBaseLevel(rbase, "CPP Step 5");
 
     // Intersect  the current cell of <P>  with  the mapped basic orbit of
     // <G> (and also with the one of <H> in the intersection case).
@@ -1067,14 +1067,14 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       //      std::cerr << "After pVal loop\n";
     }
     std::cerr << "CPP PBEnumerate, step 6\n";
-    PrintRBaseLevels();
+    PrintRBaseLevel(rbase, "CPP Step 6");
     if (d == 0 && ForAll(G->comm->labels, [&](Telt const& x){return PowAct(a, x) == a;})) {
       orb[d][a]=true; // ensure a is a possible image (can happen if acting on permutations with more points)
       std::cerr << "CPP ORB: After assignation d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
     }
     AssignationVectorGapStyle(orB, d, orb[d]);
     std::cerr << "CPP PBEnumerate, step 7, wasTriv=" << wasTriv << "\n";
-    PrintRBaseLevels();
+    PrintRBaseLevel(rbase, "CPP Step 7");
     
     // Loop  over the candidate images  for the  current base point. First
     // the special case image = base up to current level.
