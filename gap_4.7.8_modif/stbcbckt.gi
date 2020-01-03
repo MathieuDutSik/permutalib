@@ -1025,8 +1025,10 @@ InstallGlobalFunction( ProcessFixpoint, function( arg )
         if rbase.level2 <> false  and  rbase.level2 <> true  then
 	    Print("GAP Before ChangeStabChain level2\n");
             ChangeStabChain( rbase.level2, [ pnt ] );
+            PrintRBaseLevel(rbase, "GAP After CSC level2");
 	    Print("GAP After ChangeStabChain level2\n");
             if BasePoint( rbase.level2 ) = pnt  then
+                Print("GAP Going to stabilizer of level2\n");
                 rbase.level2 := rbase.level2.stabilizer;
             fi;
         fi;
@@ -1036,11 +1038,14 @@ InstallGlobalFunction( ProcessFixpoint, function( arg )
 	    Print("GAP Before ChangeStabChain level\n");
 #            TestEqualityPointer("Before ChangeStabChain");
             ChangeStabChain( rbase.level, [ pnt ] );
+            PrintRBaseLevel(rbase, "GAP After CSC level");
 #            TestEqualityPointer("After ChangeStabChain");
 	    Print("GAP After ChangeStabChain level\n");
             if BasePoint( rbase.level ) = pnt  then
+                Print("GAP Going to stabilizer of level\n");
                 rbase.level := rbase.level.stabilizer;
             else
+                Print("GAP returning false\n");
                 return false;
             fi;
         fi;

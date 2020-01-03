@@ -36,6 +36,12 @@ struct StabChainPlusLev {
 };
 
 
+template<typename Telt>
+StabChainPlusLev<Telt> StructuralCopy(StabChainPlusLev<Telt> const& S)
+{
+  return {S.status, S.value_int, StructuralCopy(S.Stot)};
+}
+
 
 std::string STRING_VectInt(std::vector<int> const& V)
 {
@@ -286,9 +292,12 @@ bool ProcessFixpoint_rbase(rbaseType<Telt> & rbase, int const& pnt)
   if (rbase.level2.status != int_true && rbase.level2.status != int_false) {
     std::cerr << "CPP Before ChangeStabChain level2\n";
     ChangeStabChain(rbase.level2.Stot, {pnt}, int_true);
+    PrintRBaseLevel(rbase, "CPP After CSC level2");
     std::cerr << "CPP After ChangeStabChain level2\n";
-    if (BasePoint(rbase.level2) == pnt)
+    if (BasePoint(rbase.level2) == pnt) {
+      std::cerr << "CPP Going to stabilizer of level2\n";
       rbase.level2.Stot = rbase.level2.Stot->stabilizer;
+    }
   }
   if (rbase.level.status == int_int) {
     rbase.level.value_int--;
@@ -296,11 +305,14 @@ bool ProcessFixpoint_rbase(rbaseType<Telt> & rbase, int const& pnt)
   else {
     std::cerr << "CPP Before ChangeStabChain level\n";
     ChangeStabChain(rbase.level.Stot, {pnt}, int_true);
+    PrintRBaseLevel(rbase, "CPP After CSC level");
     std::cerr << "CPP After ChangeStabChain level\n";
     if (BasePoint(rbase.level) == pnt) {
+      std::cerr << "CPP Going to stabilizer of level\n";
       rbase.level.Stot = rbase.level.Stot->stabilizer;
     }
     else {
+      std::cerr << "CPP returning false\n";
       return false;
     }
   }
