@@ -54,7 +54,7 @@ std::string STRING_VectInt(std::vector<int> const& V)
 template<typename Telt>
 permPlusBool<Telt> ExtendedT(Telt const& t, int const& pnt, int& img, int const& simg, StabChainPlusLev<Telt> const& S)
 {
-  std::cerr << "CPP ExtendedT sgs(S.Stot)=" << GapStringTVector(StrongGeneratorsStabChain(S.Stot)) << "\n";
+  std::cerr << "CPP ExtendedT sgs(S.Stot)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(S.Stot))) << "\n";
   if (simg == -1)
     img = SlashAct(img, t);
   else
@@ -78,7 +78,7 @@ permPlusBool<Telt> ExtendedT(Telt const& t, int const& pnt, int& img, int const&
     return {int_false, {}};
   }
   std::cerr << "CPP Final case t=" << t << "\n";
-  std::cerr << "CPP sgs(S.Stot)=" << GapStringTVector(StrongGeneratorsStabChain(S.Stot)) << "\n";
+  std::cerr << "CPP sgs(S.Stot)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(S.Stot))) << "\n";
   Telt eInv = InverseRepresentative(S.Stot, img);
   std::cerr << "CPP Before final oper\n";
   //      Telt u = InverseRepresentative(S.Stot, S.eLev, img);
@@ -318,7 +318,7 @@ template<typename Telt>
 bool ProcessFixpoint_image(imageType<Telt> & image, int const& pnt, int & img, int const& simg)
 {
   if (image.perm.status != int_true) {
-    std::cerr << "CPP PFI  sgs(level)=" << GapStringTVector(StrongGeneratorsStabChain(image.level.Stot)) << "\n";
+    std::cerr << "CPP PFI  sgs(level)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(image.level.Stot))) << "\n";
     std::cerr << "CPP Case image.perm.status = true\n";
     permPlusBool<Telt> t = ExtendedT(image.perm.val, pnt, img, simg, image.level);
     if (t.status == int_false) {
@@ -332,7 +332,7 @@ bool ProcessFixpoint_image(imageType<Telt> & image, int const& pnt, int & img, i
     image.perm = t;
   }
   if (image.level2.status != int_false) {
-    std::cerr << "CPP PFI sgs(level2)=" << GapStringTVector(StrongGeneratorsStabChain(image.level2.Stot)) << "\n";
+    std::cerr << "CPP PFI sgs(level2)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(image.level2.Stot))) << "\n";
     std::cerr << "CPP Case image.perm.status = false\n";
     permPlusBool<Telt> t = ExtendedT(image.perm2.val, pnt, img, -1, image.level2);
     if (t.status == int_false) {
@@ -570,7 +570,7 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
     auto MainInsert=[&](StabChainPlusLev<Telt> const& lev) -> void {
       if (lev.status != int_int) {
 	std::vector<Telt> LGen = StrongGeneratorsStabChain(lev.Stot);
-	std::cerr << "CPP StrongGeneratorsStabChain(lev) = " << GapStringTVector(LGen) << "\n";
+	std::cerr << "CPP StrongGeneratorsStabChain(lev) = " << GapStringTVector(SortVector(LGen)) << "\n";
 	Partition O = OrbitsPartition(LGen, lev.Stot->comm->n, rbase.domain);
 	NicePrintPartition("CPP Before StratMeetPartition O", O);
         KeyUpdatingRbase("RegisterRBasePoint 2.1", rbase);
@@ -877,9 +877,9 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 {
   int n=G->comm->n;
   std::cerr << "CPP PartitionBacktrack step 1\n";
-  std::cerr << "CPP sgs(G)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(G))) << "\n";
-  std::cerr << "CPP sgs(L)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(L))) << "\n";
-  std::cerr << "CPP sgs(R)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(R))) << "\n";
+  std::cerr << "CPP INIT sgs(G)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(G))) << "\n";
+  std::cerr << "CPP INIT sgs(L)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(L))) << "\n";
+  std::cerr << "CPP INIT sgs(R)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(R))) << "\n";
   imageType<Telt> image;
   std::vector<Face> orB; // backup of <orb>. We take a single entry. Not sure it is correct
   int nrback;
@@ -893,8 +893,9 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   std::vector<StabChain<Telt>> L_list, R_list;
   auto PrintRBaseLevels=[&]() -> void {
     int len=rbase.lev.size();
+    std::cerr << "CPP |rbase.lev|=" << len << "\n";
     for (int eD=0; eD<len; eD++) {
-      std::cerr << "CPP rbase.lev[" << (eD+1) << "]=" << GapStringTVector(StrongGeneratorsStabChain(rbase.lev[eD].Stot)) << "\n";
+      std::cerr << "CPP rbase.lev[" << (eD+1) << "]=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(rbase.lev[eD].Stot))) << "\n";
     }
   };
   std::function<permPlusBool<Telt>(int const&,bool const&)> PBEnumerate = [&](int const& d, bool const & wasTriv) -> permPlusBool<Telt> {
@@ -914,6 +915,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     }
     image.depth = d;
     std::cerr << "CPP PBEnumerate, step 2\n";
+    PrintRBaseLevels();
     //    PrintVectorORB("orb", orb);
     //    PrintVectorORB("orB", orB);
 
@@ -932,6 +934,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     else
       oldprm2.status = int_false;
     std::cerr << "CPP PBEnumerate, step 4 d=" << (d+1) << " |rbase.base|=" << rbase.base.size() << "\n";
+    PrintRBaseLevels();
     // Recursion comes to an end  if all base  points have been prescribed
     // images.
     if (d >= int(rbase.base.size())) {
@@ -949,7 +952,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  options.base = rbase.base;
 	  options.reduced = false;
 	  std::cerr << "CPP Before computation of ListStabChain Order(L)=" << Order<Telt,mpz_class>(L) << "\n";
-          std::cerr << "CPP sgs(L)=" << GapStringTVector(StrongGeneratorsStabChain(L)) << " base=" << GapStringIntVector(rbase.base) << "\n";
+          std::cerr << "CPP sgs(L)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(L))) << " base=" << GapStringIntVector(rbase.base) << "\n";
 	  L_list = ListStabChain(StabChainOp_stabchain_nofalse<Telt,Tint>(L, options));
 	  std::cerr << "CPP ListStabChain |L|=" << L_list.size() << "\n";
 	  std::cerr << "CPP wasTriv Critical, step 2\n";
@@ -1011,6 +1014,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     }
     a = rbase.base[d];
     std::cerr << "CPP PBEnumerate, step 5\n";
+    PrintRBaseLevels();
 
     // Intersect  the current cell of <P>  with  the mapped basic orbit of
     // <G> (and also with the one of <H> in the intersection case).
@@ -1063,6 +1067,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       //      std::cerr << "After pVal loop\n";
     }
     std::cerr << "CPP PBEnumerate, step 6\n";
+    PrintRBaseLevels();
     if (d == 0 && ForAll(G->comm->labels, [&](Telt const& x){return PowAct(a, x) == a;})) {
       orb[d][a]=true; // ensure a is a possible image (can happen if acting on permutations with more points)
       std::cerr << "CPP ORB: After assignation d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";

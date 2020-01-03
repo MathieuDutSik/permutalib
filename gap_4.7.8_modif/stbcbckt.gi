@@ -1305,16 +1305,17 @@ InstallGlobalFunction( PartitionBacktrack,
 	   nrback,	 # backtrack counter
 	   bail,	 # do we want to bail out quickly?
 	   val,          # return value of test
-           PrintRBaseLevels, 
+           PrintRBaseLevels,
            i,  dd,  p;   # loop variables
 
     Print("GAP PartitionBacktrack step 1\n");
-    
-    Print("GAP sgs(G)=", Set(StrongGeneratorsStabChain(StabChainMutable(G))), "\n");
-    Print("GAP sgs(L)=", Set(StrongGeneratorsStabChain(StabChainMutable(L))), "\n");
-    Print("GAP sgs(R)=", Set(StrongGeneratorsStabChain(StabChainMutable(R))), "\n");
+
+    Print("GAP INIT sgs(G)=", Set(StrongGeneratorsStabChain(StabChainMutable(G))), "\n");
+    Print("GAP INIT sgs(L)=", Set(StrongGeneratorsStabChain(StabChainMutable(L))), "\n");
+    Print("GAP INIT sgs(R)=", Set(StrongGeneratorsStabChain(StabChainMutable(R))), "\n");
     PrintRBaseLevels:=function()
       local eD;
+      Print("GAP |rbase.lev|=", Length(rbase.lev), "\n");
       for eD in [1..Length(rbase.lev)]
       do
         Print("GAP rbase.lev[", eD, "]=", StrongGeneratorsStabChain(rbase.lev[eD]), "\n");
@@ -1342,6 +1343,7 @@ InstallGlobalFunction( PartitionBacktrack,
         fi;
         image.depth := d;
         Print("GAP PBEnumerate, step 2\n");
+        PrintRBaseLevels();
 
         # Store the original values of <image.*>.
         undoto := NumberCells( image.partition );
@@ -1357,6 +1359,7 @@ InstallGlobalFunction( PartitionBacktrack,
         if image.level2 <> false  then  oldprm2 := image.perm2;
                                   else  oldprm2 := false;        fi;
         Print("GAP PBEnumerate, step 4 d=", d, " |rbase.base|=", Length(rbase.base), "\n");
+        PrintRBaseLevels();
 
         # Recursion comes to an end  if all base  points have been prescribed
         # images.
@@ -1444,6 +1447,7 @@ InstallGlobalFunction( PartitionBacktrack,
         fi;
         a := rbase.base[ d ];
         Print("GAP PBEnumerate, step 5\n");
+        PrintRBaseLevels();
         Info(InfoBckt,3,Ordinal(d)," basepoint: ",a);
 
         # Intersect  the current cell of <P>  with  the mapped basic orbit of
@@ -1478,6 +1482,7 @@ InstallGlobalFunction( PartitionBacktrack,
 	    Print("GAP ORB: After pVal loop d=", d, " orb[d]=", orb[d], "\n");
         fi;
         Print("GAP PBEnumerate, step 6\n");
+        PrintRBaseLevels();
 	if d=1 and ForAll(GeneratorsOfGroup(G),x->a^x=a) then
 	  orb[d][a]:=true; # ensure a is a possible image (can happen if
 			  # acting on permutations with more points)

@@ -1183,30 +1183,28 @@ local   G,  base,  reduced,
     Print("GAP we have strS_current\n");
     idx:=0;
     KeyUpdating:=function(str)
-      local strGloc, strSloc;
+      local strGloc, strSloc, DoPrint;
       strGloc:=GetStringExpressionOfStabChain(G);
       strSloc:=GetStringExpressionOfStabChain(S);
       idx:=idx+1;
-#      Print("GAP KU At step ", idx, " S=G : ", strGloc=strSloc, " of ", str, "\n");
-      Print("GAP KU At ", idx, " of ", str, " dep(G)/dep(S)=", GetStabilizerDepth(G), "/", GetStabilizerDepth(S), "\n");
-      Print("GAP KU At step ", idx, " of ", str, "\n");
-      Print("GAP sgs(G) = ", StrongGeneratorsStabChain(G), "\n");
-      Print("GAP sgs(S) = ", StrongGeneratorsStabChain(S), "\n");
-      if strG_current=strGloc then
-        Print("GAP   KU At step ", idx, " of ", str, " no change of G\n");
-      else
-        Print("GAP   KU At step ", idx, " of ", str, " CHANGE of G\n");
-#        Print("GAP   KU old=", strG_current, "\n");
-#        Print("GAP   KU new=", strGloc, "\n");
-	strG_current:=strGloc;
-      fi;
-      if strS_current=strSloc then
-        Print("GAP   KU At step ", idx, " of ", str, " no change of S\n");
-      else
-        Print("GAP   KU At step ", idx, " of ", str, " CHANGE of S\n");
-#        Print("GAP   KU old=", strS_current, "\n");
-#        Print("GAP   KU new=", strSloc, "\n");
-	strS_current:=strSloc;
+      DoPrint:=false;
+      if DoPrint then
+        Print("GAP KU At ", idx, " of ", str, " dep(G)/dep(S)=", GetStabilizerDepth(G), "/", GetStabilizerDepth(S), "\n");
+        Print("GAP KU At step ", idx, " of ", str, "\n");
+        Print("GAP sgs(G) = ", StrongGeneratorsStabChain(G), "\n");
+        Print("GAP sgs(S) = ", StrongGeneratorsStabChain(S), "\n");
+        if strG_current=strGloc then
+          Print("GAP   KU At step ", idx, " of ", str, " no change of G\n");
+        else
+          Print("GAP   KU At step ", idx, " of ", str, " CHANGE of G\n");
+          strG_current:=strGloc;
+        fi;
+        if strS_current=strSloc then
+          Print("GAP   KU At step ", idx, " of ", str, " no change of S\n");
+        else
+          Print("GAP   KU At step ", idx, " of ", str, " CHANGE of S\n");
+          strS_current:=strSloc;
+        fi;
       fi;
     end;
     newBase := [  ];
@@ -1466,7 +1464,7 @@ InstallGlobalFunction( InverseRepresentative, function( S, pnt )
 
     bpt := S.orbit[ 1 ];
     rep := S.identity;
-    fct_debug:=true;
+    fct_debug:=false;
     if fct_debug then
       Print("GAP INVREP bpt=", bpt, " pnt=", pnt, "\n");
     fi;
