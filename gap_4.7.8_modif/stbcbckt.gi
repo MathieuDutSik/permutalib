@@ -68,6 +68,7 @@ PrintRBaseLevel:=function(rbase, str)
       do
         Print("GAP rbase.lev[", eD, "]=", StrongGeneratorsStabChain(rbase.lev[eD]), "\n");
       od;
+      Print("GAP rbase.level=", StrongGeneratorsStabChain(rbase.level), "\n");
       Print(str, " PRBL rbase.level, record, |genlabels|=", Length(rbase.level.genlabels), "\n");
       Print(str, " PRBL");
       if IsBound(rbase.level.orbit) then
