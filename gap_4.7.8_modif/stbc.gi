@@ -83,13 +83,22 @@ end;
 
 
 PrintStabChainTransversals:=function(S)
-  local Swork;
+  local Swork, iLevel;
   Swork := S;
   iLevel:=0;
-  while IsRecord(Swork)
+  while(true)
   do
-    Print("GAP i=", iLevel, " ", Swork.transversal, "\n");
-    Swork := Swork.stabilizer;
+    if IsBound(Swork.transversal) then
+      Print("GAP i=", iLevel, " ", Swork.transversal, "\n");
+    else
+      Print("GAP i=", iLevel, " [  ]\n");
+    fi;
+    iLevel:=iLevel+1;
+    if IsBound(Swork.stabilizer) then
+      Swork:=Swork.stabilizer;
+    else
+      break;
+    fi;
   od;
 end;
 
