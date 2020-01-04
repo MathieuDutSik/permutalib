@@ -34,7 +34,7 @@
 #include <vector>
 #include <memory>
 
-
+#include "GapPrint.h"
 #include "PermGroup.h"
 
 
@@ -159,6 +159,29 @@ template<typename Telt>
 using StabChain = std::shared_ptr<StabLevel<Telt>>;
 // other possible entries:
 // transimages, genimages, labelimages, idimage
+
+
+template<typename Telt>
+void PrintStabChainTransversals(StabChain<Telt> const& S)
+{
+  StabChain<Telt> Swork = S;
+  int n=Swork->comm->n;
+  int iLevel=0;
+  while(Swork != nullptr) {
+    std::vector<std::optional<Telt>> V(n);
+    for (int i=0; i<n; i++) {
+      int eVal = Swork->transversal[i];
+      if (eVal == -1)
+        V[i] = {};
+      else
+        V[i] = Swork->comm->labels[eVal];
+    }
+    //
+    std::cerr << "CPP i=" << iLevel << " " << GapStringMissingTVector(V) << "\n";
+    Swork = Swork->stabilizer;
+    iLevel++;
+  }
+}
 
 
 /*

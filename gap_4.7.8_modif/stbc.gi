@@ -82,6 +82,19 @@ end;
 
 
 
+PrintStabChainTransversals:=function(S)
+  local Swork;
+  Swork := S;
+  iLevel:=0;
+  while IsRecord(Swork)
+  do
+    Print("GAP i=", iLevel, " ", Swork.transversal, "\n");
+    Swork := Swork.stabilizer;
+  od;
+end;
+
+
+
 #############################################################################
 ##
 #F  StabChain( <G>, <options> ) . . . . . . . . . . . . make stabilizer chain

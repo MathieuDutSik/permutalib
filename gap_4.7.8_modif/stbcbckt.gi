@@ -67,6 +67,7 @@ PrintRBaseLevel:=function(rbase, str)
       for eD in [1..Length(rbase.lev)]
       do
         Print("GAP rbase.lev[", eD, "]=", StrongGeneratorsStabChain(rbase.lev[eD]), "\n");
+        PrintStabChainTransversals(rbase.lev[eD]);
       od;
       Print("GAP rbase.level=", StrongGeneratorsStabChain(rbase.level), "\n");
       Print(str, " PRBL rbase.level, record, |genlabels|=", Length(rbase.level.genlabels), "\n");

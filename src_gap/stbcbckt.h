@@ -272,6 +272,7 @@ void PrintRBaseLevel(rbaseType<Telt> const& rbase, std::string const& str)
       std::cerr << str << " |rbase.lev|=" << len << "\n";
       for (int eD=0; eD<len; eD++) {
         std::cerr << "CPP rbase.lev[" << (eD+1) << "]=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(rbase.lev[eD].Stot))) << "\n";
+        PrintStabChainTransversals(rbase.lev[eD].Stot);
       }
       std::cerr << "CPP rbase.level=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(rbase.level.Stot))) << "\n";
       std::cerr << str << " PRBL rbase.level, record, |genlabels|=" << rbase.level.Stot->genlabels.size() << "\n";
