@@ -1258,6 +1258,7 @@ void ConjugateStabChain(StabChain<Telt> & Stot, Telt const& cnj)
 #ifdef DEBUG_CONJ_STAB_CHAIN
   std::cerr << "ConjugateStabChain, step 1\n";
 #endif
+  std::unordered_map<int,int> MappedTrans;
   while(true) {
 #ifdef DEBUG_CONJ_STAB_CHAIN
     std::cerr << "ConjugateStabChain, step 2\n";
@@ -1276,11 +1277,14 @@ void ConjugateStabChain(StabChain<Telt> & Stot, Telt const& cnj)
 	int eVal=Sptr->transversal[i];
 	//	std::cerr << "eVal=" << eVal << "\n";
 	NewTransversal[iImg] = eVal;
+        if (eVal != -1)
+          MappedTrans[eVal] = -1;
 	//	std::cerr << "After assignation\n";
       }
       //      std::cerr << " After loop\n";
       Sptr->transversal=NewTransversal;
     }
+    
 #ifdef DEBUG_CONJ_STAB_CHAIN
     std::cerr << "ConjugateStabChain, step 4\n";
 #endif
@@ -1296,12 +1300,35 @@ void ConjugateStabChain(StabChain<Telt> & Stot, Telt const& cnj)
 #ifdef DEBUG_CONJ_STAB_CHAIN
   std::cerr << "ConjugateStabChain, step 10\n";
 #endif
-  Stot->comm->labels = ListT(Stot->comm->labels, hom);
+  //
+  // Mapping the labels that showed up.
+  //
+  for (auto & ePair : MappedTrans) {
+    Telt img = hom(Stot->comm->labels[ePair.first]);
+    int pos = PositionVect(Stot->comm->labels, img);
+    if (pos == -1) {
+      pos = Stot->comm->labels.size();
+      Stot->comm->labels.push_back(img);
+    }
+    ePair.second = pos;
+  }
+  //
+  // Now remapping the labels that occurred.
+  //
+  Sptr = Stot;
+  while(true) {
+    if (Sptr == nullptr)
+      break;
+    for (size_t i=0; i<Sptr->transversal.size(); i++) {
+      int eVal = Sptr->transversal[i];
+      if (eVal != -1)
+        Sptr->transversal[i] = MappedTrans[eVal];
+    }
+    Sptr = Sptr->stabilizer;
+  }
 #ifdef DEBUG_CONJ_STAB_CHAIN
   std::cerr << "ConjugateStabChain, step 11\n";
 #endif
-  //  std::cerr << "Now we need to program ConjugateStabChain\n";
-  //  throw TerminalException{1};
 }
 
 template<typename Telt>
