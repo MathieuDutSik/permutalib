@@ -1217,9 +1217,10 @@ end );
 ##
 InstallGlobalFunction( RRefine, function( rbase, image, uscore )
 local  Rf,  t;
-
+  Print("GAP uscore=", uscore, "\n");
   if not uscore then
     for Rf  in rbase.rfm[ image.depth ]  do
+      Print("GAP Doing one CallFuncList 1\n");
       t := CallFuncList( Refinements.( Rf.func ), Concatenation
 		    ( [ rbase, image ], Rf.args ) );
       if   t = false  then  return fail;
@@ -1228,6 +1229,7 @@ local  Rf,  t;
     return true;
   else
     for Rf  in rbase.rfm[ image.depth ]  do
+      Print("GAP Doing one CallFuncList 2\n");
       if Rf.func[ 1 ] = '_'  then
 	t := CallFuncList( Refinements.( Rf.func ), Concatenation
 		      ( [ rbase, image ], Rf.args ) );
@@ -1607,11 +1609,11 @@ InstallGlobalFunction( PartitionBacktrack,
                 val:=ProcessFixpoint( image, a, b, org[ d ][ b ] );
 		Print("GAP a=", a, " b=", b, " org[d][b]=", org[d][b], " val=", val, "\n");
                 if val  then
-#Error(a," ",b," ",Cells(rbase.partition),Cells(image.partition));
                     t := RRefine( rbase, image, false );
                 else
                     t := fail;
                 fi;
+                Print("GAP After assignment of t\n");
 
                 if t <> fail  then
 

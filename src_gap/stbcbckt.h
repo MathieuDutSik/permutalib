@@ -85,10 +85,6 @@ permPlusBool<Telt> ExtendedT(Telt const& t, int const& pnt, int& img, int const&
   }
   std::cerr << "CPP Final case t=" << t << "\n";
   std::cerr << "CPP sgs(S.Stot)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(S.Stot))) << "\n";
-  Telt eInv = InverseRepresentative(S.Stot, img);
-  std::cerr << "CPP Before final oper\n";
-  //      Telt u = InverseRepresentative(S.Stot, S.eLev, img);
-  //      t = LeftQuotient(u, t);
   return {int_perm, LeftQuotient(InverseRepresentative(S.Stot, img), t)};
 }
 
@@ -701,6 +697,7 @@ bool Refinements_Intersection(rbaseType<Telt> & rbase, imageType<Telt> & image, 
 template<typename Telt>
 int RRefine(rbaseType<Telt> & rbase, imageType<Telt> & image, bool const& uscore)
 {
+  std::cerr << "CPP uscore=" << uscore << "\n";
   auto BoolToInt=[&](bool const& val) -> int {
     if (val)
       return int_true;
@@ -715,6 +712,7 @@ int RRefine(rbaseType<Telt> & rbase, imageType<Telt> & image, bool const& uscore
   };
   if (!uscore) {
     for (auto & Rf : rbase.rfm[image.depth]) {
+      std::cerr << "CPP Doing one CallFuncList 1\n";
       bool t = Evaluation(Rf);
       if (!t) {
 	return int_fail;
@@ -729,6 +727,7 @@ int RRefine(rbaseType<Telt> & rbase, imageType<Telt> & image, bool const& uscore
   }
   else {
     for (auto & Rf : rbase.rfm[image.depth]) {
+      std::cerr << "CPP Doing one CallFuncList 2\n";
       if (UnderscoreNature(Rf.nature)) {
 	bool t = Evaluation(Rf);
 	if (!t) {
@@ -1178,11 +1177,12 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	IsolatePoint( image.partition, b_int );
         std::cerr << "CPP ProcessFixpoint_image, Case PartitionBacktrack 1\n";
 	bool val = ProcessFixpoint_image(image, a, b_int, org[d][b_int]);
-	std::cerr << "CPP a=" << a << " b_int=" << b_int << " org[d][b_int]=" << org[d][b_int] << " val=" << val << "\n";
+	std::cerr << "CPP a=" << (a+1) << " b=" << (b_int+1) << " org[d][b]=" << (org[d][b_int]+1) << " val=" << val << "\n";
 	if (val)
 	  t.status = RRefine(rbase, image, false);
 	else
 	  t.status = int_fail;
+        std::cerr << "CPP After assignment of t\n";
 
 	if (t.status != int_fail) {
 	  // Subgroup case, base <> image   at current level:   <R>,

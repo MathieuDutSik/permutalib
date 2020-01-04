@@ -51,12 +51,12 @@ MyPrintStabChain:=function(eRec)
     if IsBound(eStab.orbit) then
       Print("GAP  orbit=", eStab.orbit, "\n");
     else
-      Print("GAP  orbit=unset\n");
+      Print("GAP  orbit=[  ]\n");
     fi;
     if IsBound(eStab.transversal) then
       Print("GAP  transversal=", eStab.transversal, "\n");
     else
-      Print("GAP  transversal=unset\n");
+      Print("GAP  transversal=[  ]\n");
     fi;
     if IsBound(eStab.stabilizer) then
       eStab:=eStab.stabilizer;
