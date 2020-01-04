@@ -1324,6 +1324,10 @@ void ConjugateStabChain(StabChain<Telt> & Stot, Telt const& cnj)
       if (eVal != -1)
         Sptr->transversal[i] = MappedTrans[eVal];
     }
+    for (size_t i=0; i<Sptr->genlabels.size(); i++) {
+      int eVal = Sptr->genlabels[i];
+      Sptr->genlabels[i] = MappedTrans[eVal];
+    }
     Sptr = Sptr->stabilizer;
   }
 #ifdef DEBUG_CONJ_STAB_CHAIN
