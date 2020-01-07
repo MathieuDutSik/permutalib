@@ -1558,7 +1558,7 @@ bool ReduceStabChain(StabChain<Telt> & Stot)
 
 
 template<typename Telt>
-bool TestEqualityAtLevel(StabChain<Telt> const& L, StabChain<Telt> const& R, int const& lev)
+bool TestEqualityStabChain(StabChain<Telt> const& L, StabChain<Telt> const& R)
 {
   StabChain<Telt> Lptr = L;
   StabChain<Telt> Rptr = R;

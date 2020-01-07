@@ -1216,7 +1216,8 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  //   which until now is identical to  <L>, must be changed
 	  //   without affecting <L>, so take a copy.
           std::cerr << "CPP wasTriv=" << wasTriv << " d=" << (d+1) << "\n";
-	  if (wasTriv && TestEqualityAtLevel(L, R, d)) {
+          std::cerr << "CPP TestEquality=" << TestEqualityStabChain(L_list[d], R_list[d]) << "\n";
+	  if (wasTriv && TestEqualityStabChain(L_list[d], R_list[d])) {
             std::cerr << "CPP Assigning R from d\n";
 	    SetStabChainFromLevel(R, L, d);
 	    branch = d;
