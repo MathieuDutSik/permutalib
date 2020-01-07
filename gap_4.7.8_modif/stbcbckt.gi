@@ -988,16 +988,24 @@ end );
 #F  AddRefinement( <rbase>, <func>, <args> )  . . . . . register R-refinement
 ##
 InstallGlobalFunction( AddRefinement, function( rbase, func, args )
+    local i;
+    Print("GAP beginning of AddRefinement\n");
+#    Print("Length(args)=", Length(args), "\n");
+#    Print("IsList(...)=", IsList( args[ Length( args ) ] ), "\n");
+#    Print("args[...]=", args[ Length( args ) ], "\n");
     if    Length( args ) = 0
        or not IsList( args[ Length( args ) ] )
        or Length( args[ Length( args ) ] ) <> 0  then
-#        Print("Before Refinement insert |rbase.rfm| 1,2=", Length(rbase.rfm), ", ", Length(rbase.rfm[Length(rbase.rfm)]), "\n");
+        Print("GAP Doing RFM insertion\n");
         Add( rbase.rfm[ Length( rbase.rfm ) ], rec( func := func,
                                                     args := args ) );
-#        Print(" After Refinement insert |rbase.rfm| 1,2=", Length(rbase.rfm), ", ", Length(rbase.rfm[Length(rbase.rfm)]), "\n");
         Info( InfoBckt, 1, "Refinement ", func, ": ",
                 NumberCells( rbase.partition ), " cells" );
     fi;
+    for i in [1..Length(rbase.rfm)]
+    do
+      Print("GAP i=", i, " |rbase.rfm[i]|=", Length(rbase.rfm[i]), "\n");
+    od;
 end );
 
 #############################################################################
@@ -1124,6 +1132,7 @@ InstallGlobalFunction( RegisterRBasePoint, function( P, rbase, pnt )
         KeyUpdatingRbase("RegisterRBasePoint 1.4", rbase);
 	Print("GAP Section P.lengths after ProcessFixpoint_rbase\n");
         AddRefinement( rbase, STBBCKT_STRING_PROCESSFIX, [ pnt, k ] );
+        Print("GAP after AddRefinement 1\n");
         KeyUpdatingRbase("RegisterRBasePoint 1.5", rbase);
     fi;
     PrintRBaseLevel(rbase, "GAP RegisterRBasePoint 3");
@@ -1146,6 +1155,7 @@ InstallGlobalFunction( RegisterRBasePoint, function( P, rbase, pnt )
             strat := StratMeetPartition( rbase, P, O );
             KeyUpdatingRbase("RegisterRBasePoint 2.2", rbase);
             AddRefinement( rbase, STBBCKT_STRING_INTERSECTION, [ O, strat ] );
+            Print("GAP after AddRefinement 2\n");
         fi;
     fi;
     KeyUpdatingRbase("RegisterRBasePoint 3", rbase);
@@ -1613,18 +1623,21 @@ InstallGlobalFunction( PartitionBacktrack,
                 else
                     t := fail;
                 fi;
-                Print("GAP After assignment of t\n");
+                Print("GAP After assignment of t. t=", t, "\n");
 
                 if t <> fail  then
-
+                    Print("GAP case of not fail\n");
                     # Subgroup case, base <> image   at current level:   <R>,
                     #   which until now is identical to  <L>, must be changed
                     #   without affecting <L>, so take a copy.
+                    Print("GAP wasTriv=", wasTriv, " d=", d, "\n");
                     if wasTriv  and  IsIdenticalObj( L[ d ], R[ d ] )  then
+                        Print("GAP Assigning R from d\n");
                         R{ [ d .. Length( rbase.base ) ] } := List(
                         L{ [ d .. Length( rbase.base ) ] }, CopyStabChain );
                         branch := d;
                     fi;
+                    Print("GAP After wasTriv test\n");
 
                     if 2 * d <= blen  then
                         ChangeStabChain( R[ d ], [ b ], false );
@@ -1643,6 +1656,7 @@ InstallGlobalFunction( PartitionBacktrack,
                     Info( InfoBckt, 5, d, ": point ", b,
                             " pruned by partition condition" );
                 fi;
+                Print("GAP t step 2\n");
 
                 # Recursion.
                 if t = true  then
@@ -1655,6 +1669,7 @@ InstallGlobalFunction( PartitionBacktrack,
 		    fi;
                     image.depth := d;
                 fi;
+                Print("GAP t step 3\n");
 
                 # If   <t>   =   `fail', either   the   recursive   call  was
                 #   unsuccessful,  or all new  elements   have been added  to
@@ -1692,6 +1707,7 @@ InstallGlobalFunction( PartitionBacktrack,
                     fi;
 
                 fi;
+                Print("GAP t step 4\n");
 
                 # Now  we can remove the   entire <R>-orbit  of <b> from  the
                 # candidate list.

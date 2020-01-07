@@ -1588,6 +1588,8 @@ bool TestEqualityAtLevel(StabChain<Telt> const& L, StabChain<Telt> const& R, int
 	  return false;
       }
     }
+    Rptr = Rptr->stabilizer;
+    Lptr = Lptr->stabilizer;
   }
   return true;
 }

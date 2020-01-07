@@ -125,6 +125,17 @@ public:
   std::pair<Partition,std::vector<singStrat>> inputIntersection;
 };
 
+bool IsInsertableRefinement(Refinement const& eRfm)
+{
+  if (eRfm.nature == 0)
+    return true;
+  if (eRfm.nature == 1) {
+    if (eRfm.inputIntersection.second.size() == 0)
+      return false;
+    return true;
+  }
+}
+
 
 // The underscore nature of a function can be seen in stbcbckt top.
 // Since we did not implement all the algorithms of stbcbckt, the value is always 0.
@@ -544,6 +555,19 @@ std::vector<singStrat> StratMeetPartition(rbaseType<Telt> & rbase, Partition & P
   return strat;
 }
 
+template<typename Telt>
+void AddRefinement(rbaseType<Telt> & rbase, int const& pos, Refinement const& eRfm)
+{
+  std::cerr << "CPP beginning of AddRefinement\n";
+  if (IsInsertableRefinement(eRfm)) {
+    std::cerr << "CPP Doing RFM insertion\n";
+    rbase.rfm[pos].push_back(eRfm);
+  }
+  for (size_t i=0; i<rbase.rfm.size(); i++) {
+    std::cerr << "CPP i=" << (i+1) << " |rbase.rfm[i]|=" << rbase.rfm[i].size() << "\n";
+  }
+}
+
 
 template<typename Telt>
 void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, Telt const& TheId)
@@ -580,7 +604,8 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
     PrintRBaseLevel(rbase, "CPP RegisterRBasePoint 2.2");
     KeyUpdatingRbase("RegisterRBasePoint 1.4", rbase);
     std::cerr << "CPP Section P.lengths after ProcessFixpoint_rbase\n";
-    rbase.rfm[len].push_back(Refinement({pnt,k}));
+    AddRefinement(rbase, len, Refinement({pnt,k}));
+    std::cerr << "CPP After AddRefinement 1\n";
     KeyUpdatingRbase("RegisterRBasePoint 1.5", rbase);
   }
   PrintRBaseLevel(rbase, "CPP RegisterRBasePoint 3");
@@ -596,7 +621,8 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
         KeyUpdatingRbase("RegisterRBasePoint 2.1", rbase);
 	std::vector<singStrat> strat = StratMeetPartition(rbase, P, O, TheId);
         KeyUpdatingRbase("RegisterRBasePoint 2.2", rbase);
-	rbase.rfm[len].push_back(Refinement({O,strat}));
+        AddRefinement(rbase, len, Refinement({O,strat}));
+        std::cerr << "CPP after AddRefinement 2\n";
       }
     };
     if (rbase.level2.status == int_true) {
@@ -1182,16 +1208,20 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  t.status = RRefine(rbase, image, false);
 	else
 	  t.status = int_fail;
-        std::cerr << "CPP After assignment of t\n";
+        std::cerr << "CPP After assignment of t. t.status=" << t.status << "\n";
 
 	if (t.status != int_fail) {
+          std::cerr << "CPP case of not fail\n";
 	  // Subgroup case, base <> image   at current level:   <R>,
 	  //   which until now is identical to  <L>, must be changed
 	  //   without affecting <L>, so take a copy.
+          std::cerr << "CPP wasTriv=" << wasTriv << " d=" << (d+1) << "\n";
 	  if (wasTriv && TestEqualityAtLevel(L, R, d)) {
+            std::cerr << "CPP Assigning R from d\n";
 	    SetStabChainFromLevel(R, L, d);
 	    branch = d;
 	  }
+          std::cerr << "CPP After wasTriv test\n";
 	  if (2 * d <= blen) {
             std::cerr << "CPP Before ChangeStabChain R_list[d] 2\n";
 	    ChangeStabChain(R_list[d], {b_int}, int_false);
@@ -1208,6 +1238,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    R_list[d+1] = StabChainOp_listgen(LGenB, options);
 	  }
 	}
+        std::cerr << "CPP t step 2\n";
 	//	PrintVectorORB("orb", orb);
 	//	PrintVectorORB("orB", orB);
 
@@ -1217,6 +1248,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  nrback++;
 	  image.depth = d;
 	}
+        std::cerr << "CPP t step 3\n";
 
 	// If   <t>   =   fail, either   the   recursive   call  was
 	//   unsuccessful,  or all new  elements   have been added  to
@@ -1246,6 +1278,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    SetStabChainFromLevel(R, L, d);
 	  }
 	}
+        std::cerr << "CPP t step 4\n";
 
 	// Now  we can remove the   entire <R>-orbit  of <b> from  the
 	// candidate list.
