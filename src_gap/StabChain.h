@@ -413,7 +413,7 @@ int BasePoint(StabChain<Telt> const& S)
 template<typename Telt>
 void RemoveStabChain(StabChain<Telt> & Stot)
 {
-  Stot->stabilizer == nullptr;
+  Stot->stabilizer = nullptr;
   Stot->genlabels.clear();
 }
 

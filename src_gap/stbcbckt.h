@@ -134,6 +134,11 @@ bool IsInsertableRefinement(Refinement const& eRfm)
       return false;
     return true;
   }
+#ifdef DEBUG
+  std::cerr << "We should never reach that stage\n";
+  throw TerminalException{1};
+#endif
+  return true;
 }
 
 
