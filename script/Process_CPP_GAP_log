@@ -8,14 +8,14 @@ if nb_arg != 4:
     print("Process_CPP_GAP_log   RES_gap   RES_cpp   BeginLine")
     sys.exit(0)
 
-FileGap = sys.argv[1]
-FileCpp = sys.argv[2]
+File1 = sys.argv[1]
+File2 = sys.argv[2]
 CritLine = sys.argv[3]
 
-f1 = open(FileGap, "r")
+f1 = open(File1, "r")
 lines1 = f1.readlines()
 
-f2 = open(FileCpp, "r")
+f2 = open(File2, "r")
 lines2 = f2.readlines()
 
 
@@ -50,15 +50,23 @@ for iposs in range(nbposs):
         print("iposs=", iposs, " jline1=", jline1, " jline2=", jline2)
 #        print("e_line1=", e_line1)
 #        print("e_line2=", e_line2)
-#        print("LOOP")
-        for i in range(-2,2):
+        print("LOOP")
+        ibegin=-2
+        iend=2
+        print("file1=", File1)
+        for i in range(ibegin,iend):
             jposs = iposs + i
-            print("jposs=", jposs, " i=", i)
             if jposs >= 0 and jposs < nbposs:
-                f_line1=lines1[iline1 + jposs]
-                f_line2=lines2[iline2 + jposs]
-                print("f_line1=", f_line1[:-1])
-                print("f_line2=", f_line2[:-1])
+                jline1 = iline1 + jposs
+                f_line1=lines1[jline1]
+                print("jline1=", jline1, " : ", f_line1[:-1])
+        print("file2=", File2)
+        for i in range(ibegin,iend):
+            jposs = iposs + i
+            if jposs >= 0 and jposs < nbposs:
+                jline2 = iline2 + jposs
+                f_line2=lines2[jline2]
+                print("jline2=", jline2, " : ", f_line2[:-1])
         print("Normal termination of the program")
         sys.exit(1)
 

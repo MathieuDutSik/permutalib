@@ -75,7 +75,7 @@ PrintRBaseLevel:=function(rbase, str)
       if IsBound(rbase.level.orbit) then
         Print(" orbit=", rbase.level.orbit);
       else
-        Print(" orbit=unset");
+        Print(" orbit=[  ]");
       fi;
       Print("\n");
     else
@@ -1132,7 +1132,7 @@ InstallGlobalFunction( RegisterRBasePoint, function( P, rbase, pnt )
         KeyUpdatingRbase("RegisterRBasePoint 1.4", rbase);
 	Print("GAP Section P.lengths after ProcessFixpoint_rbase\n");
         AddRefinement( rbase, STBBCKT_STRING_PROCESSFIX, [ pnt, k ] );
-        Print("GAP after AddRefinement 1\n");
+        Print("GAP After AddRefinement 1\n");
         KeyUpdatingRbase("RegisterRBasePoint 1.5", rbase);
     fi;
     PrintRBaseLevel(rbase, "GAP RegisterRBasePoint 3");
@@ -1155,7 +1155,7 @@ InstallGlobalFunction( RegisterRBasePoint, function( P, rbase, pnt )
             strat := StratMeetPartition( rbase, P, O );
             KeyUpdatingRbase("RegisterRBasePoint 2.2", rbase);
             AddRefinement( rbase, STBBCKT_STRING_INTERSECTION, [ O, strat ] );
-            Print("GAP after AddRefinement 2\n");
+            Print("GAP After AddRefinement 2\n");
         fi;
     fi;
     KeyUpdatingRbase("RegisterRBasePoint 3", rbase);

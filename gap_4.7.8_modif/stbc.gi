@@ -76,7 +76,7 @@ PrintTopOrbit:=function(eRec)
   if IsBound(eRec.orbit) then
     return eRec.orbit;
   else
-    return "unset";
+    return "[  ]";
   fi;
 end;
 

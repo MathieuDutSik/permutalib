@@ -627,7 +627,7 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
 	std::vector<singStrat> strat = StratMeetPartition(rbase, P, O, TheId);
         KeyUpdatingRbase("RegisterRBasePoint 2.2", rbase);
         AddRefinement(rbase, len, Refinement({O,strat}));
-        std::cerr << "CPP after AddRefinement 2\n";
+        std::cerr << "CPP After AddRefinement 2\n";
       }
     };
     if (rbase.level2.status == int_true) {
