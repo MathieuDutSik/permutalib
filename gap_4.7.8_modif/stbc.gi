@@ -38,6 +38,7 @@ GetStringExpressionOfStabChain:=function(eRec)
 end;
 
 
+
 MyPrintStabChain:=function(eRec)
   local eStab, iLev;
   Print("Begin of MyPrintStabChain\n");

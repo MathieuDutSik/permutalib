@@ -30,7 +30,7 @@ end;
 
 CreateExampleOnSetCase:=function(FileName, GRP, sizSet)
   local LGen, SetMovedPt, eGen, nbMov, output, iMov, eImg, eSet, pos, eVal, eStab;
-  PrintStabChain(GRP);
+#  PrintStabChain(GRP);
   LGen:=GeneratorsOfGroup(GRP);
   SetMovedPt:=[];
   for eGen in LGen
