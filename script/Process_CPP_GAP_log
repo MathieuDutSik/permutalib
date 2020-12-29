@@ -1,0 +1,60 @@
+#! /usr/bin/python3
+import os
+import sys
+
+nb_arg = len(sys.argv)
+if nb_arg != 4:
+    print("nb_arg should be equal to 4")
+    print("Process_CPP_GAP_log   RES_gap   RES_cpp   BeginLine")
+    sys.exit(0)
+
+FileGap = sys.argv[1]
+FileCpp = sys.argv[2]
+CritLine = sys.argv[3]
+
+f1 = open(FileGap, "r")
+lines1 = f1.readlines()
+
+f2 = open(FileCpp, "r")
+lines2 = f2.readlines()
+
+
+def get_firstline(l_lines, eCrit):
+    nb_line = len(l_lines)
+    for iline in range(nb_line):
+        e_line = l_lines[iline]
+        LStr = e_line.split(eCrit)
+        if len(LStr) > 1:
+            return iline
+    return -1
+
+iline1 = get_firstline(lines1, CritLine)
+iline2 = get_firstline(lines2, CritLine)
+print("iline1=", iline1, " iline2=", iline2)
+if iline1 == -1 or iline2 == -1:
+    print("We found iline1=", iline1, " iline2=", iline2)
+    sys.exit(0)
+
+
+
+nbposs= min(len(lines1) - iline1, len(lines2) - iline2)
+
+for iposs in range(nbposs):
+    e_line1=lines1[iline1 + iposs]
+    e_line2=lines2[iline2 + iposs]
+    
+    if e_line1 != e_line2:
+        print("iposs=", iposs)
+        for i in range(-2,2):
+            jposs = iposs + i
+            print("jposs=", jposs, " i=", i)
+            if jposs >= 0 and jposs < nbposs:
+                f_line1=lines1[iline1 + jposs]
+                f_line2=lines2[iline2 + jposs]
+                print("f_line1=", f_line1)
+                print("f_line2=", f_line1)
+        print("Normal termination of the program")
+        sys.exit(1)
+
+
+    

@@ -994,6 +994,24 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
 
 
 
+std::string ConstrainedIntInfinity_to_string(int const& val, int const& n)
+{
+  if (val < n) {
+    return std::to_string(val+1);
+  } else {
+    return std::string("infinity");
+  }
+}
+
+
+std::string PosFail_to_string(int const& pos)
+{
+  if (pos == -1)
+    return std::string("fail");
+  return std::to_string(pos + 1);
+}
+
+
 
 template<typename Telt>
 void ChooseNextBasePoint(StabChain<Telt> & S, std::vector<int> const& base, std::vector<Telt> const& newgens)
@@ -1030,9 +1048,9 @@ void ChooseNextBasePoint(StabChain<Telt> & S, std::vector<int> const& base, std:
     bpt = S->comm->n + 444; // value in GAP is infinity
     pos = -1;
   }
-  std::cerr << "CPP BPT/POS bpt=" << (bpt+1) << " pos=" << pos << "\n";
+  std::cerr << "CPP pnt=" << PosFail_to_string(pnt) << " bpt=" << ConstrainedIntInfinity_to_string(bpt, S->comm->n) << " pos=" << PosFail_to_string(pos) << "\n";
   if ((pos != -1 && i < pos) || (pos == -1 && i<int(base.size())) || (pos == -1 && pnt < bpt)) {
-    std::cerr << "CPP pnt=" << (pnt+1) << " bpt=" << (bpt+1) << " pos=" << pos << "\n";
+    std::cerr << "CPP matching test\n";
     //    std::cerr << "CPP Before InsertTrivialStabilizer S=" << S << "\n";
     InsertTrivialStabilizer(S, pnt);
     //    std::cerr << "CPP After InsertTrivialStabilizer S=" << S << "\n";

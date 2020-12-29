@@ -41,7 +41,7 @@ end;
 
 MyPrintStabChain:=function(eRec)
   local eStab, iLev;
-  Print("Begin of MyPrintStabChain\n");
+#  Print("Begin of MyPrintStabChain\n");
   #
 #  Print("eRec=", eRec, "\n");
   eStab:=eRec;
@@ -66,7 +66,7 @@ MyPrintStabChain:=function(eRec)
     fi;
     iLev:=iLev+1;
   od;
-  Print(" Exit of MyPrintStabChain\n");
+#  Print(" Exit of MyPrintStabChain\n");
 end;
 
 
@@ -716,11 +716,11 @@ InstallGlobalFunction( ChooseNextBasePoint, function( S, base, newgens )
         bpt := infinity;
         pos := fail;
     fi;
-    Print("GAP BPT/POS bpt=", bpt, " pos=", pos, "\n");
+    Print("GAP pnt=", pnt, " bpt=", bpt, " pos=", pos, "\n");
     if    pos <> fail  and  i < pos              # (1)
        or pos =  fail  and  i <= Length( base )  # (2)
        or pos =  fail  and  pnt < bpt  then      # (3)
-        Print("GAP pnt=", pnt, " bpt=", bpt, " pos=", pos, "\n");
+        Print("GAP matching test\n");
 #        Print("ChooseNextBasePoint: Before InsertTrivialStabilizer, S=\n");
 #        MyPrintStabChain(S);
         InsertTrivialStabilizer( S, pnt );
