@@ -42,17 +42,23 @@ nbposs= min(len(lines1) - iline1, len(lines2) - iline2)
 for iposs in range(nbposs):
     e_line1=lines1[iline1 + iposs]
     e_line2=lines2[iline2 + iposs]
-    
-    if e_line1 != e_line2:
-        print("iposs=", iposs)
+#    import pdb
+#    pdb.set_trace()
+    if e_line1[3:] != e_line2[3:]:
+        jline1 = iline1 + iposs
+        jline2 = iline2 + iposs
+        print("iposs=", iposs, " jline1=", jline1, " jline2=", jline2)
+#        print("e_line1=", e_line1)
+#        print("e_line2=", e_line2)
+#        print("LOOP")
         for i in range(-2,2):
             jposs = iposs + i
             print("jposs=", jposs, " i=", i)
             if jposs >= 0 and jposs < nbposs:
                 f_line1=lines1[iline1 + jposs]
                 f_line2=lines2[iline2 + jposs]
-                print("f_line1=", f_line1)
-                print("f_line2=", f_line1)
+                print("f_line1=", f_line1[:-1])
+                print("f_line2=", f_line2[:-1])
         print("Normal termination of the program")
         sys.exit(1)
 
