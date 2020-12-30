@@ -998,25 +998,6 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
 
 
 
-std::string ConstrainedIntInfinity_to_string(int const& val, int const& n)
-{
-  if (val < n) {
-    return std::to_string(val+1);
-  } else {
-    return std::string("infinity");
-  }
-}
-
-
-std::string PosFail_to_string(int const& pos)
-{
-  if (pos == -1)
-    return std::string("fail");
-  return std::to_string(pos + 1);
-}
-
-
-
 template<typename Telt>
 void ChooseNextBasePoint(StabChain<Telt> & S, std::vector<int> const& base, std::vector<Telt> const& newgens)
 {

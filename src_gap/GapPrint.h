@@ -42,6 +42,33 @@ std::string GapStringBoolVector(Face const& f)
   return str;
 }
 
+std::string ConstrainedIntInfinity_to_string(int const& val, int const& n)
+{
+  if (val < n) {
+    return std::to_string(val+1);
+  } else {
+    return std::string("infinity");
+  }
+}
+
+
+std::string PosFail_to_string(int const& pos)
+{
+  if (pos == -1)
+    return std::string("fail");
+  return std::to_string(pos + 1);
+}
+
+
+std::string PosFalse_to_string(int const& pos)
+{
+  if (pos == -1)
+    return std::string("false");
+  return std::to_string(pos + 1);
+}
+
+
+
 
 template<typename T>
 std::string GapStringTVector(std::vector<T> const& f)

@@ -1067,7 +1067,9 @@ InstallGlobalFunction( ProcessFixpoint, function( arg )
 	    Print("GAP Case image.perm.status = true\n");
             if Length( arg ) = 4  then  simg := arg[ 4 ];
                                   else  simg := 0;         fi;
+	    Print("GAP Before ExtendedT img=", img, "\n");
             t := ExtendedT( image.perm, pnt, img, simg, image.level );
+	    Print("GAP After ExtendedT img=", img, "\n");
             if t = false  then
 	        Print("GAP Returning false 1\n");
                 return false;
@@ -1569,7 +1571,7 @@ InstallGlobalFunction( PartitionBacktrack,
             b := fail;
         fi;
         while b <> fail  do
-	    Print("GAP b=", b, "\n");
+	    Print("GAP b=", b, " b_int=", b, "\n");
 
             # Try to prune the node with prop 8(ii) of Leon's paper.
             if not repr  and  not wasTriv  and  IsBound( R[ d ].orbit )  then
@@ -1613,9 +1615,12 @@ InstallGlobalFunction( PartitionBacktrack,
 
                 # If <b> could not be prescribed as image for  <a>, or if the
                 # refinement was impossible, give up for this image.
+                Print("GAP Before AssignationVectorGapStyle b_int=", b, "\n");
                 image.bimg[ d ] := b;
+                Print("GAP Before IsolatePoint b_int=", b, "\n");
                 IsolatePoint( image.partition, b );
                 Print("GAP ProcessFixpoint_image, Case PartitionBacktrack 1\n");
+                Print("GAP Before ProcessFixpoint_image b_int=", b, "\n");
                 val:=ProcessFixpoint( image, a, b, org[ d ][ b ] );
 		Print("GAP a=", a, " b=", b, " org[d][b]=", org[d][b], " val=", val, "\n");
                 if val  then
