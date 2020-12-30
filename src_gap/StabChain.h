@@ -161,6 +161,10 @@ using StabChain = std::shared_ptr<StabLevel<Telt>>;
 // transimages, genimages, labelimages, idimage
 
 
+
+
+
+
 template<typename Telt>
 void PrintStabChainTransversals(StabChain<Telt> const& S)
 {
@@ -1580,35 +1584,67 @@ bool TestEqualityStabChain(StabChain<Telt> const& L, StabChain<Telt> const& R)
 {
   StabChain<Telt> Lptr = L;
   StabChain<Telt> Rptr = R;
+  //#define DEBUG_EQUALITY
   while(true) {
-    if (Lptr == nullptr && Rptr != nullptr)
+    if (Lptr == nullptr && Rptr != nullptr) {
+#ifdef DEBUG_EQUALITY
+      std::cerr << "TestEqualityStabChain 1\n";
+#endif
       return false;
-    if (Lptr != nullptr && Rptr == nullptr)
+    }
+    if (Lptr != nullptr && Rptr == nullptr) {
+#ifdef DEBUG_EQUALITY
+      std::cerr << "TestEqualityStabChain 2\n";
+#endif
       return false;
+    }
     if (Lptr == nullptr)
       break;
-    if (Lptr->orbit != R->orbit)
+    if (Lptr->orbit != Rptr->orbit) {
+#ifdef DEBUG_EQUALITY
+      std::cerr << "TestEqualityStabChain 3\n";
+#endif
       return false;
-    if (Lptr->transversal.size() != Rptr->transversal.size())
+    }
+    if (Lptr->transversal.size() != Rptr->transversal.size()) {
+#ifdef DEBUG_EQUALITY
+      std::cerr << "TestEqualityStabChain 4\n";
+#endif
       return false;
+    }
     int lenL=Lptr->transversal.size();
     for (int u=0; u<lenL; u++) {
-      if (Lptr->transversal[u] == -1 && Rptr->transversal[u] != -1)
+      if (Lptr->transversal[u] == -1 && Rptr->transversal[u] != -1) {
+#ifdef DEBUG_EQUALITY
+        std::cerr << "TestEqualityStabChain 5\n";
+#endif
 	return false;
-      if (Lptr->transversal[u] != -1 && Rptr->transversal[u] == -1)
+      }
+      if (Lptr->transversal[u] != -1 && Rptr->transversal[u] == -1) {
+#ifdef DEBUG_EQUALITY
+        std::cerr << "TestEqualityStabChain 6\n";
+#endif
 	return false;
+      }
       if (Lptr->transversal[u] != -1) {
 	int idxL=Lptr->transversal[u];
 	int idxR=Rptr->transversal[u];
 	Telt permL=L->comm->labels[idxL];
 	Telt permR=L->comm->labels[idxR];
-	if (permL != permR)
+	if (permL != permR) {
+#ifdef DEBUG_EQUALITY
+          std::cerr << "TestEqualityStabChain 7\n";
+#endif
 	  return false;
+        }
       }
     }
     Rptr = Rptr->stabilizer;
     Lptr = Lptr->stabilizer;
   }
+#ifdef DEBUG_EQUALITY
+  std::cerr << "TestEqualityStabChain 8\n";
+#endif
   return true;
 }
 

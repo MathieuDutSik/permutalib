@@ -1631,6 +1631,7 @@ InstallGlobalFunction( PartitionBacktrack,
                     #   which until now is identical to  <L>, must be changed
                     #   without affecting <L>, so take a copy.
                     Print("GAP wasTriv=", wasTriv, " d=", d, "\n");
+#                    Print("GAP L[d]=", L[d], " R[d]=", R[d], "\n");
                     Print("GAP TestEquality=", IsIdenticalObj( L[ d ], R[ d ] ), "\n");
                     if wasTriv  and  IsIdenticalObj( L[ d ], R[ d ] )  then
                         Print("GAP Assigning R from d\n");
