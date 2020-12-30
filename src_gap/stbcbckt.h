@@ -1221,10 +1221,10 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  //   which until now is identical to  <L>, must be changed
 	  //   without affecting <L>, so take a copy.
           std::cerr << "CPP wasTriv=" << wasTriv << " d=" << (d+1) << "\n";
-          std::cerr << "CPP L[d]=";
-          PrintStabChainTransversals(L_list[d]);
-          std::cerr << "CPP R[d]=";
-          PrintStabChainTransversals(R_list[d]);
+          //          std::cerr << "CPP L[d]=";
+          //          PrintStabChainTransversals(L_list[d]);
+          //          std::cerr << "CPP R[d]=";
+          //          PrintStabChainTransversals(R_list[d]);
           std::cerr << "CPP TestEquality=" << TestEqualityStabChain(L_list[d], R_list[d]) << "\n";
 	  if (wasTriv && TestEqualityStabChain(L_list[d], R_list[d])) {
             std::cerr << "CPP Assigning R from d\n";
@@ -1232,7 +1232,8 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    branch = d;
 	  }
           std::cerr << "CPP After wasTriv test\n";
-	  if (2 * d <= blen) {
+          std::cerr << "CPP d=" << (d+1) << " blen=" << blen << "\n";
+	  if (2 * (d+1) <= blen) {
             std::cerr << "CPP Before ChangeStabChain R_list[d] 2\n";
 	    ChangeStabChain(R_list[d], {b_int}, int_false);
             std::cerr << "CPP After ChangeStabChain R_list[d] 2\n";

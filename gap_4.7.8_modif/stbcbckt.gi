@@ -1640,6 +1640,7 @@ InstallGlobalFunction( PartitionBacktrack,
                         branch := d;
                     fi;
                     Print("GAP After wasTriv test\n");
+                    Print("GAP d=", d, " blen=", blen, "\n");
 
                     if 2 * d <= blen  then
                         ChangeStabChain( R[ d ], [ b ], false );
