@@ -1623,7 +1623,7 @@ InstallGlobalFunction( PartitionBacktrack,
                 else
                     t := fail;
                 fi;
-                Print("GAP After assignment of t. t=", t, "\n");
+                Print("GAP After assignment of t. t.status=", t, "\n");
 
                 if t <> fail  then
                     Print("GAP case of not fail\n");

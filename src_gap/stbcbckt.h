@@ -1213,7 +1213,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  t.status = RRefine(rbase, image, false);
 	else
 	  t.status = int_fail;
-        std::cerr << "CPP After assignment of t. t.status=" << t.status << "\n";
+        std::cerr << "CPP After assignment of t. t.status=" << GapStringBool(t.status) << "\n";
 
 	if (t.status != int_fail) {
           std::cerr << "CPP case of not fail\n";

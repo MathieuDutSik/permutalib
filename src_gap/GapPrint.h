@@ -16,6 +16,14 @@ std::string GapStringIntVector(std::vector<int> const& f)
   return str;
 }
 
+std::string GapStringBool(bool const& v)
+{
+  if (v)
+    return std::string("true");
+  else
+    return std::string("false");
+}
+
 
 std::string GapStringBoolVector(Face const& f)
 {
