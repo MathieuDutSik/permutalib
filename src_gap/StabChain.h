@@ -940,6 +940,10 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
 #endif
 
   int len = S->orbit.size();
+#ifdef DEBUG_ADD_GEN_SCH
+  std::cerr << "CPP AGEST len=" << len << "\n";
+  std::cerr << "CPP AGEST S->orbit=" << GapStringIntVector(S->orbit) << "\n";
+#endif
   int i=0;
   if (S->comm->UseCycle) {
 #ifdef DEBUG_ADD_GEN_SCH

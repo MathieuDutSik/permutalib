@@ -621,6 +621,10 @@ InstallGlobalFunction( AddGeneratorsExtendSchreierTree, function( S, new )
 
     # Extend the orbit and the transversal with the new labels.
     len := Length( S.orbit );
+    if debug_fct then
+        Print("GAP AGEST len=", len, "\n");
+        Print("GAP AGEST S->orbit=", S.orbit, "\n");
+    fi;
     i := 1;
 
     if IsBound( S.cycles )  then
