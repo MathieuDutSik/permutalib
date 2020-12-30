@@ -13,10 +13,28 @@ File2 = sys.argv[2]
 CritLine = sys.argv[3]
 
 f1 = open(File1, "r")
-lines1 = f1.readlines()
+pre_lines1 = f1.readlines()
 
 f2 = open(File2, "r")
-lines2 = f2.readlines()
+pre_lines2 = f2.readlines()
+
+str1 = "XXX ELIMINATE begin\n"
+str2 = "XXX ELIMINATE end\n"
+def process_lines(l_lines):
+    l_lines_ret = []
+    do_insert = True
+    for e_line in l_lines:
+        if e_line == str1:
+            do_insert=False
+        if do_insert:
+            l_lines_ret.append(e_line)
+        if e_line == str2:
+            do_insert=True
+    return l_lines_ret
+
+lines1 = process_lines(pre_lines1)
+lines2 = process_lines(pre_lines2)
+
 
 
 def get_firstline(l_lines, eCrit):

@@ -1240,13 +1240,18 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    //	    R[ d + 1 ] = R[ d ].stabilizer;
 	  }
 	  else {
+            std::cerr << "CPP Beginning else case\n";
 	    std::vector<Telt> LGen = StrongGeneratorsStabChain( R);
+            std::cerr << "CPP First generating step done\n";
 	    std::vector<Telt> LGenB = Filtered(LGen, [&](Telt const& gen) -> bool {return PowAct(b_int, gen) == b_int;});
+            std::cerr << "CPP |LGenB|=" << LGenB.size() << "\n";
 	    //	    R[ d + 1 ] := rec( generators := Filtered( R[ d + 1 ], gen -> b ^ gen = b ) );
 	    int largMov=LargestMovedPoint(LGenB);
 	    StabChainOptions<Tint> options = GetStandardOptions<Tint>(n);
 	    options.base = ClosedInterval(0, largMov);
+            std::cerr << "XXX ELIMINATE begin\n";
 	    R_list[d+1] = StabChainOp_listgen(LGenB, options);
+            std::cerr << "XXX ELIMINATE end\n";
 	  }
 	}
         std::cerr << "CPP t step 2\n";

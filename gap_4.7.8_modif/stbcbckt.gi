@@ -1643,14 +1643,19 @@ InstallGlobalFunction( PartitionBacktrack,
                     Print("GAP d=", d, " blen=", blen, "\n");
 
                     if 2 * d <= blen  then
+                        Print("GAP Before ChangeStabChain R_list[d] 2\n");
                         ChangeStabChain( R[ d ], [ b ], false );
+                        Print("GAP After ChangeStabChain R_list[d] 2\n");
                         R[ d + 1 ] := R[ d ].stabilizer;
                     else
+                        Print("GAP Beginning else case\n");
                         if IsBound( R[ d ].stabilizer )  then
                             R[ d + 1 ] := StrongGeneratorsStabChain( R[ d ] );
                         else
                             R[ d + 1 ] := R[ d ].generators;
                         fi;
+                        Print("GAP First generating step done\n");
+                        Print("GAP |LGenB|=", Length(Filtered( R[ d + 1 ], gen -> b ^ gen = b ) ), "\n");
                         R[ d + 1 ] := rec( generators := Filtered
                             ( R[ d + 1 ], gen -> b ^ gen = b ) );
                     fi;
