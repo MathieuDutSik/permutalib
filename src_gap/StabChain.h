@@ -221,11 +221,13 @@ void PrintStabChain(StabChain<Telt> const& S)
     //
     std::cerr << "CPP orbit=" << GapStringIntVector(Swork->orbit) << "\n";
     std::cerr << "CPP transversal=" << GapStringMissingTVector(V) << "\n";
+    std::cerr << "XXX ELIMINATE begin\n";
     if (Swork->cycles.size() > 0) {
       std::cerr << "CPP cycles=" << GapStringBoolVectorB(Swork->cycles) << "\n";
     } else {
       std::cerr << "CPP No cycles\n";
     }
+    std::cerr << "XXX ELIMINATE end\n";
     Swork = Swork->stabilizer;
     iLevel++;
   }
@@ -978,6 +980,9 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
   std::cerr << "CPP AGEST S->orbit=" << GapStringIntVector(S->orbit) << "\n";
 #endif
   int i=0;
+#ifdef DEBUG_ADD_GEN_SCH
+  std::cerr << "XXX ELIMINATE begin\n";
+#endif
   if (S->cycles.size() > 0) {
 #ifdef DEBUG_ADD_GEN_SCH
     std::cerr << "CPP AGEST Cycles S.cycles=" << GapStringBoolVectorB(S->cycles) << "\n";
@@ -1031,6 +1036,9 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
       i++;
     }
   }
+#ifdef DEBUG_ADD_GEN_SCH
+  std::cerr << "XXX ELIMINATE end\n";
+#endif
 }
 
 

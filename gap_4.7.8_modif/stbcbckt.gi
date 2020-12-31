@@ -1695,6 +1695,7 @@ InstallGlobalFunction( PartitionBacktrack,
                 #   levels  below  the current one   (this happens if  base =
                 #   image up to current level).
                 if t <> fail  then
+                    Print("GAP Matching t<>fail\n");
 
                     # Representative case, element found: Return it.
                     # Subgroup case, base <> image  before current level:  We
@@ -1720,10 +1721,10 @@ InstallGlobalFunction( PartitionBacktrack,
                         fi;
                         max := PositionNthTrueBlist( orB[ d ],
                                        m - Length( L[ d ].orbit ) + 1 );
-                        Print("GAP Before |R|=", Length(R), " |L|=", Length(L), "\n");
+#                        Print("GAP Before |R|=", Length(R), " |L|=", Length(L), "\n");
                         R{ [ d .. Length( rbase.base ) ] } := List(
                         L{ [ d .. Length( rbase.base ) ] }, CopyStabChain );
-                        Print("GAP After |R|=", Length(R), " |L|=", Length(L), "\n");
+#                        Print("GAP After |R|=", Length(R), " |L|=", Length(L), "\n");
                     fi;
 
                 fi;
@@ -1744,7 +1745,7 @@ InstallGlobalFunction( PartitionBacktrack,
             fi;
 
             b := Position( orb[ d ], true, b );
-	    Print("GAP End of loop, Now b=", b, "\n");
+	    Print("GAP End of the loop. Now b=", b, "\n");
             if b <> fail  and  b > max  then
                 b := fail;
             fi;
@@ -2491,6 +2492,7 @@ InstallGlobalFunction( RepOpSetsPermGroup, function( arg )
             gens,  cell,  i,phitail, SelectedGens;
     Print("GAP Beginning of RepOpSetsPermGroup\n");
     G   := arg[ 1 ];
+    PrintStabChain(StabChainMutable(G));
     Phi := Set( arg[ 2 ] );
     if Length( arg ) > 2  and  IsList( arg[ 3 ] )  then
         p := 3;
@@ -2561,6 +2563,8 @@ InstallGlobalFunction( RepOpSetsPermGroup, function( arg )
         SelectedGens:=Filtered(StrongGeneratorsStabChain(StabChainMutable(G)),
                      gen -> OnSets( Phi, gen ) = Phi );
         Print("GAP SelectedGens=", SelectedGens, "\n");
+        # The SubgroupNC is declared as
+        # DeclareSynonym( "SubgroupNC", SubmagmaWithInversesNC );
         L:=SubgroupNC(G,
 	     Filtered(StrongGeneratorsStabChain(StabChainMutable(G)),
                      gen -> OnSets( Phi, gen ) = Phi ) );

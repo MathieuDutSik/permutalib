@@ -42,7 +42,6 @@ end;
 PrintStabChain:=function(eRec)
   local eStab, iLev;
   #
-#  Print("eRec=", eRec, "\n");
   eStab:=eRec;
   iLev:=0;
   while(true)
@@ -58,11 +57,13 @@ PrintStabChain:=function(eRec)
     else
       Print("GAP transversal=[  ]\n");
     fi;
+    Print("XXX ELIMINATE begin\n");
     if IsBound(eStab.cycles) then
         Print("GAP cycles=", eStab.cycles, "\n");
     else
         Print("GAP No cycles\n");
     fi;
+    Print("XXX ELIMINATE end\n");
     if IsBound(eStab.stabilizer) then
       eStab:=eStab.stabilizer;
     else
@@ -652,7 +653,9 @@ InstallGlobalFunction( AddGeneratorsExtendSchreierTree, function( S, new )
         Print("GAP AGEST S->orbit=", S.orbit, "\n");
     fi;
     i := 1;
-
+    if debug_fct then
+        Print("XXX ELIMINATE begin\n");
+    fi;
     if IsBound( S.cycles )  then
         if debug_fct then
           Print("GAP AGEST Cycles S.cycles=", S.cycles, "\n");
@@ -712,6 +715,9 @@ InstallGlobalFunction( AddGeneratorsExtendSchreierTree, function( S, new )
             od;
             i := i + 1;
         od;
+    fi;
+    if debug_fct then
+        Print("XXX ELIMINATE end\n");
     fi;
 end );
 

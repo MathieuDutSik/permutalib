@@ -1286,6 +1286,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	//   levels  below  the current one   (this happens if  base =
 	//   image up to current level).
 	if (t.status != int_fail) {
+          std::cerr << "CPP Matching t<>fail\n";
 	  // Representative case, element found: Return it.
 	  // Subgroup case, base <> image  before current level:  We
 	  //   need  only find  a representative  because we already
@@ -1302,7 +1303,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    //	      AddGeneratorsExtendSchreierTree( L[ dd ], {t});
             // It is a little bit unclear why the loop was removed and a single call to
             // AGEST with L_list[dd].
-            for (int dd=0; dd<d; dd++) {
+            for (int dd=0; dd<=d; dd++) {
               std::cerr << "CPP Before AGEST dd=" << (dd+1) << "\n";
               AddGeneratorsExtendSchreierTree(L_list[dd], {t.val});
             }
@@ -1325,11 +1326,11 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  SubtractBlistOrbitStabChain(orb[d], StrongGeneratorsStabChain(R), b_int);
 	std::cerr << "CPP ORB 2: After subtract d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
 	b = orb[d].find_next(b);
-	std::cerr << "CPP End of the loop. Now b=" << (b+1) << "\n";
+	std::cerr << "CPP End of the loop. Now b=" << PosFail_to_string(b) << "\n";
       }
 
     }
-    std::cerr << "CPP PBEnumerate, step 11, EXIT 10\n";
+    std::cerr << "CPP PBEnumerate, step 11, EXIT 10 |L|=" << L_list.size() << "\n";
     return {int_fail, {}};
   };
 
@@ -1439,6 +1440,7 @@ template<typename Telt, typename Tint>
 ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, Face const& Phi, Face const& Psi)
 {
   std::cerr << "CPP Beginning of RepOpSetsPermGroup\n";
+  PrintStabChain(G);
   std::cerr << "CPP UseCycle=" << (G->cycles.size() > 0) << "\n";
   std::cerr << "CPP After bool print\n";
   int n=G->comm->n;

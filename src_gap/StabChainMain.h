@@ -37,14 +37,14 @@ StabChain<Telt> StabChainOp_listgen(std::vector<Telt> const& Lgen, StabChainOpti
     The business with StabChainOptions look eminently dangerous and a reliable replacement
     has to be found.
     It is a record of the options chosen for the stabilizer chain that is outside of the
-    variable itself!
-  if (options.random > 0) {
-        if IsBound( StabChainOptions( Parent( G ) ).random )  then
-            options.random := Minimum( StabChainOptions( Parent( G ) ).random,
-                                      options.random );
-        fi;
-        StabChainOptions( G ).random := options.random;
-	fi;*/
+    variable itself! */
+  /* if (options.random > 0) {
+     if IsBound( StabChainOptions( Parent( G ) ).random )  then
+     options.random := Minimum( StabChainOptions( Parent( G ) ).random,
+     options.random );
+     fi;
+     StabChainOptions( G ).random := options.random;
+     fi;*/
   return S;
 }
 
