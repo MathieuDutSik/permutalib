@@ -39,7 +39,7 @@ end;
 
 
 
-MyPrintStabChain:=function(eRec)
+PrintStabChain:=function(eRec)
   local eStab, iLev;
   #
 #  Print("eRec=", eRec, "\n");
@@ -49,19 +49,19 @@ MyPrintStabChain:=function(eRec)
   do
     Print("GAP iLev=", iLev, "\n");
     if IsBound(eStab.orbit) then
-      Print("GAP  orbit=", eStab.orbit, "\n");
+      Print("GAP orbit=", eStab.orbit, "\n");
     else
-      Print("GAP  orbit=[  ]\n");
+      Print("GAP orbit=[  ]\n");
     fi;
     if IsBound(eStab.transversal) then
-      Print("GAP  transversal=", eStab.transversal, "\n");
+      Print("GAP transversal=", eStab.transversal, "\n");
     else
-      Print("GAP  transversal=[  ]\n");
+      Print("GAP transversal=[  ]\n");
     fi;
     if IsBound(eStab.cycles) then
-        Print("GAP  cycles=", eStab.cycles, "\n");
+        Print("GAP cycles=", eStab.cycles, "\n");
     else
-        Print("GAP  No cycles\n");
+        Print("GAP No cycles\n");
     fi;
     if IsBound(eStab.stabilizer) then
       eStab:=eStab.stabilizer;
@@ -283,7 +283,7 @@ InstallMethod( StabChainOp,"group and option",
                     Print("GAP Before call to StabChainStrong\n");
                     StabChainStrong( S, GeneratorsOfGroup( G ), options );
 		    Print("GAP After main call to StabChainStrong\n");
-		    MyPrintStabChain(S);
+		    PrintStabChain(S);
                     T := S;
                     while IsBound( T.stabilizer )  do
                         T.generators := T.labels{ T.genlabels };

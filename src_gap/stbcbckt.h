@@ -937,6 +937,10 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 {
   int n=G->comm->n;
   std::cerr << "CPP PartitionBacktrack step 1\n";
+  std::cerr << "CPP L=\n";
+  PrintStabChain(L);
+  std::cerr << "CPP R=\n";
+  PrintStabChain(R);
   std::cerr << "CPP INIT sgs(G)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(G))) << "\n";
   std::cerr << "CPP INIT sgs(L)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(L))) << "\n";
   std::cerr << "CPP INIT sgs(R)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(R))) << "\n";

@@ -1340,7 +1340,10 @@ InstallGlobalFunction( PartitionBacktrack,
            i,  dd,  p;   # loop variables
 
     Print("GAP PartitionBacktrack step 1\n");
-
+    Print("GAP L=\n");
+    PrintStabChain(StabChainMutable(L));
+    Print("GAP R=\n");
+    PrintStabChain(StabChainMutable(R));
     Print("GAP INIT sgs(G)=", Set(StrongGeneratorsStabChain(StabChainMutable(G))), "\n");
     Print("GAP INIT sgs(L)=", Set(StrongGeneratorsStabChain(StabChainMutable(L))), "\n");
     Print("GAP INIT sgs(R)=", Set(StrongGeneratorsStabChain(StabChainMutable(R))), "\n");
