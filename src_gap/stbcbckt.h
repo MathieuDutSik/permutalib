@@ -891,8 +891,10 @@ template<typename T>
 void AssignationVectorGapStyle(std::vector<T> & eVect, int const& pos, T const& val)
 {
   int siz=eVect.size();
-  if (pos < siz)
+  if (pos < siz) {
     eVect[pos] = val;
+    return;
+  }
 #ifdef DEBUG
   if (pos != siz) {
     std::cerr << "Assignation leaves gap in the vector. Not allowed\n";
@@ -918,18 +920,6 @@ std::string GetStringGAP(Face const& f)
   return str;
 }
 
-void PrintVectorORB(std::string const& str, std::vector<Face> const& eV)
-{
-  int len=0;
-  int siz=eV.size();
-  if (siz > 0)
-    len = eV[0].size();
-  std::cerr << "Printing std:vector<Face> : " << str << " |eV|=" << siz << " len=" << len << "\n";
-  for (int i=0; i<siz; i++) {
-    std::cerr << "i=" << i << " v=" << GetStringGAP(eV[i]) << "\n";
-  }
-}
-
 
 
 template<typename Telt, typename Tint>
@@ -945,7 +935,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   std::cerr << "CPP INIT sgs(L)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(L))) << "\n";
   std::cerr << "CPP INIT sgs(R)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(R))) << "\n";
   imageType<Telt> image;
-  std::vector<Face> orB; // backup of <orb>. We take a single entry. Not sure it is correct
+  std::vector<Face> orB; // backup of <orb>.
   int nrback;
   std::vector<Face> orb;
   std::vector<std::vector<int>> org; // intersected (mapped) basic orbits of <G>
@@ -957,8 +947,6 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   std::vector<StabChain<Telt>> L_list, R_list;
   std::function<permPlusBool<Telt>(int const&,bool const&)> PBEnumerate = [&](int const& d, bool const & wasTriv) -> permPlusBool<Telt> {
     std::cerr << "CPP PBEnumerate, step 1, d=" << (d+1) << " wasTriv=" << wasTriv << "\n";
-    //    PrintVectorORB("orb", orb);
-    //    PrintVectorORB("orB", orB);
     permPlusBool<Telt> oldprm, oldprm2;
     int a;                // current R-base point
     permPlusBool<Telt> t; // group element constructed, to be handed upwards
@@ -973,8 +961,6 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     image.depth = d;
     std::cerr << "CPP PBEnumerate, step 2\n";
     PrintRBaseLevel(rbase, "CPP Step 2");
-    //    PrintVectorORB("orb", orb);
-    //    PrintVectorORB("orB", orB);
 
     // Store the original values of <image.*>.
     int undoto = NumberCells(image.partition);
@@ -1075,6 +1061,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     // Intersect  the current cell of <P>  with  the mapped basic orbit of
     // <G> (and also with the one of <H> in the intersection case).
     if (image.perm.status == int_true) {
+      std::cerr << "CPP orb assign 1: d=" << (d+1) << "\n";
       AssignationVectorGapStyle(orb, d, BlistList(range, Cell(oldcel, rbase.where[d]) ));
       if (image.level2.status != int_false) {
 	b = orb[d].find_first();
@@ -1088,7 +1075,9 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     }
     else {
       std::cerr << "CPP image.perm<>true orb=" << GapStringListBoolVector(orb) << "\n";
+      std::cerr << "CPP orb assign 2: d=" << (d+1) << "\n";
       AssignationVectorGapStyle(orb, d, BlistList(range, {}));
+      std::cerr << "CPP After assignation |orb|=" << orb.size() << "\n";
       // line below needs to be checked.
       std::cerr << "CPP ORB: Before pVal loop d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
       std::cerr << "CPP RBASE: List(...) = [ ";
@@ -1122,7 +1111,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       std::cerr << "CPP ORB: After pVal loop d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
       //      std::cerr << "After pVal loop\n";
     }
-    std::cerr << "CPP PBEnumerate, step 6\n";
+    std::cerr << "CPP PBEnumerate, step 6 orb=" << GapStringListBoolVector(orb) << "\n";
     PrintRBaseLevel(rbase, "CPP Step 6");
     if (d == 0 && ForAll(G->comm->labels, [&](Telt const& x){return PowAct(a, x) == a;})) {
       orb[d][a]=true; // ensure a is a possible image (can happen if acting on permutations with more points)
@@ -1156,9 +1145,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     std::cerr << "CPP PBEnumerate, step 8\n";
 
     // Only the early points of the orbit have to be considered.
-    //    PrintVectorORB("orb", orb);
-    //    PrintVectorORB("orB", orB);
-    m = SizeBlist( orB[d] );
+    m = SizeBlist(orB[d] );
     if (m < int(L_list[d]->orbit.size()) ) {
       std::cerr << "CPP PBEnumerate, EXIT 6 |L|=" << L_list.size() << "\n";
       return {int_fail,{}};
@@ -1166,8 +1153,6 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     max = PositionNthTrueBlist(orB[d], m - L_list[d]->orbit.size());
     std::cerr << "CPP PBEnumerate, step 9\n";
     std::cerr << "CPP wasTriv=" << wasTriv << " a=" << (a+1) << " max=" << (max+1) << "\n";
-    //    PrintVectorORB("orb", orb);
-    //    PrintVectorORB("orB", orB);
 
     if (wasTriv && a > max) {
       m--;
@@ -1270,8 +1255,6 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  }
 	}
         std::cerr << "CPP t step 2\n";
-	//	PrintVectorORB("orb", orb);
-	//	PrintVectorORB("orB", orB);
 
 	// Recursion.
 	if (t.status == int_true) {

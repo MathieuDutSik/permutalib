@@ -1481,6 +1481,7 @@ InstallGlobalFunction( PartitionBacktrack,
         # Intersect  the current cell of <P>  with  the mapped basic orbit of
         # <G> (and also with the one of <H> in the intersection case).
         if image.perm = true  then
+            Print("GAP orb assign 1: d=", d, "\n");
             orb[ d ] := BlistList( range, Cell( oldcel, rbase.where[ d ] ) );
             if image.level2 <> false  then
                 b := Position( orb[ d ], true );
@@ -1494,7 +1495,9 @@ InstallGlobalFunction( PartitionBacktrack,
             fi;
         else
 	    Print("GAP image.perm<>true orb=", String(orb), "\n");
+            Print("GAP orb assign 2: d=", d, "\n");
             orb[ d ] := BlistList( range, [  ] );
+            Print("GAP After assignation |orb|=", Length(orb), "\n");
 	    Print("GAP ORB: Before pVal loop d=", d, " orb[d]=", orb[d], "\n");
 	    Print("GAP RBASE: List(...) = ", List(rbase.lev, x->x.orbit), "\n");
             for p  in rbase.lev[ d ].orbit  do
@@ -1509,7 +1512,7 @@ InstallGlobalFunction( PartitionBacktrack,
             od;
 	    Print("GAP ORB: After pVal loop d=", d, " orb[d]=", orb[d], "\n");
         fi;
-        Print("GAP PBEnumerate, step 6\n");
+        Print("GAP PBEnumerate, step 6 orb=", String(orb), "\n");
         PrintRBaseLevel(rbase, "GAP Step 6");
 	if d=1 and ForAll(GeneratorsOfGroup(G),x->a^x=a) then
 	  orb[d][a]:=true; # ensure a is a possible image (can happen if
