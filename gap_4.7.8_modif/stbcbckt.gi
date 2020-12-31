@@ -1493,7 +1493,7 @@ InstallGlobalFunction( PartitionBacktrack,
                 od;
             fi;
         else
-	    Print("GAP |orb|=", Length(orb), "\n");
+	    Print("GAP image.perm<>true orb=", String(orb), "\n");
             orb[ d ] := BlistList( range, [  ] );
 	    Print("GAP ORB: Before pVal loop d=", d, " orb[d]=", orb[d], "\n");
 	    Print("GAP RBASE: List(...) = ", List(rbase.lev, x->x.orbit), "\n");

@@ -863,38 +863,6 @@ StabChain<Telt> StabChainBaseStrongGenerators(std::vector<int> const& base, std:
   return S;
 }
 
-std::string GapStringIntVector(std::vector<int> const& f)
-{
-  std::string str;
-  str += "[ ";
-  int len=f.size();
-  for (int i=0; i<len; i++) {
-    if (i>0)
-      str += ", ";
-    str += std::to_string(f[i]+1);
-  }
-  str += " ]";
-  return str;
-}
-
-std::string GapStringBoolVector(Face const& f)
-{
-  std::string str;
-  str += "[ ";
-  int len=f.size();
-  for (int i=0; i<len; i++) {
-    if (i>0)
-      str += ", ";
-    if (f[i])
-      str += "true";
-    else
-      str += "false";
-  }
-  str += " ]";
-  return str;
-}
-
-
 template<typename T>
 std::vector<T> SortVector(std::vector<T> const& f)
 {
@@ -1394,10 +1362,10 @@ std::string PrintTopOrbit(StabChain<Telt> const& S)
 template<typename Telt>
 bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int const& reduced)
 {
-  std::string strG_orig=GetStringExpressionOfStabChain(Gptr);
-  std::string strG_current=strG_orig;
 #define DEBUG_CHANGE_STAB_CHAIN
 #ifdef DEBUG_CHANGE_STAB_CHAIN
+  std::string strG_orig=GetStringExpressionOfStabChain(Gptr);
+  std::string strG_current=strG_orig;
   std::cerr << "CPP Beginning ChangeStabChain, GetStabilizerDepth = " << GetStabilizerDepth(Gptr) << "\n";
 #endif
   Telt cnj = Gptr->comm->identity;

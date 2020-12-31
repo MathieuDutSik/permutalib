@@ -2,6 +2,31 @@
 #define GAP_PRINT_INCLUDE
 
 
+template<typename T>
+std::string GapStringTVector(std::vector<T> const& f)
+{
+  std::ostringstream os;
+  os << "[ ";
+  int len=f.size();
+  for (int i=0; i<len; i++) {
+    if (i>0)
+      os << ", ";
+    os << f[i];
+  }
+  os << " ]";
+  return os.str();
+}
+
+
+template<typename T>
+std::string GapStringTVectorB(std::vector<T> const& f)
+{
+  if (f.size() == 0)
+    return std::string("[ ]");
+  return GapStringTVector(f);
+}
+
+
 std::string GapStringIntVector(std::vector<int> const& f)
 {
   std::string str;
@@ -41,6 +66,30 @@ std::string GapStringBoolVector(Face const& f)
   str += " ]";
   return str;
 }
+
+
+std::string GapStringSetBoolVector(Face const& f)
+{
+  std::vector<int> eS;
+  int len=f.size();
+  for (int i=0; i<len; i++)
+    if (f[i])
+      eS.push_back(i);
+  return GapStringIntVector(eS);
+}
+
+std::string GapStringListBoolVector(std::vector<Face> const& f)
+{
+  if (f.size() == 0)
+    return std::string("[ ]");
+  std::vector<std::string> Lstr;
+  for (auto & eF : f)
+    Lstr.push_back(GapStringBoolVector(eF));
+  return GapStringTVector(Lstr);
+}
+
+
+
 
 
 std::string GapStringBoolVectorB(std::vector<int8_t> const& f)
@@ -83,33 +132,6 @@ std::string PosFalse_to_string(int const& pos)
   if (pos == -1)
     return std::string("false");
   return std::to_string(pos + 1);
-}
-
-
-
-
-template<typename T>
-std::string GapStringTVector(std::vector<T> const& f)
-{
-  std::ostringstream os;
-  os << "[ ";
-  int len=f.size();
-  for (int i=0; i<len; i++) {
-    if (i>0)
-      os << ", ";
-    os << f[i];
-  }
-  os << " ]";
-  return os.str();
-}
-
-
-template<typename T>
-std::string GapStringTVectorB(std::vector<T> const& f)
-{
-  if (f.size() == 0)
-    return std::string("[ ]");
-  return GapStringTVector(f);
 }
 
 

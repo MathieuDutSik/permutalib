@@ -1087,7 +1087,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       std::cerr << "CPP ORB: Case image.perm=true d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
     }
     else {
-      std::cerr << "CPP |orb|=" << orb.size() << "\n";
+      std::cerr << "CPP image.perm<>true orb=" << GapStringListBoolVector(orb) << "\n";
       AssignationVectorGapStyle(orb, d, BlistList(range, {}));
       // line below needs to be checked.
       std::cerr << "CPP ORB: Before pVal loop d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
