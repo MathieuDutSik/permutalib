@@ -41,7 +41,6 @@ end;
 
 MyPrintStabChain:=function(eRec)
   local eStab, iLev;
-#  Print("Begin of MyPrintStabChain\n");
   #
 #  Print("eRec=", eRec, "\n");
   eStab:=eRec;
@@ -66,7 +65,6 @@ MyPrintStabChain:=function(eRec)
     fi;
     iLev:=iLev+1;
   od;
-#  Print(" Exit of MyPrintStabChain\n");
 end;
 
 
@@ -102,6 +100,29 @@ PrintStabChainTransversals:=function(S)
     fi;
   od;
 end;
+
+
+
+PrintStabChainOrbits:=function(S)
+  local Swork, iLevel;
+  Swork := S;
+  iLevel:=0;
+  while(true)
+  do
+    if IsBound(Swork.orbit) then
+      Print("GAP i=", iLevel, " ", Swork.orbit, "\n");
+    else
+      Print("GAP i=", iLevel, " [  ]\n");
+    fi;
+    iLevel:=iLevel+1;
+    if IsBound(Swork.stabilizer) then
+      Swork:=Swork.stabilizer;
+    else
+      break;
+    fi;
+  od;
+end;
+
 
 
 
@@ -629,7 +650,7 @@ InstallGlobalFunction( AddGeneratorsExtendSchreierTree, function( S, new )
 
     if IsBound( S.cycles )  then
         if debug_fct then
-          Print("GAP AGEST Cycles len=", len, "\n");
+          Print("GAP AGEST Cycles S.cycles=", S.cycles, "\n");
         fi;
         while i <= Length( S.orbit )  do
             if debug_fct then
@@ -668,7 +689,7 @@ InstallGlobalFunction( AddGeneratorsExtendSchreierTree, function( S, new )
 
     else
         if debug_fct then
-          Print("GAP AGEST No Cycles len=", len, "\n");
+          Print("GAP AGEST No Cycles\n");
         fi;
         while i <= Length( S.orbit )  do
             for j  in S.genlabels  do

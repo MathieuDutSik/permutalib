@@ -59,12 +59,12 @@ int PositionNthTrueBlist(Face const& blist, int const& hpos)
 
 
 
-std::vector<int> ListBlist(std::vector<int> const& list, Face const& blist)
+  std::vector<int> ListBlist(std::vector<int> const& list, std::vector<int8_t> const& blist)
 {
   std::vector<int> ret;
   int len=list.size();
   for (int i=0; i<len; i++) {
-    if (blist[i])
+    if (blist[i] == 1)
       ret.push_back(list[i]);
   }
   return ret;

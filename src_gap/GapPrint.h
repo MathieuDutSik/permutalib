@@ -42,6 +42,24 @@ std::string GapStringBoolVector(Face const& f)
   return str;
 }
 
+
+std::string GapStringBoolVectorB(std::vector<int8_t> const& f)
+{
+  std::string str;
+  str += "[ ";
+  int len=f.size();
+  for (int i=0; i<len; i++) {
+    if (i>0)
+      str += ", ";
+    if (f[i] == 1)
+      str += "true";
+    else
+      str += "false";
+  }
+  str += " ]";
+  return str;
+}
+
 std::string ConstrainedIntInfinity_to_string(int const& val, int const& n)
 {
   if (val < n) {

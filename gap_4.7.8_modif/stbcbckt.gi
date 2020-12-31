@@ -68,6 +68,7 @@ PrintRBaseLevel:=function(rbase, str)
       do
         Print("GAP rbase.lev[", eD, "]=", StrongGeneratorsStabChain(rbase.lev[eD]), "\n");
         PrintStabChainTransversals(rbase.lev[eD]);
+        PrintStabChainOrbits(rbase.lev[eD]);
       od;
       Print("GAP rbase.level=", StrongGeneratorsStabChain(rbase.level), "\n");
       Print(str, " PRBL rbase.level, record, |genlabels|=", Length(rbase.level.genlabels), "\n");
@@ -1459,8 +1460,10 @@ InstallGlobalFunction( PartitionBacktrack,
                     # In  the representative  case,  change  the   stabilizer
                     # chains of <L> and <R>.
                     ChangeStabChain( L[ d ], [ rbase.base[ d ] ], false );
+                    PrintStabChainTransversals(L[d]);
                     L[ d + 1 ] := L[ d ].stabilizer;
                     ChangeStabChain( R[ d ], [ rbase.base[ d ] ], false );
+                    PrintStabChainTransversals(R[d]);
                     R[ d + 1 ] := R[ d ].stabilizer;
 
                 fi;
@@ -1703,6 +1706,7 @@ InstallGlobalFunction( PartitionBacktrack,
                     #   enlarged <L>. Reset <R> to the enlarged <L>.
                     else
                         for dd  in [ 1 .. d ]  do
+                            Print("GAP Before AGEST dd=", dd, "\n");
                             AddGeneratorsExtendSchreierTree( L[ dd ], [ t ] );
                         od;
                         Info( InfoBckt, 1, "Level ", d,

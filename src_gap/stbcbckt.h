@@ -288,6 +288,7 @@ void PrintRBaseLevel(rbaseType<Telt> const& rbase, std::string const& str)
       for (int eD=0; eD<len; eD++) {
         std::cerr << "CPP rbase.lev[" << (eD+1) << "]=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(rbase.lev[eD].Stot))) << "\n";
         PrintStabChainTransversals(rbase.lev[eD].Stot);
+        PrintStabChainOrbits(rbase.lev[eD].Stot);
       }
       std::cerr << "CPP rbase.level=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(rbase.level.Stot))) << "\n";
       std::cerr << str << " PRBL rbase.level, record, |genlabels|=" << rbase.level.Stot->genlabels.size() << "\n";
@@ -446,7 +447,7 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
     else {
       rbase.level2 = {int_stablev, -555, G[1]};
       std::cerr << "CPP rbase Before bool print\n";
-      std::cerr << "CPP bool=" << rbase.level2.Stot->comm->UseCycle << "\n";
+      std::cerr << "CPP bool=" << (rbase.level2.Stot->cycles.size() > 0) << "\n";
       std::cerr << "CPP rbase After bool print\n";
       rbase.lev2 = {};
     }
@@ -1052,10 +1053,12 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  // chains of <L> and <R>.
           std::cerr << "CPP Before ChangeStabChain L_list[d]\n";
 	  ChangeStabChain(L_list[d], {rbase.base[d]}, int_false);
+          PrintStabChainTransversals(L_list[d]);
           std::cerr << "CPP After ChangeStabChain L_list[d]\n";
 	  //	  L[ d + 1 ] := L[ d ].stabilizer;
           std::cerr << "CPP Before ChangeStabChain R_list[d]\n";
 	  ChangeStabChain(R_list[d], {rbase.base[d]}, int_false);
+          PrintStabChainTransversals(R_list[d]);
           std::cerr << "CPP After ChangeStabChain R_list[d]\n";
 	  //	  R[ d + 1 ] := R[ d ].stabilizer;
 	}
@@ -1293,7 +1296,12 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    //   enlarged <L>. Reset <R> to the enlarged <L>.
 	    //	    for (int dd=0; dd<d; dd++)
 	    //	      AddGeneratorsExtendSchreierTree( L[ dd ], {t});
-	    AddGeneratorsExtendSchreierTree(L_list[dd], {t.val});
+            // It is a little bit unclear why the loop was removed and a single call to
+            // AGEST with L_list[dd].
+            for (int dd=0; dd<d; dd++) {
+              std::cerr << "CPP Before AGEST dd=" << (dd+1) << "\n";
+              AddGeneratorsExtendSchreierTree(L_list[dd], {t.val});
+            }
 	    if (m < int(L_list[d]->orbit.size())) {
 	      std::cerr << "CPP PBEnumerate, EXIT 9\n";
 	      return {int_fail,{}};
@@ -1427,7 +1435,7 @@ template<typename Telt, typename Tint>
 ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, Face const& Phi, Face const& Psi)
 {
   std::cerr << "CPP Beginning of RepOpSetsPermGroup\n";
-  std::cerr << "CPP UseCycle=" << G->comm->UseCycle << "\n";
+  std::cerr << "CPP UseCycle=" << (G->cycles.size() > 0) << "\n";
   std::cerr << "CPP After bool print\n";
   int n=G->comm->n;
   std::vector<int> Omega = MovedPoints(G);
@@ -1502,7 +1510,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
     return true;
   };
   std::cerr << "CPP Before call to PartitionBacktrack\n";
-  std::cerr << "CPP bool=" << rbase.level2.Stot->comm->UseCycle << "\n";
+  std::cerr << "CPP bool=" << (rbase.level2.Stot->cycles.size() > 0) << "\n";
   std::cerr << "CPP After bool print\n";
   return PartitionBacktrack<Telt,Tint>( G, Pr, repr, rbase, {Q}, L, R );
 }

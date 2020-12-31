@@ -134,7 +134,6 @@ template<typename Telt>
 struct CommonStabInfo {
   int n;
   Telt identity;
-  bool UseCycle;
   std::vector<Telt> labels;
 };
 
@@ -143,7 +142,9 @@ struct StabLevel {
   std::vector<int> transversal;
   std::vector<int> orbit;
   std::vector<int> genlabels; // Not used in Random algorithm
-  Face cycles;
+  std::vector<int8_t> cycles; // We need a vector because if we use a "Face" dynamic bitset then
+                              // we cannot extend. On the other hand if we use a std::vector<bool>
+                              // we are exposed to the problems of this 
   // entry below are specific to the random algorithms:
   std::vector<Telt> treegen;
   std::vector<Telt> treegeninv;
@@ -188,16 +189,19 @@ void PrintStabChainTransversals(StabChain<Telt> const& S)
 }
 
 
-/*
 template<typename Telt>
-struct StabChain {
-  int n;
-  Telt identity;
-  bool UseCycle;
-  std::vector<Telt> labels;
-  std::vector<StabLevel<Telt>> stabilizer;
-};
-*/
+void PrintStabChainOrbits(StabChain<Telt> const& S)
+{
+  StabChain<Telt> Swork = S;
+  int iLevel=0;
+  while(Swork != nullptr) {
+    std::cerr << "CPP i=" << iLevel << " " << GapStringIntVector(Swork->orbit) << "\n";
+    Swork = Swork->stabilizer;
+    iLevel++;
+  }
+}
+
+
 
 template<typename Telt>
 int GetStabilizerDepth(StabChain<Telt> const& Sptr)
@@ -357,7 +361,7 @@ StabChain<Telt> RestrictedStabChain(StabChain<Telt> const& Stot, int const& eLev
   std::vector<StabLevel<Telt>> stabilizerRed;
   for (int uLev=eLev; uLev<nbLevel; uLev++)
     stabilizerRed.push_back(Stot.stabilizer[uLev]);
-  return {Stot.n, Stot.identity, Stot.UseCycle, Stot.labels, stabilizerRed};
+  return {Stot.n, Stot.identity, Stot.labels, stabilizerRed};
 }
 
 
@@ -367,7 +371,7 @@ StabLevel<Telt> EmptyStabLevel(std::shared_ptr<CommonStabInfo<Telt>> const& comm
   std::vector<int> transversal = std::vector<int>(comm->n, -1);
   std::vector<int> orbit;
   std::vector<int> genlabels;
-  Face cycles;
+  std::vector<int8_t> cycles;
   std::vector<Telt> treegen;
   std::vector<Telt> treegeninv;
   std::vector<Telt> aux;
@@ -382,7 +386,7 @@ template<typename Telt>
 StabChain<Telt> EmptyStabChain(int const& n)
 {
   Telt id(n);
-  std::shared_ptr<CommonStabInfo<Telt>> comm = std::make_shared<CommonStabInfo<Telt>>(CommonStabInfo<Telt>({n, id, false, {id}}));
+  std::shared_ptr<CommonStabInfo<Telt>> comm = std::make_shared<CommonStabInfo<Telt>>(CommonStabInfo<Telt>({n, id, {id}}));
   return std::make_shared<StabLevel<Telt>>(EmptyStabLevel<Telt>(comm));
 }
 
@@ -770,7 +774,7 @@ void InsertTrivialStabilizer(StabChain<Telt> & Stot, int const& pnt)
   Stot->transversal = {};
   Stot->orbit = {};
   Stot->genlabels = Stot->stabilizer->genlabels;
-  Stot->cycles = Face(Stot->comm->n);
+  Stot->cycles = std::vector<int8_t>(Stot->comm->n);
   Stot->treegen = {};
   Stot->treegen = {};
   Stot->aux = {};
@@ -945,9 +949,9 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
   std::cerr << "CPP AGEST S->orbit=" << GapStringIntVector(S->orbit) << "\n";
 #endif
   int i=0;
-  if (S->comm->UseCycle) {
+  if (S->cycles.size() > 0) {
 #ifdef DEBUG_ADD_GEN_SCH
-    std::cerr << "CPP AGEST Cycles len=" << len << "\n";
+    std::cerr << "CPP AGEST Cycles S.cycles=" << " TO Be COMPLETED" << "\n";
 #endif
     while (i < int(S->orbit.size())) {
 #ifdef DEBUG_ADD_GEN_SCH
@@ -983,7 +987,7 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
   }
   else {
 #ifdef DEBUG_ADD_GEN_SCH
-    std::cerr << "CPP AGEST No Cycles len=" << len << "\n";
+    std::cerr << "CPP AGEST No Cycles\n";
 #endif
     while (i < int(S->orbit.size())) {
       for (int& j : S->genlabels) {
@@ -1043,9 +1047,8 @@ void ChooseNextBasePoint(StabChain<Telt> & S, std::vector<int> const& base, std:
     //    std::cerr << "CPP Before InsertTrivialStabilizer S=" << S << "\n";
     InsertTrivialStabilizer(S, pnt);
     //    std::cerr << "CPP After InsertTrivialStabilizer S=" << S << "\n";
-    if (S->comm->UseCycle) {
-      Face eFace(1);
-      eFace[0] = 0;
+    if (S->stabilizer->cycles.size() > 0) {
+      std::vector<int8_t> eFace = {0};
       S->cycles = eFace;
       std::cerr << "CPP   Initializing cycles\n";
     }
@@ -1078,12 +1081,12 @@ void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, Stab
 
   // # Compute the Schreier generators (seems to work better backwards).
   std::vector<int> pnts = ClosedInterval(0, S->orbit.size());
-  if (S->comm->UseCycle)
+  if (S->cycles.size() > 0)
     pnts = ListBlist(pnts, S->cycles);
   std::cerr << "CPP pnts = " << GapStringIntVector(pnts) << "\n";
-  std::cerr << "CPP Usecycle=" << S->comm->UseCycle << "\n";
-  if (S->comm->UseCycle) {
-    std::cerr << "CPP cycles=" << GapStringBoolVector(S->cycles) << "\n";
+  std::cerr << "CPP Usecycle=" << (S->cycles.size() > 0) << "\n";
+  if (S->cycles.size() > 0) {
+    std::cerr << "CPP cycles=" << GapStringBoolVectorB(S->cycles) << "\n";
   }
   int gen1=0;
   std::cerr << "CPP StabChainStrong O=" << GapStringIntVector(S->orbit) << "\n";
@@ -1732,7 +1735,7 @@ StabChain<Tret> HomomorphismMapping(StabChain<Telt> const& Stot, std::function<T
     return Vret;
   };
   std::vector<Tret> labelsMap = fVector(Stot->comm->labels);
-  std::shared_ptr<CommonStabInfo<Tret>> comm = std::make_shared<CommonStabInfo<Tret>>(CommonStabInfo<Tret>({nMap, idMap, Stot->comm->UseCycle, labelsMap}));
+  std::shared_ptr<CommonStabInfo<Tret>> comm = std::make_shared<CommonStabInfo<Tret>>(CommonStabInfo<Tret>({nMap, idMap, labelsMap}));
 
   StabChain<Telt> Sptr = Stot;
   StabChain<Tret> Swork = nullptr;
