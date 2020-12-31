@@ -1093,6 +1093,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       for (auto & pVal : rbase.lev[d].Stot->orbit) {
 	b = PowAct(pVal, image.perm.val);
 	std::cerr << "CPP pVal=" << (pVal+1) << " b=" << (b+1) << "\n";
+        std::cerr << "CPP oldcell=" << (oldcel_cellno[b]+1) << " rbase.where=" << (rbase.where[d]+1) << "\n";
 	if (oldcel_cellno[b] == rbase.where[d]) {
 	  bool DoOper=false;
 	  if (image.level2.status == int_false)

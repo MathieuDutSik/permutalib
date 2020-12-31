@@ -1503,6 +1503,7 @@ InstallGlobalFunction( PartitionBacktrack,
             for p  in rbase.lev[ d ].orbit  do
                 b := p ^ image.perm;
 		Print("GAP pVal=", p, " b=", b, "\n");
+                Print("GAP oldcell=", oldcel[b], " rbase.where=", rbase.where[d], "\n");
                 if oldcel[ b ] = rbase.where[ d ]
                and ( image.level2 = false
                   or IsInBasicOrbit( rbase.lev2[d], b/image.perm2 ) )  then
