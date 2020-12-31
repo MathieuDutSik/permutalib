@@ -202,6 +202,35 @@ void PrintStabChainOrbits(StabChain<Telt> const& S)
 }
 
 
+template<typename Telt>
+void PrintStabChain(StabChain<Telt> const& S)
+{
+  StabChain<Telt> Swork = S;
+  int n=Swork->comm->n;
+  int iLevel=0;
+  while(Swork != nullptr) {
+    std::cerr << "CPP iLev=" << iLevel << "\n";
+    std::vector<std::optional<Telt>> V(n);
+    for (int i=0; i<n; i++) {
+      int eVal = Swork->transversal[i];
+      if (eVal == -1)
+        V[i] = {};
+      else
+        V[i] = Swork->comm->labels[eVal];
+    }
+    //
+    std::cerr << "CPP orbit=" << GapStringIntVector(Swork->orbit) << "\n";
+    std::cerr << "CPP transversal=" << GapStringMissingTVector(V) << "\n";
+    if (Swork->cycles.size() > 0) {
+      std::cerr << "CPP cycles=" << GapStringBoolVectorB(Swork->cycles) << "\n";
+    } else {
+      std::cerr << "CPP No cycles\n";
+    }
+    Swork = Swork->stabilizer;
+    iLevel++;
+  }
+}
+
 
 template<typename Telt>
 int GetStabilizerDepth(StabChain<Telt> const& Sptr)

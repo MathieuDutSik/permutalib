@@ -58,6 +58,11 @@ MyPrintStabChain:=function(eRec)
     else
       Print("GAP  transversal=[  ]\n");
     fi;
+    if IsBound(eStab.cycles) then
+        Print("GAP  cycles=", eStab.cycles, "\n");
+    else
+        Print("GAP  No cycles\n");
+    fi;
     if IsBound(eStab.stabilizer) then
       eStab:=eStab.stabilizer;
     else
