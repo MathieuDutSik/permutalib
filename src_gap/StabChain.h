@@ -951,17 +951,17 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
   int i=0;
   if (S->cycles.size() > 0) {
 #ifdef DEBUG_ADD_GEN_SCH
-    std::cerr << "CPP AGEST Cycles S.cycles=" << " TO Be COMPLETED" << "\n";
+    std::cerr << "CPP AGEST Cycles S.cycles=" << GapStringBoolVectorB(S->cycles) << "\n";
 #endif
     while (i < int(S->orbit.size())) {
 #ifdef DEBUG_ADD_GEN_SCH
-      std::cerr << "CPP   AGEST i=" << (i +1) << "\n";
+      std::cerr << "CPP   AGEST i=" << (i+1) << "\n";
 #endif
       for (int& j : S->genlabels) {
 	if (i > len-1 || old[j] == 0) {
 	  int img=SlashAct(S->orbit[i], S->comm->labels[j]);
 #ifdef DEBUG_ADD_GEN_SCH
-	  std::cerr << "CPP     AGEST img=" << (img +1) << " g=" << S->comm->labels[j] << "\n";
+	  std::cerr << "CPP     AGEST img=" << (img+1) << " g=" << S->comm->labels[j] << "\n";
 #endif
 	  if (S->transversal[img] != -1) {
 	    S->cycles[i]=true;
@@ -1363,14 +1363,6 @@ std::string PrintTopOrbit(StabChain<Telt> const& S)
 }
 
 
-std::string ConvertIntFalse(int const& pos)
-{
-  if (pos == -1)
-    return "false";
-  return std::to_string(pos+1);
-}
-
-
 
 // value of reduced
 //  reduced = -1 corresponds to reduced = -1 in GAP code
@@ -1433,7 +1425,7 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
 #endif
     int old=BasePoint(Sptr);
 #ifdef DEBUG_CHANGE_STAB_CHAIN
-    std::cerr << "CPP ChangeStabChain old=" << ConvertIntFalse(old) << " i=" << (i+1) << " |base|=" << basSiz << "\n";
+    std::cerr << "CPP ChangeStabChain old=" << PosFalse_to_string(old) << " i=" << (i+1) << " |base|=" << basSiz << "\n";
     KeyUpdating("After BasePoint");
 #endif
     //    std::cerr << "eLev=" << eLev << "\n";
