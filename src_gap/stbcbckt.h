@@ -63,7 +63,7 @@ std::string STRING_VectInt(std::vector<int> const& V)
 template<typename Telt>
 permPlusBool<Telt> ExtendedT(Telt const& t, int const& pnt, int img, int const& simg, StabChainPlusLev<Telt> const& S)
 {
-  std::cerr << "CPP ExtendedT sgs(S.Stot)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(S.Stot))) << "\n";
+  std::cerr << "CPP ExtendedT sgs(S.Stot)=" << GapStringTVectorB(SortVector(StrongGeneratorsStabChain(S.Stot))) << "\n";
   if (simg == -1)
     img = SlashAct(img, t);
   else

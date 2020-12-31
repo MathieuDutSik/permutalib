@@ -20,7 +20,7 @@ pre_lines2 = f2.readlines()
 
 str1 = "XXX ELIMINATE begin\n"
 str2 = "XXX ELIMINATE end\n"
-def process_lines(l_lines):
+def eliminate_marked_blocks(l_lines):
     l_lines_ret = []
     do_insert = True
     for e_line in l_lines:
@@ -31,6 +31,27 @@ def process_lines(l_lines):
         if e_line == str2:
             do_insert=True
     return l_lines_ret
+
+def merge_lines(l_lines):
+    l_lines_ret = []
+    curr_line = ""
+    for e_line in l_lines:
+        if len(e_line) > 2 and e_line[-2] == '\\':
+            curr_line += e_line[:-2]
+        else:
+            curr_line += e_line
+            l_lines_ret.append(curr_line)
+            curr_line = ""
+    return l_lines_ret
+
+
+def process_lines(l_linesA):
+    l_linesB = eliminate_marked_blocks(l_linesA)
+    l_linesC = merge_lines(l_linesB)
+    return l_linesC
+
+
+
 
 lines1 = process_lines(pre_lines1)
 lines2 = process_lines(pre_lines2)

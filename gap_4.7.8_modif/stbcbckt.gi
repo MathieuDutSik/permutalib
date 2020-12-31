@@ -185,7 +185,7 @@ end );
 ##
 InstallGlobalFunction( ExtendedT, function( t, pnt, img, simg, G )
     local   bpt,  len,  edg;
-    Print("GAP ExtendedT sgs(S.Stot)=", StrongGeneratorsStabChain(G), "\n");
+    Print("GAP ExtendedT sgs(S.Stot)=", String(StrongGeneratorsStabChain(G)), "\n");
 
     # Map the image with the part <t> that is already known.
     if simg = 0  then  img := img / t;

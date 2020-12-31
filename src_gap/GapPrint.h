@@ -105,6 +105,18 @@ std::string GapStringTVector(std::vector<T> const& f)
 
 
 template<typename T>
+std::string GapStringTVectorB(std::vector<T> const& f)
+{
+  if (f.size() == 0)
+    return std::string("[ ]");
+  return GapStringTVector(f);
+}
+
+
+
+
+
+template<typename T>
 std::string GapStringMissingTVector(std::vector<std::optional<T>> const& f)
 {
   int len=f.size();

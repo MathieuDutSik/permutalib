@@ -894,20 +894,6 @@ std::string GapStringBoolVector(Face const& f)
   return str;
 }
 
-template<typename T>
-std::string GapStringTVector(std::vector<T> const& f)
-{
-  std::ostringstream os;
-  os << "[ ";
-  int len=f.size();
-  for (int i=0; i<len; i++) {
-    if (i>0)
-      os << ", ";
-    os << f[i];
-  }
-  os << " ]";
-  return os.str();
-}
 
 template<typename T>
 std::vector<T> SortVector(std::vector<T> const& f)
