@@ -246,7 +246,7 @@ end;
 ##
 InstallGlobalFunction( MeetPartitionStrat, function(rbase,image,S,g,strat )
 local  P,  p;
-
+  Print("GAP Running MeetPartitionStrat\n");
   if Length( strat ) = 0  then
     return false;
   fi;
@@ -1375,8 +1375,11 @@ InstallGlobalFunction( PartitionBacktrack,
         undoto := NumberCells( image.partition );
         if image.perm = true  then
             oldcel := image.partition;
+            Print("GAP Assigning from image.partition\n");
         else
             oldcel := image.partition.cellno;
+            Print("GAP Assigning from image.partition.cellno\n");
+            Print("GAP oldcel=", oldcel, "\n");
             if IsSlicedPerm( image.perm ) then  oldprm := image.perm!.length;
                                           else  oldprm := image.perm;
 					  fi;
@@ -1451,7 +1454,9 @@ InstallGlobalFunction( PartitionBacktrack,
                     oldcel := StructuralCopy( oldcel );
                 fi;
 		PrintRBaseLevel(rbase, "GAP Before NextRBasePoint");
+                Print("GAP Before NextRBasePoint image.p.c=", image.partition.cellno, "\n");
                 rbase.nextLevel( rbase.partition, rbase );
+                Print("GAP After NextRBasePoint image.p.c=", image.partition.cellno, "\n");
 		PrintRBaseLevel(rbase, "GAP After NextRBasePoint");
                 if image.perm = true  then
                     Add( rbase.fix, Fixcells( rbase.partition ) );
@@ -1534,7 +1539,10 @@ InstallGlobalFunction( PartitionBacktrack,
 
             # Refinements that start with '_' must be executed even when base
             # = image since they modify `image.data' etc.
+            Print("GAP Before RRefine 1 rbase.p.c=", rbase.partition.cellno, "\n");
+            Print("GAP Before RRefine 1 image.p.c=", image.partition.cellno, "\n");
             RRefine( rbase, image, true );
+            Print("GAP After RRefine 1 image.p.c=", image.partition.cellno, "\n");
     	    PrintRBaseLevel(rbase, "GAP After RRefine");
 
             # Recursion.
@@ -1605,7 +1613,9 @@ InstallGlobalFunction( PartitionBacktrack,
                 # Undo the  changes made to  <image.partition>, <image.level>
                 # and <image.perm>.
                 for i  in [ undoto+1 .. NumberCells( image.partition ) ]  do
+                    Print("GAP Before UndoRefinement cellno=", image.partition.cellno, "\n");
                     UndoRefinement( image.partition );
+                    Print("GAP After UndoRefinement cellno=", image.partition.cellno, "\n");
                 od;
                 if image.perm <> true  then
                     Print("GAP assignation image.level\n");
@@ -1628,13 +1638,17 @@ InstallGlobalFunction( PartitionBacktrack,
                 Print("GAP Before AssignationVectorGapStyle b_int=", b, "\n");
                 image.bimg[ d ] := b;
                 Print("GAP Before IsolatePoint b_int=", b, "\n");
+                Print("GAP Before IsolatePoint cellno=", image.partition.cellno, "\n");
                 IsolatePoint( image.partition, b );
+                Print("GAP After IsolatePoint cellno=", image.partition.cellno, "\n");
                 Print("GAP ProcessFixpoint_image, Case PartitionBacktrack 1\n");
                 Print("GAP Before ProcessFixpoint_image b_int=", b, "\n");
                 val:=ProcessFixpoint( image, a, b, org[ d ][ b ] );
 		Print("GAP a=", a, " b=", b, " org[d][b]=", org[d][b], " val=", val, "\n");
                 if val  then
+                    Print("GAP Before RRefine 2 oldcel=", image.partition.cellno, "\n");
                     t := RRefine( rbase, image, false );
+                    Print("GAP After RRefine 2 oldcel=", image.partition.cellno, "\n");
                 else
                     t := fail;
                 fi;

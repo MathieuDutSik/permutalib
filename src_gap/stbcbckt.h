@@ -155,9 +155,15 @@ int UnderscoreNature(int const& nature)
 
 
 
-template<typename Telt>
 struct dataType {
-  Partition P;
+  Partition& P;
+  dataType(Partition& _P) : P(_P)
+  {
+  }
+  dataType operator=(dataType& data)
+  {
+    return dataType(data.P);
+  }
 };
 
 
@@ -208,7 +214,6 @@ struct rbaseType {
   std::vector<int> base;
   std::vector<int> where;
   //
-  dataType<Telt> data;
   std::vector<std::vector<int>> fix;
   //
   std::vector<std::vector<Refinement>> rfm;
@@ -341,14 +346,16 @@ bool ProcessFixpoint_rbase(rbaseType<Telt> & rbase, int const& pnt)
 template<typename Telt>
 struct imageType {
   int depth;
-  dataType<Telt> data;
-  Partition partition;
+  Partition& partition;
   permPlusBool<Telt> perm;
   StabChainPlusLev<Telt> level;
   std::vector<int> bimg;
   //
   permPlusBool<Telt> perm2;
   StabChainPlusLev<Telt> level2;
+  imageType(Partition& _partition) : partition(_partition)
+  {
+  }
 };
 
 
@@ -467,6 +474,7 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
 template<typename Telt>
 bool MeetPartitionStrat(rbaseType<Telt> const& rbase, imageType<Telt> & image, Partition const& S, Telt const& g, std::vector<singStrat> const& strat)
 {
+  std::cerr << "CPP Running MeetPartitionStrat\n";
   if (strat.size() == 0)
     return false;
   for (auto & pRec : strat) {
@@ -920,10 +928,20 @@ std::string GetStringGAP(Face const& f)
   return str;
 }
 
+template<typename Telt>
+imageType<Telt> BuildInitialImage(bool const&repr, rbaseType<Telt> & rbase, dataType & data)
+{
+  if (repr) {
+    return imageType<Telt>(data.P);
+  }
+  else {
+    return imageType<Telt>(rbase.partition);
+  }
+};
 
 
 template<typename Telt, typename Tint>
-ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(Telt const&)> const& Pr, bool const& repr, rbaseType<Telt> & rbase, dataType<Telt> const& data, StabChain<Telt> & L, StabChain<Telt> & R)
+ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(Telt const&)> const& Pr, bool const& repr, rbaseType<Telt> & rbase, dataType & data, StabChain<Telt> & L, StabChain<Telt> & R)
 {
   int n=G->comm->n;
   std::cerr << "CPP PartitionBacktrack step 1\n";
@@ -934,7 +952,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   std::cerr << "CPP INIT sgs(G)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(G))) << "\n";
   std::cerr << "CPP INIT sgs(L)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(L))) << "\n";
   std::cerr << "CPP INIT sgs(R)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(R))) << "\n";
-  imageType<Telt> image;
+  imageType<Telt> image = BuildInitialImage(repr, rbase, data);
   std::vector<Face> orB; // backup of <orb>.
   int nrback;
   std::vector<Face> orb;
@@ -942,6 +960,9 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   Tplusinfinity<int> blen(true, 0);
   int dd, branch; // branch is level where $Lstab\ne Rstab$ starts
   std::vector<int> range;    // range for construction of <orb>
+  int lenD=rbase.domain[rbase.domain.size()-1];
+  for (int i=0; i<=lenD; i++)
+    range.push_back(i);
   Partition oldcel;       // old value of <image.partition.cellno>
   std::vector<int> oldcel_cellno;
   std::vector<StabChain<Telt>> L_list, R_list;
@@ -966,9 +987,12 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     int undoto = NumberCells(image.partition);
     if (image.perm.status == int_true) {
       oldcel = image.partition;
+      std::cerr << "CPP Assigning from image.partition\n";
     }
     else {
       oldcel_cellno = image.partition.cellno;
+      std::cerr << "CPP Assigning from image.partition.cellno\n";
+      std::cerr << "CPP oldcel=" << GapStringIntVector(oldcel_cellno) << "\n";
       oldprm = image.perm;
     }
     std::cerr << "CPP PBEnumerate, step 3\n";
@@ -1031,7 +1055,9 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       else {
 	std::cerr << "CPP Not matching IsTrivialRBase test\n";
         PrintRBaseLevel(rbase, "CPP Before NextRBasePoint");
+        std::cerr << "CPP Before NextRBasePoint image.p.c=" << GapStringIntVector(image.partition.cellno) << "\n";
 	NextRBasePoint(rbase.partition, rbase, G->comm->identity);
+        std::cerr << "CPP After NextRBasePoint image.p.c=" << GapStringIntVector(image.partition.cellno) << "\n";
 	PrintRBaseLevel(rbase, "CPP After NextRBasePoint");
 	if (image.perm.status == int_true)
 	  rbase.fix.push_back(Fixcells(rbase.partition));
@@ -1121,7 +1147,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     AssignationVectorGapStyle(orB, d, orb[d]);
     std::cerr << "CPP PBEnumerate, step 7, wasTriv=" << wasTriv << "\n";
     PrintRBaseLevel(rbase, "CPP Step 7");
-    
+
     // Loop  over the candidate images  for the  current base point. First
     // the special case image = base up to current level.
     if (wasTriv) {
@@ -1130,7 +1156,11 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       std::cerr << "CPP wasTriv Critical, step 5\n";
       // Refinements that start with '_' must be executed even when base
       // = image since they modify image.data, etc.
+
+      std::cerr << "CPP Before RRefine 1 rbase.p.c=" << GapStringIntVector(rbase.partition.cellno) << "\n";
+      std::cerr << "CPP Before RRefine 1 image.p.c=" << GapStringIntVector(image.partition.cellno) << "\n";
       RRefine(rbase, image, true);
+      std::cerr << "CPP After RRefine 1 image.p.c=" << GapStringIntVector(image.partition.cellno) << "\n";
       PrintRBaseLevel(rbase, "CPP After RRefine");
       // Recursion.
       PBEnumerate(d + 1, true);
@@ -1188,8 +1218,11 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
         std::cerr << "CPP equality dd=d\n";
 	// Undo the  changes made to  <image.partition>, <image.level>
 	// and <image.perm>.
-	for (int i=undoto+1; i<NumberCells(image.partition); i++)
+	for (int i=undoto+1; i<NumberCells(image.partition); i++) {
+          std::cerr << "CPP Before UndoRefinement cellno=" << GapStringIntVector(image.partition.cellno) << "\n";
 	  UndoRefinement(image.partition);
+          std::cerr << "CPP After UndoRefinement cellno=" << GapStringIntVector(image.partition.cellno) << "\n";
+        }
 	if (image.perm.status != int_true) {
           std::cerr << "CPP assignation image.level\n";
 	  image.level = rbase.lev[d];
@@ -1205,15 +1238,20 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
         std::cerr << "CPP Before AssignationVectorGapStyle b_int=" << (b_int+1) << "\n";
 	AssignationVectorGapStyle(image.bimg, d, b_int);
         std::cerr << "CPP Before IsolatePoint b_int=" << (b_int+1) << "\n";
+        std::cerr << "CPP Before IsolatePoint cellno=" << GapStringIntVector(image.partition.cellno) << "\n";
 	IsolatePoint( image.partition, b_int );
+        std::cerr << "CPP After IsolatePoint cellno=" << GapStringIntVector(image.partition.cellno) << "\n";
         std::cerr << "CPP ProcessFixpoint_image, Case PartitionBacktrack 1\n";
         std::cerr << "CPP Before ProcessFixpoint_image b_int=" << (b_int+1) << "\n";
 	bool val = ProcessFixpoint_image(image, a, b_int, org[d][b_int]);
 	std::cerr << "CPP a=" << (a+1) << " b=" << (b_int+1) << " org[d][b]=" << (org[d][b_int]+1) << " val=" << val << "\n";
-	if (val)
+	if (val) {
+          std::cerr << "CPP Before RRefine 2 oldcel=" << GapStringIntVector(image.partition.cellno) << "\n";
 	  t.status = RRefine(rbase, image, false);
-	else
+          std::cerr << "CPP After RRefine 2 oldcel=" << GapStringIntVector(image.partition.cellno) << "\n";
+        } else {
 	  t.status = int_fail;
+        }
         std::cerr << "CPP After assignment of t. t.status=" << GapStringBool(t.status) << "\n";
 
 	if (t.status != int_fail) {
@@ -1331,7 +1369,6 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   }
 
   // Construct the <image>.
-  image.data=data;
   image.depth=1;
   if (repr) {
     image.partition = data.P;
@@ -1366,15 +1403,8 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	ProcessFixpoint_image(image, fix[i], fixP[i], -1);
       }
     }
-    // In   the representative case,   assign  to <L>  and <R>  stabilizer
-    // chains.
-    //    L := ListStabChain( CopyStabChain( StabChainMutable( L ) ) );
-    //    R := ListStabChain( CopyStabChain( StabChainMutable( R ) ) );
   }
 
-  int lenD=rbase.domain[rbase.domain.size()-1];
-  for (int i=0; i<=lenD; i++)
-    range.push_back(i);
   permPlusBool<Telt> rep = PBEnumerate(0, !repr);
   if (!repr) {
     return {int_group, L, {}};
@@ -1502,7 +1532,8 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
   std::cerr << "CPP Before call to PartitionBacktrack\n";
   std::cerr << "CPP bool=" << (rbase.level2.Stot->cycles.size() > 0) << "\n";
   std::cerr << "CPP After bool print\n";
-  return PartitionBacktrack<Telt,Tint>( G, Pr, repr, rbase, {Q}, L, R );
+  dataType data(Q);
+  return PartitionBacktrack<Telt,Tint>( G, Pr, repr, rbase, data, L, R );
 }
 
 template<typename Telt,typename Tint>
