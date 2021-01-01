@@ -1215,14 +1215,16 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       }
       std::cerr << "CPP dd=" << (dd+1) << " d=" << (d+1) << "\n";
       if (dd == d) {
-        std::cerr << "CPP equality dd=d\n";
+        std::cerr << "CPP equality dd=d undoto=" << undoto << " |image.partition|=" << NumberCells(image.partition) << "\n";
 	// Undo the  changes made to  <image.partition>, <image.level>
 	// and <image.perm>.
-	for (int i=undoto+1; i<NumberCells(image.partition); i++) {
-          std::cerr << "CPP Before UndoRefinement cellno=" << GapStringIntVector(image.partition.cellno) << "\n";
+        int nbCell=NumberCells(image.partition);
+	for (int i=undoto+1; i<=nbCell; i++) {
+          std::cerr << "CPP Before UndoRefinement cellno=" << GapStringIntVector(image.partition.cellno) << " i=" << i << "\n";
 	  UndoRefinement(image.partition);
-          std::cerr << "CPP After UndoRefinement cellno=" << GapStringIntVector(image.partition.cellno) << "\n";
+          std::cerr << "CPP After UndoRefinement cellno=" << GapStringIntVector(image.partition.cellno) << " i=" << i << "\n";
         }
+        std::cerr << "CPP After UndoRefinement loop\n";
 	if (image.perm.status != int_true) {
           std::cerr << "CPP assignation image.level\n";
 	  image.level = rbase.lev[d];

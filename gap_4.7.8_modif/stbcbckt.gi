@@ -1609,14 +1609,15 @@ InstallGlobalFunction( PartitionBacktrack,
             fi;
             Print("GAP dd=", dd, " d=", d, "\n");
             if dd = d  then
-                Print("GAP equality dd=d\n");
+                Print("GAP equality dd=d undoto=", undoto, " |image.partition|=", NumberCells(image.partition), "\n");
                 # Undo the  changes made to  <image.partition>, <image.level>
                 # and <image.perm>.
                 for i  in [ undoto+1 .. NumberCells( image.partition ) ]  do
-                    Print("GAP Before UndoRefinement cellno=", image.partition.cellno, "\n");
+                    Print("GAP Before UndoRefinement cellno=", image.partition.cellno, " i=", i, "\n");
                     UndoRefinement( image.partition );
-                    Print("GAP After UndoRefinement cellno=", image.partition.cellno, "\n");
+                    Print("GAP After UndoRefinement cellno=", image.partition.cellno, " i=", i, "\n");
                 od;
+                Print("GAP After UndoRefinement loop\n");
                 if image.perm <> true  then
                     Print("GAP assignation image.level\n");
                     image.level := rbase.lev[ d ];

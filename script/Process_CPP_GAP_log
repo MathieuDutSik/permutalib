@@ -90,7 +90,7 @@ for iposs in range(nbposs):
 #        print("e_line1=", e_line1)
 #        print("e_line2=", e_line2)
         print("LOOP")
-        ibegin=-2
+        ibegin=-10
         iend=2
         print("file1=", File1)
         for i in range(ibegin,iend):
