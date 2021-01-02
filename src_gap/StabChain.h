@@ -372,6 +372,7 @@ StabChain<Telt> StructuralCopy(StabChain<Telt> const& S)
     S2->comm = comm_new;
     Sret = S2;
   }
+#ifdef DEBUG
   std::string str1 = GetStringExpressionOfStabChain(S);
   std::string str2 = GetStringExpressionOfStabChain(Sret);
   if (str1 != str2) {
@@ -380,6 +381,7 @@ StabChain<Telt> StructuralCopy(StabChain<Telt> const& S)
     std::cerr << "str2=" << str2 << "\n";
     throw TerminalException{1};
   }
+#endif
   return Sret;
 }
 
@@ -1621,41 +1623,11 @@ bool TestEqualityStabChain(StabChain<Telt> const& L, StabChain<Telt> const& R)
 
 
 template<typename Telt>
-void SetStabChainFromLevel(StabChain<Telt> & R, StabChain<Telt> const& L, int const& lev)
+void SetStabChainFromLevel(std::vector<StabChain<Telt>> & R_list, std::vector<StabChain<Telt>> const& L_list,
+                           int const& levbegin, int const& levend)
 {
-  StabChain<Telt> Rptr = R;
-  StabChain<Telt> Lptr = L;
-  int n=Lptr->comm->n;
-  while(true) {
-#ifdef DEBUG_PERMUTALIB
-    if ((Rptr == nullptr && Lptr != nullptr) || (Rptr != nullptr && Lptr == nullptr)) {
-      std::cerr << "Inconsistency\n";
-      throw TerminalException{1};
-    }
-#endif
-    if (Rptr == nullptr)
-      break;
-    Rptr->orbit = Lptr->orbit;
-    for (int i=0; i<n; i++) {
-      int idx=Lptr->transversal[i];
-      int posPerm;
-      if (idx == -1) {
-	posPerm=-1;
-      }
-      else {
-	Telt ePerm=Lptr->comm->labels[idx];
-	posPerm = GetLabelIndex(Rptr->comm->labels, ePerm);
-      }
-      Rptr->transversal[i] = posPerm;
-    }
-    Rptr->genlabels.clear();
-    for (int eVal : Lptr->genlabels) {
-      Telt ePerm=Lptr->comm->labels[eVal];
-      int pos = GetLabelIndex(Rptr->comm->labels, ePerm);
-      Rptr->genlabels.push_back(pos);
-    }
-    Rptr = Rptr->stabilizer;
-    Lptr = Lptr->stabilizer;
+  for (int iLev=levbegin; iLev<levend; iLev++) {
+    R_list[iLev] = StructuralCopy(L_list[iLev]);
   }
 }
 

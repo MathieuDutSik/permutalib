@@ -1661,6 +1661,10 @@ InstallGlobalFunction( PartitionBacktrack,
                     #   which until now is identical to  <L>, must be changed
                     #   without affecting <L>, so take a copy.
                     Print("GAP wasTriv=", wasTriv, " d=", d, "\n");
+                    Print("GAP L[d]=\n");
+                    PrintStabChainOrbits(L[d]);
+                    Print("GAP R[d]=\n");
+                    PrintStabChainOrbits(R[d]);
 #                    Print("GAP L[d]=", L[d], " R[d]=", R[d], "\n");
                     Print("GAP TestEquality=", IsIdenticalObj( L[ d ], R[ d ] ), "\n");
                     if wasTriv  and  IsIdenticalObj( L[ d ], R[ d ] )  then
@@ -1675,6 +1679,8 @@ InstallGlobalFunction( PartitionBacktrack,
                     if 2 * d <= blen  then
                         Print("GAP Before ChangeStabChain R_list[d] 2\n");
                         ChangeStabChain( R[ d ], [ b ], false );
+                        Print("GAP R[d]=\n");
+                        PrintStabChainOrbits(R[d]);
                         Print("GAP After ChangeStabChain R_list[d] 2\n");
                         R[ d + 1 ] := R[ d ].stabilizer;
                     else
@@ -1684,6 +1690,7 @@ InstallGlobalFunction( PartitionBacktrack,
                         else
                             R[ d + 1 ] := R[ d ].generators;
                         fi;
+                        Print("GAP LGen=", R[d+1], "\n");
                         Print("GAP First generating step done\n");
                         Print("GAP |LGenB|=", Length(Filtered( R[ d + 1 ], gen -> b ^ gen = b ) ), "\n");
                         R[ d + 1 ] := rec( generators := Filtered

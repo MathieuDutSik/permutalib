@@ -1023,7 +1023,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  L_list = ListStabChain(StabChainOp_stabchain_nofalse<Telt,Tint>(L, options));
 	  std::cerr << "CPP ListStabChain |L|=" << L_list.size() << "\n";
 	  std::cerr << "CPP wasTriv Critical, step 2\n";
-	  R_list = L_list;
+	  R_list = L_list; // Corresponds to R := ShallowCopy( L)
 	  std::cerr << "CPP wasTriv Critical, step 3\n";
 	  std::cerr << "CPP PBEnumerate, EXIT 2 |L|=" << L_list.size() << "\n";
 	  return {int_fail,{}};
@@ -1262,14 +1262,14 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  //   which until now is identical to  <L>, must be changed
 	  //   without affecting <L>, so take a copy.
           std::cerr << "CPP wasTriv=" << wasTriv << " d=" << (d+1) << "\n";
-          //          std::cerr << "CPP L[d]=";
-          //          PrintStabChainTransversals(L_list[d]);
-          //          std::cerr << "CPP R[d]=";
-          //          PrintStabChainTransversals(R_list[d]);
+          std::cerr << "CPP L[d]=\n";
+          PrintStabChainOrbits(L_list[d]);
+          std::cerr << "CPP R[d]=\n";
+          PrintStabChainOrbits(R_list[d]);
           std::cerr << "CPP TestEquality=" << TestEqualityStabChain(L_list[d], R_list[d]) << "\n";
 	  if (wasTriv && TestEqualityStabChain(L_list[d], R_list[d])) {
             std::cerr << "CPP Assigning R from d\n";
-	    SetStabChainFromLevel(R, L, d);
+	    SetStabChainFromLevel(R_list, L_list, d, rbase.base.size());
 	    branch = d;
 	  }
           std::cerr << "CPP After wasTriv test\n";
@@ -1277,12 +1277,14 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  if (2 * (d+1) <= blen) {
             std::cerr << "CPP Before ChangeStabChain R_list[d] 2\n";
 	    ChangeStabChain(R_list[d], {b_int}, int_false);
+            std::cerr << "CPP R[d]=\n";
+            PrintStabChainOrbits(R_list[d]);
             std::cerr << "CPP After ChangeStabChain R_list[d] 2\n";
 	    //	    R[ d + 1 ] = R[ d ].stabilizer;
-	  }
-	  else {
+	  } else {
             std::cerr << "CPP Beginning else case\n";
-	    std::vector<Telt> LGen = StrongGeneratorsStabChain( R);
+	    std::vector<Telt> LGen = StrongGeneratorsStabChain( R_list[d] );
+            std::cerr << "CPP LGen=" << GapStringTVector(LGen) << "\n";
             std::cerr << "CPP First generating step done\n";
 	    std::vector<Telt> LGenB = Filtered(LGen, [&](Telt const& gen) -> bool {return PowAct(b_int, gen) == b_int;});
             std::cerr << "CPP |LGenB|=" << LGenB.size() << "\n";
@@ -1336,7 +1338,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	      return {int_fail,{}};
 	    }
 	    max = PositionNthTrueBlist( orB[d], m - L_list[d]->orbit.size());
-	    SetStabChainFromLevel(R, L, d);
+	    SetStabChainFromLevel(R_list, L_list, d, rbase.base.size());
 	  }
 	}
         std::cerr << "CPP t step 4\n";
