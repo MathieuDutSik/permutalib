@@ -22,14 +22,14 @@ str1 = "XXX ELIMINATE begin\n"
 str2 = "XXX ELIMINATE end\n"
 def eliminate_marked_blocks(l_lines):
     l_lines_ret = []
-    do_insert = True
+    level_write = 0
     for e_line in l_lines:
         if e_line == str1:
-            do_insert=False
-        if do_insert:
+            level_write += 1
+        if level_write == 0:
             l_lines_ret.append(e_line)
         if e_line == str2:
-            do_insert=True
+            level_write += -1
     return l_lines_ret
 
 def merge_lines(l_lines):

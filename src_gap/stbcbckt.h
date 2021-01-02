@@ -1295,6 +1295,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
             std::cerr << "XXX ELIMINATE begin\n";
 	    R_list[d+1] = StabChainOp_listgen(LGenB, options);
             std::cerr << "XXX ELIMINATE end\n";
+            std::cerr << "CPP After assignation of R_list[d]\n";
 	  }
 	}
         std::cerr << "CPP t step 2\n";
