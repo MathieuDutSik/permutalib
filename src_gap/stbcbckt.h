@@ -1280,7 +1280,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
             std::cerr << "CPP R[d]=\n";
             PrintStabChainOrbits(R_list[d]);
             std::cerr << "CPP After ChangeStabChain R_list[d] 2\n";
-	    //	    R[ d + 1 ] = R[ d ].stabilizer;
+	    R_list[ d + 1 ] = R_list[ d ]->stabilizer;
 	  } else {
             std::cerr << "CPP Beginning else case\n";
 	    std::vector<Telt> LGen = StrongGeneratorsStabChain( R_list[d] );
