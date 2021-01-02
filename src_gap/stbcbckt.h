@@ -1071,12 +1071,12 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  ChangeStabChain(L_list[d], {rbase.base[d]}, int_false);
           PrintStabChainTransversals(L_list[d]);
           std::cerr << "CPP After ChangeStabChain L_list[d]\n";
-	  //	  L[ d + 1 ] := L[ d ].stabilizer;
+	  L_list[ d + 1 ] = L_list[ d ]->stabilizer;
           std::cerr << "CPP Before ChangeStabChain R_list[d]\n";
 	  ChangeStabChain(R_list[d], {rbase.base[d]}, int_false);
           PrintStabChainTransversals(R_list[d]);
           std::cerr << "CPP After ChangeStabChain R_list[d]\n";
-	  //	  R[ d + 1 ] := R[ d ].stabilizer;
+	  R_list[ d + 1 ] = R_list[ d ]->stabilizer;
 	}
       }
     }
@@ -1350,7 +1350,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	if (R_list[d]->transversal[b] != -1)
 	  SubtractBlist(orb[d], BlistList(range, R_list[d]->orbit));
 	else
-	  SubtractBlistOrbitStabChain(orb[d], StrongGeneratorsStabChain(R), b_int);
+	  SubtractBlistOrbitStabChain(orb[d], StrongGeneratorsStabChain(R_list[d]), b_int);
 	std::cerr << "CPP ORB 2: After subtract d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
 	b = orb[d].find_next(b);
 	std::cerr << "CPP End of the loop. Now b=" << PosFail_to_string(b) << "\n";

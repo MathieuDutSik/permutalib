@@ -1694,7 +1694,7 @@ InstallGlobalFunction( PartitionBacktrack,
                         Print("GAP First generating step done\n");
                         Print("GAP |LGenB|=", Length(Filtered( R[ d + 1 ], gen -> b ^ gen = b ) ), "\n");
                         R[ d + 1 ] := rec( generators := Filtered
-                                           ( R[ d + 1 ], gen -> b ^ gen = b ) );
+                                   ( R[ d + 1 ], gen -> b ^ gen = b ) );
                         Print("GAP After assignation of R_list[d]\n");
                     fi;
 
