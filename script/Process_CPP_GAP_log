@@ -3,14 +3,18 @@ import os
 import sys
 
 nb_arg = len(sys.argv)
-if nb_arg != 4:
+if nb_arg != 4 and nb_arg != 5:
     print("nb_arg should be equal to 4")
-    print("Process_CPP_GAP_log   RES_gap   RES_cpp   BeginLine")
+    print("Process_CPP_GAP_log   RES_gap   RES_cpp   BeginLine [nb_line]")
     sys.exit(0)
 
 File1 = sys.argv[1]
 File2 = sys.argv[2]
 CritLine = sys.argv[3]
+nb_linebef = 5
+if nb_arg == 5:
+    nb_linebef = int(sys.argv[4])
+print("nb_linebef=", nb_linebef)
 
 f1 = open(File1, "r")
 pre_lines1 = f1.readlines()
@@ -90,7 +94,7 @@ for iposs in range(nbposs):
 #        print("e_line1=", e_line1)
 #        print("e_line2=", e_line2)
         print("LOOP")
-        ibegin=-10
+        ibegin=-nb_linebef
         iend=2
         print("file1=", File1)
         for i in range(ibegin,iend):

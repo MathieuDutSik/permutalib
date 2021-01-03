@@ -1077,6 +1077,14 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
           PrintStabChainTransversals(R_list[d]);
           std::cerr << "CPP After ChangeStabChain R_list[d]\n";
 	  R_list[ d + 1 ] = R_list[ d ]->stabilizer;
+          std::cerr << "CPP L[d]=\n";
+          PrintStabChainOrbits(L_list[d]);
+          std::cerr << "CPP R[d]=\n";
+          PrintStabChainOrbits(R_list[d]);
+          std::cerr << "CPP L[d+1]=\n";
+          PrintStabChainOrbits(L_list[d+1]);
+          std::cerr << "CPP R[d+1]=\n";
+          PrintStabChainOrbits(R_list[d+1]);
 	}
       }
     }
@@ -1136,7 +1144,6 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	}
       }
       std::cerr << "CPP ORB: After pVal loop d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
-      //      std::cerr << "After pVal loop\n";
     }
     std::cerr << "CPP PBEnumerate, step 6 orb=" << GapStringListBoolVector(orb) << "\n";
     PrintRBaseLevel(rbase, "CPP Step 6");
@@ -1214,6 +1221,10 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	dd = d;
       }
       std::cerr << "CPP dd=" << (dd+1) << " d=" << (d+1) << "\n";
+      std::cerr << "CPP L[d]=\n";
+      PrintStabChainOrbits(L_list[d]);
+      std::cerr << "CPP R[d]=\n";
+      PrintStabChainOrbits(R_list[d]);
       if (dd == d) {
         std::cerr << "CPP equality dd=d undoto=" << undoto << " |image.partition|=" << NumberCells(image.partition) << "\n";
 	// Undo the  changes made to  <image.partition>, <image.level>
@@ -1285,18 +1296,24 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
             std::cerr << "CPP Beginning else case\n";
 	    std::vector<Telt> LGen = StrongGeneratorsStabChain( R_list[d] );
             std::cerr << "CPP LGen=" << GapStringTVector(LGen) << "\n";
-            std::cerr << "CPP First generating step done\n";
+            std::cerr << "CPP First generating step done b=" << (b_int+1) << "\n";
 	    std::vector<Telt> LGenB = Filtered(LGen, [&](Telt const& gen) -> bool {return PowAct(b_int, gen) == b_int;});
-            std::cerr << "CPP |LGenB|=" << LGenB.size() << "\n";
+            //            std::cerr << "CPP |LGenB|=" << LGenB.size() << "\n";
+            std::cerr << "CPP LGenB=" << GapStringTVector(LGenB) << "\n";
 	    //	    R[ d + 1 ] := rec( generators := Filtered( R[ d + 1 ], gen -> b ^ gen = b ) );
 	    int largMov=LargestMovedPoint(LGenB);
 	    StabChainOptions<Tint> options = GetStandardOptions<Tint>(n);
 	    options.base = ClosedInterval(0, largMov);
+            //            std::cerr << "CPP Before assignation R[d+1]=\n";
+            //            PrintStabChainOrbits(R_list[d+1]);
             std::cerr << "XXX ELIMINATE begin\n";
 	    R_list[d+1] = StabChainOp_listgen(LGenB, options);
             std::cerr << "XXX ELIMINATE end\n";
-            std::cerr << "CPP After assignation of R_list[d]\n";
+            std::cerr << "CPP After assignation R[d+1]=\n";
+            PrintStabChainOrbits(R_list[d+1]);
 	  }
+          std::cerr << "CPP R[d+1]=\n";
+          PrintStabChainOrbits(R_list[d+1]);
 	}
         std::cerr << "CPP t step 2\n";
 

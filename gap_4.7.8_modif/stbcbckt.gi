@@ -1473,7 +1473,14 @@ InstallGlobalFunction( PartitionBacktrack,
                     ChangeStabChain( R[ d ], [ rbase.base[ d ] ], false );
                     PrintStabChainTransversals(R[d]);
                     R[ d + 1 ] := R[ d ].stabilizer;
-
+                    Print("GAP L[d]=\n");
+                    PrintStabChainOrbits(L[d]);
+                    Print("GAP R[d]=\n");
+                    PrintStabChainOrbits(R[d]);
+                    Print("GAP L[d+1]=\n");
+                    PrintStabChainOrbits(L[d+1]);
+                    Print("GAP R[d+1]=\n");
+                    PrintStabChainOrbits(R[d+1]);
                 fi;
             fi;
 
@@ -1608,6 +1615,10 @@ InstallGlobalFunction( PartitionBacktrack,
                 dd := d;
             fi;
             Print("GAP dd=", dd, " d=", d, "\n");
+            Print("GAP L[d]=\n");
+            PrintStabChainOrbits(L[d]);
+            Print("GAP R[d]=\n");
+            PrintStabChainOrbits(R[d]);
             if dd = d  then
                 Print("GAP equality dd=d undoto=", undoto, " |image.partition|=", NumberCells(image.partition), "\n");
                 # Undo the  changes made to  <image.partition>, <image.level>
@@ -1665,7 +1676,6 @@ InstallGlobalFunction( PartitionBacktrack,
                     PrintStabChainOrbits(L[d]);
                     Print("GAP R[d]=\n");
                     PrintStabChainOrbits(R[d]);
-#                    Print("GAP L[d]=", L[d], " R[d]=", R[d], "\n");
                     Print("GAP TestEquality=", IsIdenticalObj( L[ d ], R[ d ] ), "\n");
                     if wasTriv  and  IsIdenticalObj( L[ d ], R[ d ] )  then
                         Print("GAP Assigning R from d\n");
@@ -1691,12 +1701,17 @@ InstallGlobalFunction( PartitionBacktrack,
                             R[ d + 1 ] := R[ d ].generators;
                         fi;
                         Print("GAP LGen=", R[d+1], "\n");
-                        Print("GAP First generating step done\n");
-                        Print("GAP |LGenB|=", Length(Filtered( R[ d + 1 ], gen -> b ^ gen = b ) ), "\n");
+                        Print("GAP First generating step done b=", b, "\n");
+                        Print("GAP LGenB=", Filtered( R[ d + 1 ], gen -> b ^ gen = b ), "\n");
+#                        Print("GAP Before assignation R[d+1]=\n");
+#                        PrintStabChainOrbits(R[d+1]);
                         R[ d + 1 ] := rec( generators := Filtered
                                    ( R[ d + 1 ], gen -> b ^ gen = b ) );
-                        Print("GAP After assignation of R_list[d]\n");
+                        Print("GAP After assignation R[d+1]=\n");
+                        PrintStabChainOrbits(R[d+1]);
                     fi;
+                    Print("GAP R[d+1]=\n");
+                    PrintStabChainOrbits(R[d+1]);
 
                 else
                     Info( InfoBckt, 5, d, ": point ", b,
