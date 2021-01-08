@@ -164,6 +164,28 @@ using StabChain = std::shared_ptr<StabLevel<Telt>>;
 
 
 
+template<typename Telt>
+StabChain<Telt> StabChainGenerators(std::vector<Telt> const& generators, int const& n, Telt const& id)
+{
+  std::shared_ptr<CommonStabInfo<Telt>> comm = std::make_shared<CommonStabInfo<Telt>>(CommonStabInfo<Telt>({n, id, generators}));
+  //
+  std::vector<int> transversal = std::vector<int>(n, -1);
+  std::vector<int> orbit;
+  std::vector<int> genlabels;
+  for (int igen=0; igen<int(generators.size()); igen++)
+    genlabels.push_back(igen);
+  std::vector<int8_t> cycles;
+  std::vector<Telt> treegen;
+  std::vector<Telt> treegeninv;
+  std::vector<Telt> aux;
+  int treedepth = 0;
+  int diam = 0;
+  return std::make_shared<StabLevel<Telt>>(StabLevel<Telt>({transversal, orbit, genlabels, cycles, treegen, treegeninv, aux, treedepth, diam, comm, nullptr}));
+}
+
+
+
+
 
 
 template<typename Telt>

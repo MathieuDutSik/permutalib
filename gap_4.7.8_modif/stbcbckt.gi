@@ -1722,6 +1722,7 @@ InstallGlobalFunction( PartitionBacktrack,
                 # Recursion.
                 if t = true  then
                     t := PBEnumerate( d + 1, false );
+                    Print("GAP After PBEnumerate Recursion case\n");
 		    nrback:=nrback+1;
 		    if bail and nrback>500 then
                       Print("GAP PBEnumerate, EXIT 7\n");
@@ -1885,6 +1886,7 @@ InstallGlobalFunction( PartitionBacktrack,
     range := [ 1 .. rbase.domain[ Length( rbase.domain ) ] ];
     blen := infinity;
     rep := PBEnumerate( 1, not repr );
+    Print("GAP After PBEnumerate Call 0, repr\n");
     if not repr  then
         ReduceStabChain( L[ 1 ] );
         return GroupStabChain( G, L[ 1 ], true );

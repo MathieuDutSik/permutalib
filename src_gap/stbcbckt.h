@@ -944,6 +944,7 @@ template<typename Telt, typename Tint>
 ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(Telt const&)> const& Pr, bool const& repr, rbaseType<Telt> & rbase, dataType & data, StabChain<Telt> & L, StabChain<Telt> & R)
 {
   int n=G->comm->n;
+  Telt id = G->comm->identity;
   std::cerr << "CPP PartitionBacktrack step 1\n";
   std::cerr << "CPP L=\n";
   PrintStabChain(L);
@@ -1056,7 +1057,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	std::cerr << "CPP Not matching IsTrivialRBase test\n";
         PrintRBaseLevel(rbase, "CPP Before NextRBasePoint");
         std::cerr << "CPP Before NextRBasePoint image.p.c=" << GapStringIntVector(image.partition.cellno) << "\n";
-	NextRBasePoint(rbase.partition, rbase, G->comm->identity);
+	NextRBasePoint(rbase.partition, rbase, id);
         std::cerr << "CPP After NextRBasePoint image.p.c=" << GapStringIntVector(image.partition.cellno) << "\n";
 	PrintRBaseLevel(rbase, "CPP After NextRBasePoint");
 	if (image.perm.status == int_true)
@@ -1301,13 +1302,14 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
             //            std::cerr << "CPP |LGenB|=" << LGenB.size() << "\n";
             std::cerr << "CPP LGenB=" << GapStringTVector(LGenB) << "\n";
 	    //	    R[ d + 1 ] := rec( generators := Filtered( R[ d + 1 ], gen -> b ^ gen = b ) );
-	    int largMov=LargestMovedPoint(LGenB);
-	    StabChainOptions<Tint> options = GetStandardOptions<Tint>(n);
-	    options.base = ClosedInterval(0, largMov);
+            //	    int largMov=LargestMovedPoint(LGenB);
+            //	    StabChainOptions<Tint> options = GetStandardOptions<Tint>(n);
+            //	    options.base = ClosedInterval(0, largMov);
             //            std::cerr << "CPP Before assignation R[d+1]=\n";
             //            PrintStabChainOrbits(R_list[d+1]);
             std::cerr << "XXX ELIMINATE begin\n";
-	    R_list[d+1] = StabChainOp_listgen(LGenB, options);
+            //	    R_list[d+1] = StabChainOp_listgen(LGenB, options);
+	    R_list[d+1] = StabChainGenerators(LGenB, n, id);
             std::cerr << "XXX ELIMINATE end\n";
             std::cerr << "CPP After assignation R[d+1]=\n";
             PrintStabChainOrbits(R_list[d+1]);
@@ -1320,6 +1322,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	// Recursion.
 	if (t.status == int_true) {
 	  t = PBEnumerate(d + 1, false);
+          std::cerr << "CPP After PBEnumerate Recursion case\n";
 	  nrback++;
 	  image.depth = d;
 	}
@@ -1384,8 +1387,8 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   if (IsTrivial(G)) {
     if (!repr)
       return {int_group, G, {}};
-    if (Pr(G->comm->identity))
-      return {int_perm, {}, G->comm->identity};
+    if (Pr(id))
+      return {int_perm, {}, id};
     else
       return {int_fail, {}, {}};
   }
@@ -1403,12 +1406,12 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   }
   else {
     image.level2 = rbase.level2;
-    image.perm2  = {int_perm, G->comm->identity};
+    image.perm2  = {int_perm, id};
   }
 
   // If  <Pr> is  function,   multiply  permutations. Otherwise, keep   them
   // factorized.
-  image.perm = {int_perm, G->comm->identity};
+  image.perm = {int_perm, id};
   //  image.level = rbase.chain;
 
   if (repr) {
@@ -1428,8 +1431,9 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   }
 
   permPlusBool<Telt> rep = PBEnumerate(0, !repr);
+  std::cerr << "CPP After PBEnumerate Call 0, repr\n";
   if (!repr) {
-    return {int_group, L, {}};
+    return {int_group, L_list[0], {}};
   }
   else {
     if (rep.status == int_perm)
