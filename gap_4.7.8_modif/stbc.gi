@@ -48,20 +48,20 @@ PrintStabChain:=function(eRec)
   do
     Print("GAP iLev=", iLev, "\n");
     if IsBound(eStab.orbit) then
-      Print("GAP orbit=", eStab.orbit, "\n");
+      Print("GAP   orbit=", eStab.orbit, "\n");
     else
-      Print("GAP orbit=[  ]\n");
+      Print("GAP   orbit=[  ]\n");
     fi;
     if IsBound(eStab.transversal) then
-      Print("GAP transversal=", eStab.transversal, "\n");
+      Print("GAP   transversal=", eStab.transversal, "\n");
     else
-      Print("GAP transversal=[  ]\n");
+      Print("GAP   transversal=[  ]\n");
     fi;
     Print("XXX ELIMINATE begin\n");
     if IsBound(eStab.cycles) then
-        Print("GAP cycles=", eStab.cycles, "\n");
+        Print("GAP   cycles=", eStab.cycles, "\n");
     else
-        Print("GAP No cycles\n");
+        Print("GAP   No cycles\n");
     fi;
     Print("XXX ELIMINATE end\n");
     if IsBound(eStab.stabilizer) then
@@ -614,11 +614,13 @@ InstallGlobalFunction( AddGeneratorsExtendSchreierTree, function( S, new )
     old[ 1 ] := true;
     ald := StructuralCopy( old );
     if debug_fct then
-      Print("GAP AGEST newgens=", new, "\n");
-      Print("GAP AGEST 1: old=", old, "\n");
-      Print("GAP AGEST 1: ald=", ald, "\n");
-      Print("GAP AGEST labels=", S.labels, "\n");
-      Print("GAP AGEST 2: genlabels=", S.genlabels, "\n");
+        Print("GAP AGEST newgens=", new, "\n");
+        Print("GAP AGEST 1: old=", old, "\n");
+        Print("GAP AGEST 1: ald=", ald, "\n");
+        Print("XXX ELIMINATE begin\n");
+        Print("GAP AGEST labels=", S.labels, "\n");
+        Print("XXX ELIMINATE end\n");
+        Print("GAP AGEST 2: genlabels=", S.genlabels, "\n");
     fi;
     for gen  in new  do
         pos := Position( S.labels, gen );
@@ -627,12 +629,16 @@ InstallGlobalFunction( AddGeneratorsExtendSchreierTree, function( S, new )
             Add( old, false );
             Add( ald, true );
             if debug_fct then
-              Print("GAP AGEST  genlabels insert 1: pos=", Length(S.labels), "\n");
+              Print("GAP AGEST  genlabels insert 1:\n");
+#              Print("GAP AGEST  genlabels insert 1: pos=", Length(S.labels), "\n");
+#              Print("GAP AGEST  genlabels insert X: pos=", Length(S.labels), "\n");
             fi;
             Add( S.genlabels, Length( S.labels ) );
         elif not ald[ pos ]  then
             if debug_fct then
-              Print("GAP AGEST  genlabels insert 2: pos=", pos, "\n");
+              Print("GAP AGEST  genlabels insert 2:\n");
+#              Print("GAP AGEST  genlabels insert 2: pos=", pos, "\n");
+#              Print("GAP AGEST  genlabels insert X: pos=", pos, "\n");
             fi;
             Add( S.genlabels, pos );
         fi;
@@ -642,8 +648,10 @@ InstallGlobalFunction( AddGeneratorsExtendSchreierTree, function( S, new )
         fi;
     od;
     if debug_fct then
-      Print("GAP AGEST 2: old=", old, "\n");
-      Print("GAP AGEST 2: ald=", ald, "\n");
+#        Print("XXX ELIMINATE begin\n");
+        Print("GAP AGEST 2: old=", old, "\n");
+        Print("GAP AGEST 2: ald=", ald, "\n");
+#        Print("XXX ELIMINATE end\n");
     fi;
 
     # Extend the orbit and the transversal with the new labels.
@@ -938,26 +946,33 @@ InstallGlobalFunction( StabChainSwap, function( S )
             gen,        # new generator of $T_b$
             i;          # loop variable
     Print("GAP Beginning of StabChainSwap\n");
+    PrintStabChain(S);
     # get the two basepoints $a$ and $b$ that we have to switch
     a := S.orbit[ 1 ];
     b := S.stabilizer.orbit[ 1 ];
+    Print("GAP StabChainSwap a=", a, " b=", b, "\n");
 
     # set $T = S$ and compute $b^T$ and a transversal $T/T_b$
     T := EmptyStabChain( S.labels, S.identity, b );
     Unbind( T.generators );
     AddGeneratorsExtendSchreierTree( T, S.generators );
+    Print("GAP StabChainSwap : after first AGEST\n");
 
     # initialize $Tstab$, which will become $T_b$
     Tstab := EmptyStabChain( [  ], S.identity, a );
     Unbind( Tstab.generators );
+    Print("GAP StabChainSwap : before second AGEST gens=", S.stabilizer.stabilizer.generators, "\n");
     AddGeneratorsExtendSchreierTree( Tstab,
             S.stabilizer.stabilizer.generators );
+    Print("GAP StabChainSwap : after second AGEST\n");
 
     # in the end $|b^T||a^{T_b}| = [T:T_{ab}] = [S:S_{ab}] = |a^S||b^{S_a}|$
     ind := 1;
     len := Length( S.orbit ) * Length( S.stabilizer.orbit )
            / Length( T.orbit );
+    Print("GAP StabChainSwap |Tstab->orbit|=", Length(Tstab.orbit), " len=", len, "\n");
     while Length( Tstab.orbit ) < len  do
+        Print("GAP beginning of loop\n");
 
         # choose a point $pnt \in a^S \ a^{T_b}$ with representative $s$
         repeat
@@ -971,6 +986,7 @@ InstallGlobalFunction( StabChainSwap, function( S )
 
             pnt := S.orbit[ ind ];
         until not IsBound( Tstab.translabels[ pnt ] );
+        Print("GAP ind=", ind, " pnt=", pnt, "\n");
 
         # find out what $s^-$ does with $b$ (without computing $s$!)
         img := b;
@@ -979,6 +995,7 @@ InstallGlobalFunction( StabChainSwap, function( S )
             img := img ^ S.transversal[ i ];
             i   := i   ^ S.transversal[ i ];
         od;
+        Print("GAP i=", i, " img=", img, "\n");
 
         # if $b^{s^-}} \in b^{S_a}$ with representative $r \in S_a$
         if IsBound( S.stabilizer.translabels[ img ] )  then
@@ -998,6 +1015,7 @@ InstallGlobalFunction( StabChainSwap, function( S )
         fi;
 
     od;
+    Print("GAP After while loop\n");
 
     # copy everything back into the stabchain
     S.labels      := T.labels;
@@ -1005,10 +1023,10 @@ InstallGlobalFunction( StabChainSwap, function( S )
     S.orbit       := T.orbit;
     S.translabels := T.translabels;
     S.transversal := T.transversal;
-    Print("StabChainSwap 1: Now S.transversal=", S.transversal, "\n");
+    Print("GAP StabChainSwap 1:\n");
     if Length( Tstab.orbit ) = 1  then
         S.stabilizer := S.stabilizer.stabilizer;
-        Print("StabChainSwap 2: Now S.transversal=", S.transversal, "\n");
+        Print("GAP StabChainSwap 2:\n");
     else
         S.stabilizer.labels      := Tstab.labels;
         S.stabilizer.genlabels   := Tstab.genlabels;
@@ -1019,7 +1037,7 @@ InstallGlobalFunction( StabChainSwap, function( S )
         S.stabilizer.orbit       := Tstab.orbit;
         S.stabilizer.translabels := Tstab.translabels;
         S.stabilizer.transversal := Tstab.transversal;
-        Print("StabChainSwap 3: Now S.transversal=", S.transversal, "\n");
+        Print("GAP StabChainSwap 3:\n");
     fi;
 
     return true;

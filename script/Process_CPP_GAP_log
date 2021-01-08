@@ -3,7 +3,7 @@ import os
 import sys
 
 nb_arg = len(sys.argv)
-if nb_arg != 4 and nb_arg != 5:
+if not nb_arg in [4,5,6]:
     print("nb_arg should be equal to 4")
     print("Process_CPP_GAP_log   RES_gap   RES_cpp   BeginLine [nb_line]")
     sys.exit(0)
@@ -11,10 +11,16 @@ if nb_arg != 4 and nb_arg != 5:
 File1 = sys.argv[1]
 File2 = sys.argv[2]
 CritLine = sys.argv[3]
+#
 nb_linebef = 5
-if nb_arg == 5:
+if nb_arg >= 5:
     nb_linebef = int(sys.argv[4])
 print("nb_linebef=", nb_linebef)
+#
+nb_lineaft = 2
+if nb_arg >= 6:
+    nb_lineaft = int(sys.argv[5])
+print("nb_lineaft=", nb_lineaft)
 
 f1 = open(File1, "r")
 pre_lines1 = f1.readlines()
@@ -66,11 +72,21 @@ def merge_lines_multiline(l_lines):
     return l_lines_ret
 
 
+def remove_debug_lines(l_lines):
+    l_lines_ret = []
+    for e_line in l_lines:
+        if len(e_line) > 5:
+            if e_line[:5] != "DEBUG":
+                l_lines_ret.append(e_line)
+    return l_lines_ret
+
+
 def process_lines(l_linesA):
     l_linesB = eliminate_marked_blocks(l_linesA)
     l_linesC = merge_lines(l_linesB)
     l_linesD = merge_lines_multiline(l_linesC)
-    return l_linesD
+    l_linesE = remove_debug_lines(l_linesD)
+    return l_linesE
 
 
 
@@ -113,7 +129,7 @@ for iposs in range(nbposs):
 #        print("e_line2=", e_line2)
         print("LOOP")
         ibegin=-nb_linebef
-        iend=2
+        iend=nb_lineaft
         print("file1=", File1)
         for i in range(ibegin,iend):
             jposs = iposs + i

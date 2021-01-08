@@ -241,13 +241,13 @@ void PrintStabChain(StabChain<Telt> const& S)
         V[i] = Swork->comm->labels[eVal];
     }
     //
-    std::cerr << "CPP orbit=" << GapStringIntVector(Swork->orbit) << "\n";
-    std::cerr << "CPP transversal=" << GapStringMissingTVector(V) << "\n";
+    std::cerr << "CPP   orbit=" << GapStringIntVector(Swork->orbit) << "\n";
+    std::cerr << "CPP   transversal=" << GapStringMissingTVector(V) << "\n";
     std::cerr << "XXX ELIMINATE begin\n";
     if (Swork->cycles.size() > 0) {
-      std::cerr << "CPP cycles=" << GapStringBoolVectorB(Swork->cycles) << "\n";
+      std::cerr << "CPP   cycles=" << GapStringBoolVectorB(Swork->cycles) << "\n";
     } else {
-      std::cerr << "CPP No cycles\n";
+      std::cerr << "CPP   No cycles\n";
     }
     std::cerr << "XXX ELIMINATE end\n";
     Swork = Swork->stabilizer;
@@ -451,9 +451,20 @@ StabChain<Telt> EmptyStabChainPlusNode(int const& n, int const& bas)
 {
   StabChain<Telt> S = EmptyStabChain<Telt>(n);
   InitializeSchreierTree(S, bas);
-  //  S->orbit.push_back(bas);
   return S;
 }
+
+
+template<typename Telt>
+StabChain<Telt> EmptyStabChainPlusCommonPlusNode(std::shared_ptr<CommonStabInfo<Telt>> const& comm, int const& n, int const& bas)
+{
+  StabChain<Telt> S = std::make_shared<StabLevel<Telt>>(EmptyStabLevel<Telt>(comm));
+  InitializeSchreierTree(S, bas);
+  return S;
+}
+
+
+
 
 
 
@@ -911,6 +922,13 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
 #ifdef DEBUG_ADD_GEN_SCH
   std::cerr << "CPP AGEST : Beginning of AddGeneratorsExtendSchreierTree\n";
   std::cerr << "CPP AGEST 1: genlabels=" << GapStringIntVector(S->genlabels) << "\n";
+  StabChain<Telt> Swrite = S;
+  int idxwrt=0;
+  while(Swrite != nullptr) {
+    std::cerr << "DEBUG idxwrt=" << idxwrt << " |labels|=" << S->comm->labels.size() << "\n";
+    idxwrt++;
+    Swrite = Swrite->stabilizer;
+  }
 #endif
   int nbLabel=S->comm->labels.size();
   std::vector<int> ListAtt(nbLabel);
@@ -923,7 +941,9 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
   std::cerr << "CPP AGEST newgens=" << GapStringTVector(newgens) << "\n";
   std::cerr << "CPP AGEST 1: old=" << GapStringBoolVector(old) << "\n";
   std::cerr << "CPP AGEST 1: ald=" << GapStringBoolVector(ald) << "\n";
+  std::cerr << "XXX ELIMINATE begin\n";
   std::cerr << "CPP AGEST labels=" << GapStringTVector(S->comm->labels) << "\n";
+  std::cerr << "XXX ELIMINATE end\n";
   std::cerr << "CPP AGEST 2: genlabels=" << GapStringIntVector(S->genlabels) << "\n";
 #endif
   for (auto & gen : newgens) {
@@ -934,22 +954,27 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
       ald.push_back(true);
       int posG=S->comm->labels.size() - 1;
 #ifdef DEBUG_ADD_GEN_SCH
-      std::cerr << "CPP AGEST  genlabels insert 1: pos=" << (posG+1) << "\n";
+      std::cerr << "CPP AGEST  genlabels insert 1:\n";
+      //      std::cerr << "CPP AGEST  genlabels insert 1: pos=" << (posG+1) << "\n";
+      //std::cerr << "CPP AGEST  genlabels insert X: pos=" << (posG+1) << "\n";
 #endif
       S->genlabels.push_back(posG);
-    }
-    else {
+    } else {
       if (!ald[pos]) {
 #ifdef DEBUG_ADD_GEN_SCH
-	std::cerr << "CPP AGEST  genlabels insert 2: pos=" << (pos+1) << "\n";
+        std::cerr << "CPP AGEST  genlabels insert 2:\n";
+        //        std::cerr << "CPP AGEST  genlabels insert 2: pos=" << (pos+1) << "\n";
+	//std::cerr << "CPP AGEST  genlabels insert X: pos=" << (pos+1) << "\n";
 #endif
 	S->genlabels.push_back(pos);
       }
     }
   }
 #ifdef DEBUG_ADD_GEN_SCH
+  //  std::cerr << "XXX ELIMINATE begin\n";
   std::cerr << "CPP AGEST 2: old=" << GapStringBoolVector(old) << "\n";
   std::cerr << "CPP AGEST 2: ald=" << GapStringBoolVector(ald) << "\n";
+  //  std::cerr << "XXX ELIMINATE end\n";
 #endif
 
   int len = S->orbit.size();
@@ -980,8 +1005,7 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
 #ifdef DEBUG_ADD_GEN_SCH
 	    std::cerr << "CPP       AGEST assign true\n";
 #endif
-	  }
-	  else {
+	  } else {
 	    S->transversal[img]=j;
 #ifdef DEBUG_ADD_GEN_SCH
 	    std::cerr << "CPP       AGEST S.transversal[img]=" << S->comm->labels[j] << "\n";
@@ -996,8 +1020,7 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
       }
       i++;
     }
-  }
-  else {
+  } else {
 #ifdef DEBUG_ADD_GEN_SCH
     std::cerr << "CPP AGEST No Cycles\n";
 #endif
@@ -1159,26 +1182,34 @@ template<typename Telt>
 bool StabChainSwap(StabChain<Telt> & Stot)
 {
   std::cerr << "CPP Beginning of StabChainSwap\n";
+  PrintStabChain(Stot);
   int n=Stot->comm->n;
   int a = Stot->orbit[0];
   int b = Stot->stabilizer->orbit[0];
+  std::cerr << "CPP StabChainSwap a=" << (a+1) << " b=" << (b+1) << "\n";
   //
   std::vector<Telt> LGens = GetListGenerators(Stot);
   //
-  StabChain<Telt> Ttot = EmptyStabChainPlusNode<Telt>(n, b);
+  //  StabChain<Telt> Ttot = EmptyStabChainPlusNode<Telt>(n, b);
+  StabChain<Telt> Ttot = EmptyStabChainPlusCommonPlusNode(Stot->comm, n, b);
   AddGeneratorsExtendSchreierTree(Ttot, LGens);
+  std::cerr << "CPP StabChainSwap : after first AGEST\n";
   //
   StabChain<Telt> Tstab = EmptyStabChainPlusNode<Telt>(n, a);
-  if (Tstab->stabilizer != nullptr) {
-    if (Tstab->stabilizer->stabilizer != nullptr) {
+  if (Stot->stabilizer != nullptr) {
+    if (Stot->stabilizer->stabilizer != nullptr) {
       std::vector<Telt> LGensB = GetListGenerators(Stot->stabilizer->stabilizer);
+      std::cerr << "CPP StabChainSwap : before second AGEST gens=" << GapStringTVector(LGensB) << "\n";
       AddGeneratorsExtendSchreierTree(Tstab, LGensB);
+      std::cerr << "CPP StabChainSwap : after second AGEST\n";
     }
   }
   //
   int ind = 0;
   int len = Stot->orbit.size() * Stot->stabilizer->orbit.size() / Ttot->orbit.size();
+  std::cerr << "CPP StabChainSwap |Tstab->orbit|=" << int(Tstab->orbit.size()) << " len=" << len << "\n";
   while (int(Tstab->orbit.size()) < len) {
+    std::cerr << "CPP Beginning of loop\n";
     int pnt;
     while(true) {
       ind++;
@@ -1188,6 +1219,7 @@ bool StabChainSwap(StabChain<Telt> & Stot)
       if (Tstab->transversal[pnt] == -1)
 	break;
     }
+    std::cerr << "CPP ind=" << (ind+1) << " pnt=" << (pnt+1) << "\n";
     int img = b;
     int i = pnt;
     while (i != a) {
@@ -1195,6 +1227,7 @@ bool StabChainSwap(StabChain<Telt> & Stot)
       img = PowAct(img, Stot->comm->labels[posGen]);
       i = PowAct(i, Stot->comm->labels[posGen]);
     }
+    std::cerr << "CPP i=" << (i+1) << " img=" << (img+1) << "\n";
     if (Stot->stabilizer->transversal[img] != -1) {
       Telt gen = Stot->comm->identity;
       while (PowAct(pnt, gen) != a) {
@@ -1208,6 +1241,7 @@ bool StabChainSwap(StabChain<Telt> & Stot)
       AddGeneratorsExtendSchreierTree(Tstab, {gen});
     }
   }
+  std::cerr << "CPP After while loop\n";
   auto MappingIndex=[&](StabChain<Telt> const& Wtot, int const& idx) -> int {
     if (idx == -1)
       return -1;
@@ -1228,10 +1262,14 @@ bool StabChainSwap(StabChain<Telt> & Stot)
     }
   };
   MapAtLevel(Ttot);
-  if (Tstab->orbit.size() == 1)
+  std::cerr << "CPP StabChainSwap 1:\n";
+  if (Tstab->orbit.size() == 1) {
     Stot->stabilizer = Stot->stabilizer->stabilizer;
-  else
+    std::cerr << "CPP StabChainSwap 2:\n";
+  }  else {
     MapAtLevel(Tstab->stabilizer);
+    std::cerr << "CPP StabChainSwap 3:\n";
+  }
   return true;
 }
 
