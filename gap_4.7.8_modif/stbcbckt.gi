@@ -1596,19 +1596,28 @@ InstallGlobalFunction( PartitionBacktrack,
             b := fail;
         fi;
         while b <> fail  do
-	    Print("GAP b=", b, " b_int=", b, "\n");
+	    Print("GAP b=", b, " b_int=", b, " d=", d, "\n");
+            if IsBound(R[d].orbit) then
+                Print("GAP |R[d].orbit|=", Length(R[d].orbit), "\n");
+            else
+                Print("GAP |R[d].orbit|=", 0, "\n");
+            fi;
 
             # Try to prune the node with prop 8(ii) of Leon's paper.
             if not repr  and  not wasTriv  and  IsBound( R[ d ].orbit )  then
+                Print("GAP matching if test\n");
                 dd := branch;
                 while dd < d  do
+                    Print("GAP while dd=", dd, " d=", d, "\n");
                     if IsInBasicOrbit( L[ dd ], a )  and  not PBIsMinimal
                        ( range, R[ dd ].orbit[ 1 ], b, R[ d ] )  then
                         Info( InfoBckt, 3, d, ": point ", b,
                                 " pruned by minimality condition" );
                         dd := d + 1;
+                        Print("GAP first case\n");
                     else
                         dd := dd + 1;
+                        Print("GAP second case\n");
                     fi;
                 od;
             else
@@ -1682,6 +1691,7 @@ InstallGlobalFunction( PartitionBacktrack,
                         R{ [ d .. Length( rbase.base ) ] } := List(
                         L{ [ d .. Length( rbase.base ) ] }, CopyStabChain );
                         branch := d;
+                        Print("GAP assignation branch=", branch, "\n");
                     fi;
                     Print("GAP After wasTriv test\n");
                     Print("GAP d=", d, " blen=", blen, "\n");

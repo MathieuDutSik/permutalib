@@ -1207,15 +1207,21 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     b = orb[d].find_first();
     while (b != boost::dynamic_bitset<>::npos) {
       int b_int = int(b);
-      std::cerr << "CPP b=" << (b+1) << " b_int=" << (b_int+1) << "\n";
+      std::cerr << "CPP b=" << (b+1) << " b_int=" << (b_int+1) << " d=" << (d+1) << "\n";
+      std::cerr << "CPP |R[d].orbit|=" << R_list[d]->orbit.size() << "\n";
       // Try to prune the node with prop 8(ii) of Leon paper.
-      if (!repr && !wasTriv) {
+      if (!repr && !wasTriv && R_list[d]->orbit.size() > 0) {
+        std::cerr << "CPP matching if test\n";
 	dd = branch;
 	while (dd < d) {
-	  if (IsInBasicOrbit(L_list[dd], a) && !PBIsMinimal(range, R_list[dd]->orbit[0], b_int, R_list[d]))
+          std::cerr << "CPP while dd=" << (dd+1) << " d=" << (d+1) << "\n";
+	  if (IsInBasicOrbit(L_list[dd], a) && !PBIsMinimal(range, R_list[dd]->orbit[0], b_int, R_list[d])) {
 	    dd = d + 1;
-	  else
+            std::cerr << "CPP first case\n";
+          } else {
 	    dd = dd + 1;
+            std::cerr << "CPP second case\n";
+          }
 	}
       }
       else {
@@ -1283,6 +1289,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
             std::cerr << "CPP Assigning R from d\n";
 	    SetStabChainFromLevel(R_list, L_list, d, rbase.base.size());
 	    branch = d;
+            std::cerr << "CPP assignation branch=" << (branch+1) << "\n";
 	  }
           std::cerr << "CPP After wasTriv test\n";
           std::cerr << "CPP d=" << (d+1) << " blen=" << blen << "\n";
