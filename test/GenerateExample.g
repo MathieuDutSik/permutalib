@@ -115,7 +115,7 @@ DoSym5:=true;
 #DoSym5:=false;
 if DoSym5 then
   eSize:=2;
-  eFile:=Concatenation("ExampleSym5_", String(eSize));
-  CreateExampleOnSetCase(eFile, Group([(1,2,3,4,5),(1,2)]), eSize);
+  eFile:="ExampleGRP_Set";
+  CreateExampleOnSetCase(eFile, Group([(1,2,3,4,5,6),(1,2)]), eSize);
   Print("eFile=", eFile, "\n");
 fi;
