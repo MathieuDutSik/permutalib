@@ -1,4 +1,5 @@
-PROGRAM	= TestStabilizerOnSet
+#PROGRAM	= TestStabilizerOnSet
+PROGRAM	= TestRepresentativeActionOnSet
 #PROGRAM	= TestCompilation TestSymmetricGroup TestStabilizerOnSet
 #PROGRAM	= TestSymmetricGroup
 

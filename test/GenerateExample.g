@@ -114,7 +114,7 @@ fi;
 DoSym5:=true;
 #DoSym5:=false;
 if DoSym5 then
-  eSize:=2;
+  eSize:=3;
   eFile:="ExampleGRP_Set";
   CreateExampleOnSetCase(eFile, Group([(1,2,3,4,5,6),(1,2)]), eSize);
   Print("eFile=", eFile, "\n");
