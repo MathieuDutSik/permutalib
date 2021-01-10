@@ -1256,31 +1256,31 @@ bool StabChainSwap(StabChain<Telt> & Stot)
     Telt eElt=Wtot->comm->labels[idx];
     return GetLabelIndex(Stot->comm->labels, eElt);
   };
-  auto MapAtLevel=[&](StabChain<Telt> const& insStab) -> void {
-    Stot->genlabels.clear();
+  auto MapAtLevel=[&](StabChain<Telt> & Swork, StabChain<Telt> const& insStab) -> void {
+    Swork->genlabels.clear();
     for (int const& posGen : insStab->genlabels) {
       std::cerr << "DEBUG posGen=" << posGen << "\n";
       int posGenMap=MappingIndex(insStab, posGen);
       std::cerr << "DEBUG posGenMap=" << posGenMap << "\n";
-      Stot->genlabels.push_back(posGenMap);
+      Swork->genlabels.push_back(posGenMap);
     }
-    Stot->orbit = insStab->orbit;
+    Swork->orbit = insStab->orbit;
     for (int u=0; u<n; u++) {
       int idx=insStab->transversal[u];
       std::cerr << "DEBUG u=" << u << " idx=" << idx << "\n";
       int idxMap=MappingIndex(insStab, idx);
       std::cerr << "DEBUG idxMap=" << idxMap << "\n";
-      Stot->transversal[u] = idxMap;
+      Swork->transversal[u] = idxMap;
     }
     std::cerr << "DEBUG exising MapAtLevel\n";
   };
-  MapAtLevel(Ttot);
+  MapAtLevel(Stot, Ttot);
   std::cerr << "CPP StabChainSwap 1: |orbit|=" << Tstab->orbit.size() << "\n";
   if (Tstab->orbit.size() == 1) {
     Stot->stabilizer = Stot->stabilizer->stabilizer;
     std::cerr << "CPP StabChainSwap 2:\n";
   }  else {
-    MapAtLevel(Tstab);
+    MapAtLevel(Stot->stabilizer, Tstab);
     std::cerr << "CPP StabChainSwap 3:\n";
   }
   return true;
