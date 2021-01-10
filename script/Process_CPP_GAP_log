@@ -66,6 +66,7 @@ def merge_lines_multiline(l_lines):
         else:
             curr_line += e_line
             curr_line = curr_line.replace(", \n  ", ", ")
+            curr_line = curr_line.replace(",\n  ", ", ")
             curr_line = curr_line.replace(" \n ", " ")
             l_lines_ret.append(curr_line)
             curr_line = ""

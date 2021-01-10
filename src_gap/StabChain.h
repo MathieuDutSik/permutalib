@@ -1183,7 +1183,7 @@ bool StabChainSwap(StabChain<Telt> & Stot)
 {
   std::cerr << "CPP Beginning of StabChainSwap\n";
   PrintStabChain(Stot);
-  int n=Stot->comm->n;
+  int n = Stot->comm->n;
   int a = Stot->orbit[0];
   int b = Stot->stabilizer->orbit[0];
   std::cerr << "CPP StabChainSwap a=" << (a+1) << " b=" << (b+1) << "\n";
@@ -1209,7 +1209,7 @@ bool StabChainSwap(StabChain<Telt> & Stot)
   int len = Stot->orbit.size() * Stot->stabilizer->orbit.size() / Ttot->orbit.size();
   std::cerr << "CPP StabChainSwap |Tstab->orbit|=" << int(Tstab->orbit.size()) << " len=" << len << "\n";
   while (int(Tstab->orbit.size()) < len) {
-    std::cerr << "CPP Beginning of loop\n";
+    std::cerr << "CPP beginning of loop\n";
     int pnt;
     while(true) {
       ind++;
@@ -1229,15 +1229,22 @@ bool StabChainSwap(StabChain<Telt> & Stot)
     }
     std::cerr << "CPP i=" << (i+1) << " img=" << (img+1) << "\n";
     if (Stot->stabilizer->transversal[img] != -1) {
+      std::cerr << "CPP Determining gen, step 1\n";
       Telt gen = Stot->comm->identity;
       while (PowAct(pnt, gen) != a) {
+        std::cerr << "CPP pnt^gen=" << (PowAct(pnt, gen)+1) << "\n";
 	int posGen=Stot->transversal[PowAct(pnt, gen)];
+        std::cerr << "DEBUG posGen=" << posGen << "\n";
 	gen = gen * Stot->comm->labels[posGen];
       }
+      std::cerr << "CPP Determining gen, step 2 gen=" << gen << "\n";
       while (PowAct(b, gen) != b) {
-	int posGen=Stot->stabilizer->transversal[PowAct(pnt, gen)];
+        std::cerr << "CPP b^gen=" << (PowAct(b, gen)+1) << "\n";
+	int posGen=Stot->stabilizer->transversal[PowAct(b, gen)];
+        std::cerr << "DEBUG posGen=" << posGen << "\n";
 	gen = gen * Stot->comm->labels[posGen];
       }
+      std::cerr << "CPP Determining gen, step 3 gen=" << gen << "\n";
       AddGeneratorsExtendSchreierTree(Tstab, {gen});
     }
   }
@@ -1245,29 +1252,35 @@ bool StabChainSwap(StabChain<Telt> & Stot)
   auto MappingIndex=[&](StabChain<Telt> const& Wtot, int const& idx) -> int {
     if (idx == -1)
       return -1;
+    std::cerr << "DEBUG idx=" << idx << "\n";
     Telt eElt=Wtot->comm->labels[idx];
     return GetLabelIndex(Stot->comm->labels, eElt);
   };
-  auto MapAtLevel=[&](StabChain<Telt> const& Wtot) -> void {
+  auto MapAtLevel=[&](StabChain<Telt> const& insStab) -> void {
     Stot->genlabels.clear();
-    for (int const& posGen : Wtot->genlabels) {
-      int posGenMap=MappingIndex(Wtot, posGen);
+    for (int const& posGen : insStab->genlabels) {
+      std::cerr << "DEBUG posGen=" << posGen << "\n";
+      int posGenMap=MappingIndex(insStab, posGen);
+      std::cerr << "DEBUG posGenMap=" << posGenMap << "\n";
       Stot->genlabels.push_back(posGenMap);
     }
-    Stot->orbit = Wtot->orbit;
+    Stot->orbit = insStab->orbit;
     for (int u=0; u<n; u++) {
-      int idx=Wtot->transversal[u];
-      int idxMap=MappingIndex(Wtot, idx);
+      int idx=insStab->transversal[u];
+      std::cerr << "DEBUG u=" << u << " idx=" << idx << "\n";
+      int idxMap=MappingIndex(insStab, idx);
+      std::cerr << "DEBUG idxMap=" << idxMap << "\n";
       Stot->transversal[u] = idxMap;
     }
+    std::cerr << "DEBUG exising MapAtLevel\n";
   };
   MapAtLevel(Ttot);
-  std::cerr << "CPP StabChainSwap 1:\n";
+  std::cerr << "CPP StabChainSwap 1: |orbit|=" << Tstab->orbit.size() << "\n";
   if (Tstab->orbit.size() == 1) {
     Stot->stabilizer = Stot->stabilizer->stabilizer;
     std::cerr << "CPP StabChainSwap 2:\n";
   }  else {
-    MapAtLevel(Tstab->stabilizer);
+    MapAtLevel(Tstab);
     std::cerr << "CPP StabChainSwap 3:\n";
   }
   return true;

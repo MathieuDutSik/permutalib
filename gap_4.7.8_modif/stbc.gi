@@ -999,17 +999,22 @@ InstallGlobalFunction( StabChainSwap, function( S )
 
         # if $b^{s^-}} \in b^{S_a}$ with representative $r \in S_a$
         if IsBound( S.stabilizer.translabels[ img ] )  then
+            Print("GAP Determining gen, step 1\n");
 
             # with $gen = s^- r^-$ we have
             # $b^gen = {b^{s^-}}^{r^-} = img^{r-} = b$, so $gen \in S_b$
             # and $pnt^gen = {pnt^{s^-}}^{r^-} = a^{r-} = a$, so $gen$ is new
             gen := S.identity;
             while pnt ^ gen <> a  do
+                Print("GAP pnt^gen=", pnt^gen, "\n");
                 gen := gen * S.transversal[ pnt ^ gen ];
             od;
+            Print("GAP Determining gen, step 2 gen=", gen, "\n");
             while b ^ gen <> b  do
+                Print("GAP b^gen=", b^gen, "\n");
                 gen := gen * S.stabilizer.transversal[ b ^ gen ];
             od;
+            Print("GAP Determining gen, step 3 gen=", gen, "\n");
             AddGeneratorsExtendSchreierTree( Tstab, [ gen ] );
 
         fi;
@@ -1023,7 +1028,7 @@ InstallGlobalFunction( StabChainSwap, function( S )
     S.orbit       := T.orbit;
     S.translabels := T.translabels;
     S.transversal := T.transversal;
-    Print("GAP StabChainSwap 1:\n");
+    Print("GAP StabChainSwap 1: |orbit|=", Length(Tstab.orbit), "\n");
     if Length( Tstab.orbit ) = 1  then
         S.stabilizer := S.stabilizer.stabilizer;
         Print("GAP StabChainSwap 2:\n");
