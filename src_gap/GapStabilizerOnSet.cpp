@@ -54,8 +54,12 @@ int main(int argc, char *argv[])
     //
     std::ofstream os(argv[2]);
     os << "local ListGen;\n";
-    os << "ListGen:=" << GeneratorsOfGroup(eG2) << ";\n";
-    os << "return Group(ListGen);\n";
+    std::vector<Telt> LGenRet = GeneratorsOfGroup(eG2);
+    os << "ListGen:=" << GapStringTVector(LGenRet) << ";\n";
+    if (LGenRet.size() == 0)
+      os << "return Group(());\n";
+    else
+      os << "return Group(ListGen);\n";
   }
   catch (TerminalException const& e) {
     std::cerr << "Erroneous completion of the program\n";
