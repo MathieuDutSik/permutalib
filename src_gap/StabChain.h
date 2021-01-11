@@ -642,6 +642,14 @@ std::vector<Telt> StrongGeneratorsStabChain(StabChain<Telt> const& S)
 }
 
 
+template<typename Telt>
+std::vector<Telt> GeneratorsOfGroup(StabChain<Telt> const& S)
+{
+  return StrongGeneratorsStabChain(S);
+}
+
+
+
 
 
 template<typename Telt>
@@ -1360,7 +1368,6 @@ void ConjugateStabChain(StabChain<Telt> & Stot, Telt const& cnj)
       //      std::cerr << " After loop\n";
       Sptr->transversal=NewTransversal;
     }
-    
 #ifdef DEBUG_CONJ_STAB_CHAIN
     std::cerr << "ConjugateStabChain, step 4\n";
 #endif
