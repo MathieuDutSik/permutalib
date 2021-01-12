@@ -548,7 +548,7 @@ std::vector<singStrat> StratMeetPartition(rbaseType<Telt> & rbase, Partition & P
     for (auto & pVal : splits) {
       // Last argument true means that the cell will split.
       int i = SplitCell_Partition(P, pVal, S, s, g, -1);
-      std::cerr << "CPP g=" << g << " i=" << (i+1) << "\n";
+      std::cerr << "CPP g=" << g << " i=" << i << "\n";
       if (!g.isIdentity()) {
 	std::vector<int> cell = Cell(P, NumberCells(P));
 	for (auto & eVal : cell) {
@@ -558,11 +558,13 @@ std::vector<singStrat> StratMeetPartition(rbaseType<Telt> & rbase, Partition & P
       }
       strat.push_back({pVal, s, i});
       // If  we have one  or two  new fixpoints, put  them  into the base.
-      if (i == 0) {
-        int pnt = FixpointCellNo(P, NumberCells(P));
+      if (i == 1) {
+        int iPart = NumberCells(P) - 1;
+        std::cerr << "CPP NumberCells=" << (iPart+1) << "\n";
+        int pnt = FixpointCellNo(P, iPart);
         std::cerr << "CPP FixpointCellNo - NumberCells\n";
 	ProcessFixpoint_rbase(rbase, pnt);
-	strat.push_back({-1, pnt, NumberCells(P)});
+	strat.push_back({-1, pnt, iPart});
 	if (IsTrivialRBase(rbase))
 	  return strat;
       }

@@ -364,6 +364,7 @@ InstallGlobalFunction( StratMeetPartition, function( arg )
                 # If  we have one  or two  new fixpoints, put  them  into the
                 # base.
                 if i = 1  then
+                    Print("GAP NumberCells=", NumberCells( P ), "\n");
                     pnt := FixpointCellNo( P, NumberCells( P ) );
                     Print("GAP FixpointCellNo - NumberCells\n");
                     ProcessFixpoint( rbase, pnt );
