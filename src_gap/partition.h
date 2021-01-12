@@ -3,7 +3,8 @@
 
 #include "PermGroup.h"
 
-//#define DEBUG_PARTITION
+#define DEBUG_PARTITION
+#define CHECK_PARTITION
 
 namespace permutalib {
 
@@ -38,19 +39,10 @@ void NicePrintPartition(std::string const& str, Partition const& P)
  
 void RawPrintPartition(Partition const& P)
 {
-  auto prt=[](std::vector<int> const& V) -> void {
-    for (auto & eVal : V)
-      std::cerr << " " << eVal;
-    std::cerr << " |V|=" << V.size() << "\n";
-  };
-  std::cerr << "points=";
-  prt(P.points);
-  std::cerr << "firsts=";
-  prt(P.firsts);
-  std::cerr << "lengths=";
-  prt(P.lengths);
-  std::cerr << "cellno=";
-  prt(P.cellno);
+  std::cerr << "CPP points=" << GapStringIntVector(P.points) << "\n";
+  std::cerr << "CPP firsts=" << GapStringIntVector(P.firsts) << "\n";
+  std::cerr << "CPP lengths=" << GapStringTVector(P.lengths) << "\n";
+  std::cerr << "CPP cellno=" << GapStringTVector(P.cellno) << "\n";
 }
 
 
@@ -133,8 +125,10 @@ Partition GetPartition(std::vector<std::vector<int>> const& list)
   }
   Partition P{points, firsts, lengths, cellno};
 #ifdef DEBUG_PARTITION
-  std::cerr << "After GetPartition operation P=\n";
+  std::cerr << "CPP After GetPartition operation P=\n";
   RawPrintPartition(P);
+#endif
+#ifdef CHECK_PARTITION
   CheckConsistencyPartition("GetPartition", P);
 #endif
   return P;
@@ -214,7 +208,9 @@ std::vector<int> Fixcells(Partition const& ePartition)
 
 int SplitCell_Kernel(Partition & P, int const& i, std::function<bool(int)> const& test, int const& out)
 {
+#ifdef CHECK_PARTITION
   CheckConsistencyPartition("Input SplitCell_Kernel", P);
+#endif
   int eFirst=P.firsts[i];
   int len=P.lengths[i];
   std::vector<int> ListMove(out);
@@ -255,8 +251,10 @@ int SplitCell_Kernel(Partition & P, int const& i, std::function<bool(int)> const
   }
 
 #ifdef DEBUG_PARTITION
-  std::cerr << "After SplitCell_Kernel operation P=\n";
+  std::cerr << "CPP After SplitCell_Kernel operation P=\n";
   RawPrintPartition(P);
+#endif
+#ifdef CHECK_PARTITION
   CheckConsistencyPartition("Output SplitCell_Kernel", P);
 #endif
   return idxMov;
@@ -295,9 +293,11 @@ int SplitCell_Face(Partition & P, int const& i, Face const& f, int const& j, Tel
 
 int IsolatePoint(Partition & P, int const& a)
 {
-#ifdef DEBUG_PARTITION
+#ifdef CHECK_PARTITION
   CheckConsistencyPartition("Input IsolatePoint", P);
-  std::cerr << "Input Partition\n";
+#endif
+#ifdef DEBUG_PARTITION
+  std::cerr << "CPP Input Partition\n";
   RawPrintPartition(P);
 #endif
   int nbPart=P.firsts.size();
@@ -324,9 +324,10 @@ int IsolatePoint(Partition & P, int const& a)
   P.lengths.push_back(1);
 
 #ifdef DEBUG_PARTITION
-  std::cerr << "After IsolatePoint operation P=\n";
-  std::cerr << "Output partition\n";
+  std::cerr << "CPP After IsolatePoint operation P=\n";
   RawPrintPartition(P);
+#endif
+#ifdef CHECK_PARTITION
   CheckConsistencyPartition("Output IsolatePoint", P);
 #endif
   return iPart;
@@ -336,7 +337,9 @@ int IsolatePoint(Partition & P, int const& a)
 
 int UndoRefinement(Partition & P)
 {
+#ifdef CHECK_PARTITION
   CheckConsistencyPartition("Input UndoRefinement", P);
+#endif
   int nbPart=P.firsts.size();
   int pfm=P.firsts[nbPart-1];
   if (pfm == 0)
@@ -351,8 +354,10 @@ int UndoRefinement(Partition & P)
   P.firsts.pop_back();
   P.lengths.pop_back();
 #ifdef DEBUG_PARTITION
-  std::cerr << "After UndoRefinement operation P=\n";
+  std::cerr << "CPP After UndoRefinement operation P=\n";
   RawPrintPartition(P);
+#endif
+#ifdef CHECK_PARTITION
   CheckConsistencyPartition("Output UndoRefinement", P);
 #endif
   return m;
