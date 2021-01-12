@@ -32,6 +32,22 @@
 
 
 RawPrintPartition:=function(P)
+    local nbPart, LPart, iPart, len, eFirst, eList, u, ePt;
+    nbPart:=Length(P.lengths);
+    LPart:=[];
+    for iPart in [1..nbPart]
+    do
+        len:=P.lengths[iPart];
+        eFirst:=P.firsts[iPart];
+        eList:=[];
+        for u in [1..len]
+        do
+            ePt:=P.points[eFirst+u-1];
+            Add(eList, ePt);
+        od;
+        Add(LPart, eList);
+    od;
+    Print("GAP Partition=", LPart, "\n");
     Print("GAP points=", P.points, "\n");
     Print("GAP firsts=", P.firsts, "\n");
     Print("GAP lengths=", P.lengths, "\n");
@@ -71,6 +87,10 @@ InstallGlobalFunction( Partition, function( list )
         i := i + Length( list[ c ] );
         P.cellno{ list[ c ] } := c + 0 * list[ c ];
     od;
+    if GetDebugPartition() then
+        Print("GAP After GetPartition operation P=\n");
+        RawPrintPartition(P);
+    fi;
     return P;
 end );
 
@@ -186,6 +206,11 @@ end);
 
 InstallGlobalFunction( SplitCell, function( P, i, Q, j, g, out )
 local   a,  b,  l,  B,  tmp,  m,  x, inflag, outflag,test,k,Pcop,acop,maxmov;
+  if GetDebugPartition() then
+#      Print("GAP i=", i, " out=", out, "\n");
+      Print("GAP Before SplitCell_Kernel operation P=\n");
+      RawPrintPartition(P);
+  fi;
   
   # If none or  all  points are  moved out,  do  not change <P>  and return
   # 'false'.
@@ -204,14 +229,14 @@ local   a,  b,  l,  B,  tmp,  m,  x, inflag, outflag,test,k,Pcop,acop,maxmov;
     maxmov:=P.lengths[i]-1; # maximum number to be moved out: Cellength-1
   fi;
 
-  if IsPartition(Q) 
+#  if IsPartition(Q) 
     # if P.points is a range, or g not internal, we would crash
-    and IsPlistRep(P.points) and IsInternalRep(g) then
-    a:=SPLIT_PARTITION(P.points,Q.cellno,j,g,[a,l,maxmov]);
-    if a<0 then
-      return false;
-    fi;
-  else
+#    and IsPlistRep(P.points) and IsInternalRep(g) then
+#    a:=SPLIT_PARTITION(P.points,Q.cellno,j,g,[a,l,maxmov]);
+#    if a<0 then
+#      return false;
+#    fi;
+#  else
     # library version
 
     if IsPartition(Q) then
@@ -248,7 +273,7 @@ local   a,  b,  l,  B,  tmp,  m,  x, inflag, outflag,test,k,Pcop,acop,maxmov;
 
     od;
 
-  fi;
+#  fi;
 
   if a>l then
     # no point moved out

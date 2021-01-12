@@ -39,6 +39,19 @@ void NicePrintPartition(std::string const& str, Partition const& P)
  
 void RawPrintPartition(Partition const& P)
 {
+  int nbPart=P.lengths.size();
+  std::vector<std::string> LPart(nbPart);
+  for (int iPart=0; iPart<nbPart; iPart++) {
+    int len=P.lengths[iPart];
+    int eFirst=P.firsts[iPart];
+    std::vector<int> eList(len);
+    for (int u=0; u<len; u++) {
+      int ePt = P.points[eFirst + u];
+      eList[u] = ePt;
+    }
+    LPart[iPart] = GapStringIntVector(eList);
+  }
+  std::cerr << "CPP Partition=" << GapStringTVector(LPart) << "\n";
   std::cerr << "CPP points=" << GapStringIntVector(P.points) << "\n";
   std::cerr << "CPP firsts=" << GapStringIntVector(P.firsts) << "\n";
   std::cerr << "CPP lengths=" << GapStringTVector(P.lengths) << "\n";
@@ -208,6 +221,11 @@ std::vector<int> Fixcells(Partition const& ePartition)
 
 int SplitCell_Kernel(Partition & P, int const& i, std::function<bool(int)> const& test, int const& out)
 {
+#ifdef DEBUG_PARTITION
+  //  std::cerr << "CPP i=" << (i+1) << " out=" << out << "\n";
+  std::cerr << "CPP Before SplitCell_Kernel operation P=\n";
+  RawPrintPartition(P);
+#endif
 #ifdef CHECK_PARTITION
   CheckConsistencyPartition("Input SplitCell_Kernel", P);
 #endif
@@ -242,7 +260,7 @@ int SplitCell_Kernel(Partition & P, int const& i, std::function<bool(int)> const
   }
   P.firsts.push_back(pos);
   P.lengths.push_back(idxMov);
-  int newNbPart=P.firsts.size();
+  int newNbPart=P.firsts.size()-1;
   for (int j=0; j<idxMov; j++) {
     int ePt=ListMove[j];
     P.points[pos]=ePt;
