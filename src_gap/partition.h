@@ -229,44 +229,53 @@ int SplitCell_Kernel(Partition & P, int const& i, std::function<bool(int)> const
 #ifdef CHECK_PARTITION
   CheckConsistencyPartition("Input SplitCell_Kernel", P);
 #endif
-  int eFirst=P.firsts[i];
-  int len=P.lengths[i];
-  std::vector<int> ListMove(out);
-  std::vector<int> ListStay(len);
-  int idxMov=0;
-  int idxStay=0;
-  for (int j=0; j<len; j++) {
-    int ePt=P.points[eFirst + j];
-    bool res=test(ePt);
-    if (res) {
-      if (idxMov == out)
-	return -1;
-      ListMove[idxMov]=ePt;
-      idxMov++;
+  int a=P.firsts[i];
+  int b=a + P.lengths[i];
+  int l=b-1;
+
+  int maxmov;
+  if (out >= 0)
+    maxmov = out;
+  else
+    maxmov = P.lengths[i]-1;
+  int B = l - maxmov;
+  std::cerr << "CPP maxmov=" << maxmov << " B=" << (B+1) << "\n";
+  a--;
+  while (a<b) {
+    std::cerr << "CPP 1 a=" << (a+1) << " b=" << (b+1) << "\n";
+    while(true) {
+      std::cerr << "CPP repeat loop on b\n";
+      b--;
+      if (b < B) {
+        std::cerr << "CPP exit 1\n";
+        return -1;
+      }
+      if (!test(b))
+        break;
     }
-    else {
-      ListStay[idxStay]=ePt;
-      idxStay++;
+    std::cerr << "CPP 2 a=" << (a+1) << " b=" << (b+1) << "\n";
+    while(true) {
+      a++;
+      if (a>b || test(a))
+        break;
+    }
+    std::cerr << "CPP 3 a=" << (a+1) << " b=" << (b+1) << "\n";
+    if (a<b) {
+      std::swap(P.points[a], P.points[b]);
     }
   }
-  if (idxMov == 0 || idxMov == len)
+  std::cerr << "CPP a=" << (a+1) << " l=" << (l+1) << "\n";
+  if (a > l) {
+    std::cerr << "CPP exit 2\n";
     return -1;
-  P.lengths[i]=idxStay;
-  int pos=eFirst;
-  for (int j=0; j<idxStay; j++) {
-    int ePt=ListStay[j];
-    P.points[pos]=ePt;
-    pos++;
   }
-  P.firsts.push_back(pos);
-  P.lengths.push_back(idxMov);
-  int newNbPart=P.firsts.size()-1;
-  for (int j=0; j<idxMov; j++) {
-    int ePt=ListMove[j];
-    P.points[pos]=ePt;
-    P.cellno[ePt]=newNbPart;
-    pos++;
+  int m=P.firsts.size();
+  for (int idx=a; idx<=l; idx++) {
+    P.cellno[P.points[idx]] = m;
   }
+  P.firsts.push_back(a);
+  P.lengths.push_back(l - a + 1);
+  P.lengths[i] = P.lengths[i] - P.lengths[m];
 
 #ifdef DEBUG_PARTITION
   std::cerr << "CPP After SplitCell_Kernel operation P=\n";
@@ -275,14 +284,18 @@ int SplitCell_Kernel(Partition & P, int const& i, std::function<bool(int)> const
 #ifdef CHECK_PARTITION
   CheckConsistencyPartition("Output SplitCell_Kernel", P);
 #endif
-  return idxMov;
+  std::cerr << "CPP exit 3\n";
+  return P.lengths[m];
 }
 
 template<typename Telt>
 int SplitCell_Partition(Partition & P, int const& i, Partition const& Q, int const& j, Telt const& g, int const& out)
 {
+  std::cerr << "CPP Q=\n";
+  RawPrintPartition(Q);
   std::function<bool(int)> test=[&](int const& ePt) -> bool {
-    int fPt=PowAct(ePt, g);
+    int fPt=PowAct(P.points[ePt], g);
+    std::cerr << "CPP SplitCellTestfun1\n";
     return PointInCellNo(Q, fPt, j);
   };
   return SplitCell_Kernel(P, i, test, out);
@@ -293,7 +306,7 @@ template<typename Telt>
 int SplitCell_Face(Partition & P, int const& i, Face const& f, int const& j, Telt const& g, int const& out)
 {
   std::function<bool(int)> test=[&](int const& ePt) -> bool {
-    int fPt=PowAct(ePt, g);
+    int fPt=PowAct(P.points[ePt], g);
     if (j == 1) {
       if (f[fPt] == 1)
 	return true;

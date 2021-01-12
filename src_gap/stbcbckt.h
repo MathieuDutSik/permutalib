@@ -310,7 +310,7 @@ void PrintRBaseLevel(rbaseType<Telt> const& rbase, std::string const& str)
 template<typename Telt>
 bool ProcessFixpoint_rbase(rbaseType<Telt> & rbase, int const& pnt)
 {
-  std::cerr << "CPP ProcessFixpoint_rbase beginning\n";
+  std::cerr << "CPP ProcessFixpoint_rbase beginning pnt=" << (pnt+1) << "\n";
   if (rbase.level2.status != int_true && rbase.level2.status != int_false) {
     std::cerr << "CPP Before ChangeStabChain level2\n";
     ChangeStabChain(rbase.level2.Stot, {pnt}, int_true);
@@ -463,8 +463,10 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
     rbase.level2.status = int_false;
   }
   rbase.level = {int_stablev, -666, G[0]};
-  for (auto & pnt : Fixcells(P))
+  for (auto & pnt : Fixcells(P)) {
+    std::cerr << "CPP Fixcells call ProcessFixpoint_rbase\n";
     ProcessFixpoint_rbase(rbase, pnt);
+  }
   return rbase;
 }
 
@@ -545,7 +547,8 @@ std::vector<singStrat> StratMeetPartition(rbaseType<Telt> & rbase, Partition & P
     }
     for (auto & pVal : splits) {
       // Last argument true means that the cell will split.
-      int i = SplitCell_Partition(P, pVal, S, s, g, true);
+      int i = SplitCell_Partition(P, pVal, S, s, g, -1);
+      std::cerr << "CPP g=" << g << " i=" << (i+1) << "\n";
       if (!g.isIdentity()) {
 	std::vector<int> cell = Cell(P, NumberCells(P));
 	for (auto & eVal : cell) {
@@ -557,6 +560,7 @@ std::vector<singStrat> StratMeetPartition(rbaseType<Telt> & rbase, Partition & P
       // If  we have one  or two  new fixpoints, put  them  into the base.
       if (i == 0) {
         int pnt = FixpointCellNo(P, NumberCells(P));
+        std::cerr << "CPP FixpointCellNo - NumberCells\n";
 	ProcessFixpoint_rbase(rbase, pnt);
 	strat.push_back({-1, pnt, NumberCells(P)});
 	if (IsTrivialRBase(rbase))
@@ -564,6 +568,7 @@ std::vector<singStrat> StratMeetPartition(rbaseType<Telt> & rbase, Partition & P
       }
       if (P.lengths[pVal] == 1) {
         int pnt = FixpointCellNo(P, pVal);
+        std::cerr << "CPP FixpointCellNo - pVal\n";
 	ProcessFixpoint_rbase(rbase, pnt);
 	strat.push_back({-1, pnt, pVal});
 	if (IsTrivialRBase(rbase))

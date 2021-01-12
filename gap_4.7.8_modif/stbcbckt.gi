@@ -352,6 +352,7 @@ InstallGlobalFunction( StratMeetPartition, function( arg )
       for p in splits do
             # Last argument `true' means that the cell will split.
             i := SplitCell( P, p, lS, s, g, true );
+            Print("GAP g=", g, " i=", i, "\n");
             if not IsOne( g )  then
                 cell := Cell( P, NumberCells( P ) );
                 cellsP{ OnTuples( cell, g ) } := NumberCells( P ) + 0 * cell;
@@ -364,6 +365,7 @@ InstallGlobalFunction( StratMeetPartition, function( arg )
                 # base.
                 if i = 1  then
                     pnt := FixpointCellNo( P, NumberCells( P ) );
+                    Print("GAP FixpointCellNo - NumberCells\n");
                     ProcessFixpoint( rbase, pnt );
                     Add( strat, [ 0, pnt, NumberCells( P ) ] );
                     if IsTrivialRBase( rbase )  then
@@ -372,6 +374,7 @@ InstallGlobalFunction( StratMeetPartition, function( arg )
                 fi;
                 if P.lengths[ p ] = 1  then
                     pnt := FixpointCellNo( P, p );
+                    Print("GAP FixpointCellNo - pVal\n");
                     ProcessFixpoint( rbase, pnt );
                     Add( strat, [ 0, pnt, p ] );
                     if IsTrivialRBase( rbase )  then
@@ -947,6 +950,7 @@ InstallGlobalFunction( EmptyRBase, function( G, Omega, P )
 
     # Process all fixpoints in <P>.
     for pnt  in Fixcells( P )  do
+        Print("GAP Fixcells call ProcessFixpoint_rbase\n");
         ProcessFixpoint( rbase, pnt );
     od;
 
@@ -1024,9 +1028,9 @@ InstallGlobalFunction( ProcessFixpoint, function( arg )
     local   rbase,  image,  pnt,  img,  simg,  t, TestEqualityPointer;
 
     if Length( arg ) = 2  then
-        Print("GAP ProcessFixpoint_rbase beginning\n");
         rbase := arg[ 1 ];
         pnt   := arg[ 2 ];
+        Print("GAP ProcessFixpoint_rbase beginning pnt=", pnt, "\n");
         TestEqualityPointer:=function(str)
           local len;
           len:=Length(rbase.lev);

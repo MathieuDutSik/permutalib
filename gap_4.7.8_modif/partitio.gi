@@ -193,6 +193,7 @@ end );
 ##  Q is either a partition or a single cell.
 ##
 BindGlobal("SplitCellTestfun1",function(Q,pt,no)
+  Print("GAP SplitCellTestfun1\n");
   return PointInCellNo(Q,pt,no);
 end);
 
@@ -207,6 +208,11 @@ end);
 InstallGlobalFunction( SplitCell, function( P, i, Q, j, g, out )
 local   a,  b,  l,  B,  tmp,  m,  x, inflag, outflag,test,k,Pcop,acop,maxmov;
   if GetDebugPartition() then
+
+      if IsPartition(Q) then
+          Print("GAP Q=\n");
+          RawPrintPartition(Q);
+      fi;
 #      Print("GAP i=", i, " out=", out, "\n");
       Print("GAP Before SplitCell_Kernel operation P=\n");
       RawPrintPartition(P);
@@ -244,26 +250,31 @@ local   a,  b,  l,  B,  tmp,  m,  x, inflag, outflag,test,k,Pcop,acop,maxmov;
     else
       test:=SplitCellTestfun2;
     fi;
-
     B:=l-maxmov;
+    Print("GAP maxmov=", maxmov, " B=", B, "\n");
     a := a - 1;
     # Points left of <a>  remain in the cell,   points right of  <b> move
     # out.
     while a < b  do
+      Print("GAP 1 a=", a, " b=", b, "\n");
       # Decrease <b> until a point remains in the cell.
       repeat
+        Print("GAP repeat loop on b\n");
 	b := b - 1;
 	# $b < B$ means that more than <out> points move out.
 	if b < B  then
+          Print("GAP exit 1\n");
 	  return false;
 	fi;
       until not test(Q,P.points[ b ] ^ g,j);
 
+      Print("GAP 2 a=", a, " b=", b, "\n");
       # Increase <a> until a point moved out.
       repeat
 	a := a + 1;
       until (a>b) or test(Q,P.points[ a ] ^ g,j);
 
+      Print("GAP 3 a=", a, " b=", b, "\n");
       # Swap the points.
       if a < b  then
 	tmp := P.points[ a ];
@@ -275,7 +286,9 @@ local   a,  b,  l,  B,  tmp,  m,  x, inflag, outflag,test,k,Pcop,acop,maxmov;
 
 #  fi;
 
+  Print("GAP a=", a, " l=", l, "\n");
   if a>l then
+    Print("GAP exit 2\n");
     # no point moved out
     return false;
   fi;
@@ -289,6 +302,7 @@ local   a,  b,  l,  B,  tmp,  m,  x, inflag, outflag,test,k,Pcop,acop,maxmov;
       Print("GAP After SplitCell_Kernel operation P=\n");
       RawPrintPartition(P);
   fi;
+  Print("GAP exit 3\n");
   return P.lengths[ m ];
 end );
 
