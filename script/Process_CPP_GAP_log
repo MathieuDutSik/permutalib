@@ -70,6 +70,7 @@ def merge_lines_multiline(l_lines):
             curr_line = curr_line.replace(" \n ", " ")
             l_lines_ret.append(curr_line)
             curr_line = ""
+    print("level_bracket=", level_bracket)
     return l_lines_ret
 
 
@@ -87,6 +88,7 @@ def process_lines(l_linesA):
     l_linesC = merge_lines(l_linesB)
     l_linesD = merge_lines_multiline(l_linesC)
     l_linesE = remove_debug_lines(l_linesD)
+    print("l_lines |A|=", len(l_linesA), " |B|=", len(l_linesB), " |C|=", len(l_linesC), " |D|=", len(l_linesD), " |E|=", len(l_linesE))
     return l_linesE
 
 
@@ -104,14 +106,15 @@ def get_firstline(l_lines, eCrit):
         LStr = e_line.split(eCrit)
         if len(LStr) > 1:
             return iline
-    return -1
+    print("We could not find the critical line")
+    for iline in range(nb_line):
+        e_line = l_lines[iline]
+        print("iline=", iline, " e_line=", e_line[:-1])
+    sys.exit(0)
 
 iline1 = get_firstline(lines1, CritLine)
 iline2 = get_firstline(lines2, CritLine)
 print("iline1=", iline1, " iline2=", iline2)
-if iline1 == -1 or iline2 == -1:
-    print("We found iline1=", iline1, " iline2=", iline2)
-    sys.exit(0)
 
 
 

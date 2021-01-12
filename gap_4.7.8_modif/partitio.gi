@@ -280,7 +280,7 @@ end );
 InstallGlobalFunction( IsolatePoint, function( P, a )
     local   i,  pos,  l,  m;
     if GetDebugPartition() then
-        Print("CAP Input Partition\n");
+        Print("GAP Input Partition\n");
         RawPrintPartition(P);
     fi;
 
@@ -300,7 +300,7 @@ InstallGlobalFunction( IsolatePoint, function( P, a )
     P.lengths[ m ] := 1;
     P.lengths[ i ] := P.lengths[ i ] - 1;
     if GetDebugPartition() then
-        Print("CAP After IsolatePoint operation P=\n");
+        Print("GAP After IsolatePoint operation P=\n");
         RawPrintPartition(P);
     fi;
     return i;

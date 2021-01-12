@@ -42,7 +42,7 @@ void RawPrintPartition(Partition const& P)
   std::cerr << "CPP points=" << GapStringIntVector(P.points) << "\n";
   std::cerr << "CPP firsts=" << GapStringIntVector(P.firsts) << "\n";
   std::cerr << "CPP lengths=" << GapStringTVector(P.lengths) << "\n";
-  std::cerr << "CPP cellno=" << GapStringTVector(P.cellno) << "\n";
+  std::cerr << "CPP cellno=" << GapStringIntVector(P.cellno) << "\n";
 }
 
 
