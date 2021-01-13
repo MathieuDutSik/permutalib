@@ -71,6 +71,9 @@ std::pair<bool, StabChain<Telt>> StabChainOp_stabchain(StabChain<Telt> const& G,
 template<typename Telt, typename Tint>
 StabChain<Telt> StabChainOp_stabchain_nofalse(StabChain<Telt> const& G, StabChainOptions<Tint> const& options)
 {
+  if (IsTrivial(G)) {
+    return StabChainOp_trivial_group(G, options);
+  }
   //  std::cerr << "CPP Before call to StabChainOp_stabchain\n";
   std::pair<bool, StabChain<Telt>> eRec = StabChainOp_stabchain(G, options);
   //  std::cerr << "CPP After call to StabChainOp_stabchain\n";

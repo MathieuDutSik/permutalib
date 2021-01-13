@@ -857,6 +857,25 @@ void InsertTrivialStabilizer(StabChain<Telt> & Stot, int const& pnt)
   InitializeSchreierTree(Stot, pnt);
 }
 
+
+template<typename Telt, typename Tint>
+StabChain<Telt> StabChainOp_trivial_group(StabChain<Telt> const& Stot, StabChainOptions<Tint> const& options)
+{
+  std::cerr << "CPP Call to StabChainOp (trivial group)\n";
+  StabChain<Telt> S = EmptyStabChain<Telt>(Stot->comm->n);
+  if (options.base.size() > 0 && !options.reduced) {
+    StabChain<Telt> T = S;
+    for (int const& pnt : options.base) {
+      InsertTrivialStabilizer( T, pnt );
+      T = T->stabilizer;
+    }
+  }
+  return S;
+}
+
+
+
+
 template<typename Telt>
 std::vector<StabChain<Telt>> ListStabChain(StabChain<Telt> const& S)
 {
