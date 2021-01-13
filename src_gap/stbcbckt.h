@@ -739,7 +739,7 @@ bool Refinements_Intersection(rbaseType<Telt> & rbase, imageType<Telt> & image, 
     t = image.perm2.val;
   }
   Telt tinv =Inverse(t);
-  return MeetPartitionStrat(rbase, image, Q, t, strat);
+  return MeetPartitionStrat(rbase, image, Q, tinv, strat);
 }
 
 // The function RRefine is doing the computation using CallFuncList
