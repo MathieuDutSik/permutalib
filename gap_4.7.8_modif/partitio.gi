@@ -12,7 +12,7 @@
 ##  permutation groups.
 ##
 ##  A *partition* is a mutable record with the following components.
-##  \beginitems                             
+##  \beginitems
 ##  `points':  &
 ##       a list of all points contained in the partition, such that
 ##       points from the same cell are neighboured
@@ -27,7 +27,7 @@
 ##
 ##  `lengths': &
 ##       a list of the cell lengths
-##  \enditems                             
+##  \enditems
 ##
 
 
@@ -66,7 +66,7 @@ end;
 ##
 InstallGlobalFunction( Partition, function( list )
     local   P,  i,  c;
-    
+
     P := rec( points := Concatenation( list ),
               firsts := [  ],
              lengths := [  ] );
@@ -94,7 +94,7 @@ InstallGlobalFunction( Partition, function( list )
     return P;
 end );
 
-      
+
 #############################################################################
 ##
 #F  IsPartition( <P> )  . . . . . . . . . . . . test if object is a partition
@@ -124,7 +124,7 @@ end );
 ##
 InstallGlobalFunction( Cells, function( Pi )
     local  cells,  i;
-    
+
     cells := [  ];
     for i  in Reversed( [ 1 .. NumberCells( Pi ) ] )  do
         cells[ i ] := Cell( Pi, i );
@@ -165,7 +165,7 @@ end );
 ##
 InstallGlobalFunction( Fixcells, function( P )
     local   fix,  i;
-    
+
     fix := [  ];
     for i  in [ 1 .. Length( P.lengths ) ]  do
         if P.lengths[ i ] = 1  then
@@ -193,11 +193,12 @@ end );
 ##  Q is either a partition or a single cell.
 ##
 BindGlobal("SplitCellTestfun1",function(Q,pt,no)
-  Print("GAP SplitCellTestfun1\n");
+  Print("GAP SplitCellTestfun1 fPt=", pt, "\n");
   return PointInCellNo(Q,pt,no);
 end);
 
 BindGlobal("SplitCellTestfun2",function(Q,pt,no)
+  Print("GAP SplitCellTestfun2 fPt=", pt, "\n");
   if no=1 then
     return pt in Q;
   else
@@ -208,7 +209,7 @@ end);
 InstallGlobalFunction( SplitCell, function( P, i, Q, j, g, out )
 local   a,  b,  l,  B,  tmp,  m,  x, inflag, outflag,test,k,Pcop,acop,maxmov;
   if GetDebugPartition() then
-
+      Print("GAP SplitCell g=", g, "\n");
       if IsPartition(Q) then
           Print("GAP Q=\n");
           RawPrintPartition(Q);
@@ -217,10 +218,9 @@ local   a,  b,  l,  B,  tmp,  m,  x, inflag, outflag,test,k,Pcop,acop,maxmov;
       Print("GAP Before SplitCell_Kernel operation P=\n");
       RawPrintPartition(P);
   fi;
-  
+
   # If none or  all  points are  moved out,  do  not change <P>  and return
   # 'false'.
-
   a := P.firsts[ i ];
   b := a + P.lengths[ i ];
   l := b - 1;
@@ -229,13 +229,13 @@ local   a,  b,  l,  B,  tmp,  m,  x, inflag, outflag,test,k,Pcop,acop,maxmov;
   # right.
 
   # if B is passed, we moved too many (or all) points
-  if IsInt(out)  then  
+  if IsInt(out)  then
     maxmov:=out;
   else
     maxmov:=P.lengths[i]-1; # maximum number to be moved out: Cellength-1
   fi;
 
-#  if IsPartition(Q) 
+#  if IsPartition(Q)
     # if P.points is a range, or g not internal, we would crash
 #    and IsPlistRep(P.points) and IsInternalRep(g) then
 #    a:=SPLIT_PARTITION(P.points,Q.cellno,j,g,[a,l,maxmov]);
@@ -256,25 +256,28 @@ local   a,  b,  l,  B,  tmp,  m,  x, inflag, outflag,test,k,Pcop,acop,maxmov;
     # Points left of <a>  remain in the cell,   points right of  <b> move
     # out.
     while a < b  do
-      Print("GAP 1 a=", a, " b=", b, "\n");
+      Print("GAP     1 a=", a, " b=", b, "\n");
       # Decrease <b> until a point remains in the cell.
       repeat
-        Print("GAP repeat loop on b\n");
+        Print("GAP B LOOP\n");
 	b := b - 1;
 	# $b < B$ means that more than <out> points move out.
 	if b < B  then
           Print("GAP exit 1\n");
 	  return false;
 	fi;
+#        Print("GAP P.points[ X ] ^ g=", P.points[ b ] ^ g, "\n");
       until not test(Q,P.points[ b ] ^ g,j);
 
-      Print("GAP 2 a=", a, " b=", b, "\n");
+      Print("GAP     2 a=", a, " b=", b, "\n");
       # Increase <a> until a point moved out.
       repeat
+        Print("GAP A LOOP\n");
 	a := a + 1;
+#        Print("GAP P.points[ X ] ^ g=", P.points[ a ] ^ g, "\n");
       until (a>b) or test(Q,P.points[ a ] ^ g,j);
 
-      Print("GAP 3 a=", a, " b=", b, "\n");
+      Print("GAP     3 a=", a, " b=", b, "\n");
       # Swap the points.
       if a < b  then
 	tmp := P.points[ a ];
@@ -327,12 +330,12 @@ InstallGlobalFunction( IsolatePoint, function( P, a )
     if P.lengths[ i ] = 1  then
         return false;
     fi;
-    
+
     pos := Position( P.points, a, P.firsts[ i ] - 1 );
     l := P.firsts[ i ] + P.lengths[ i ] - 1;
     P.points[ pos ] := P.points[ l ];
     P.points[ l ] := a;
-    
+
     m := Length( P.firsts ) + 1;
     P.cellno[ a ] := m;
     P.firsts[ m ] := l;
@@ -407,7 +410,7 @@ end );
 ##
 InstallGlobalFunction( FixcellPoint, function( P, old )
     local   lens,  poss,  p;
-    
+
     lens := P.lengths;
     poss := Filtered( [ 1 .. Length( lens ) ], i ->
                     not i in old  and  lens[ i ] = 1 );
@@ -432,7 +435,7 @@ end );
 ##
 InstallGlobalFunction( FixcellsCell, function( P, Q, old )
     local   K,  I,  i,  k,  start;
-    
+
     K := [  ];  I := [  ];
     for i  in [ 1 .. NumberCells( P ) ]  do
         start := P.firsts[ i ];
@@ -478,7 +481,7 @@ end );
 ##
 InstallGlobalFunction( SmallestPrimeDivisor, function( size )
     local   i;
-    
+
     i := 0;
     if size = 1  then
         return 1;
@@ -527,4 +530,3 @@ end );
 #############################################################################
 ##
 #E
-

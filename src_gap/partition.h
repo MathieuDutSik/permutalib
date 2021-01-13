@@ -242,9 +242,9 @@ int SplitCell_Kernel(Partition & P, int const& i, std::function<bool(int)> const
   std::cerr << "CPP maxmov=" << maxmov << " B=" << (B+1) << "\n";
   a--;
   while (a<b) {
-    std::cerr << "CPP 1 a=" << (a+1) << " b=" << (b+1) << "\n";
+    std::cerr << "CPP     1 a=" << (a+1) << " b=" << (b+1) << "\n";
     while(true) {
-      std::cerr << "CPP repeat loop on b\n";
+      std::cerr << "CPP B LOOP\n";
       b--;
       if (b < B) {
         std::cerr << "CPP exit 1\n";
@@ -253,13 +253,14 @@ int SplitCell_Kernel(Partition & P, int const& i, std::function<bool(int)> const
       if (!test(b))
         break;
     }
-    std::cerr << "CPP 2 a=" << (a+1) << " b=" << (b+1) << "\n";
+    std::cerr << "CPP     2 a=" << (a+1) << " b=" << (b+1) << "\n";
     while(true) {
+      std::cerr << "CPP A LOOP\n";
       a++;
       if (a>b || test(a))
         break;
     }
-    std::cerr << "CPP 3 a=" << (a+1) << " b=" << (b+1) << "\n";
+    std::cerr << "CPP     3 a=" << (a+1) << " b=" << (b+1) << "\n";
     if (a<b) {
       std::swap(P.points[a], P.points[b]);
     }
@@ -291,11 +292,12 @@ int SplitCell_Kernel(Partition & P, int const& i, std::function<bool(int)> const
 template<typename Telt>
 int SplitCell_Partition(Partition & P, int const& i, Partition const& Q, int const& j, Telt const& g, int const& out)
 {
+  std::cerr << "CPP SplitCell g=" << g << "\n";
   std::cerr << "CPP Q=\n";
   RawPrintPartition(Q);
   std::function<bool(int)> test=[&](int const& ePt) -> bool {
     int fPt=PowAct(P.points[ePt], g);
-    std::cerr << "CPP SplitCellTestfun1\n";
+    std::cerr << "CPP SplitCellTestfun1 fPt=" << (fPt+1) << "\n";
     return PointInCellNo(Q, fPt, j);
   };
   return SplitCell_Kernel(P, i, test, out);
