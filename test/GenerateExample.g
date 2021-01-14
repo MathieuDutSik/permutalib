@@ -30,7 +30,7 @@ end;
 
 CreateExampleOnSetCase:=function(FileName, GRP, eSet)
   local LGen, eGen, nbMov, output, iMov, eImg, pos, eVal, eStab;
-  nbMov:=Maximum(LargestMovedPoint(eGRP), Maximum(eSet));
+  nbMov:=Maximum(LargestMovedPoint(GRP), Maximum(eSet));
   #
   Local_RemoveFileIfExist(FileName);
   output:=OutputTextFile(FileName, true);
