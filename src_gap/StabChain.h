@@ -642,6 +642,23 @@ std::vector<Telt> StrongGeneratorsStabChain(StabChain<Telt> const& S)
 }
 
 
+
+template<typename Telt>
+std::vector<Telt> GeneratorsStabChain(StabChain<Telt> const& S)
+{
+  std::set<int> sgs_set;
+  for (auto & pos : S->genlabels)
+    sgs_set.insert(pos);
+  std::vector<Telt> sgs;
+  for (auto & ePos : sgs_set)
+    sgs.push_back(S->comm->labels[ePos]);
+  return sgs;
+}
+
+
+
+
+
 template<typename Telt>
 std::vector<Telt> GeneratorsOfGroup(StabChain<Telt> const& S)
 {

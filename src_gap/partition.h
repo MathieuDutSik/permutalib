@@ -525,6 +525,7 @@ template<typename Telt>
 Partition OrbitsPartition(std::vector<Telt> const& gens, int const&n, std::vector<int> const& Omega)
 {
   std::cerr << "CPP OrbitsPartition, using OrbitsPerms\n";
+  std::cerr << "CPP generators=" << GapStringTVector(gens) << "\n";
   return GetPartition(OrbitsPermsB(gens, n, Omega));
 }
 

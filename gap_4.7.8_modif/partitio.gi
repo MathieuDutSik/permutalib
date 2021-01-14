@@ -473,6 +473,7 @@ InstallGlobalFunction( OrbitsPartition, function( G, Omega )
         return Partition( OrbitsDomain( G, Omega ) );
     else
         Print("GAP OrbitsPartition, using OrbitsPerms\n");
+        Print("GAP generators=", G.generators, "\n");
         return Partition( OrbitsPerms( G.generators, Omega ) );
     fi;
 end );

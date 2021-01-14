@@ -640,8 +640,9 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
     std::cerr << "CPP Matching the ! false test\n";
     auto MainInsert=[&](StabChainPlusLev<Telt> const& lev) -> void {
       if (lev.status != int_int) {
-	std::vector<Telt> LGen = StrongGeneratorsStabChain(lev.Stot);
-	std::cerr << "CPP StrongGeneratorsStabChain(lev) = " << GapStringTVector(SortVector(LGen)) << "\n";
+	std::vector<Telt> LGenStrong = StrongGeneratorsStabChain(lev.Stot);
+	std::cerr << "CPP StrongGeneratorsStabChain(lev) = " << GapStringTVector(SortVector(LGenStrong)) << "\n";
+        std::vector<Telt> LGen = GeneratorsStabChain(lev.Stot);
 	Partition O = OrbitsPartition(LGen, lev.Stot->comm->n, rbase.domain);
 	NicePrintPartition("CPP Before StratMeetPartition O", O);
         KeyUpdatingRbase("RegisterRBasePoint 2.1", rbase);
