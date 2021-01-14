@@ -161,6 +161,8 @@ print("iline1=", iline1, " iline2=", iline2)
 
 nbposs= min(len(lines1) - iline1, len(lines2) - iline2)
 
+
+FoundDifferingLine = False
 for iposs in range(nbposs):
     e_line1=lines1[iline1 + iposs]
     e_line2=lines2[iline2 + iposs]
@@ -189,8 +191,12 @@ for iposs in range(nbposs):
                 jline2 = iline2 + jposs
                 f_line2=lines2[jline2]
                 print("jline2=", jline2, " : ", f_line2[:-1])
-        print("Normal termination of the program")
-        sys.exit(1)
+        FoundDifferingLine = True
 
+if FoundDifferingLine:
+    print("Found a differing line")
+else:
+    print("NO differing line found")
 
-    
+print("Normal termination of the program")
+

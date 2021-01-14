@@ -66,7 +66,9 @@ end;
 ##
 InstallGlobalFunction( Partition, function( list )
     local   P,  i,  c;
-
+    if GetDebugPartition() then
+        Print("GAP list=", list, "\n");
+    fi;
     P := rec( points := Concatenation( list ),
               firsts := [  ],
              lengths := [  ] );
@@ -470,6 +472,7 @@ InstallGlobalFunction( OrbitsPartition, function( G, Omega )
     if IsGroup( G )  then
         return Partition( OrbitsDomain( G, Omega ) );
     else
+        Print("GAP OrbitsPartition, using OrbitsPerms\n");
         return Partition( OrbitsPerms( G.generators, Omega ) );
     fi;
 end );

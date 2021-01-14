@@ -15,6 +15,7 @@ struct Partition {
   std::vector<int> cellno;
 };
 
+
 void NicePrintPartition(std::string const& str, Partition const& P)
 {
   int nbPart=P.firsts.size();
@@ -36,7 +37,7 @@ void NicePrintPartition(std::string const& str, Partition const& P)
   std::cerr << " ]\n";
 }
 
- 
+
 void RawPrintPartition(Partition const& P)
 {
   int nbPart=P.lengths.size();
@@ -118,6 +119,12 @@ void CheckConsistencyPartition(std::string const& str, Partition const& P)
  
 Partition GetPartition(std::vector<std::vector<int>> const& list)
 {
+#ifdef DEBUG_PARTITION
+  std::vector<std::string> LStr;
+  for (auto & eList : list)
+    LStr.push_back(GapStringIntVector(eList));
+  std::cerr << "CPP list=" << GapStringTVector(LStr) << "\n";
+#endif
   std::vector<int> points;
   for (auto & eList : list)
     for (auto & eVal : eList)
@@ -403,8 +410,6 @@ int FixpointCellNo(Partition const& P, int const& i)
 }
 
 
-
-
 int FixcellPoint(Partition const& P, std::set<int> & old)
 {
   int nbPart=P.lengths.size();
@@ -428,7 +433,8 @@ struct typeFixcellsCell {
   std::vector<int> K;
   std::vector<int> I;
 };
- 
+
+
 typeFixcellsCell FixcellsCell(Partition const& P, Partition const& Q, std::set<int> & old)
 {
   std::vector<int> K, I;
@@ -465,10 +471,50 @@ Partition TrivialPartition(std::vector<int> const& Omega)
   return GetPartition({Omega});
 }
 
+
+template<typename Telt>
+std::vector<std::vector<int>> OrbitsPermsB(std::vector<Telt> const& gens, int const&n, std::vector<int> const& Omega)
+{
+  int max=LargestMovedPoint(gens);
+  Face dom(max+1);
+  for (auto & eVal : Omega)
+    dom[eVal] = 1;
+  Face newF(max+1);
+  for (int i=0; i<=max; i++)
+    newF[i] = 1;
+  std::vector<std::vector<int>> orbs;
+  boost::dynamic_bitset<>::size_type fst=dom.find_first();
+  while (fst != boost::dynamic_bitset<>::npos) {
+    int fst_i = int(fst);
+    std::vector<int> orb{fst_i};
+    newF[fst_i] = 0;
+    dom [fst_i] = 0;
+    for (auto & pnt : orb) {
+      for (auto & gen : gens) {
+        int img = PowAct(pnt, gen);
+        if (newF[img]) {
+          orb.push_back(img);
+          newF[img] = 0;
+          dom [img] = 0;
+        }
+      }
+    }
+    orbs.push_back(orb);
+    fst=dom.find_first();
+  }
+  for (auto & pnt : Omega)
+    if (pnt > max)
+      orbs.push_back({pnt});
+  return orbs;
+}
+
+
+
 template<typename Telt>
 Partition OrbitsPartition(std::vector<Telt> const& gens, int const&n, std::vector<int> const& Omega)
 {
-  return GetPartition(OrbitsPerms(gens, n, Omega));
+  std::cerr << "CPP OrbitsPartition, using OrbitsPerms\n";
+  return GetPartition(OrbitsPermsB(gens, n, Omega));
 }
 
 
@@ -485,7 +531,8 @@ int SmallestPrimeDivisor(Tarith const& size)
     i++;
   }
 }
- 
+
+
 template<typename Tarith>
 Partition CollectedPartition(Partition const& P, Tarith const& size)
 {
@@ -513,8 +560,7 @@ Partition CollectedPartition(Partition const& P, Tarith const& size)
   return C;
 }
 
- 
- 
+
 }
 
 #endif
