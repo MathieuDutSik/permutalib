@@ -475,13 +475,17 @@ Partition TrivialPartition(std::vector<int> const& Omega)
 template<typename Telt>
 std::vector<std::vector<int>> OrbitsPermsB(std::vector<Telt> const& gens, int const&n, std::vector<int> const& Omega)
 {
+  std::cerr << "DEBUG OrbitsPermB beginning\n";
   int max=LargestMovedPoint(gens);
   Face dom(max+1);
   for (auto & eVal : Omega)
-    dom[eVal] = 1;
+    if (eVal <= max)
+      dom[eVal] = 1;
+  std::cerr << "DEBUG dom built\n";
   Face newF(max+1);
   for (int i=0; i<=max; i++)
     newF[i] = 1;
+  std::cerr << "DEBUG newF built\n";
   std::vector<std::vector<int>> orbs;
   boost::dynamic_bitset<>::size_type fst=dom.find_first();
   while (fst != boost::dynamic_bitset<>::npos) {
@@ -489,7 +493,10 @@ std::vector<std::vector<int>> OrbitsPermsB(std::vector<Telt> const& gens, int co
     std::vector<int> orb{fst_i};
     newF[fst_i] = 0;
     dom [fst_i] = 0;
-    for (auto & pnt : orb) {
+    std::cerr << "DEBUG Before beginning of pnt loop\n";
+    size_t posOrb=0;
+    while(true) {
+      int pnt = orb[posOrb];
       for (auto & gen : gens) {
         int img = PowAct(pnt, gen);
         if (newF[img]) {
@@ -498,7 +505,11 @@ std::vector<std::vector<int>> OrbitsPermsB(std::vector<Telt> const& gens, int co
           dom [img] = 0;
         }
       }
+      posOrb++;
+      if (posOrb >= orb.size())
+        break;
     }
+    std::cerr << "DEBUG After the pnt loop\n";
     orbs.push_back(orb);
     fst=dom.find_first();
   }

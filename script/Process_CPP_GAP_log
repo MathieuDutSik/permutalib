@@ -168,7 +168,7 @@ for iposs in range(nbposs):
     e_line2=lines2[iline2 + iposs]
 #    import pdb
 #    pdb.set_trace()
-    if e_line1[3:] != e_line2[3:]:
+    if e_line1[3:] != e_line2[3:] and not FoundDifferingLine:
         jline1 = iline1 + iposs
         jline2 = iline2 + iposs
         print("iposs=", iposs, " jline1=", jline1, " jline2=", jline2)
@@ -192,6 +192,9 @@ for iposs in range(nbposs):
                 f_line2=lines2[jline2]
                 print("jline2=", jline2, " : ", f_line2[:-1])
         FoundDifferingLine = True
+
+
+
 
 if FoundDifferingLine:
     print("Found a differing line")
