@@ -2665,7 +2665,7 @@ InstallGlobalFunction( RepOpSetsPermGroup, function( arg )
 
     # Pr := [ Phi, Psi, OnTuples, gen ->
     #         IsSubsetSet( gen!.lftObj, gen!.rgtObj ) ];
-    Print("Before call to PartitionBacktrack\n");
+    Print("GAP Before call to PartitionBacktrack\n");
     return PartitionBacktrack( G, Pr, repr, rbase, [ Q ], L, R );
 end );
 

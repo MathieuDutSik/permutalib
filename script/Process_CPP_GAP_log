@@ -68,9 +68,48 @@ def merge_lines_multiline(l_lines):
             curr_line = curr_line.replace(", \n  ", ", ")
             curr_line = curr_line.replace(",\n  ", ", ")
             curr_line = curr_line.replace(" \n ", " ")
+            curr_line = curr_line.replace(", ,", ",,")
             l_lines_ret.append(curr_line)
             curr_line = ""
     print("level_bracket=", level_bracket)
+    return l_lines_ret
+
+
+def merge_appendable_lines(l_lines):
+    l_lines_ret = []
+    ListSymbol = [ "GAP", "CPP", "DEBUG", "XXX" ]
+    def CorrectLine(e_line):
+        for e_symbol in ListSymbol:
+            if len(e_line) > len(e_symbol):
+                if e_line[:len(e_symbol)] == e_symbol:
+                    return True
+        return False
+    curr_line=""
+    for e_line in l_lines:
+#        print("TEST=", CorrectLine(e_line), "e_line=", e_line)
+        if CorrectLine(e_line):
+            l_lines_ret.append(curr_line + "\n")
+            curr_line = e_line[:-1]
+        else:
+            curr_line += e_line[:-1]
+    return l_lines_ret
+
+
+def remove_space_permutation(l_lines):
+    l_lines_ret = []
+    for e_line in l_lines:
+        levelParenthesis=0
+        f_line=""
+        for ichar in range(len(e_line)):
+            echar = e_line[ichar]
+            if echar == '(':
+                levelParenthesis += 1
+            if echar == ')':
+                levelParenthesis += -1
+            if echar != ' ' or levelParenthesis == 0:
+                f_line += echar
+#        print("e_line=", e_line, " f_line=", f_line)
+        l_lines_ret.append(f_line)
     return l_lines_ret
 
 
@@ -87,9 +126,11 @@ def process_lines(l_linesA):
     l_linesB = eliminate_marked_blocks(l_linesA)
     l_linesC = merge_lines(l_linesB)
     l_linesD = merge_lines_multiline(l_linesC)
-    l_linesE = remove_debug_lines(l_linesD)
-    print("l_lines |A|=", len(l_linesA), " |B|=", len(l_linesB), " |C|=", len(l_linesC), " |D|=", len(l_linesD), " |E|=", len(l_linesE))
-    return l_linesE
+    l_linesE = merge_appendable_lines(l_linesD)
+    l_linesF = remove_space_permutation(l_linesE)
+    l_linesG = remove_debug_lines(l_linesF)
+    print("l_lines |A|=", len(l_linesA), " |B|=", len(l_linesB), " |C|=", len(l_linesC), " |D|=", len(l_linesD), " |E|=", len(l_linesE), " |F|=", len(l_linesF), " |G|=", len(l_linesG))
+    return l_linesG
 
 
 
