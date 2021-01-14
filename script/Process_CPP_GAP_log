@@ -58,6 +58,17 @@ def merge_lines_multiline(l_lines):
     l_lines_ret = []
     curr_line = ""
     level_bracket = 0;
+    def ParseSeqSpace(e_line):
+        prevchar = ''
+        f_line = ""
+        for ic in range(len(e_line)):
+            echar = e_line[ic]
+            if echar != prevchar or echar != ' ':
+                f_line += echar
+            prevchar = echar
+#        print("e_line=", e_line, " f_line=", f_line)
+        return f_line
+
     for e_line in l_lines:
         contrib_level_bracket = e_line.count('[') - e_line.count(']')
         level_bracket += contrib_level_bracket
@@ -69,6 +80,7 @@ def merge_lines_multiline(l_lines):
             curr_line = curr_line.replace(",\n  ", ", ")
             curr_line = curr_line.replace(" \n ", " ")
             curr_line = curr_line.replace(", ,", ",,")
+            curr_line = ParseSeqSpace(curr_line)
             l_lines_ret.append(curr_line)
             curr_line = ""
     print("level_bracket=", level_bracket)
