@@ -28,23 +28,13 @@ end;
 
 
 
-CreateExampleOnSetCase:=function(FileName, GRP, sizSet)
-  local LGen, SetMovedPt, eGen, nbMov, output, iMov, eImg, eSet, pos, eVal, eStab;
-#  PrintStabChain(GRP);
-  LGen:=GeneratorsOfGroup(GRP);
-  SetMovedPt:=[];
-  for eGen in LGen
-  do
-    SetMovedPt:=Union(SetMovedPt, MovedPoints(eGen));
-  od;
-  nbMov:=Length(SetMovedPt);
-  if SetMovedPt<>[1..nbMov] then
-    Print("Some assumption need to be rethough. The set of moving points is a closed interval [1..N]\n");
-    Error("Please correct");
-  fi;
+CreateExampleOnSetCase:=function(FileName, GRP, eSet)
+  local LGen, eGen, nbMov, output, iMov, eImg, pos, eVal, eStab;
+  nbMov:=Maximum(LargestMovedPoint(eGRP), Maximum(eSet));
   #
   Local_RemoveFileIfExist(FileName);
   output:=OutputTextFile(FileName, true);
+  LGen:=GeneratorsOfGroup(GRP);
   AppendTo(output, Length(LGen), " ", nbMov, "\n");
   for eGen in LGen
   do
@@ -56,7 +46,6 @@ CreateExampleOnSetCase:=function(FileName, GRP, sizSet)
     AppendTo(output, "\n");
   od;
   #
-  eSet:=Local_RandomSubset([1..nbMov], sizSet);
   for iMov in [1..nbMov]
   do
     pos:=Position(eSet, iMov);
@@ -76,31 +65,6 @@ CreateExampleOnSetCase:=function(FileName, GRP, sizSet)
 end;
 
 
-#DoMathieu24:=true;
-DoMathieu24:=false;
-if DoMathieu24 then
-  eSize:=12;
-  eFile:=Concatenation("ExampleM24_", String(eSize));
-  CreateExampleOnSetCase(eFile, MathieuGroup(24), eSize);
-fi;
-
-DoMathieu12:=false;
-if DoMathieu12 then
-  eSize:=6;
-  eFile:=Concatenation("ExampleM12_", String(eSize));
-  CreateExampleOnSetCase(eFile, MathieuGroup(12), eSize);
-fi;
-
-DoSym6:=false;
-if DoSym6 then
-  for eSize in [1..3]
-  do
-    eFile:=Concatenation("ExampleSym6_", String(eSize));
-    CreateExampleOnSetCase(eFile, SymmetricGroup(6), eSize);
-  od;
-  #
-fi;
-
 # The case of Sym4 is simpler. However it is also solvable
 # and in that case GAP uses the PCGS algorithms that we do not
 # want to implement.
@@ -114,10 +78,11 @@ fi;
 DoSym5:=true;
 #DoSym5:=false;
 if DoSym5 then
-  eSize:=3;
+  eSet:=Local_RandomSubset([1..5], 3);
   eFile:="ExampleGRP_Set";
-#  CreateExampleOnSetCase(eFile, Group([(1,2,3,4,5,6,7,8,9),(1,2)]), eSize);
-#  CreateExampleOnSetCase(eFile, Group([(1,2,3,4,5),(4,5)]), eSize);
-  CreateExampleOnSetCase(eFile, Group([(1,2,3,4,5),(3,4,5)]), eSize);
+#  CreateExampleOnSetCase(eFile, Group([(1,2,3,4,5,6,7,8,9),(1,2)]), eSet);
+#  CreateExampleOnSetCase(eFile, Group([(1,2,3,4,5),(4,5)]), eSet);
+#  CreateExampleOnSetCase(eFile, Group([(1,2,3,4,5),(3,4,5)]), eSet);
+  CreateExampleOnSetCase(eFile, Group([ (1,4,5,9,3)(2,8,10,7,6)(12,15,16,20,14)(13,19,21,18,17), (1,21,5,12,20)(2,16,3,4,17)(6,18,7,19,15)(8,13,9,14,11) ]), [ 2, 3, 7, 9, 11, 13, 14, 17, 21 ]);
   Print("eFile=", eFile, "\n");
 fi;
