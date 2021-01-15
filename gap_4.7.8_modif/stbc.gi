@@ -1252,8 +1252,11 @@ local   G,  base,  reduced,
     strG_current:=strG_orig;
     Print("GAP Beginning ChangeStabChain, GetStabilizerDepth = ", GetStabilizerDepth(G), "\n");
     base := arg[ 2 ];
-    if Length( arg ) > 2  then  reduced := arg[ 3 ];
-                          else  reduced := true;      fi;
+    if Length( arg ) > 2  then
+        reduced := arg[ 3 ];
+    else
+        reduced := true;
+    fi;
 
     cnj := G.identity;
     S := G;
@@ -1284,6 +1287,10 @@ local   G,  base,  reduced,
           strS_current:=strSloc;
         fi;
       fi;
+      Print("GAP Gptr at str=", str, "\n");
+      PrintStabChain(G);
+      Print("GAP Sptr at str=", str, "\n");
+      PrintStabChain(S);
     end;
     newBase := [  ];
     i := 1;
@@ -1309,6 +1316,7 @@ local   G,  base,  reduced,
            and ( reduced = true  or  i > Length( base ) )  then
             Print("GAP Before RemoveStabChain\n");
             dep1:=GetStabilizerDepth(S);
+            KeyUpdating("Before RemoveStabChain");
             RemoveStabChain( S );
             dep2:=GetStabilizerDepth(S);
             Print("GAP RemoveStabChain dep1=", dep1, " dep2=", dep2, "\n");
@@ -1318,6 +1326,7 @@ local   G,  base,  reduced,
         # Determine the new base point for this level.
         elif i <= Length( base )  then
             new := base[ i ] / cnj;
+            Print("GAP newpnt=", new, "\n");
             i := i + 1;
 
             # Stabilizer chain extension.

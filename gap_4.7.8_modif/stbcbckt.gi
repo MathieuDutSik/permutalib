@@ -1813,11 +1813,12 @@ InstallGlobalFunction( PartitionBacktrack,
                 # Now  we can remove the   entire <R>-orbit  of <b> from  the
                 # candidate list.
                 Print("GAP ORB 2: Before subtract d=", d, " orb[d]=", orb[d], "\n");
-                if      IsBound( R[ d ].translabels )
-                    and IsBound( R[ d ].translabels[ b ] )  then
+                if IsBound( R[ d ].translabels ) and IsBound( R[ d ].translabels[ b ] )  then
+                    Print("GAP subtract case 1\n");
                     SubtractBlist( orb[ d ],
                             BlistList( range, R[ d ].orbit ) );
                 else
+                    Print("GAP subtract case 2\n");
                     SubtractBlistOrbitStabChain( orb[ d ], R[ d ], b );
                 fi;
                 Print("GAP ORB 2: After subtract d=", d, " orb[d]=", orb[d], "\n");

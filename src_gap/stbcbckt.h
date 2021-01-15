@@ -1394,10 +1394,13 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	// Now  we can remove the   entire <R>-orbit  of <b> from  the
 	// candidate list.
 	std::cerr << "CPP ORB 2: Before subtract d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
-	if (R_list[d]->transversal[b] != -1)
+	if (R_list[d]->transversal.size() > 0 && R_list[d]->transversal[b] != -1) {
+          std::cerr << "CPP subtract case 1\n";
 	  SubtractBlist(orb[d], BlistList(range, R_list[d]->orbit));
-	else
+        } else {
+          std::cerr << "CPP subtract case 2\n";
 	  SubtractBlistOrbitStabChain(orb[d], StrongGeneratorsStabChain(R_list[d]), b_int);
+        }
 	std::cerr << "CPP ORB 2: After subtract d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
 	b = orb[d].find_next(b);
 	std::cerr << "CPP End of the loop. Now b=" << PosFail_to_string(b) << "\n";
