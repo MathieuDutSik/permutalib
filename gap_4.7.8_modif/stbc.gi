@@ -94,9 +94,9 @@ PrintStabChainTransversals:=function(S)
   while(true)
   do
     if IsBound(Swork.transversal) then
-      Print("GAP i=", iLevel, " ", Swork.transversal, "\n");
+      Print("GAP i=", iLevel, " transversal=", Swork.transversal, "\n");
     else
-      Print("GAP i=", iLevel, " [  ]\n");
+      Print("GAP i=", iLevel, " transversal=[  ]\n");
     fi;
     iLevel:=iLevel+1;
     if IsBound(Swork.stabilizer) then
@@ -116,9 +116,9 @@ PrintStabChainOrbits:=function(S)
   while(true)
   do
     if IsBound(Swork.orbit) then
-      Print("GAP i=", iLevel, " ", Swork.orbit, "\n");
+      Print("GAP i=", iLevel, " orbit=", Swork.orbit, "\n");
     else
-      Print("GAP i=", iLevel, " [  ]\n");
+      Print("GAP i=", iLevel, " orbit=[  ]\n");
     fi;
     iLevel:=iLevel+1;
     if IsBound(Swork.stabilizer) then

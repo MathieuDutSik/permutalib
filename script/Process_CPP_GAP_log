@@ -92,6 +92,7 @@ def merge_lines_multiline(l_lines):
             curr_line = curr_line.replace(", ,", ",,")
             curr_line = curr_line.replace("\n ", " ")
             curr_line = ParseSeqSpace(curr_line)
+            curr_line = curr_line.replace(" ,", ",")
             l_lines_ret.append(curr_line)
             curr_line = ""
     print("level_bracket=", level_bracket)

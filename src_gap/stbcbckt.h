@@ -1070,8 +1070,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	}
 	// Construct the   next refinement  level. This  also  initializes
 	// <image.partition> for the case ``image = base point''.
-      }
-      else {
+      } else {
 	std::cerr << "CPP Not matching IsTrivialRBase test\n";
         PrintRBaseLevel(rbase, "CPP Before NextRBasePoint");
         std::cerr << "CPP Before NextRBasePoint image.p.c=" << GapStringIntVector(image.partition.cellno) << "\n";
@@ -1088,22 +1087,22 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  // chains of <L> and <R>.
           std::cerr << "CPP Before ChangeStabChain L_list[d]\n";
 	  ChangeStabChain(L_list[d], {rbase.base[d]}, int_false);
-          PrintStabChainTransversals(L_list[d]);
+          PrintStabChain(L_list[d]);
           std::cerr << "CPP After ChangeStabChain L_list[d]\n";
 	  L_list[ d + 1 ] = L_list[ d ]->stabilizer;
           std::cerr << "CPP Before ChangeStabChain R_list[d]\n";
 	  ChangeStabChain(R_list[d], {rbase.base[d]}, int_false);
-          PrintStabChainTransversals(R_list[d]);
+          PrintStabChain(R_list[d]);
           std::cerr << "CPP After ChangeStabChain R_list[d]\n";
 	  R_list[ d + 1 ] = R_list[ d ]->stabilizer;
           std::cerr << "CPP L[d]=\n";
-          PrintStabChainOrbits(L_list[d]);
+          PrintStabChain(L_list[d]);
           std::cerr << "CPP R[d]=\n";
-          PrintStabChainOrbits(R_list[d]);
+          PrintStabChain(R_list[d]);
           std::cerr << "CPP L[d+1]=\n";
-          PrintStabChainOrbits(L_list[d+1]);
+          PrintStabChain(L_list[d+1]);
           std::cerr << "CPP R[d+1]=\n";
-          PrintStabChainOrbits(R_list[d+1]);
+          PrintStabChain(R_list[d+1]);
 	}
       }
     }
@@ -1247,9 +1246,9 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       }
       std::cerr << "CPP dd=" << (dd+1) << " d=" << (d+1) << "\n";
       std::cerr << "CPP L[d]=\n";
-      PrintStabChainOrbits(L_list[d]);
+      PrintStabChain(L_list[d]);
       std::cerr << "CPP R[d]=\n";
-      PrintStabChainOrbits(R_list[d]);
+      PrintStabChain(R_list[d]);
       if (dd == d) {
         std::cerr << "CPP equality dd=d undoto=" << undoto << " |image.partition|=" << NumberCells(image.partition) << "\n";
 	// Undo the  changes made to  <image.partition>, <image.level>
@@ -1314,9 +1313,11 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
           std::cerr << "CPP d=" << (d+1) << " blen=" << blen << "\n";
 	  if (2 * (d+1) <= blen) {
             std::cerr << "CPP Before ChangeStabChain R_list[d] 2\n";
+            std::cerr << "CPP XXX Before ChangeStabChain R[d]=\n";
+            PrintStabChain(R_list[d]);
 	    ChangeStabChain(R_list[d], {b_int}, int_false);
-            std::cerr << "CPP R[d]=\n";
-            PrintStabChainOrbits(R_list[d]);
+            std::cerr << "CPP XXX After ChangeStabChain R[d]=\n";
+            PrintStabChain(R_list[d]);
             std::cerr << "CPP After ChangeStabChain R_list[d] 2\n";
 	    R_list[ d + 1 ] = R_list[ d ]->stabilizer;
 	  } else {

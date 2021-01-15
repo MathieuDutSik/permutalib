@@ -1492,19 +1492,19 @@ InstallGlobalFunction( PartitionBacktrack,
                     # In  the representative  case,  change  the   stabilizer
                     # chains of <L> and <R>.
                     ChangeStabChain( L[ d ], [ rbase.base[ d ] ], false );
-                    PrintStabChainTransversals(L[d]);
+                    PrintStabChain(L[d]);
                     L[ d + 1 ] := L[ d ].stabilizer;
                     ChangeStabChain( R[ d ], [ rbase.base[ d ] ], false );
-                    PrintStabChainTransversals(R[d]);
+                    PrintStabChain(R[d]);
                     R[ d + 1 ] := R[ d ].stabilizer;
                     Print("GAP L[d]=\n");
-                    PrintStabChainOrbits(L[d]);
+                    PrintStabChain(L[d]);
                     Print("GAP R[d]=\n");
-                    PrintStabChainOrbits(R[d]);
+                    PrintStabChain(R[d]);
                     Print("GAP L[d+1]=\n");
-                    PrintStabChainOrbits(L[d+1]);
+                    PrintStabChain(L[d+1]);
                     Print("GAP R[d+1]=\n");
-                    PrintStabChainOrbits(R[d+1]);
+                    PrintStabChain(R[d+1]);
                 fi;
             fi;
 
@@ -1649,9 +1649,9 @@ InstallGlobalFunction( PartitionBacktrack,
             fi;
             Print("GAP dd=", dd, " d=", d, "\n");
             Print("GAP L[d]=\n");
-            PrintStabChainOrbits(L[d]);
+            PrintStabChain(L[d]);
             Print("GAP R[d]=\n");
-            PrintStabChainOrbits(R[d]);
+            PrintStabChain(R[d]);
             if dd = d  then
                 Print("GAP equality dd=d undoto=", undoto, " |image.partition|=", NumberCells(image.partition), "\n");
                 # Undo the  changes made to  <image.partition>, <image.level>
@@ -1723,9 +1723,11 @@ InstallGlobalFunction( PartitionBacktrack,
 
                     if 2 * d <= blen  then
                         Print("GAP Before ChangeStabChain R_list[d] 2\n");
+                        Print("GAP XXX Before ChangeStabChain R[d]=\n");
+                        PrintStabChain(R[d]);
                         ChangeStabChain( R[ d ], [ b ], false );
-                        Print("GAP R[d]=\n");
-                        PrintStabChainOrbits(R[d]);
+                        Print("GAP XXX After ChangeStabChain R[d]=\n");
+                        PrintStabChain(R[d]);
                         Print("GAP After ChangeStabChain R_list[d] 2\n");
                         R[ d + 1 ] := R[ d ].stabilizer;
                     else

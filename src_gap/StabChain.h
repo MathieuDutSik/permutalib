@@ -202,7 +202,7 @@ void PrintStabChainTransversals(StabChain<Telt> const& S)
         V[i] = Swork->comm->labels[eVal];
     }
     //
-    std::cerr << "CPP i=" << iLevel << " " << GapStringMissingTVector(V) << "\n";
+    std::cerr << "CPP i=" << iLevel << " transversal=" << GapStringMissingTVector(V) << "\n";
     Swork = Swork->stabilizer;
     iLevel++;
   }
@@ -215,7 +215,7 @@ void PrintStabChainOrbits(StabChain<Telt> const& S)
   StabChain<Telt> Swork = S;
   int iLevel=0;
   while(Swork != nullptr) {
-    std::cerr << "CPP i=" << iLevel << " " << GapStringIntVector(Swork->orbit) << "\n";
+    std::cerr << "CPP i=" << iLevel << " orbit=" << GapStringIntVector(Swork->orbit) << "\n";
     Swork = Swork->stabilizer;
     iLevel++;
   }
