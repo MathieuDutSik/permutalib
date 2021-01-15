@@ -982,11 +982,9 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
   Face ald=old;
 #ifdef DEBUG_ADD_GEN_SCH
   std::cerr << "CPP AGEST newgens=" << GapStringTVector(newgens) << "\n";
-  std::cerr << "CPP AGEST 1: old=" << GapStringBoolVector(old) << "\n";
-  std::cerr << "CPP AGEST 1: ald=" << GapStringBoolVector(ald) << "\n";
-  std::cerr << "XXX ELIMINATE begin\n";
-  std::cerr << "CPP AGEST labels=" << GapStringTVector(S->comm->labels) << "\n";
-  std::cerr << "XXX ELIMINATE end\n";
+  std::cerr << "DEBUG AGEST 1: old=" << GapStringBoolVector(old) << "\n";
+  std::cerr << "DEBUG AGEST 1: ald=" << GapStringBoolVector(ald) << "\n";
+  std::cerr << "DEBUG AGEST labels=" << GapStringTVector(S->comm->labels) << "\n";
   std::cerr << "CPP AGEST 2: genlabels=" << GapStringIntVector(S->genlabels) << "\n";
 #endif
   for (auto & gen : newgens) {
@@ -1014,10 +1012,8 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
     }
   }
 #ifdef DEBUG_ADD_GEN_SCH
-  //  std::cerr << "XXX ELIMINATE begin\n";
-  std::cerr << "CPP AGEST 2: old=" << GapStringBoolVector(old) << "\n";
-  std::cerr << "CPP AGEST 2: ald=" << GapStringBoolVector(ald) << "\n";
-  //  std::cerr << "XXX ELIMINATE end\n";
+  std::cerr << "DEBUG AGEST 2: old=" << GapStringBoolVector(old) << "\n";
+  std::cerr << "DEBUG AGEST 2: ald=" << GapStringBoolVector(ald) << "\n";
 #endif
 
   int len = S->orbit.size();

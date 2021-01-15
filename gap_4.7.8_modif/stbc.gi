@@ -615,11 +615,9 @@ InstallGlobalFunction( AddGeneratorsExtendSchreierTree, function( S, new )
     ald := StructuralCopy( old );
     if debug_fct then
         Print("GAP AGEST newgens=", new, "\n");
-        Print("GAP AGEST 1: old=", old, "\n");
-        Print("GAP AGEST 1: ald=", ald, "\n");
-        Print("XXX ELIMINATE begin\n");
-        Print("GAP AGEST labels=", S.labels, "\n");
-        Print("XXX ELIMINATE end\n");
+        Print("DEBUG AGEST 1: old=", old, "\n");
+        Print("DEBUG AGEST 1: ald=", ald, "\n");
+        Print("DEBUG AGEST labels=", S.labels, "\n");
         Print("GAP AGEST 2: genlabels=", S.genlabels, "\n");
     fi;
     for gen  in new  do
@@ -648,10 +646,8 @@ InstallGlobalFunction( AddGeneratorsExtendSchreierTree, function( S, new )
         fi;
     od;
     if debug_fct then
-#        Print("XXX ELIMINATE begin\n");
-        Print("GAP AGEST 2: old=", old, "\n");
-        Print("GAP AGEST 2: ald=", ald, "\n");
-#        Print("XXX ELIMINATE end\n");
+        Print("DEBUG AGEST 2: old=", old, "\n");
+        Print("DEBUG AGEST 2: ald=", ald, "\n");
     fi;
 
     # Extend the orbit and the transversal with the new labels.
