@@ -1,6 +1,16 @@
 #ifndef GAP_PRINT_INCLUDE
 #define GAP_PRINT_INCLUDE
 
+namespace permutalib {
+
+static const int int_reducedm1 = -1;
+static const int int_false = 0;
+static const int int_true = 1;
+static const int int_fail = 2;
+static const int int_int  = 3;
+static const int int_perm = 4;
+static const int int_group = 5;
+static const int int_stablev = 6;
 
 template<typename T>
 std::string GapStringTVector(std::vector<T> const& f)
@@ -41,6 +51,17 @@ std::string GapStringIntVector(std::vector<int> const& f)
   return str;
 }
 
+std::string GapStringTrueFalseFail(int const& v)
+{
+  if (v == int_true)
+    return std::string("true");
+  if (v == int_false)
+    return std::string("false");
+  if (v == int_fail)
+    return std::string("fail");
+  return std::string("Unsupported case in GapStringTrueFalseFail\n");
+}
+
 std::string GapStringBool(bool const& v)
 {
   if (v)
@@ -48,7 +69,6 @@ std::string GapStringBool(bool const& v)
   else
     return std::string("false");
 }
-
 
 std::string GapStringBoolVector(Face const& f)
 {
@@ -180,5 +200,5 @@ std::string GapStringMissingTVector(std::vector<std::optional<T>> const& f)
   return os.str();
 }
 
-
+}
 #endif

@@ -1237,24 +1237,38 @@ InstallGlobalFunction( RRefine, function( rbase, image, uscore )
 local  Rf,  t;
   Print("GAP uscore=", uscore, "\n");
   if not uscore then
+    Print("GAP case of NOT uscore\n");
     for Rf  in rbase.rfm[ image.depth ]  do
       Print("GAP Doing one CallFuncList 1\n");
       t := CallFuncList( Refinements.( Rf.func ), Concatenation
 		    ( [ rbase, image ], Rf.args ) );
-      if   t = false  then  return fail;
-      elif t <> true  then  return t;     fi;
+      if   t = false then
+          Print("GAP 1 return fail\n");
+          return fail;
+      elif t <> true then
+          Print("GAP 1 return t\n");
+          return t;
+      fi;
     od;
+    Print("GAP 1 return true\n");
     return true;
   else
+    Print("GAP case of uscore\n");
     for Rf  in rbase.rfm[ image.depth ]  do
       Print("GAP Doing one CallFuncList 2\n");
       if Rf.func[ 1 ] = '_'  then
 	t := CallFuncList( Refinements.( Rf.func ), Concatenation
 		      ( [ rbase, image ], Rf.args ) );
-	if   t = false  then  return fail;
-	elif t <> true  then  return t;     fi;
+	if   t = false then
+            Print("GAP 2 return fail\n");
+            return fail;
+	elif t <> true then
+            Print("GAP 2 return t\n");
+            return t;
+        fi;
       fi;
     od;
+    Print("GAP 2 return true\n");
     return true;
   fi;
 
@@ -1263,8 +1277,11 @@ local  Rf,  t;
       if not uscore  or  Rf.func[ 1 ] = '_'  then
 	  t := CallFuncList( Refinements.( Rf.func ), Concatenation
 			( [ rbase, image ], Rf.args ) );
-	  if   t = false  then  return fail;
-	  elif t <> true  then  return t;     fi;
+	  if   t = false  then
+              return fail;
+	  elif t <> true  then
+              return t;
+          fi;
       fi;
   od;
   return true;
@@ -1676,6 +1693,7 @@ InstallGlobalFunction( PartitionBacktrack,
                     t := RRefine( rbase, image, false );
                     Print("GAP After RRefine 2 oldcel=", image.partition.cellno, "\n");
                 else
+                    Print("GAP assignation of t to fail\n");
                     t := fail;
                 fi;
                 Print("GAP After assignment of t. t.status=", t, "\n");

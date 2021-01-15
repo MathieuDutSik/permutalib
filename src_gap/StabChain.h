@@ -40,7 +40,7 @@
 
 
 namespace permutalib {
-
+  /*
 static const int int_reducedm1 = -1;
 static const int int_false = 0;
 static const int int_true = 1;
@@ -49,7 +49,7 @@ static const int int_int  = 3;
 static const int int_perm = 4;
 static const int int_group = 5;
 static const int int_stablev = 6;
-
+  */
 
 std::string GetIntTypeNature(int const& val)
 {

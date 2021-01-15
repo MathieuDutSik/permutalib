@@ -764,35 +764,42 @@ int RRefine(rbaseType<Telt> & rbase, imageType<Telt> & image, bool const& uscore
     return true;
   };
   if (!uscore) {
+    std::cerr << "CPP case of NOT uscore\n";
     for (auto & Rf : rbase.rfm[image.depth]) {
       std::cerr << "CPP Doing one CallFuncList 1\n";
       bool t = Evaluation(Rf);
       if (!t) {
+        std::cerr << "CPP 1 return fail\n";
 	return int_fail;
       }
       else {
 	if (!t) {
+          std::cerr << "CPP 1 return t\n";
 	  return BoolToInt(t);
 	}
       }
     }
+    std::cerr << "CPP 1 return true\n";
     return int_true;
-  }
-  else {
+  } else {
+    std::cerr << "CPP case of uscore\n";
     for (auto & Rf : rbase.rfm[image.depth]) {
       std::cerr << "CPP Doing one CallFuncList 2\n";
       if (UnderscoreNature(Rf.nature)) {
 	bool t = Evaluation(Rf);
 	if (!t) {
+          std::cerr << "CPP 2 return fail\n";
 	  return int_fail;
 	}
 	else {
 	  if (!t) {
+            std::cerr << "CPP 2 return t\n";
 	    return BoolToInt(t);
 	  }
 	}
       }
     }
+    std::cerr << "CPP 2 return true\n";
     return int_true;
   }
 }
@@ -1278,9 +1285,10 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  t.status = RRefine(rbase, image, false);
           std::cerr << "CPP After RRefine 2 oldcel=" << GapStringIntVector(image.partition.cellno) << "\n";
         } else {
+          std::cerr << "CPP assignation of t to fail\n";
 	  t.status = int_fail;
         }
-        std::cerr << "CPP After assignment of t. t.status=" << GapStringBool(t.status) << "\n";
+        std::cerr << "CPP After assignment of t. t.status=" << GapStringTrueFalseFail(t.status) << "\n";
 
 	if (t.status != int_fail) {
           std::cerr << "CPP case of not fail\n";
