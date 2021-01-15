@@ -1705,10 +1705,10 @@ InstallGlobalFunction( PartitionBacktrack,
                     #   without affecting <L>, so take a copy.
                     Print("GAP wasTriv=", wasTriv, " d=", d, "\n");
                     Print("GAP L[d]=\n");
-                    PrintStabChainOrbits(L[d]);
+                    PrintStabChain(L[d]);
                     Print("GAP R[d]=\n");
-                    PrintStabChainOrbits(R[d]);
-                    Print("GAP TestEquality=", IsIdenticalObj( L[ d ], R[ d ] ), "\n");
+                    PrintStabChain(R[d]);
+                    Print("GAP IsIdenticalObj=", IsIdenticalObj( L[ d ], R[ d ] ), "\n");
                     if wasTriv  and  IsIdenticalObj( L[ d ], R[ d ] )  then
                         Print("GAP Assigning R from d\n");
                         R{ [ d .. Length( rbase.base ) ] } := List(

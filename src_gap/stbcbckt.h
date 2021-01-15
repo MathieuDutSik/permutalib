@@ -1297,11 +1297,11 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  //   without affecting <L>, so take a copy.
           std::cerr << "CPP wasTriv=" << wasTriv << " d=" << (d+1) << "\n";
           std::cerr << "CPP L[d]=\n";
-          PrintStabChainOrbits(L_list[d]);
+          PrintStabChain(L_list[d]);
           std::cerr << "CPP R[d]=\n";
-          PrintStabChainOrbits(R_list[d]);
-          std::cerr << "CPP TestEquality=" << TestEqualityStabChain(L_list[d], R_list[d]) << "\n";
-	  if (wasTriv && TestEqualityStabChain(L_list[d], R_list[d])) {
+          PrintStabChain(R_list[d]);
+          std::cerr << "CPP IsIdenticalObj=" << IsIdenticalObj(L_list[d], R_list[d]) << "\n";
+	  if (wasTriv && IsIdenticalObj(L_list[d], R_list[d])) {
             std::cerr << "CPP Assigning R from d\n";
 	    SetStabChainFromLevel(R_list, L_list, d, rbase.base.size());
 	    branch = d;

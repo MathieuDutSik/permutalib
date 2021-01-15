@@ -40,16 +40,6 @@
 
 
 namespace permutalib {
-  /*
-static const int int_reducedm1 = -1;
-static const int int_false = 0;
-static const int int_true = 1;
-static const int int_fail = 2;
-static const int int_int  = 3;
-static const int int_perm = 4;
-static const int int_group = 5;
-static const int int_stablev = 6;
-  */
 
 std::string GetIntTypeNature(int const& val)
 {
@@ -160,6 +150,14 @@ template<typename Telt>
 using StabChain = std::shared_ptr<StabLevel<Telt>>;
 // other possible entries:
 // transimages, genimages, labelimages, idimage
+
+
+template<typename Telt>
+bool IsIdenticalObj(StabChain<Telt> const& S1, StabChain<Telt> const& S2)
+{
+  return S1 == S2;
+}
+
 
 
 
