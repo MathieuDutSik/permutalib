@@ -480,10 +480,13 @@ bool MeetPartitionStrat(rbaseType<Telt> const& rbase, imageType<Telt> & image, P
   if (strat.size() == 0)
     return false;
   for (auto & pRec : strat) {
-    int eFix=FixpointCellNo(image.partition, pRec.i);
     std::cerr << "CPP ProcessFixpoint_image, Case MeetPartitionStrat\n";
-    if ((pRec.p == -1 && !ProcessFixpoint_image(image, pRec.s, eFix, -1)) ||
-	(pRec.p != -1 && SplitCell_Partition(image.partition, pRec.p, S, pRec.s, g, pRec.i ) != pRec.i))
+    if (pRec.p == -1) {
+      int eFix = FixpointCellNo(image.partition, pRec.i);
+      if (!ProcessFixpoint_image(image, pRec.s, eFix, -1))
+        return false;
+    }
+    if (pRec.p != -1 && SplitCell_Partition(image.partition, pRec.p, S, pRec.s, g, pRec.i ) != pRec.i)
       return false;
   }
   return true;

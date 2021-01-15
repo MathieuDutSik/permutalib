@@ -245,7 +245,7 @@ end;
 #F  MeetPartitionStrat( <rbase>,<image>,<S>,<strat> ) .  meet acc. to <strat>
 ##
 InstallGlobalFunction( MeetPartitionStrat, function(rbase,image,S,g,strat )
-local  P,  p;
+  local P, p, eFix;
   Print("GAP Running MeetPartitionStrat\n");
   if Length( strat ) = 0  then
     return false;
@@ -253,6 +253,8 @@ local  P,  p;
 
   P := image.partition;
   for p  in strat  do
+#    Print("GAP pRec.i=", p[3], "\n");
+#    eFix := FixpointCellNo( P, p[3] );
     Print("GAP ProcessFixpoint_image, Case MeetPartitionStrat\n");
     if p[1] =  0  and
       not ProcessFixpoint( image, p[2], FixpointCellNo( P, p[3] ) )
