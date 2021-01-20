@@ -982,8 +982,10 @@ InstallGlobalFunction( StabChainSwap, function( S )
             if ind > Length( S.orbit )  then
                 return false;
             fi;
+            Print("GAP |orbit|=", Length(S.orbit), " ind=", ind, "\n");
 
             pnt := S.orbit[ ind ];
+            Print("GAP ind=", ind, " pnt=", pnt, "\n");
         until not IsBound( Tstab.translabels[ pnt ] );
         Print("GAP ind=", ind, " pnt=", pnt, "\n");
 
@@ -1411,15 +1413,17 @@ local   G,  base,  reduced,
     Print("GAP LEAVE GetStabilizerDepth(S)=", GetStabilizerDepth(S), " i=", i, " |base|=", Length(base), "\n");
     Print("GAP Ending ChangeStabChain, GetStabilizerDepth(G) = ", GetStabilizerDepth(G), "\n");
     Print("GAP Ending ChangeStabChain, GetStabilizerDepth(S) = ", GetStabilizerDepth(S), "\n");
-    Print("GAP sgs(G) = ", StrongGeneratorsStabChain(G), "\n");
-    Print("GAP sgs(S) = ", StrongGeneratorsStabChain(S), "\n");
+    PrintStabChain(G);
+    PrintStabChain(S);
+#    Print("GAP sgs(G) = ", StrongGeneratorsStabChain(G), "\n");
+#    Print("GAP sgs(S) = ", StrongGeneratorsStabChain(S), "\n");
     strG_final:=GetStringExpressionOfStabChain(G);
     strS:=GetStringExpressionOfStabChain(S);
 #    Print("GAP ChangeStabChainOPER G change: ", strG_orig=strG_final, "\n");
 #    Print("GAP ChangeStabChainOPER S<>G: ", strS=strG_final, "\n");
 
     # Conjugate to move all the points to the beginning of their orbit.
-    Print("GAP ChangeStabChain 2 orbit=", PrintTopOrbit(G), "\n");
+#    Print("GAP ChangeStabChain 2 orbit=", PrintTopOrbit(G), "\n");
     Print("GAP Before ConjugateStabChain cnj=", cnj, "\n");
     if cnj <> S.identity  then
         ConjugateStabChain( G, G, cnj, cnj );

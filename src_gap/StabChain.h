@@ -1260,17 +1260,20 @@ bool StabChainSwap(StabChain<Telt> & Stot)
     }
   }
   //
-  int ind = 0;
-  int len = Stot->orbit.size() * Stot->stabilizer->orbit.size() / Ttot->orbit.size();
-  std::cerr << "CPP StabChainSwap |Tstab->orbit|=" << int(Tstab->orbit.size()) << " len=" << len << "\n";
-  while (int(Tstab->orbit.size()) < len) {
+  size_t ind = 0;
+  size_t len = Stot->orbit.size() * Stot->stabilizer->orbit.size() / Ttot->orbit.size();
+  std::cerr << "CPP StabChainSwap |Tstab->orbit|=" << int(Tstab->orbit.size()) << " len=" << int(len) << "\n";
+  while (Tstab->orbit.size() < len) {
     std::cerr << "CPP beginning of loop\n";
     int pnt;
     while(true) {
       ind++;
-      if (ind > int(Stot->orbit.size()))
+      if (ind >= Stot->orbit.size())
 	return false;
+      std::cerr << "CPP |orbit|=" << Stot->orbit.size() << " ind=" << (ind+1) << "\n";
       pnt = Stot->orbit[ind];
+      std::cerr << "CPP ind=" << (ind+1) << " pnt=" << (pnt+1) << "\n";
+      std::cerr << "DEBUG |Tstab->transversal|=" << Tstab->transversal.size() << " pnt=" << pnt << "\n";
       if (Tstab->transversal[pnt] == -1)
 	break;
     }
@@ -1664,9 +1667,11 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
   std::cerr << "CPP LEAVE GetStabilizerDepth(S)=" << GetStabilizerDepth(Sptr) << " i=" << (i+1) << " |base|=" << basSiz << "\n";
   std::cerr << "CPP Ending ChangeStabChain, GetStabilizerDepth(G) = " << GetStabilizerDepth(Gptr) << "\n";
   std::cerr << "CPP Ending ChangeStabChain, GetStabilizerDepth(S) = " << GetStabilizerDepth(Sptr) << "\n";
-  std::cerr << "CPP sgs(G) = " << GapStringTVector(SortVector(StrongGeneratorsStabChain(Gptr))) << "\n";
-  std::cerr << "CPP sgs(S) = " << GapStringTVector(SortVector(StrongGeneratorsStabChain(Sptr))) << "\n";
-  std::cerr << "CPP ChangeStabChain 2 orbit=" << PrintTopOrbit(Gptr) << "\n";
+  PrintStabChain(Gptr);
+  PrintStabChain(Sptr);
+  //  std::cerr << "CPP sgs(G) = " << GapStringTVector(SortVector(StrongGeneratorsStabChain(Gptr))) << "\n";
+  //  std::cerr << "CPP sgs(S) = " << GapStringTVector(SortVector(StrongGeneratorsStabChain(Sptr))) << "\n";
+  //  std::cerr << "CPP ChangeStabChain 2 orbit=" << PrintTopOrbit(Gptr) << "\n";
   std::cerr << "CPP Before ConjugateStabChain cnj=" << cnj << "\n";
 #endif
   if (!cnj.isIdentity())
