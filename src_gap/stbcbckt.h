@@ -913,22 +913,6 @@ Telt MappingPermListList(int const& n, std::vector<int> const& src, std::vector<
 }
 
 
-template<typename T>
-void AssignationVectorGapStyle(std::vector<T> & eVect, int const& pos, T const& val)
-{
-  int siz=eVect.size();
-  if (pos < siz) {
-    eVect[pos] = val;
-    return;
-  }
-#ifdef DEBUG
-  if (pos != siz) {
-    std::cerr << "Assignation leaves gap in the vector. Not allowed\n";
-    throw TerminalException{1};
-  }
-#endif
-  eVect.push_back(val);
-}
 
 std::string GetStringGAP(Face const& f)
 {

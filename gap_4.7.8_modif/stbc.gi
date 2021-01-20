@@ -666,7 +666,7 @@ InstallGlobalFunction( AddGeneratorsExtendSchreierTree, function( S, new )
         fi;
         while i <= Length( S.orbit )  do
             if debug_fct then
-              Print("GAP   AGEST i=", i, "\n");
+              Print("GAP   AGEST i=", i, " |cycles|=", Length(S.cycles), "\n");
             fi;
             for j  in S.genlabels  do
 
@@ -677,19 +677,25 @@ InstallGlobalFunction( AddGeneratorsExtendSchreierTree, function( S, new )
                       Print("GAP     AGEST img=", img, " g=", S.labels[j], "\n");
                     fi;
                     if IsBound( S.translabels[ img ] )  then
+                        if debug_fct then
+                            if i > Length(S.cycles) then
+                                Print("DEBUG XXX CycleLength i=", i, " |S.cycles|=", Length(S.cycles), "\n");
+                            fi;
+                            Print("GAP |S->cycles|=", Length(S.cycles), " i=", i, "\n");
+                        fi;
                         S.cycles[ i ] := true;
                         if debug_fct then
-                          Print("GAP       AGEST assign true\n");
+                            Print("GAP       AGEST assign true\n");
                         fi;
                     else
                         S.translabels[ img ] := j;
                         S.transversal[ img ] := S.labels[ j ];
                         if debug_fct then
-                          Print("GAP       AGEST S.transversal[img]=", S.transversal[img], "\n");
+                            Print("GAP       AGEST S.transversal[img]=", S.transversal[img], "\n");
                         fi;
                         Add( S.orbit, img );
                         if debug_fct then
-                          Print("GAP       AGEST insert img\n");
+                            Print("GAP       AGEST insert img\n");
                         fi;
                         Add( S.cycles, false );
                     fi;
@@ -954,6 +960,7 @@ InstallGlobalFunction( StabChainSwap, function( S )
     # set $T = S$ and compute $b^T$ and a transversal $T/T_b$
     T := EmptyStabChain( S.labels, S.identity, b );
     Unbind( T.generators );
+    Print("GAP LGens=", S.generators, "\n");
     AddGeneratorsExtendSchreierTree( T, S.generators );
     Print("GAP StabChainSwap : after first AGEST\n");
 

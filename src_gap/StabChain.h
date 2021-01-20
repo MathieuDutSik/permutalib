@@ -63,6 +63,23 @@ std::string GetIntTypeNature(int const& val)
 
 
 
+template<typename T>
+void AssignationVectorGapStyle(std::vector<T> & eVect, int const& pos, T const& val)
+{
+  int siz=eVect.size();
+  if (pos < siz) {
+    eVect[pos] = val;
+    return;
+  }
+#ifdef DEBUG
+  if (pos != siz) {
+    std::cerr << "Assignation leaves gap in the vector. Not allowed\n";
+    throw TerminalException{1};
+  }
+#endif
+  eVect.push_back(val);
+}
+
 
 template<typename T>
 void PrintVectDebug(std::string const& str, std::vector<T> const& V)
@@ -262,15 +279,15 @@ void PrintStabChain(StabChain<Telt> const& S)
 
 
 template<typename Telt>
-int GetStabilizerDepth(StabChain<Telt> const& Sptr)
+int GetStabilizerDepth(StabChain<Telt> const& S1)
 {
-  StabChain<Telt> Ssec = Sptr;
+  StabChain<Telt> S2 = S1;
   int dep = 0;
   while(true) {
-    if (Ssec == nullptr)
+    if (S2 == nullptr)
       break;
     dep++;
-    Ssec = Ssec->stabilizer;
+    S2 = S2->stabilizer;
   }
   return dep;
 }
@@ -1042,16 +1059,21 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
 #endif
     while (i < int(S->orbit.size())) {
 #ifdef DEBUG_ADD_GEN_SCH
-      std::cerr << "CPP   AGEST i=" << (i+1) << "\n";
+      std::cerr << "CPP   AGEST i=" << (i+1) << " |cycles|=" << S->cycles.size() << "\n";
 #endif
       for (int& j : S->genlabels) {
 	if (i > len-1 || old[j] == 0) {
 	  int img=SlashAct(S->orbit[i], S->comm->labels[j]);
 #ifdef DEBUG_ADD_GEN_SCH
 	  std::cerr << "CPP     AGEST img=" << (img+1) << " g=" << S->comm->labels[j] << "\n";
+          //	  std::cerr << "DEBUG |S->transversal|=" << S->transversal.size() << " img=" << img << "\n";
 #endif
 	  if (S->transversal[img] != -1) {
-	    S->cycles[i]=true;
+#ifdef DEBUG_ADD_GEN_SCH
+	    std::cerr << "CPP       |S->cycles|=" << S->cycles.size() << " i=" << (i+1) << "\n";
+#endif
+            AssignationVectorGapStyle(S->cycles, i, int8_t(true));
+            //            S->cycles[i] = true;
 #ifdef DEBUG_ADD_GEN_SCH
 	    std::cerr << "CPP       AGEST assign true\n";
 #endif
@@ -1233,6 +1255,9 @@ std::vector<Telt> GetListGenerators(StabChain<Telt> const& Stot)
   return LGens;
 }
 
+
+
+
 template<typename Telt>
 bool StabChainSwap(StabChain<Telt> & Stot)
 {
@@ -1244,6 +1269,9 @@ bool StabChainSwap(StabChain<Telt> & Stot)
   std::cerr << "CPP StabChainSwap a=" << (a+1) << " b=" << (b+1) << "\n";
   //
   std::vector<Telt> LGens = GetListGenerators(Stot);
+  // We have some missing entries in the S.generators.
+  // Apparently, the S.generators contains generators that are not used.
+  std::cerr << "CPP LGens=" << GapStringTVector(LGens) << "\n";
   //
   //  StabChain<Telt> Ttot = EmptyStabChainPlusNode<Telt>(n, b);
   StabChain<Telt> Ttot = EmptyStabChainPlusCommonPlusNode(Stot->comm, n, b);
