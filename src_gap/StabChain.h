@@ -1595,8 +1595,7 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
 #ifdef DEBUG_CHANGE_STAB_CHAIN
         KeyUpdating("After S:=S.stabilizer 1");
 #endif
-      }
-      else if (reduced == int_false || !IsFixedStabilizer(Sptr, newpnt )) {
+      } else if (reduced == int_false || !IsFixedStabilizer(Sptr, newpnt )) {
 	if (Sptr->stabilizer != nullptr) {
 #ifdef DEBUG_CHANGE_STAB_CHAIN
           KeyUpdating("Before StabChainForcePoint");
@@ -1634,12 +1633,25 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
 #ifdef DEBUG_CHANGE_STAB_CHAIN
       std::cerr << "CPP Stabilizer shift in ChangeStabChain\n";
 #endif
-      int dep1=GetStabilizerDepth(Sptr);
-      Sptr->stabilizer = Sptr->stabilizer->stabilizer;
-      int dep2=GetStabilizerDepth(Sptr);
+
+      Sptr->genlabels = Sptr->stabilizer->genlabels;
+      if (Sptr->stabilizer->orbit.size() > 0) {
+        Sptr->orbit = Sptr->stabilizer->orbit;
+        Sptr->transversal = Sptr->stabilizer->transversal;
+      } else {
+        Sptr->orbit.clear();
+        Sptr->transversal.clear();
+      }
+      if (Sptr->stabilizer->stabilizer != nullptr) {
+        int dep1=GetStabilizerDepth(Sptr);
+        Sptr->stabilizer = Sptr->stabilizer->stabilizer;
+        int dep2=GetStabilizerDepth(Sptr);
 #ifdef DEBUG_CHANGE_STAB_CHAIN
-      std::cerr << "CPP Manual Removal dep1=" << dep1 << " dep2=" << dep2 << "\n";
+        std::cerr << "CPP Manual Removal dep1=" << dep1 << " dep2=" << dep2 << "\n";
 #endif
+      } else {
+        Sptr->stabilizer = nullptr;
+      }
     } else {
       newBase.push_back(old);
       Sptr = Sptr->stabilizer;

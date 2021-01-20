@@ -1378,6 +1378,7 @@ local   G,  base,  reduced,
         # base).
         elif    old in newBase
              or reduced = true  and  Length( S.orbit ) = 1  then
+            Print("GAP Stabilizer shift in ChangeStabChain\n");
             S.labels     := S.stabilizer.labels;
             S.genlabels  := S.stabilizer.genlabels;
             S.generators := S.stabilizer.generators;
