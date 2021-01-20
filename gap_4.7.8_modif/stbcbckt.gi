@@ -1826,10 +1826,11 @@ InstallGlobalFunction( PartitionBacktrack,
             fi;
 
             b := Position( orb[ d ], true, b );
-	    Print("GAP End of the loop. Now b=", b, "\n");
+	    Print("GAP End of the loop. 1 Now b=", b, "\n");
             if b <> fail  and  b > max  then
                 b := fail;
             fi;
+	    Print("GAP End of the loop. 2 Now b=", b, "\n");
         od;
 
         Print("GAP PBEnumerate, step 11, EXIT 10 |L|=", Length(L), "\n");

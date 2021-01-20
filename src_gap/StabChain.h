@@ -18,7 +18,6 @@
   ---MinimalElementCosetStabChain for coset representatives.
   ---ListStabChain since we are using a different design in our code.
   ---OrbitStabChain which seems used by no code at all.
-  ---StabChainForcePoint seems not to be used
   ---knownBase seems strange. We should be able to work completely without it,
      since I never set up the knownBase in the first place.
   ---
@@ -1204,18 +1203,23 @@ void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, Stab
 template<typename Telt>
 bool StabChainForcePoint(StabChain<Telt> & Stot, int const& pnt)
 {
-  std::cerr << "CPP Beginning of StabChainForcePoint\n";
-  if (Stot->transversal[pnt] == -1) {
+  std::cerr << "CPP Beginning of StabChainForcePoint pnt=" << (pnt+1) << "\n";
+  PrintStabChain(Stot);
+  std::cerr << "DEBUG |Stot->transversal|=" << Stot->transversal.size() << "\n";
+  if (Stot->transversal.size() == 0 || Stot->transversal[pnt] == -1) {
     std::cerr << "CPP Matching the first test\n";
     if (IsFixedStabilizer(Stot, pnt )) {
       std::cerr << "CPP Matching the second test\n";
       InsertTrivialStabilizer(Stot, pnt);
     }
     else {
-      if (!StabChainForcePoint(Stot->stabilizer, pnt) || !StabChainSwap(Stot))
+      if (!StabChainForcePoint(Stot->stabilizer, pnt) || !StabChainSwap(Stot)) {
+        std::cerr << "CPP StabChainForcePoint, return false\n";
 	return false;
+      }
     }
   }
+  std::cerr << "CPP StabChainForcePoint, return true\n";
   return true;
 }
 

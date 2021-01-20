@@ -50,12 +50,16 @@ end;
 
 
 TestSpecificGroupSet:=function(nbMov, eGRP, eSet)
-    local FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, eStab1, eStab2, test;
+    local eDir, FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, eStab1, eStab2, test;
     Print("Treating one pair Group/Set\n");
     if Maximum(eSet) > nbMov then
         Error("The eSet is too large");
     fi;
-    FileName:="/tmp/Input";
+    eDir:="/tmp/DebugStabOnSets_datarun/";
+    eCommand:=Concatenation("mkdir -p ", eDir);
+    Exec(eCommand);
+    #
+    FileName:=Concatenation(eDir, "Input");
     RemoveFileIfExist(FileName);
     output:=OutputTextFile(FileName, true);
     LGen:=GeneratorsOfGroup(eGRP);
@@ -84,8 +88,8 @@ TestSpecificGroupSet:=function(nbMov, eGRP, eSet)
     CloseStream(output);
     #
     eBinary:="/home/mathieu/GITall/GIT/permutalib/src_gap/GapStabilizerOnSet";
-    FileErr:="/tmp/CppError";
-    FileRes:="/tmp/GapOutput";
+    FileErr:=Concatenation(eDir, "CppError");
+    FileRes:=Concatenation(eDir, "GapOutput");
     eCommand:=Concatenation(eBinary, " ", FileName, " 2> ", FileErr, " ", FileRes);
     Exec(eCommand);
     #

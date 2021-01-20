@@ -42,13 +42,14 @@ Face BlistList(std::vector<int> const& list, std::vector<int> const& sub)
 }
 
 
-int PositionNthTrueBlist(Face const& blist, int const& hpos)
+
+boost::dynamic_bitset<>::size_type PositionNthTrueBlist(Face const& blist, int const& hpos)
 {
   boost::dynamic_bitset<>::size_type b=blist.find_first();
   int epos=0;
   while (true) {
     if (b == boost::dynamic_bitset<>::npos)
-      return -1;
+      return b;
     if (epos == hpos)
       return b;
     // We increase

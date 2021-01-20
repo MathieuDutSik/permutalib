@@ -905,7 +905,8 @@ end );
 #F  StabChainForcePoint( <S>, <pnt> ) . . . . . . . .  force <pnt> into orbit
 ##
 InstallGlobalFunction( StabChainForcePoint, function( S, pnt )
-    Print("GAP Beginning of StabChainForcePoint\n");
+    Print("GAP Beginning of StabChainForcePoint pnt=", pnt, "\n");
+    PrintStabChain(S);
     # Do nothing if <pnt> is already in the orbit of <S>.
     if    not IsBound( S.translabels )
        or not IsBound( S.translabels[ pnt ] )  then
@@ -921,10 +922,12 @@ InstallGlobalFunction( StabChainForcePoint, function( S, pnt )
         # incorrect, return `false' then.
         elif    not StabChainForcePoint( S.stabilizer, pnt )
              or not StabChainSwap( S )  then
+            Print("GAP StabChainForcePoint, return false\n");
             return false;
         fi;
 
     fi;
+    Print("GAP StabChainForcePoint, return true\n");
     return true;
 end );
 

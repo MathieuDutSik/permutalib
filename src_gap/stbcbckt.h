@@ -991,7 +991,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     int a;                // current R-base point
     permPlusBool<Telt> t; // group element constructed, to be handed upwards
     int m;                // initial number of candidates in <orb>
-    int max;              // maximal number of candidates still needed
+    boost::dynamic_bitset<>::size_type max;              // maximal number of candidates still needed
     boost::dynamic_bitset<>::size_type b;        // image of base point currently being considered
 
     if (image.perm.status == int_false) {
@@ -1210,7 +1210,8 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     std::cerr << "CPP PBEnumerate, step 9\n";
     std::cerr << "CPP wasTriv=" << wasTriv << " a=" << (a+1) << " max=" << (max+1) << "\n";
 
-    if (wasTriv && a > max) {
+    boost::dynamic_bitset<>::size_type a_size = a;
+    if (wasTriv && a_size > max) {
       m--;
       std::cerr << "CPP Before test m=" << m << " Length(L[d].orbit)=" << L_list[d]->orbit.size() << "\n";
       if (m < int(L_list[d]->orbit.size()) ) {
@@ -1402,9 +1403,12 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  SubtractBlistOrbitStabChain(orb[d], StrongGeneratorsStabChain(R_list[d]), b_int);
         }
 	std::cerr << "CPP ORB 2: After subtract d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
-	b = orb[d].find_next(b);
-	std::cerr << "CPP End of the loop. Now b=" << PosFail_to_string(b) << "\n";
       }
+      b = orb[d].find_next(b);
+      std::cerr << "CPP End of the loop. 1 Now b=" << PosFail_to_string(b) << "\n";
+      if (b > max)
+        b = boost::dynamic_bitset<>::npos;
+      std::cerr << "CPP End of the loop. 2 Now b=" << PosFail_to_string(b) << "\n";
 
     }
     std::cerr << "CPP PBEnumerate, step 11, EXIT 10 |L|=" << L_list.size() << "\n";

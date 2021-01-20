@@ -83,6 +83,6 @@ if DoSym5 then
 #  CreateExampleOnSetCase(eFile, Group([(1,2,3,4,5,6,7,8,9),(1,2)]), eSet);
 #  CreateExampleOnSetCase(eFile, Group([(1,2,3,4,5),(4,5)]), eSet);
 #  CreateExampleOnSetCase(eFile, Group([(1,2,3,4,5),(3,4,5)]), eSet);
-  CreateExampleOnSetCase(eFile, Group([ (1,4,5,9,3)(2,8,10,7,6)(12,15,16,20,14)(13,19,21,18,17), (1,21,5,12,20)(2,16,3,4,17)(6,18,7,19,15)(8,13,9,14,11) ]), [ 2, 3, 7, 9, 11, 13, 14, 17, 21 ]);
+  CreateExampleOnSetCase(eFile, Group([ (1,4,5,9,3)(2,8,10,7,6)(12,15,16,20,14)(13,19,21,18,17), (1,21,5,12,20)(2,16,3,4,17)(6,18,7,19,15)(8,13,9,14,11) ]), [ 2, 4, 5, 9, 11, 12, 13, 14, 18 ]);
   Print("eFile=", eFile, "\n");
 fi;
