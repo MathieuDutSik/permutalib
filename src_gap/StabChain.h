@@ -150,7 +150,8 @@ struct StabLevel {
   std::vector<int> genlabels; // Not used in Random algorithm
   std::vector<int8_t> cycles; // We need a vector because if we use a "Face" dynamic bitset then
                               // we cannot extend. On the other hand if we use a std::vector<bool>
-                              // we are exposed to the problems of this 
+                              // we are exposed to the problems of this
+  bool IsBoundCycle;
   // entry below are specific to the random algorithms:
   std::vector<Telt> treegen;
   std::vector<Telt> treegeninv;
@@ -189,12 +190,13 @@ StabChain<Telt> StabChainGenerators(std::vector<Telt> const& generators, int con
   for (int igen=0; igen<int(generators.size()); igen++)
     genlabels.push_back(igen);
   std::vector<int8_t> cycles;
+  bool IsBoundCycle = false;
   std::vector<Telt> treegen;
   std::vector<Telt> treegeninv;
   std::vector<Telt> aux;
   int treedepth = 0;
   int diam = 0;
-  return std::make_shared<StabLevel<Telt>>(StabLevel<Telt>({transversal, orbit, genlabels, cycles, treegen, treegeninv, aux, treedepth, diam, comm, nullptr}));
+  return std::make_shared<StabLevel<Telt>>(StabLevel<Telt>({transversal, orbit, genlabels, cycles, IsBoundCycle, treegen, treegeninv, aux, treedepth, diam, comm, nullptr}));
 }
 
 
@@ -266,7 +268,7 @@ void PrintStabChain(StabChain<Telt> const& S)
     std::cerr << "CPP   orbit=" << GapStringIntVector(Swork->orbit) << "\n";
     std::cerr << "CPP   transversal=" << strTransversal << "\n";
     std::cerr << "XXX ELIMINATE begin\n";
-    if (Swork->cycles.size() > 0) {
+    if (Swork->IsBoundCycle) {
       std::cerr << "CPP   cycles=" << GapStringBoolVectorB(Swork->cycles) << "\n";
     } else {
       std::cerr << "CPP   No cycles\n";
@@ -449,12 +451,13 @@ StabLevel<Telt> EmptyStabLevel(std::shared_ptr<CommonStabInfo<Telt>> const& comm
   std::vector<int> orbit;
   std::vector<int> genlabels;
   std::vector<int8_t> cycles;
+  bool IsBoundCycle = false;
   std::vector<Telt> treegen;
   std::vector<Telt> treegeninv;
   std::vector<Telt> aux;
   int treedepth = 0;
   int diam = 0;
-  return {transversal, orbit, genlabels, cycles, treegen, treegeninv, aux, treedepth, diam, comm, nullptr};
+  return {transversal, orbit, genlabels, cycles, IsBoundCycle, treegen, treegeninv, aux, treedepth, diam, comm, nullptr};
 }
 
 
@@ -514,6 +517,7 @@ void RemoveStabChain(StabChain<Telt> & Stot)
   Stot->orbit.clear();
   Stot->transversal.clear();
   Stot->cycles.clear();
+  Stot->IsBoundCycle=false;
   Stot->treegen.clear();
   Stot->treegeninv.clear();
   Stot->aux.clear();
@@ -888,11 +892,14 @@ void InitializeSchreierTree(StabChain<Telt> & S, int const& pnt)
 template<typename Telt>
 void InsertTrivialStabilizer(StabChain<Telt> & Stot, int const& pnt)
 {
+  std::cerr << "CPP begin InsertTrivialStabilizer\n";
   Stot->stabilizer = ShallowCopy(Stot);
   Stot->transversal = {};
   Stot->orbit = {};
   Stot->genlabels = Stot->stabilizer->genlabels;
-  Stot->cycles = std::vector<int8_t>(Stot->comm->n);
+  Stot->cycles = {};
+  Stot->IsBoundCycle = false;
+  //  Stot->cycles = std::vector<int8_t>(Stot->comm->n, 0);
   Stot->treegen = {};
   Stot->treegen = {};
   Stot->aux = {};
@@ -996,7 +1003,7 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
   StabChain<Telt> Swrite = S;
   int idxwrt=0;
   while(Swrite != nullptr) {
-    std::cerr << "DEBUG idxwrt=" << idxwrt << " |labels|=" << S->comm->labels.size() << "\n";
+    //    std::cerr << "DEBUG idxwrt=" << idxwrt << " |labels|=" << S->comm->labels.size() << "\n";
     idxwrt++;
     Swrite = Swrite->stabilizer;
   }
@@ -1053,7 +1060,7 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
 #ifdef DEBUG_ADD_GEN_SCH
   std::cerr << "XXX ELIMINATE begin\n";
 #endif
-  if (S->cycles.size() > 0) {
+  if (S->IsBoundCycle) {
 #ifdef DEBUG_ADD_GEN_SCH
     std::cerr << "CPP AGEST Cycles S.cycles=" << GapStringBoolVectorB(S->cycles) << "\n";
 #endif
@@ -1157,9 +1164,10 @@ void ChooseNextBasePoint(StabChain<Telt> & S, std::vector<int> const& base, std:
     //    std::cerr << "CPP Before InsertTrivialStabilizer S=" << S << "\n";
     InsertTrivialStabilizer(S, pnt);
     //    std::cerr << "CPP After InsertTrivialStabilizer S=" << S << "\n";
-    if (S->stabilizer->cycles.size() > 0) {
+    if (S->stabilizer->IsBoundCycle) {
       std::vector<int8_t> eFace = {0};
       S->cycles = eFace;
+      S->IsBoundCycle=true;
       std::cerr << "CPP   Initializing cycles\n";
     }
   }
@@ -1191,11 +1199,11 @@ void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, Stab
 
   // # Compute the Schreier generators (seems to work better backwards).
   std::vector<int> pnts = ClosedInterval(0, S->orbit.size());
-  if (S->cycles.size() > 0)
+  if (S->IsBoundCycle)
     pnts = ListBlist(pnts, S->cycles);
   std::cerr << "CPP pnts = " << GapStringIntVector(pnts) << "\n";
-  std::cerr << "CPP Usecycle=" << (S->cycles.size() > 0) << "\n";
-  if (S->cycles.size() > 0) {
+  std::cerr << "CPP Usecycle=" << S->IsBoundCycle << "\n";
+  if (S->IsBoundCycle) {
     std::cerr << "CPP cycles=" << GapStringBoolVectorB(S->cycles) << "\n";
   }
   int gen1=0;
@@ -1875,7 +1883,7 @@ StabChain<Tret> HomomorphismMapping(StabChain<Telt> const& Stot, std::function<T
   while(true) {
     if (Sptr == nullptr)
       break;
-    Swork = std::make_shared<StabLevel<Telt>>(StabLevel<Telt>({Sptr->transversal, Sptr->orbit, Sptr->genlabels, Sptr->cycles, fVector(Sptr->treegen), fVector(Sptr->treegeninv), fVector(Sptr->aux), Sptr->treedepth, Sptr->diam, comm, nullptr}));
+    Swork = std::make_shared<StabLevel<Telt>>(StabLevel<Telt>({Sptr->transversal, Sptr->orbit, Sptr->genlabels, Sptr->cycles, Sptr->IsBoundCycle, fVector(Sptr->treegen), fVector(Sptr->treegeninv), fVector(Sptr->aux), Sptr->treedepth, Sptr->diam, comm, nullptr}));
     if (Sreturn == nullptr)
       Sreturn = Swork;
     Sptr = Sptr->stabilizer;

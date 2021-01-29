@@ -26,6 +26,7 @@ StabChain<Telt> StabChainOp_listgen(std::vector<Telt> const& Lgen, StabChainOpti
   int n=options.n;
   StabChain<Telt> S = EmptyStabChain<Telt>(n);
   if (!IsTrivial_ListGen(Lgen)) {
+    S->IsBoundCycle = true;
     std::cerr << "CPP Before call to StabChainStrong\n";
     StabChainStrong(S, Lgen, options );
   }

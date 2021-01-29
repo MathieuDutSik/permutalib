@@ -681,7 +681,7 @@ InstallGlobalFunction( AddGeneratorsExtendSchreierTree, function( S, new )
                             if i > Length(S.cycles) then
                                 Print("DEBUG XXX CycleLength i=", i, " |S.cycles|=", Length(S.cycles), "\n");
                             fi;
-                            Print("GAP |S->cycles|=", Length(S.cycles), " i=", i, "\n");
+                            Print("GAP       |S->cycles|=", Length(S.cycles), " i=", i, "\n");
                         fi;
                         S.cycles[ i ] := true;
                         if debug_fct then
@@ -773,6 +773,8 @@ InstallGlobalFunction( ChooseNextBasePoint, function( S, base, newgens )
 #        Print("ChooseNextBasePoint:  After InsertTrivialStabilizer, S=\n");
 #        MyPrintStabChain(S);
         if IsBound( S.stabilizer.cycles )  then
+            Print("S.stabilizer.cycles=", S.stabilizer.cycles, "\n");
+            Print("S.stabilizer=", S.stabilizer, "\n");
             S.cycles := [ false ];
             Print("GAP   Initializing cycles\n");
         elif IsBound( S.stabilizer.relativeOrders )  then
@@ -1503,6 +1505,7 @@ end );
 #F  InsertTrivialStabilizer( <S>, <pnt> ) . .  add redundant base point <pnt>
 ##
 InstallGlobalFunction( InsertTrivialStabilizer, function( S, pnt )
+    Print("GAP begin InsertTrivialStabilizer\n");
     S.stabilizer := ShallowCopy( S );
     S.genlabels  := ShallowCopy( S.stabilizer.genlabels );
     if IsBound( S.generators )  then

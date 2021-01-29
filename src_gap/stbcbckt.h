@@ -948,6 +948,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   int n=G->comm->n;
   Telt id = G->comm->identity;
   std::cerr << "CPP PartitionBacktrack step 1\n";
+  std::cerr << "CPP |L|=" << SizeStabChain<Telt,Tint>(L) << "\n";
   std::cerr << "CPP L=\n";
   PrintStabChain(L);
   std::cerr << "CPP R=\n";

@@ -1364,6 +1364,8 @@ InstallGlobalFunction( PartitionBacktrack,
            i,  dd,  p;   # loop variables
 
     Print("GAP PartitionBacktrack step 1\n");
+#    Print(NullMat(5));
+#    Print("GAP |L|=", Order(StabChainMutable(L)), "\n"));
     Print("GAP L=\n");
     PrintStabChain(StabChainMutable(L));
     Print("GAP R=\n");
