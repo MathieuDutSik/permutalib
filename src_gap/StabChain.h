@@ -226,6 +226,18 @@ void PrintStabChainTransversals(StabChain<Telt> const& S)
   }
 }
 
+template<typename Telt>
+void UnbindCycles(StabChain<Telt> const& S)
+{
+  StabChain<Telt> Swork = S;
+  while (Swork != nullptr) {
+    Swork->cycles.clear();
+    Swork->IsBoundCycle = false;
+    Swork = Swork->stabilizer;
+  }
+}
+
+
 
 template<typename Telt>
 void PrintStabChainOrbits(StabChain<Telt> const& S)
