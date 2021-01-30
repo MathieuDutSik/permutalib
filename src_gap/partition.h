@@ -52,11 +52,11 @@ void RawPrintPartition(Partition const& P)
     }
     LPart[iPart] = GapStringIntVector(eList);
   }
-  std::cerr << "CPP Partition=" << GapStringTVector(LPart) << "\n";
-  std::cerr << "CPP points=" << GapStringIntVector(P.points) << "\n";
-  std::cerr << "CPP firsts=" << GapStringIntVector(P.firsts) << "\n";
-  std::cerr << "CPP lengths=" << GapStringTVector(P.lengths) << "\n";
-  std::cerr << "CPP cellno=" << GapStringIntVector(P.cellno) << "\n";
+  std::cerr << "CPP PART Partition=" << GapStringTVector(LPart) << "\n";
+  std::cerr << "CPP PART points=" << GapStringIntVector(P.points) << "\n";
+  std::cerr << "CPP PART firsts=" << GapStringIntVector(P.firsts) << "\n";
+  std::cerr << "CPP PART lengths=" << GapStringTVector(P.lengths) << "\n";
+  std::cerr << "CPP PART cellno=" << GapStringIntVector(P.cellno) << "\n";
 }
 
 
@@ -116,7 +116,7 @@ void CheckConsistencyPartition(std::string const& str, Partition const& P)
   }
 }
 
- 
+
 Partition GetPartition(std::vector<std::vector<int>> const& list)
 {
 #ifdef DEBUG_PARTITION

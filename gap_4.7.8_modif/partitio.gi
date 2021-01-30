@@ -47,11 +47,11 @@ RawPrintPartition:=function(P)
         od;
         Add(LPart, eList);
     od;
-    Print("GAP Partition=", LPart, "\n");
-    Print("GAP points=", P.points, "\n");
-    Print("GAP firsts=", P.firsts, "\n");
-    Print("GAP lengths=", P.lengths, "\n");
-    Print("GAP cellno=", P.cellno, "\n");
+    Print("GAP PART Partition=", LPart, "\n");
+    Print("GAP PART points=", P.points, "\n");
+    Print("GAP PART firsts=", P.firsts, "\n");
+    Print("GAP PART lengths=", P.lengths, "\n");
+    Print("GAP PART cellno=", P.cellno, "\n");
 end;
 
 GetDebugPartition:=function()

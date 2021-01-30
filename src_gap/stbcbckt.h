@@ -1534,7 +1534,12 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
 
 
   Partition P = GetPartitionFromPair(Phi);
-  Partition Q = GetPartitionFromPair(Psi);
+  Partition Q;
+  if (repr) {
+    Q = GetPartitionFromPair(Psi);
+  } else {
+    Q = P;
+  }
 
 
   std::vector<Telt> LGen = StrongGeneratorsStabChain(G);
