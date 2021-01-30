@@ -1011,7 +1011,7 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
 #define DEBUG_ADD_GEN_SCH
 #ifdef DEBUG_ADD_GEN_SCH
   std::cerr << "CPP AGEST : Beginning of AddGeneratorsExtendSchreierTree\n";
-  std::cerr << "CPP AGEST 1: genlabels=" << GapStringIntVector(S->genlabels) << "\n";
+  //  std::cerr << "CPP AGEST 1: genlabels=" << GapStringIntVector(S->genlabels) << "\n";
   StabChain<Telt> Swrite = S;
   int idxwrt=0;
   while(Swrite != nullptr) {
@@ -1032,7 +1032,7 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
   std::cerr << "DEBUG AGEST 1: old=" << GapStringBoolVector(old) << "\n";
   std::cerr << "DEBUG AGEST 1: ald=" << GapStringBoolVector(ald) << "\n";
   std::cerr << "DEBUG AGEST labels=" << GapStringTVector(S->comm->labels) << "\n";
-  std::cerr << "CPP AGEST 2: genlabels=" << GapStringIntVector(S->genlabels) << "\n";
+  std::cerr << "DEBUG AGEST 2: genlabels=" << GapStringIntVector(S->genlabels) << "\n";
 #endif
   for (auto & gen : newgens) {
     int pos = PositionVect(S->comm->labels, gen);
@@ -1042,7 +1042,7 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
       ald.push_back(true);
       int posG=S->comm->labels.size() - 1;
 #ifdef DEBUG_ADD_GEN_SCH
-      std::cerr << "CPP AGEST  genlabels insert 1:\n";
+      //      std::cerr << "CPP AGEST  genlabels insert 1:\n";
       //      std::cerr << "CPP AGEST  genlabels insert 1: pos=" << (posG+1) << "\n";
       //std::cerr << "CPP AGEST  genlabels insert X: pos=" << (posG+1) << "\n";
 #endif
@@ -1050,7 +1050,7 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
     } else {
       if (!ald[pos]) {
 #ifdef DEBUG_ADD_GEN_SCH
-        std::cerr << "CPP AGEST  genlabels insert 2:\n";
+        //        std::cerr << "CPP AGEST  genlabels insert 2:\n";
         //        std::cerr << "CPP AGEST  genlabels insert 2: pos=" << (pos+1) << "\n";
 	//std::cerr << "CPP AGEST  genlabels insert X: pos=" << (pos+1) << "\n";
 #endif

@@ -607,7 +607,7 @@ InstallGlobalFunction( AddGeneratorsExtendSchreierTree, function( S, new )
     debug_fct:=true;
     if debug_fct then
       Print("GAP AGEST : Beginning of AddGeneratorsExtendSchreierTree\n");
-      Print("GAP AGEST 1: genlabels=", S.genlabels, "\n");
+#      Print("GAP AGEST 1: genlabels=", S.genlabels, "\n");
     fi;
     # Put in the new labels.
     old := BlistList( [ 1 .. Length( S.labels ) ], S.genlabels );
@@ -618,7 +618,7 @@ InstallGlobalFunction( AddGeneratorsExtendSchreierTree, function( S, new )
         Print("DEBUG AGEST 1: old=", old, "\n");
         Print("DEBUG AGEST 1: ald=", ald, "\n");
         Print("DEBUG AGEST labels=", S.labels, "\n");
-        Print("GAP AGEST 2: genlabels=", S.genlabels, "\n");
+        Print("DEBUG AGEST 2: genlabels=", S.genlabels, "\n");
     fi;
     for gen  in new  do
         pos := Position( S.labels, gen );
@@ -627,14 +627,14 @@ InstallGlobalFunction( AddGeneratorsExtendSchreierTree, function( S, new )
             Add( old, false );
             Add( ald, true );
             if debug_fct then
-              Print("GAP AGEST  genlabels insert 1:\n");
+#              Print("GAP AGEST  genlabels insert 1:\n");
 #              Print("GAP AGEST  genlabels insert 1: pos=", Length(S.labels), "\n");
 #              Print("GAP AGEST  genlabels insert X: pos=", Length(S.labels), "\n");
             fi;
             Add( S.genlabels, Length( S.labels ) );
         elif not ald[ pos ]  then
             if debug_fct then
-              Print("GAP AGEST  genlabels insert 2:\n");
+#              Print("GAP AGEST  genlabels insert 2:\n");
 #              Print("GAP AGEST  genlabels insert 2: pos=", pos, "\n");
 #              Print("GAP AGEST  genlabels insert X: pos=", pos, "\n");
             fi;
