@@ -2590,7 +2590,7 @@ InstallGlobalFunction( RepOpSetsPermGroup, function( arg )
     fi;
 
     Omega := MovedPoints( G );
-    Print("GAP Omega=", Omega-1, "\n");
+    Print("GAP Omega=", Omega, "\n");
     if repr  and  Length( Phi ) <> Length( Psi )  then
         return fail;
     fi;
@@ -2640,7 +2640,7 @@ InstallGlobalFunction( RepOpSetsPermGroup, function( arg )
 #        fi;
 #    fi;
 
-    Print("GAP GetSubgroup, LGen=", StrongGeneratorsStabChain(StabChainMutable(G)), "\n");
+    Print("GAP G : LGen=", StrongGeneratorsStabChain(StabChainMutable(G)), "\n");
     Print("GAP repr=", repr, "\n");
     if Length( arg ) > p  then
         L := arg[ p + 1 ];

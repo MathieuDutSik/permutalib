@@ -1500,11 +1500,9 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
 {
   std::cerr << "CPP Beginning of RepOpSetsPermGroup\n";
   PrintStabChain(G);
-  std::cerr << "CPP UseCycle=" << G->IsBoundCycle << "\n";
-  std::cerr << "CPP After bool print\n";
   int n=G->comm->n;
   std::vector<int> Omega = MovedPoints(G);
-  std::cerr << "CPP n=" << n << " Omega=" << STRING_VectInt(Omega) << "\n";
+  std::cerr << "CPP Omega=" << GapStringIntVector(Omega) << "\n";
   if (repr && Phi.size() != Psi.size())
     return {int_fail, {}, {}};
   if (IsSubset(Phi, Omega) || ForAll(Omega, [&](int const &p) -> bool {return !Phi[p];})) {
@@ -1540,7 +1538,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
 
 
   std::vector<Telt> LGen = StrongGeneratorsStabChain(G);
-  std::cerr << "CPP LGen=" << GapStringTVector(LGen) << "\n";
+  std::cerr << "CPP G : LGen=" << GapStringTVector(LGen) << "\n";
   std::cerr << "CPP repr=" << repr << "\n";
 
   auto GetSubgroup=[&](Face const& Ph) -> StabChain<Telt> {

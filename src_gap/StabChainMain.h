@@ -118,7 +118,9 @@ StabChain<Telt> StabChainOp_group_options(std::vector<Telt> const& LGen, int con
   StabChainOptions<Tint> options = GetStandardOptions<Tint>(n);
   options.base = {};
   std::cerr << "CPP Before StabChainOp_listgen\n";
-  return StabChainOp_listgen(LGen, options);
+  StabChain<Telt> S = StabChainOp_listgen(LGen, options);
+  UnbindCycles(S);
+  return S;
 }
 
 
