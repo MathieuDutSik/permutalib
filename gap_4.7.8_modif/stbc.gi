@@ -710,6 +710,9 @@ InstallGlobalFunction( AddGeneratorsExtendSchreierTree, function( S, new )
           Print("GAP AGEST No Cycles\n");
         fi;
         while i <= Length( S.orbit )  do
+#            if debug_fct then
+#              Print("GAP AGEST i=", i, "\n");
+#            fi;
             for j  in S.genlabels  do
 
                 # Use new labels for old points, all labels for new points.
@@ -936,6 +939,7 @@ InstallGlobalFunction( StabChainForcePoint, function( S, pnt )
 
     fi;
     Print("GAP StabChainForcePoint, return true\n");
+    PrintStabChain(S);
     return true;
 end );
 
@@ -973,6 +977,8 @@ InstallGlobalFunction( StabChainSwap, function( S )
     AddGeneratorsExtendSchreierTree( Tstab,
             S.stabilizer.stabilizer.generators );
     Print("GAP StabChainSwap : after second AGEST\n");
+    Print("GAP After AddGeneratorsExtendSchreierTree 1 : Tstab=\n");
+    PrintStabChain(Tstab);
 
     # in the end $|b^T||a^{T_b}| = [T:T_{ab}] = [S:S_{ab}] = |a^S||b^{S_a}|$
     ind := 1;
@@ -1026,11 +1032,17 @@ InstallGlobalFunction( StabChainSwap, function( S )
             od;
             Print("GAP Determining gen, step 3 gen=", gen, "\n");
             AddGeneratorsExtendSchreierTree( Tstab, [ gen ] );
+            Print("GAP After AddGeneratorsExtendSchreierTree 2 : Tstab=\n");
+            PrintStabChain(Tstab);
 
         fi;
 
     od;
     Print("GAP After while loop\n");
+    Print("GAP T=\n");
+    PrintStabChain(T);
+    Print("GAP Tstab=\n");
+    PrintStabChain(Tstab);
 
     # copy everything back into the stabchain
     S.labels      := T.labels;
@@ -1054,7 +1066,7 @@ InstallGlobalFunction( StabChainSwap, function( S )
         S.stabilizer.transversal := Tstab.transversal;
         Print("GAP StabChainSwap 3:\n");
     fi;
-
+    PrintStabChain(S);
     return true;
 end );
 

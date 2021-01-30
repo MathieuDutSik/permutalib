@@ -105,7 +105,9 @@ StabChain<Telt> MinimalStabChain(std::vector<Telt> const& LGen, int const& n)
   int largMov=LargestMovedPoint(LGen);
   options.base = ClosedInterval(0, largMov);
   std::cerr << "CPP Before StabChainOp_listgen\n";
-  return StabChainOp_listgen(LGen, options);
+  StabChain<Telt> S = StabChainOp_listgen(LGen, options);
+  UnbindCycles(S);
+  return S;
 }
 
 

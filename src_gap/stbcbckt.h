@@ -1549,7 +1549,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
   auto GetSubgroup=[&](Face const& Ph) -> StabChain<Telt> {
     std::vector<Telt> sgs=Filtered(LGen, [&](Telt const& g)->bool{return OnSets(Ph, g) == Ph;});
     std::cerr << "CPP SelectedGens=" << GapStringTVector(SortVector(sgs)) << "\n";
-    return MinimalStabChain<Telt,Tint>(sgs, n);
+    return MinimalStabChain<Telt,Tint>(SortVector(sgs), n);
   };
 
 

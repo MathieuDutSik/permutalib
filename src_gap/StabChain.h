@@ -1063,12 +1063,12 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
   std::cerr << "DEBUG AGEST 2: ald=" << GapStringBoolVector(ald) << "\n";
 #endif
 
-  int len = S->orbit.size();
+  size_t len = S->orbit.size();
 #ifdef DEBUG_ADD_GEN_SCH
   std::cerr << "CPP AGEST len=" << len << "\n";
   std::cerr << "CPP AGEST S->orbit=" << GapStringIntVector(S->orbit) << "\n";
 #endif
-  int i=0;
+  size_t i=0;
 #ifdef DEBUG_ADD_GEN_SCH
   //  std::cerr << "XXX ELIMINATE begin\n";
 #endif
@@ -1076,12 +1076,12 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
 #ifdef DEBUG_ADD_GEN_SCH
     std::cerr << "CPP AGEST Cycles S.cycles=" << GapStringBoolVectorB(S->cycles) << "\n";
 #endif
-    while (i < int(S->orbit.size())) {
+    while (i < S->orbit.size()) {
 #ifdef DEBUG_ADD_GEN_SCH
       std::cerr << "CPP   AGEST i=" << (i+1) << " |cycles|=" << S->cycles.size() << "\n";
 #endif
       for (int& j : S->genlabels) {
-	if (i > len-1 || old[j] == 0) {
+	if (i >= len || old[j] == 0) {
 	  int img=SlashAct(S->orbit[i], S->comm->labels[j]);
 #ifdef DEBUG_ADD_GEN_SCH
 	  std::cerr << "CPP     AGEST img=" << (img+1) << " g=" << S->comm->labels[j] << "\n";
@@ -1115,9 +1115,9 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
 #ifdef DEBUG_ADD_GEN_SCH
     std::cerr << "CPP AGEST No Cycles\n";
 #endif
-    while (i < int(S->orbit.size())) {
+    while (i < S->orbit.size()) {
       for (int& j : S->genlabels) {
-	if (i > len || old[j] == 0) {
+	if (i >= len || old[j] == 0) {
 	  int img=SlashAct(S->orbit[i], S->comm->labels[j]);
 	  if (S->transversal[img] == -1) {
 	    S->transversal[img]=j;
@@ -1266,6 +1266,7 @@ bool StabChainForcePoint(StabChain<Telt> & Stot, int const& pnt)
     }
   }
   std::cerr << "CPP StabChainForcePoint, return true\n";
+  PrintStabChain(Stot);
   return true;
 }
 
@@ -1311,6 +1312,8 @@ bool StabChainSwap(StabChain<Telt> & Stot)
       std::cerr << "CPP StabChainSwap : after second AGEST\n";
     }
   }
+  std::cerr << "CPP After AddGeneratorsExtendSchreierTree 1 : Tstab=\n";
+  PrintStabChain(Tstab);
   //
   size_t ind = 0;
   size_t len = Stot->orbit.size() * Stot->stabilizer->orbit.size() / Ttot->orbit.size();
@@ -1356,9 +1359,15 @@ bool StabChainSwap(StabChain<Telt> & Stot)
       }
       std::cerr << "CPP Determining gen, step 3 gen=" << gen << "\n";
       AddGeneratorsExtendSchreierTree(Tstab, {gen});
+      std::cerr << "CPP After AddGeneratorsExtendSchreierTree 2 : Tstab=\n";
+      PrintStabChain(Tstab);
     }
   }
   std::cerr << "CPP After while loop\n";
+  std::cerr << "CPP T=\n";
+  PrintStabChain(Ttot);
+  std::cerr << "CPP Tstab=\n";
+  PrintStabChain(Tstab);
   auto MappingIndex=[&](StabChain<Telt> const& Wtot, int const& idx) -> int {
     if (idx == -1)
       return -1;
@@ -1393,6 +1402,7 @@ bool StabChainSwap(StabChain<Telt> & Stot)
     MapAtLevel(Stot->stabilizer, Tstab);
     std::cerr << "CPP StabChainSwap 3:\n";
   }
+  PrintStabChain(Stot);
   return true;
 }
 
