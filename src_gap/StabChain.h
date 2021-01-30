@@ -267,13 +267,13 @@ void PrintStabChain(StabChain<Telt> const& S)
     //
     std::cerr << "CPP   orbit=" << GapStringIntVector(Swork->orbit) << "\n";
     std::cerr << "CPP   transversal=" << strTransversal << "\n";
-    std::cerr << "XXX ELIMINATE begin\n";
+    //    std::cerr << "XXX ELIMINATE begin\n";
     if (Swork->IsBoundCycle) {
       std::cerr << "CPP   cycles=" << GapStringBoolVectorB(Swork->cycles) << "\n";
     } else {
       std::cerr << "CPP   No cycles\n";
     }
-    std::cerr << "XXX ELIMINATE end\n";
+    //    std::cerr << "XXX ELIMINATE end\n";
     Swork = Swork->stabilizer;
     iLevel++;
   }
@@ -1058,7 +1058,7 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
 #endif
   int i=0;
 #ifdef DEBUG_ADD_GEN_SCH
-  std::cerr << "XXX ELIMINATE begin\n";
+  //  std::cerr << "XXX ELIMINATE begin\n";
 #endif
   if (S->IsBoundCycle) {
 #ifdef DEBUG_ADD_GEN_SCH
@@ -1117,7 +1117,7 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
     }
   }
 #ifdef DEBUG_ADD_GEN_SCH
-  std::cerr << "XXX ELIMINATE end\n";
+  //  std::cerr << "XXX ELIMINATE end\n";
 #endif
 }
 
@@ -1191,11 +1191,14 @@ void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, Stab
   AddGeneratorsExtendSchreierTree(S, newgens);
 
   //# If a new generator fixes the base point, put it into the stabilizer.
-  for (auto & eGen : newgens)
-    if (eGen.isIdentity() == false && PowAct(pnt, eGen) == pnt) {
+  std::cerr << "CPP newgens=" << GapStringTVector(newgens) << "\n";
+  for (auto & eGen : newgens) {
+    std::cerr << "CPP eGen=" << eGen << " eGen=" << GapStyleString(eGen) << "\n";
+    if (!eGen.isIdentity() && PowAct(pnt, eGen) == pnt) {
       std::cerr << "CPP   1: Calling StabChainStrong with eGen=" << GapStyleString(eGen) << "\n";
       StabChainStrong(S->stabilizer, {eGen}, options);
     }
+  }
 
   // # Compute the Schreier generators (seems to work better backwards).
   std::vector<int> pnts = ClosedInterval(0, S->orbit.size());
@@ -1219,12 +1222,14 @@ void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, Stab
       Telt g = S->comm->labels[ S->genlabels[j] ];
       std::cerr << "CPP StabChainStrong   j=" << (j+1) << " g=" << g << "\n";
       if (S->transversal[ SlashAct(p, g) ] != S->genlabels[j]) {
+        std::cerr << "CPP unmatching labels\n";
         Telt sch = SiftedPermutation(S, Inverse(g*rep));
 	std::cerr << "CPP sch=" << sch << " g=" << g << " rep=" << rep << "\n";
 	if (!sch.isIdentity()) {
 	  StabChainStrong(S->stabilizer, {sch}, options );
 	}
       }
+      std::cerr << "CPP After label test\n";
     }
   }
 }

@@ -57,13 +57,13 @@ PrintStabChain:=function(eRec)
     else
       Print("GAP   transversal=[  ]\n");
     fi;
-    Print("XXX ELIMINATE begin\n");
+#    Print("XXX ELIMINATE begin\n");
     if IsBound(eStab.cycles) then
         Print("GAP   cycles=", eStab.cycles, "\n");
     else
         Print("GAP   No cycles\n");
     fi;
-    Print("XXX ELIMINATE end\n");
+#    Print("XXX ELIMINATE end\n");
     if IsBound(eStab.stabilizer) then
       eStab:=eStab.stabilizer;
     else
@@ -658,7 +658,7 @@ InstallGlobalFunction( AddGeneratorsExtendSchreierTree, function( S, new )
     fi;
     i := 1;
     if debug_fct then
-        Print("XXX ELIMINATE begin\n");
+#        Print("XXX ELIMINATE begin\n");
     fi;
     if IsBound( S.cycles )  then
         if debug_fct then
@@ -679,7 +679,7 @@ InstallGlobalFunction( AddGeneratorsExtendSchreierTree, function( S, new )
                     if IsBound( S.translabels[ img ] )  then
                         if debug_fct then
                             if i > Length(S.cycles) then
-                                Print("DEBUG XXX CycleLength i=", i, " |S.cycles|=", Length(S.cycles), "\n");
+                                Print("DEBUG CycleLength i=", i, " |S.cycles|=", Length(S.cycles), "\n");
                             fi;
                             Print("GAP       |S->cycles|=", Length(S.cycles), " i=", i, "\n");
                         fi;
@@ -727,7 +727,7 @@ InstallGlobalFunction( AddGeneratorsExtendSchreierTree, function( S, new )
         od;
     fi;
     if debug_fct then
-        Print("XXX ELIMINATE end\n");
+#        Print("XXX ELIMINATE end\n");
     fi;
 end );
 
@@ -773,8 +773,6 @@ InstallGlobalFunction( ChooseNextBasePoint, function( S, base, newgens )
 #        Print("ChooseNextBasePoint:  After InsertTrivialStabilizer, S=\n");
 #        MyPrintStabChain(S);
         if IsBound( S.stabilizer.cycles )  then
-            Print("S.stabilizer.cycles=", S.stabilizer.cycles, "\n");
-            Print("S.stabilizer=", S.stabilizer, "\n");
             S.cycles := [ false ];
             Print("GAP   Initializing cycles\n");
         elif IsBound( S.stabilizer.relativeOrders )  then
@@ -827,7 +825,9 @@ InstallGlobalFunction( StabChainStrong, function( S, newgens, options )
     AddGeneratorsExtendSchreierTree( S, newgens );
 
     # If a new generator fixes the base point, put it into the stabilizer.
+    Print("GAP newgens=", newgens, "\n");
     for gen  in newgens  do
+        Print("GAP eGen=", gen, " eGen=", gen, "\n");
         if gen <> S.identity  and  pnt ^ gen = pnt  then
             Print("CPP   1: Calling StabChainStrong with eGen=", gen, "\n");
             StabChainStrong( S.stabilizer, [ gen ], options );
@@ -867,7 +867,7 @@ InstallGlobalFunction( StabChainStrong, function( S, newgens, options )
 
           # Avoid computing Schreier generators that will be trivial.
           if S.translabels[ p / g ] <> S.genlabels[ j ]  then
-
+            Print("GAP unmatching labels\n");
             # If a base is known, use it to test the Schreier generator.
             if IsBound( options.knownBase )  then
                 if not MembershipTestKnownBase( S,
@@ -903,6 +903,7 @@ InstallGlobalFunction( StabChainStrong, function( S, newgens, options )
             fi;
 
           fi;
+          Print("GAP After label test\n");
         od;
     od;
 end );

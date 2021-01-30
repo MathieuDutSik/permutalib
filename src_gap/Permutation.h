@@ -273,7 +273,7 @@ std::string GapStyleStringShift(DoubleSidedPerm const& ePerm, int const& eShift)
 
 std::string GapStyleString(DoubleSidedPerm const& ePerm)
 {
-  return GapStyleStringShift(ePerm, 0);
+  return GapStyleStringShift(ePerm, 1);
 }
 
 
