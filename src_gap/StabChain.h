@@ -1222,16 +1222,15 @@ void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, Stab
       Telt g = S->comm->labels[ S->genlabels[j] ];
       std::cerr << "CPP StabChainStrong   j=" << (j+1) << " g=" << g << "\n";
       if (S->transversal[ SlashAct(p, g) ] != S->genlabels[j]) {
-        std::cerr << "CPP unmatching labels\n";
         Telt sch = SiftedPermutation(S, Inverse(g*rep));
 	std::cerr << "CPP sch=" << sch << " g=" << g << " rep=" << rep << "\n";
 	if (!sch.isIdentity()) {
 	  StabChainStrong(S->stabilizer, {sch}, options );
 	}
       }
-      std::cerr << "CPP After label test\n";
     }
   }
+  std::cerr << "CPP exiting StabChainStrong\n";
 }
 
 

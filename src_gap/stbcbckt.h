@@ -948,7 +948,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   int n=G->comm->n;
   Telt id = G->comm->identity;
   std::cerr << "CPP PartitionBacktrack step 1\n";
-  std::cerr << "CPP |L|=" << SizeStabChain<Telt,Tint>(L) << "\n";
+  //  std::cerr << "CPP |L|=" << SizeStabChain<Telt,Tint>(L) << "\n";
   std::cerr << "CPP L=\n";
   PrintStabChain(L);
   std::cerr << "CPP R=\n";
@@ -1500,7 +1500,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
 {
   std::cerr << "CPP Beginning of RepOpSetsPermGroup\n";
   PrintStabChain(G);
-  std::cerr << "CPP UseCycle=" << (G->cycles.size() > 0) << "\n";
+  std::cerr << "CPP UseCycle=" << G->IsBoundCycle << "\n";
   std::cerr << "CPP After bool print\n";
   int n=G->comm->n;
   std::vector<int> Omega = MovedPoints(G);
@@ -1539,25 +1539,19 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
   Partition Q = GetPartitionFromPair(Psi);
 
 
+  std::vector<Telt> LGen = StrongGeneratorsStabChain(G);
+  std::cerr << "CPP LGen=" << GapStringTVector(LGen) << "\n";
+  std::cerr << "CPP repr=" << repr << "\n";
+
   auto GetSubgroup=[&](Face const& Ph) -> StabChain<Telt> {
-    std::vector<Telt> LGen = StrongGeneratorsStabChain(G);
-    std::cerr << "CPP GetSubgroup, |LGen|=" << LGen.size() << "\n";
-    std::cerr << "CPP GetSubgroup, LGen=";
-    for (auto & eGen : LGen)
-      std::cerr << " " << eGen;
-    std::cerr << "\n";
-    std::vector<Telt> sgs=Filtered(StrongGeneratorsStabChain(G), [&](Telt const& g)->bool{return OnSets(Ph, g) == Ph;});
-    std::cerr << "CPP sgs=";
-    for (auto & eGen : sgs)
-      std::cerr << " " << eGen;
-    std::cerr << "\n";
+    std::vector<Telt> sgs=Filtered(LGen, [&](Telt const& g)->bool{return OnSets(Ph, g) == Ph;});
+    std::cerr << "CPP SelectedGens" << GapStringTVector(sgs) << "\n";
     return MinimalStabChain<Telt,Tint>(sgs, n);
   };
 
 
   StabChain<Telt> L = GetSubgroup(Phi);
   StabChain<Telt> R;
-  std::cerr << "CPP repr=" << repr << "\n";
   if (repr)
     R = GetSubgroup(Psi);
   else

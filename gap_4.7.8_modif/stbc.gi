@@ -867,7 +867,6 @@ InstallGlobalFunction( StabChainStrong, function( S, newgens, options )
 
           # Avoid computing Schreier generators that will be trivial.
           if S.translabels[ p / g ] <> S.genlabels[ j ]  then
-            Print("GAP unmatching labels\n");
             # If a base is known, use it to test the Schreier generator.
             if IsBound( options.knownBase )  then
                 if not MembershipTestKnownBase( S,
@@ -903,9 +902,9 @@ InstallGlobalFunction( StabChainStrong, function( S, newgens, options )
             fi;
 
           fi;
-          Print("GAP After label test\n");
         od;
     od;
+    Print("GAP exiting StabChainStrong\n");
 end );
 
 

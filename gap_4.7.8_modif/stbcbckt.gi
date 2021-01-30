@@ -2640,7 +2640,7 @@ InstallGlobalFunction( RepOpSetsPermGroup, function( arg )
 #        fi;
 #    fi;
 
-    Print("GAP GetSubgroup, |LGen|=", StrongGeneratorsStabChain(StabChainMutable(G)), "\n");
+    Print("GAP GetSubgroup, LGen=", StrongGeneratorsStabChain(StabChainMutable(G)), "\n");
     Print("GAP repr=", repr, "\n");
     if Length( arg ) > p  then
         L := arg[ p + 1 ];

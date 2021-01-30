@@ -30,7 +30,7 @@ StabChain<Telt> StabChainOp_listgen(std::vector<Telt> const& Lgen, StabChainOpti
     std::cerr << "CPP Before call to StabChainStrong\n";
     StabChainStrong(S, Lgen, options );
   }
-  std::cerr << "CPP Before the ExtendStabChain section reduced=" << options.reduced << " |base|=" << options.base.size() << "\n";
+  //  std::cerr << "CPP Before the ExtendStabChain section reduced=" << options.reduced << " |base|=" << options.base.size() << "\n";
   if (!options.reduced && options.base.size() > 0) {
     ExtendStabChain(S, options.base);
   }

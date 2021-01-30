@@ -201,14 +201,14 @@ for iposs in range(nbposs):
         print("LOOP")
         ibegin=-nb_linebef
         iend=nb_lineaft
-        print("file1=", File1)
+        print("                     file1=", File1)
         for i in range(ibegin,iend):
             jposs = iposs + i
             if jposs >= 0 and jposs < nbposs:
                 jline1 = iline1 + jposs
                 f_line1=lines1[jline1]
                 print("jline1=", jline1, " : ", f_line1[:-1])
-        print("file2=", File2)
+        print("                     file2=", File2)
         for i in range(ibegin,iend):
             jposs = iposs + i
             if jposs >= 0 and jposs < nbposs:
