@@ -454,7 +454,7 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
     else {
       rbase.level2 = {int_stablev, -555, G[1]};
       std::cerr << "CPP rbase Before bool print\n";
-      std::cerr << "CPP bool=" << (rbase.level2.Stot->cycles.size() > 0) << "\n";
+      std::cerr << "CPP bool=" << rbase.level2.Stot->IsBoundCycle << "\n";
       std::cerr << "CPP rbase After bool print\n";
       rbase.lev2 = {};
     }
@@ -1543,12 +1543,12 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
 
 
   std::vector<Telt> LGen = StrongGeneratorsStabChain(G);
-  std::cerr << "CPP G : LGen=" << GapStringTVector(LGen) << "\n";
+  std::cerr << "CPP G : LGen=" << GapStringTVector(SortVector(LGen)) << "\n";
   std::cerr << "CPP repr=" << repr << "\n";
 
   auto GetSubgroup=[&](Face const& Ph) -> StabChain<Telt> {
     std::vector<Telt> sgs=Filtered(LGen, [&](Telt const& g)->bool{return OnSets(Ph, g) == Ph;});
-    std::cerr << "CPP SelectedGens" << GapStringTVector(sgs) << "\n";
+    std::cerr << "CPP SelectedGens=" << GapStringTVector(SortVector(sgs)) << "\n";
     return MinimalStabChain<Telt,Tint>(sgs, n);
   };
 
@@ -1572,7 +1572,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
     return true;
   };
   std::cerr << "CPP Before call to PartitionBacktrack\n";
-  std::cerr << "CPP bool=" << (rbase.level2.Stot->cycles.size() > 0) << "\n";
+  std::cerr << "CPP bool=" << rbase.level2.Stot->IsBoundCycle << "\n";
   std::cerr << "CPP After bool print\n";
   dataType data(Q);
   return PartitionBacktrack<Telt,Tint>( G, Pr, repr, rbase, data, L, R );

@@ -2574,7 +2574,7 @@ end );
 ##
 InstallGlobalFunction( RepOpSetsPermGroup, function( arg )
     local   G,  Phi,  Psi,  repr,  Omega,  rbase,  L,  R,  P,  Q,  p,  Pr,
-            gens,  cell,  i,phitail, SelectedGens;
+            gens,  cell,  i,phitail, SelectedGens, eVV;
     Print("GAP Beginning of RepOpSetsPermGroup\n");
     G   := arg[ 1 ];
     PrintStabChain(StabChainMutable(G));
@@ -2640,7 +2640,9 @@ InstallGlobalFunction( RepOpSetsPermGroup, function( arg )
 #        fi;
 #    fi;
 
-    Print("GAP G : LGen=", StrongGeneratorsStabChain(StabChainMutable(G)), "\n");
+    eVV:=StrongGeneratorsStabChain(StabChainMutable(G));
+    Sort(eVV);
+    Print("GAP G : LGen=", eVV, "\n");
     Print("GAP repr=", repr, "\n");
     if Length( arg ) > p  then
         L := arg[ p + 1 ];
