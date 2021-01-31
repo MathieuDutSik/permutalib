@@ -74,6 +74,31 @@ PrintStabChain:=function(eRec)
 end;
 
 
+PrintListStabCommPartition:=function(ListS)
+    local len, Status, ListStr, i, LVal, j;
+    len:=Length(ListS);
+    Status:=ListWithIdenticalEntries(len,0);
+    ListStr:=[];
+    for i in [1..len]
+    do
+        if Status[i]=0 then
+            LVal:=[];
+            for j in [1..len]
+            do
+                if IsIdenticalObj(ListS[i].labels, ListS[j].labels) then
+                    Add(LVal, j);
+                    Status[j]:=1;
+                fi;
+            od;
+            Add(ListStr, LVal);
+        fi;
+    od;
+    Print("GAP ListStabCommPartition=", ListStr, "\n");
+end;
+
+
+
+
 
 
 PrintTopOrbit:=function(eRec)

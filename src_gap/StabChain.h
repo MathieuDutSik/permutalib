@@ -291,6 +291,32 @@ void PrintStabChain(StabChain<Telt> const& S)
   }
 }
 
+template<typename Telt>
+void PrintListStabCommPartition(std::vector<StabChain<Telt>> const& ListS)
+{
+  int len = ListS.size();
+  std::vector<int> Status(len,0);
+  std::vector<std::string> ListStr;
+  for (int i=0; i<len; i++) {
+    if (Status[i] == 0) {
+      std::vector<int> LVal;
+      auto ptr = ListS[i]->comm;
+      for (int j=0; j<len; j++) {
+        if (ListS[j]->comm == ptr) {
+          LVal.push_back(j);
+          Status[j] = 1;
+        }
+      }
+      std::string estr = GapStringIntVector(LVal);
+      ListStr.push_back(estr);
+    }
+  }
+  std::string estrb = GapStringTVector(ListStr);
+  std::cerr << "CPP ListStabCommPartition=" << estrb << "\n";
+}
+
+
+
 
 template<typename Telt>
 int GetStabilizerDepth(StabChain<Telt> const& S1)

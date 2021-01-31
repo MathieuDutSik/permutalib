@@ -1791,6 +1791,7 @@ InstallGlobalFunction( PartitionBacktrack,
                     #   <L>    with  <t>. Decrease <max>     according to the
                     #   enlarged <L>. Reset <R> to the enlarged <L>.
                     else
+                        PrintListStabCommPartition(L);
                         for dd  in [ 1 .. d ]  do
                             Print("GAP Before AGEST dd=", dd, "\n");
                             AddGeneratorsExtendSchreierTree( L[ dd ], [ t ] );

@@ -1363,6 +1363,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    //	      AddGeneratorsExtendSchreierTree( L[ dd ], {t});
             // It is a little bit unclear why the loop was removed and a single call to
             // AGEST with L_list[dd].
+            PrintListStabCommPartition(L_list);
             for (int dd=0; dd<=d; dd++) {
               std::cerr << "CPP Before AGEST dd=" << (dd+1) << "\n";
               AddGeneratorsExtendSchreierTree(L_list[dd], {t.val});
