@@ -292,7 +292,7 @@ void PrintStabChain(StabChain<Telt> const& S)
 }
 
 template<typename Telt>
-void PrintListStabCommPartition(std::vector<StabChain<Telt>> const& ListS)
+void PrintListStabCommPartition(std::string const& mesg, std::vector<StabChain<Telt>> const& ListS)
 {
   int len = ListS.size();
   std::vector<int> Status(len,0);
@@ -312,7 +312,7 @@ void PrintListStabCommPartition(std::vector<StabChain<Telt>> const& ListS)
     }
   }
   std::string estrb = GapStringTVector(ListStr);
-  std::cerr << "CPP ListStabCommPartition=" << estrb << "\n";
+  std::cerr << "CPP " << mesg << " ListStabCommPartition=" << estrb << "\n";
 }
 
 

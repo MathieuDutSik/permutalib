@@ -1415,6 +1415,9 @@ InstallGlobalFunction( PartitionBacktrack,
                                   else  oldprm2 := false;        fi;
         Print("GAP PBEnumerate, step 4 d=", d, " |rbase.base|=", Length(rbase.base), "\n");
         PrintRBaseLevel(rbase, "GAP Step 4");
+        if IsList(L) then
+            PrintListStabCommPartition("Step 4", L);
+        fi;
 
         # Recursion comes to an end  if all base  points have been prescribed
         # images.
@@ -1434,10 +1437,9 @@ InstallGlobalFunction( PartitionBacktrack,
                     L := ListStabChain( CopyStabChain( StabChainOp( L,
                                  rec( base := rbase.base,
                                    reduced := false ) ) ) );
-                    Print("GAP ListStabChain |L|=", Length(L), "\n");
-                    Print("GAP wasTriv Critical, step 2\n");
+                    PrintListStabCommPartition("ListStabChain", L);
+                    Print(NullMat(5));
                     R := ShallowCopy( L );
-                    Print("GAP wasTriv Critical, step 3\n");
 
                     if image.perm <> true  then
                         Info( InfoBckt, 1, "Stabilizer chain with depths ",
@@ -1586,7 +1588,6 @@ InstallGlobalFunction( PartitionBacktrack,
             # Now we  can  remove  the  entire   <R>-orbit of <a>  from   the
             # candidate list.
             Print("GAP ORB 1: Before subtract d=", d, " orb[d]=", orb[d], "\n");
-            Print("GAP |L|=", Length(L), "\n");
             SubtractBlist( orb[ d ], BlistList( range, L[ d ].orbit ) );
             Print("GAP ORB 1: After subtract d=", d, " orb[d]=", orb[d], "\n");
 
@@ -1791,7 +1792,7 @@ InstallGlobalFunction( PartitionBacktrack,
                     #   <L>    with  <t>. Decrease <max>     according to the
                     #   enlarged <L>. Reset <R> to the enlarged <L>.
                     else
-                        PrintListStabCommPartition(L);
+                        PrintListStabCommPartition("AddGen", L);
                         for dd  in [ 1 .. d ]  do
                             Print("GAP Before AGEST dd=", dd, "\n");
                             AddGeneratorsExtendSchreierTree( L[ dd ], [ t ] );
@@ -1808,6 +1809,8 @@ InstallGlobalFunction( PartitionBacktrack,
                         R{ [ d .. Length( rbase.base ) ] } := List(
                         L{ [ d .. Length( rbase.base ) ] }, CopyStabChain );
 #                        Print("GAP After |R|=", Length(R), " |L|=", Length(L), "\n");
+#                        PrintListStabCommPartition(R);
+                        PrintListStabCommPartition("SetStab", L);
                     fi;
 
                 fi;

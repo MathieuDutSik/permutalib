@@ -77,8 +77,7 @@ permPlusBool<Telt> ExtendedT(Telt const& t, int const& pnt, int img, int const& 
     if (pnt != img) {
       std::cerr << "CPP ExtendedT, return false 1\n";
       return {int_false, {}};
-    }
-    else {
+    } else {
       return {int_perm, t};
     }
   }
@@ -285,8 +284,7 @@ void PrintRBaseLevel(rbaseType<Telt> const& rbase, std::string const& str)
 {
   if (rbase.level.status == int_int) {
     std::cerr << str << " PRBL rbase.level, integer : " << rbase.level.value_int << "\n";
-  }
-  else {
+  } else {
     if (rbase.level.status == int_stablev) {
       int len=rbase.lev.size();
       std::cerr << str << " |rbase.lev|=" << len << "\n";
@@ -298,8 +296,7 @@ void PrintRBaseLevel(rbaseType<Telt> const& rbase, std::string const& str)
       std::cerr << "CPP rbase.level=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(rbase.level.Stot))) << "\n";
       std::cerr << str << " PRBL rbase.level, record, |genlabels|=" << rbase.level.Stot->genlabels.size() << "\n";
       std::cerr << str << " PRBL orbit=" << PrintTopOrbit(rbase.level.Stot) << "\n";
-    }
-    else {
+    } else {
       std::cerr << str << " PRBL rbase.level=" << GetIntTypeNature(rbase.level.status) << "\n";
     }
   }
@@ -323,8 +320,7 @@ bool ProcessFixpoint_rbase(rbaseType<Telt> & rbase, int const& pnt)
   }
   if (rbase.level.status == int_int) {
     rbase.level.value_int--;
-  }
-  else {
+  } else {
     std::cerr << "CPP Before ChangeStabChain level\n";
     ChangeStabChain(rbase.level.Stot, {pnt}, int_true);
     PrintRBaseLevel(rbase, "CPP After CSC level");
@@ -332,8 +328,7 @@ bool ProcessFixpoint_rbase(rbaseType<Telt> & rbase, int const& pnt)
     if (BasePoint(rbase.level) == pnt) {
       std::cerr << "CPP Going to stabilizer of level\n";
       rbase.level.Stot = rbase.level.Stot->stabilizer;
-    }
-    else {
+    } else {
       std::cerr << "CPP returning false\n";
       return false;
     }
@@ -371,8 +366,7 @@ bool ProcessFixpoint_image(imageType<Telt> & image, int const& pnt, int & img, i
     if (t.status == int_false) {
       std::cerr << "CPP Returning false 1\n";
       return false;
-    }
-    else {
+    } else {
       if (BasePoint(image.level ) == pnt)
         image.level.Stot = image.level.Stot->stabilizer;
     }
@@ -385,8 +379,7 @@ bool ProcessFixpoint_image(imageType<Telt> & image, int const& pnt, int & img, i
     if (t.status == int_false) {
       std::cerr << "CPP Returning false 2\n";
       return false;
-    }
-    else {
+    } else {
       if (BasePoint(image.level2 ) == pnt)
         image.level2.Stot = image.level2.Stot->stabilizer;
     }
@@ -411,8 +404,7 @@ bool IsTrivialRBase(rbaseType<Telt> const& rbase)
   std::cerr << "CPP IsTrivialRBase : stab=";
   if (rbase.level.status == int_stablev) {
     std::cerr << "true  |genlabels|=" << rbase.level.Stot->genlabels.size();
-  }
-  else {
+  } else {
     std::cerr << "false";
   }
   std::cerr << "\n";
@@ -450,16 +442,14 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
     if (IsId) {
       rbase.level2.status = int_true;
       rbase.level2.Stot = EmptyStabChain<Telt>(n);
-    }
-    else {
+    } else {
       rbase.level2 = {int_stablev, -555, G[1]};
       std::cerr << "CPP rbase Before bool print\n";
       std::cerr << "CPP bool=" << rbase.level2.Stot->IsBoundCycle << "\n";
       std::cerr << "CPP rbase After bool print\n";
       rbase.lev2 = {};
     }
-  }
-  else {
+  } else {
     rbase.level2.status = int_false;
   }
   rbase.level = {int_stablev, -666, G[0]};
@@ -658,8 +648,7 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
     if (rbase.level2.status == int_true) {
       std::cerr << "CPP Before call to MainInsert(level)\n";
       MainInsert(rbase.level);
-    }
-    else {
+    } else {
       std::cerr << "CPP Before call to MainInsert(level2)\n";
       MainInsert(rbase.level2);
     }
@@ -701,8 +690,7 @@ void NextRBasePoint(Partition & P, rbaseType<Telt> & rbase, Telt const& TheId)
   int l = -1;
   if (rbase.level.status == int_int) {
     l = 0;
-  }
-  else {
+  } else {
     while (true) {
       //      std::cerr << "Before PositionProperty operation len[k]=" << lens[k] << "\n";
       l = PositionProperty(ClosedInterval(0, lens[k]), [&](int const& i) -> bool {
@@ -738,8 +726,7 @@ bool Refinements_Intersection(rbaseType<Telt> & rbase, imageType<Telt> & image, 
   Telt t;
   if (image.level2.status == int_false) {
     t = image.perm.val;
-  }
-  else {
+  } else {
     t = image.perm2.val;
   }
   Telt tinv =Inverse(t);
@@ -774,8 +761,7 @@ int RRefine(rbaseType<Telt> & rbase, imageType<Telt> & image, bool const& uscore
       if (!t) {
         std::cerr << "CPP 1 return fail\n";
 	return int_fail;
-      }
-      else {
+      } else {
 	if (!t) {
           std::cerr << "CPP 1 return t\n";
 	  return BoolToInt(t);
@@ -793,8 +779,7 @@ int RRefine(rbaseType<Telt> & rbase, imageType<Telt> & image, bool const& uscore
 	if (!t) {
           std::cerr << "CPP 2 return fail\n";
 	  return int_fail;
-	}
-	else {
+	} else {
 	  if (!t) {
             std::cerr << "CPP 2 return t\n";
 	    return BoolToInt(t);
@@ -935,8 +920,7 @@ imageType<Telt> BuildInitialImage(bool const&repr, rbaseType<Telt> & rbase, data
 {
   if (repr) {
     return imageType<Telt>(data.P);
-  }
-  else {
+  } else {
     return imageType<Telt>(rbase.partition);
   }
 };
@@ -992,8 +976,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     if (image.perm.status == int_true) {
       oldcel = image.partition;
       std::cerr << "CPP Assigning from image.partition\n";
-    }
-    else {
+    } else {
       oldcel_cellno = image.partition.cellno;
       std::cerr << "CPP Assigning from image.partition.cellno\n";
       std::cerr << "CPP oldcel=" << GapStringIntVector(oldcel_cellno) << "\n";
@@ -1006,6 +989,8 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       oldprm2.status = int_false;
     std::cerr << "CPP PBEnumerate, step 4 d=" << (d+1) << " |rbase.base|=" << rbase.base.size() << "\n";
     PrintRBaseLevel(rbase, "CPP Step 4");
+    if (L_list.size() > 0)
+      PrintListStabCommPartition("Step 4", L_list);
     // Recursion comes to an end  if all base  points have been prescribed
     // images.
     if (d >= int(rbase.base.size())) {
@@ -1025,14 +1010,11 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  std::cerr << "CPP Before computation of ListStabChain Order(L)=" << Order<Telt,mpz_class>(L) << "\n";
           std::cerr << "CPP sgs(L)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(L))) << " base=" << GapStringIntVector(rbase.base) << "\n";
 	  L_list = ListStabChain(StabChainOp_stabchain_nofalse<Telt,Tint>(L, options));
-	  std::cerr << "CPP ListStabChain |L|=" << L_list.size() << "\n";
-	  std::cerr << "CPP wasTriv Critical, step 2\n";
+          PrintListStabCommPartition("ListStabChain", L_list);
 	  R_list = L_list; // Corresponds to R := ShallowCopy( L)
-	  std::cerr << "CPP wasTriv Critical, step 3\n";
 	  std::cerr << "CPP PBEnumerate, EXIT 2\n";
 	  return {int_fail,{}};
-	}
-	else {
+	} else {
 	  permPlusBool<Telt> prm;
 	  if (image.perm.status == int_true)
 	    prm = {int_perm, MappingPermListList<Telt>(n, rbase.fix[rbase.base.size()-1], Fixcells(image.partition))};
@@ -1043,8 +1025,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	      std::cerr << "CPP PBEnumerate, EXIT 3\n";
 	      return prm;
 	    }
-	  }
-	  else {
+	  } else {
 	    if (Pr(prm.val)) {
 	      std::cerr << "CPP PBEnumerate, EXIT 4\n";
 	      return {int_perm, prm.val};
@@ -1109,8 +1090,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	}
       }
       std::cerr << "CPP ORB: Case image.perm=true d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
-    }
-    else {
+    } else {
       std::cerr << "CPP image.perm<>true orb=" << GapStringListBoolVector(orb) << "\n";
       std::cerr << "CPP orb assign 2: d=" << (d+1) << "\n";
       AssignationVectorGapStyle(orb, d, BlistList(range, {}));
@@ -1179,7 +1159,6 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       // Now we  can  remove  the  entire   <R>-orbit of <a>  from   the
       // candidate list.
       std::cerr << "CPP ORB 1: Before subtract d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
-      std::cerr << "CPP |L|=" << L_list.size() << "\n";
       SubtractBlist(orb[d], BlistList(range, L_list[d]->orbit));
       std::cerr << "CPP ORB 1: After subtract d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
     }
@@ -1226,8 +1205,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
             std::cerr << "CPP second case\n";
           }
 	}
-      }
-      else {
+      } else {
 	dd = d;
       }
       std::cerr << "CPP dd=" << (dd+1) << " d=" << (d+1) << "\n";
@@ -1354,8 +1332,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  if (repr || !wasTriv) {
 	    std::cerr << "CPP PBEnumerate, EXIT 8\n";
 	    return t;
-	  }
-	  else {
+	  } else {
 	    // Subgroup case, base  <> image at current level: Enlarge
 	    //   <L>    with  <t>. Decrease <max>     according to the
 	    //   enlarged <L>. Reset <R> to the enlarged <L>.
@@ -1363,7 +1340,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    //	      AddGeneratorsExtendSchreierTree( L[ dd ], {t});
             // It is a little bit unclear why the loop was removed and a single call to
             // AGEST with L_list[dd].
-            PrintListStabCommPartition(L_list);
+            PrintListStabCommPartition("AddGen", L_list);
             for (int dd=0; dd<=d; dd++) {
               std::cerr << "CPP Before AGEST dd=" << (dd+1) << "\n";
               AddGeneratorsExtendSchreierTree(L_list[dd], {t.val});
@@ -1374,6 +1351,8 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    }
 	    max = PositionNthTrueBlist( orB[d], m - L_list[d]->orbit.size());
 	    SetStabChainFromLevel(R_list, L_list, d, rbase.base.size());
+            //            PrintListStabCommPartition(R_list);
+            PrintListStabCommPartition("SetStab", L_list);
 	  }
 	}
         std::cerr << "CPP t step 4\n";
@@ -1417,14 +1396,12 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   image.depth=1;
   if (repr) {
     image.partition = data.P;
-  }
-  else {
+  } else {
     image.partition = rbase.partition;
   }
   if (IsBool(rbase.level2)) {
     image.level2 = {int_false, -777, {}};
-  }
-  else {
+  } else {
     image.level2 = rbase.level2;
     image.perm2  = {int_perm, id};
   }
@@ -1439,8 +1416,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     // the root of the search tree.
     if (rbase.partition.lengths != image.partition.lengths) {
       image.perm.status = int_false;
-    }
-    else {
+    } else {
       std::vector<int> fix  = Fixcells(rbase.partition);
       std::vector<int> fixP = Fixcells(image.partition);
       for (int i=0; i<int(fix.size()); i++) {
@@ -1454,8 +1430,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   std::cerr << "CPP After PBEnumerate Call 0, repr\n";
   if (!repr) {
     return {int_group, L_list[0], {}};
-  }
-  else {
+  } else {
     if (rep.status == int_perm)
       return {int_perm, {}, rep.val};
     else
@@ -1512,12 +1487,10 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
 	return {int_fail, {}, {}};
       else
 	return {int_perm, {}, G->comm->identity};
-    }
-    else {
+    } else {
       return {int_group, G, {}};
     }
-  }
-  else {
+  } else {
     if (repr && (IsSubset(Psi, Omega) || ForAll(Omega, [&](int const& p) -> bool {return !Psi[p];})))
       return {int_fail, {}, {}};
   }

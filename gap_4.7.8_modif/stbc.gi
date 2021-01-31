@@ -74,7 +74,7 @@ PrintStabChain:=function(eRec)
 end;
 
 
-PrintListStabCommPartition:=function(ListS)
+PrintListStabCommPartition:=function(mesg, ListS)
     local len, Status, ListStr, i, LVal, j;
     len:=Length(ListS);
     Status:=ListWithIdenticalEntries(len,0);
@@ -93,7 +93,7 @@ PrintListStabCommPartition:=function(ListS)
             Add(ListStr, LVal);
         fi;
     od;
-    Print("GAP ListStabCommPartition=", ListStr, "\n");
+    Print("GAP ", mesg, " ListStabCommPartition=", ListStr, "\n");
 end;
 
 
