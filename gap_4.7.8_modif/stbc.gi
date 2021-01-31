@@ -627,14 +627,14 @@ InstallGlobalFunction( AddGeneratorsExtendSchreierTree, function( S, new )
             Add( old, false );
             Add( ald, true );
             if debug_fct then
-#              Print("GAP AGEST  genlabels insert 1:\n");
+              Print("GAP AGEST  genlabels insert 1:\n");
 #              Print("GAP AGEST  genlabels insert 1: pos=", Length(S.labels), "\n");
 #              Print("GAP AGEST  genlabels insert X: pos=", Length(S.labels), "\n");
             fi;
             Add( S.genlabels, Length( S.labels ) );
         elif not ald[ pos ]  then
             if debug_fct then
-#              Print("GAP AGEST  genlabels insert 2:\n");
+              Print("GAP AGEST  genlabels insert 2:\n");
 #              Print("GAP AGEST  genlabels insert 2: pos=", pos, "\n");
 #              Print("GAP AGEST  genlabels insert X: pos=", pos, "\n");
             fi;

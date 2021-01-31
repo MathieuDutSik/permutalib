@@ -1029,7 +1029,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  std::cerr << "CPP wasTriv Critical, step 2\n";
 	  R_list = L_list; // Corresponds to R := ShallowCopy( L)
 	  std::cerr << "CPP wasTriv Critical, step 3\n";
-	  std::cerr << "CPP PBEnumerate, EXIT 2 |L|=" << L_list.size() << "\n";
+	  std::cerr << "CPP PBEnumerate, EXIT 2\n";
 	  return {int_fail,{}};
 	}
 	else {
@@ -1040,17 +1040,17 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    prm = image.perm;
 	  if (image.level2.status != int_false) {
 	    if (SiftedPermutation(image.level2.Stot, prm.val * Inverse(image.perm2.val)).isIdentity()) {
-	      std::cerr << "CPP PBEnumerate, EXIT 3 |L|=" << L_list.size() << "\n";
+	      std::cerr << "CPP PBEnumerate, EXIT 3\n";
 	      return prm;
 	    }
 	  }
 	  else {
 	    if (Pr(prm.val)) {
-	      std::cerr << "CPP PBEnumerate, EXIT 4 |L|=" << L_list.size() << "\n";
+	      std::cerr << "CPP PBEnumerate, EXIT 4\n";
 	      return {int_perm, prm.val};
 	    }
 	  }
-	  std::cerr << "CPP PBEnumerate, EXIT 5 |L|=" << L_list.size() << "\n";
+	  std::cerr << "CPP PBEnumerate, EXIT 5\n";
 	  return {int_fail, {}};
 	}
 	// Construct the   next refinement  level. This  also  initializes
@@ -1188,7 +1188,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     // Only the early points of the orbit have to be considered.
     m = SizeBlist(orB[d] );
     if (m < int(L_list[d]->orbit.size()) ) {
-      std::cerr << "CPP PBEnumerate, EXIT 6 |L|=" << L_list.size() << "\n";
+      std::cerr << "CPP PBEnumerate, EXIT 6\n";
       return {int_fail,{}};
     }
     max = PositionNthTrueBlist(orB[d], m - L_list[d]->orbit.size());
@@ -1200,7 +1200,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       m--;
       std::cerr << "CPP Before test m=" << m << " Length(L[d].orbit)=" << L_list[d]->orbit.size() << "\n";
       if (m < int(L_list[d]->orbit.size()) ) {
-	std::cerr << "CPP PBEnumerate, EXIT 7 |L|=" << L_list.size() << "\n";
+	std::cerr << "CPP PBEnumerate, EXIT 7\n";
 	return {int_fail,{}};
       }
       max = PositionNthTrueBlist( orB[d], m - L_list[d]->orbit.size());
@@ -1352,7 +1352,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  //   need  only find  a representative  because we already
 	  //   know the stabilizer of <L> at an earlier level.
 	  if (repr || !wasTriv) {
-	    std::cerr << "CPP PBEnumerate, EXIT 8 |L|=" << L_list.size() << "\n";
+	    std::cerr << "CPP PBEnumerate, EXIT 8\n";
 	    return t;
 	  }
 	  else {
@@ -1396,7 +1396,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       std::cerr << "CPP End of the loop. 2 Now b=" << PosFail_to_string(b) << "\n";
 
     }
-    std::cerr << "CPP PBEnumerate, step 11, EXIT 10 |L|=" << L_list.size() << "\n";
+    std::cerr << "CPP PBEnumerate, step 11, EXIT 10\n";
     return {int_fail, {}};
   };
 

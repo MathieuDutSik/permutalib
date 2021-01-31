@@ -383,12 +383,6 @@ std::ostream& operator<<(std::ostream& os, StabChain<Telt> const& Stot)
 	os << " " << Sptr->comm->labels[eVal];
     }
     os << "\n";
-    /*
-    os << "  genlabels =";
-    for (auto & eVal : Sptr->genlabels)
-      os << " " << eVal;
-    os << "\n";
-    */
     Sptr = Sptr->stabilizer;
     iLev++;
   }
@@ -911,7 +905,6 @@ void InsertTrivialStabilizer(StabChain<Telt> & Stot, int const& pnt)
   Stot->genlabels = Stot->stabilizer->genlabels;
   Stot->cycles = {};
   Stot->IsBoundCycle = false;
-  //  Stot->cycles = std::vector<int8_t>(Stot->comm->n, 0);
   Stot->treegen = {};
   Stot->treegen = {};
   Stot->aux = {};
@@ -1042,7 +1035,7 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
       ald.push_back(true);
       int posG=S->comm->labels.size() - 1;
 #ifdef DEBUG_ADD_GEN_SCH
-      //      std::cerr << "CPP AGEST  genlabels insert 1:\n";
+      std::cerr << "CPP AGEST  genlabels insert 1:\n";
       //      std::cerr << "CPP AGEST  genlabels insert 1: pos=" << (posG+1) << "\n";
       //std::cerr << "CPP AGEST  genlabels insert X: pos=" << (posG+1) << "\n";
 #endif
@@ -1050,7 +1043,7 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
     } else {
       if (!ald[pos]) {
 #ifdef DEBUG_ADD_GEN_SCH
-        //        std::cerr << "CPP AGEST  genlabels insert 2:\n";
+        std::cerr << "CPP AGEST  genlabels insert 2:\n";
         //        std::cerr << "CPP AGEST  genlabels insert 2: pos=" << (pos+1) << "\n";
 	//std::cerr << "CPP AGEST  genlabels insert X: pos=" << (pos+1) << "\n";
 #endif
