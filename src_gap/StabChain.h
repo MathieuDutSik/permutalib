@@ -549,7 +549,7 @@ void RemoveStabChain(StabChain<Telt> & Stot)
   Stot->orbit.clear();
   Stot->transversal.clear();
   Stot->cycles.clear();
-  Stot->IsBoundCycle=false;
+  Stot->IsBoundCycle = false;
   Stot->treegen.clear();
   Stot->treegeninv.clear();
   Stot->aux.clear();
@@ -1621,13 +1621,13 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
   };
 #endif
   std::vector<int> newBase;
-  int i=0;
-  int basSiz=base.size();
+  size_t i=0;
+  size_t basSiz=base.size();
 #ifdef DEBUG_CHANGE_STAB_CHAIN
   std::cerr << "CPP ChangeStabChain base = " << GapStringIntVector(base) << "\n";
   std::cerr << "CPP ChangeStabChain 1 orbit=" << PrintTopOrbit(Gptr) << "\n";
 #endif
-  while (GetStabilizerDepth(Sptr) > 1 || i<basSiz) {
+  while (GetStabilizerDepth(Sptr) > 1 || i < basSiz) {
 #ifdef DEBUG_CHANGE_STAB_CHAIN
     std::cerr << "CPP GetStabilizerDepth(S)=" << GetStabilizerDepth(Sptr) << " GetStabilizerDepth(G)=" << GetStabilizerDepth(Gptr) << "\n";
 #endif
