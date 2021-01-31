@@ -990,7 +990,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     std::cerr << "CPP PBEnumerate, step 4 d=" << (d+1) << " |rbase.base|=" << rbase.base.size() << "\n";
     PrintRBaseLevel(rbase, "CPP Step 4");
     if (L_list.size() > 0)
-      PrintListStabCommPartition("Step 4", L_list);
+      PrintListStabCommPartition("CPP Step 4", L_list);
     // Recursion comes to an end  if all base  points have been prescribed
     // images.
     if (d >= int(rbase.base.size())) {
@@ -1010,7 +1010,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  std::cerr << "CPP Before computation of ListStabChain Order(L)=" << Order<Telt,mpz_class>(L) << "\n";
           std::cerr << "CPP sgs(L)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(L))) << " base=" << GapStringIntVector(rbase.base) << "\n";
 	  L_list = ListStabChain(StabChainOp_stabchain_nofalse<Telt,Tint>(L, options));
-          PrintListStabCommPartition("ListStabChain", L_list);
+          PrintListStabCommPartition("CPP ListStabChain", L_list);
 	  R_list = L_list; // Corresponds to R := ShallowCopy( L)
 	  std::cerr << "CPP PBEnumerate, EXIT 2\n";
 	  return {int_fail,{}};
@@ -1340,7 +1340,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    //	      AddGeneratorsExtendSchreierTree( L[ dd ], {t});
             // It is a little bit unclear why the loop was removed and a single call to
             // AGEST with L_list[dd].
-            PrintListStabCommPartition("AddGen", L_list);
+            PrintListStabCommPartition("CPP AddGen", L_list);
             for (int dd=0; dd<=d; dd++) {
               std::cerr << "CPP Before AGEST dd=" << (dd+1) << "\n";
               AddGeneratorsExtendSchreierTree(L_list[dd], {t.val});
@@ -1352,7 +1352,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    max = PositionNthTrueBlist( orB[d], m - L_list[d]->orbit.size());
 	    SetStabChainFromLevel(R_list, L_list, d, rbase.base.size());
             //            PrintListStabCommPartition(R_list);
-            PrintListStabCommPartition("SetStab", L_list);
+            PrintListStabCommPartition("CPP SetStab", L_list);
 	  }
 	}
         std::cerr << "CPP t step 4\n";

@@ -93,7 +93,7 @@ PrintListStabCommPartition:=function(mesg, ListS)
             Add(ListStr, LVal);
         fi;
     od;
-    Print("GAP ", mesg, " ListStabCommPartition=", ListStr, "\n");
+    Print(mesg, " ListStabCommPartition=", ListStr, "\n");
 end;
 
 

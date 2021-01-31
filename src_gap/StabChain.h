@@ -312,7 +312,7 @@ void PrintListStabCommPartition(std::string const& mesg, std::vector<StabChain<T
     }
   }
   std::string estrb = GapStringTVector(ListStr);
-  std::cerr << "CPP " << mesg << " ListStabCommPartition=" << estrb << "\n";
+  std::cerr << mesg << " ListStabCommPartition=" << estrb << "\n";
 }
 
 

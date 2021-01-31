@@ -1373,6 +1373,8 @@ InstallGlobalFunction( PartitionBacktrack,
     Print("GAP INIT sgs(G)=", Set(StrongGeneratorsStabChain(StabChainMutable(G))), "\n");
     Print("GAP INIT sgs(L)=", Set(StrongGeneratorsStabChain(StabChainMutable(L))), "\n");
     Print("GAP INIT sgs(R)=", Set(StrongGeneratorsStabChain(StabChainMutable(R))), "\n");
+#    PrintListStabCommPartition("DEBUG Begin PartBack XXXListStabChain",
+#                               ListStabChain( StabChainOp( L, rec(base:=[ 2, 10, 6, 4, 7, 1 ], reduced:=false))));
 #############################################################################
 ##
 #F      PBEnumerate( ... )  . . . . . . . recursive enumeration of a subgroup
@@ -1416,7 +1418,7 @@ InstallGlobalFunction( PartitionBacktrack,
         Print("GAP PBEnumerate, step 4 d=", d, " |rbase.base|=", Length(rbase.base), "\n");
         PrintRBaseLevel(rbase, "GAP Step 4");
         if IsList(L) then
-            PrintListStabCommPartition("Step 4", L);
+            PrintListStabCommPartition("GAP Step 4", L);
         fi;
 
         # Recursion comes to an end  if all base  points have been prescribed
@@ -1434,11 +1436,14 @@ InstallGlobalFunction( PartitionBacktrack,
                     # chains when the R-base is complete.
                     Print("GAP Before computation of ListStabChain Order(L)=", Order(L), "\n");
                     Print("GAP sgs(L)=", StrongGeneratorsStabChain(StabChainMutable(L)), " base=", rbase.base, "\n");
+#                    PrintListStabCommPartition("DEBUG Before CopyStabChain XXXListStabChain", ListStabChain( StabChainOp( L,
+#                                 rec( base := rbase.base,
+#                                      reduced := false ))));
                     L := ListStabChain( CopyStabChain( StabChainOp( L,
                                  rec( base := rbase.base,
                                    reduced := false ) ) ) );
-                    PrintListStabCommPartition("ListStabChain", L);
-                    Print(NullMat(5));
+                    PrintListStabCommPartition("GAP ListStabChain", L);
+#                    Print(NullMat(5));
                     R := ShallowCopy( L );
 
                     if image.perm <> true  then
@@ -1792,7 +1797,7 @@ InstallGlobalFunction( PartitionBacktrack,
                     #   <L>    with  <t>. Decrease <max>     according to the
                     #   enlarged <L>. Reset <R> to the enlarged <L>.
                     else
-                        PrintListStabCommPartition("AddGen", L);
+                        PrintListStabCommPartition("GAP AddGen", L);
                         for dd  in [ 1 .. d ]  do
                             Print("GAP Before AGEST dd=", dd, "\n");
                             AddGeneratorsExtendSchreierTree( L[ dd ], [ t ] );
@@ -1810,7 +1815,7 @@ InstallGlobalFunction( PartitionBacktrack,
                         L{ [ d .. Length( rbase.base ) ] }, CopyStabChain );
 #                        Print("GAP After |R|=", Length(R), " |L|=", Length(L), "\n");
 #                        PrintListStabCommPartition(R);
-                        PrintListStabCommPartition("SetStab", L);
+                        PrintListStabCommPartition("GAP SetStab", L);
                     fi;
 
                 fi;
