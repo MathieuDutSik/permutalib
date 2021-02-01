@@ -97,6 +97,10 @@ PrintListStabCommPartition:=function(mesg, ListS)
 end;
 
 
+GetCompleteListLabels:=function(ListS)
+    return List(ListS, x->x.labels);
+end;
+
 
 
 
@@ -1126,7 +1130,7 @@ InstallGlobalFunction( ConjugateStabChain, function( arg )
             len,                                # number of labels in <S>
             labels,  labpos,  orbit,  edges,    # conjugated components
             labs,  lims,                        # list of all labels/images
-            img,  pnt,                          # image of label and point
+            img,  pnt, nb_assign,               # image of label and point
             pos,  L,  l,  i;                    # loop variables
 
     # Get the arguments.
@@ -1139,23 +1143,37 @@ InstallGlobalFunction( ConjugateStabChain, function( arg )
     # levels.
     labs := [ S.identity ];
     lims := [ T.identity ];
+#    Print(NullMat(5));
+
+
+    # ND MDS: With the existing code what is done in the code is mapping the
+    # ND MDS: labels from the one in the S.labels to the one in return.
+    # ND MDS: The last S.labels is not mapped for some strange reason.
+    # ND MDS: Maybe because it is not actually used in the computation.
 
     # Loop over the stabilizer chain.
+    nb_assign:=0;
     while cond( S )  do
         len := Length( S.labels );
+        Print("DEBUG ConjugateStabChain, Begin loop\n");
 
         # If this is a  new  labels component, map  the  labels and mark  the
         # component so that it can be recognized at deeper levels.
         if len = 0  or  IsPerm( S.labels[ len ] )  then
+            Print("DEBUG ConjugateStabChain, Begin loop\n");
             if IsPerm( hom )  then
+                # ND MDS. This is the case that applies to us when calling with permutation mapping
                 labels := OnTuples( S.labels, hom );
+                Print("DEBUG ConjugateStabChain, 1 : labels=", labels, "\n");
                 labpos := [ 1 .. len ];
             else
                 if IsIdenticalObj( S, T )  then  labels := [ T.identity ];
                                         else  labels := T.labels;        fi;
+                Print("DEBUG ConjugateStabChain, 2 : labels=", labels, "\n");
                 labpos := ListWithIdenticalEntries( len, 0 );
                 labpos[ 1 ] := 1;
             fi;
+            # ND MDS: The genlabels are actually not used.
             Add( S.labels, rec( labels := labels,
                                 labpos := labpos,
                              genlabels := Set( S.genlabels ) ) );
@@ -1166,6 +1184,9 @@ InstallGlobalFunction( ConjugateStabChain, function( arg )
         # encountered.
         else
             labels := S.labels[ len ].labels;
+            Print("DEBUG ConjugateStabChain, 3 : labels=", labels, "\n");
+#            Print(NullMat(5));
+
             labpos := S.labels[ len ].labpos;
             UniteSet( S.labels[ len ].genlabels, S.genlabels );
         fi;
@@ -1173,6 +1194,7 @@ InstallGlobalFunction( ConjugateStabChain, function( arg )
         # Map the orbit and edges.
         edges := [  ];
         if IsPerm( map )  and  IsPerm( hom )  then
+            # This is the case that matters to us.
             orbit := OnTuples( S.orbit, map );
             edges{ orbit } := S.translabels{ S.orbit };
         else
@@ -1189,8 +1211,10 @@ InstallGlobalFunction( ConjugateStabChain, function( arg )
                     # because we know that their images  will be distinct and
                     # non-trivial.
                     if pos = 0  then
+                        # ND MDS: this case should not happen for us because value 0 occurs only when in the non-perm case
                         Add( labels, LabsLims( S.transversal[ pnt ], hom,
                                 labs, lims ) );
+                        Print("DEBUG ConjugateStabChain, 4 : labels=", labels, "\n");
                         pos := Length( labels );
                         labpos[ S.translabels[ pnt ] ] := pos;
                     fi;
@@ -1205,6 +1229,8 @@ InstallGlobalFunction( ConjugateStabChain, function( arg )
 
         # Build a level of <T>  (`genlabels' will be completed when  `labpos'
         # is complete).
+        Print("DEBUG ConjugateStabChain, 5 : labels=", labels, "\n");
+        nb_assign:=nb_assign+1;
         T.labels      := labels;
         T.genlabels   := S.genlabels;
         T.orbit       := orbit;
@@ -1221,6 +1247,7 @@ InstallGlobalFunction( ConjugateStabChain, function( arg )
         T := T.stabilizer;
 
     od;
+    Print("DEBUG nb_assign=", nb_assign, "\n");
 
     # For   the distinct labels  components  of  the original  chain, map the
     # labels that  did  not appear     as edges  and   remove the   auxiliary
@@ -1228,6 +1255,8 @@ InstallGlobalFunction( ConjugateStabChain, function( arg )
     for L  in newlevs  do
         l := L[ Length( L ) ];
         i := Position( l.labpos, 0 );
+        # ND MDS: In the perm case, we do not have the case of a 0 in labpos
+        # ND MDS: So, this does not apply here.
         while i <> fail  do
             if i in l.genlabels  then
                 img := LabsLims( L[ i ], hom, labs, lims );
@@ -1245,6 +1274,7 @@ InstallGlobalFunction( ConjugateStabChain, function( arg )
 
     # Now that all labels have been mapped, complete  the `genlabels' and put
     # in `generators'.
+    # ND MDS: The code below obviously does not apply to the IsPerm(hom) case.
     if not IsPerm( hom )  then
         L := arg[ 2 ];
         while IsBound( L.labpos )  do
@@ -1255,6 +1285,7 @@ InstallGlobalFunction( ConjugateStabChain, function( arg )
             L := L.stabilizer;
         od;
     fi;
+    # ND MDS: The code below does not apply as we do not use the generators entry.
     L := arg[ 2 ];
     while IsBound( L.stabilizer )  do
         L.generators := L.labels{ L.genlabels };
@@ -1471,9 +1502,14 @@ local   G,  base,  reduced,
     # Conjugate to move all the points to the beginning of their orbit.
 #    Print("GAP ChangeStabChain 2 orbit=", PrintTopOrbit(G), "\n");
     Print("GAP Before ConjugateStabChain cnj=", cnj, "\n");
+    PrintListStabCommPartition("GAP Before ConjugateStabChain XXXListStabChain", ListStabChain(G));
+    Print("GAP Before ConjugateStabChain XXXListLabels", GetCompleteListLabels(ListStabChain(G)), "\n");
+
     if cnj <> S.identity  then
         ConjugateStabChain( G, G, cnj, cnj );
     fi;
+    PrintListStabCommPartition("GAP After ConjugateStabChain XXXListStabChain", ListStabChain(G));
+    Print("GAP After ConjugateStabChain XXXListLabels", GetCompleteListLabels(ListStabChain(G)), "\n");
     Print("GAP ChangeStabChain 3 orbit=", PrintTopOrbit(G), "\n");
     Print("GAP Leaving ChangeStabChain\n");
     return true;

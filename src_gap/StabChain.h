@@ -513,7 +513,15 @@ StabChain<Telt> EmptyStabChainPlusNode(int const& n, int const& bas)
 
 
 template<typename Telt>
-StabChain<Telt> EmptyStabChainPlusCommonPlusNode(std::shared_ptr<CommonStabInfo<Telt>> const& comm, int const& n, int const& bas)
+StabChain<Telt> EmptyStabChainPlusCommon(std::shared_ptr<CommonStabInfo<Telt>> const& comm)
+{
+  StabChain<Telt> S = std::make_shared<StabLevel<Telt>>(EmptyStabLevel<Telt>(comm));
+  return S;
+}
+
+
+template<typename Telt>
+StabChain<Telt> EmptyStabChainPlusCommonPlusNode(std::shared_ptr<CommonStabInfo<Telt>> const& comm, int const& bas)
 {
   StabChain<Telt> S = std::make_shared<StabLevel<Telt>>(EmptyStabLevel<Telt>(comm));
   InitializeSchreierTree(S, bas);
@@ -1318,7 +1326,7 @@ bool StabChainSwap(StabChain<Telt> & Stot)
   std::cerr << "CPP LGens=" << GapStringTVector(LGens) << "\n";
   //
   //  StabChain<Telt> Ttot = EmptyStabChainPlusNode<Telt>(n, b);
-  StabChain<Telt> Ttot = EmptyStabChainPlusCommonPlusNode(Stot->comm, n, b);
+  StabChain<Telt> Ttot = EmptyStabChainPlusCommonPlusNode(Stot->comm, b);
   AddGeneratorsExtendSchreierTree(Ttot, LGens);
   std::cerr << "CPP StabChainSwap : after first AGEST\n";
   //
@@ -1443,80 +1451,49 @@ T LabsLims(T const& lab, std::function<T(T const&)> const& hom, std::vector<T> &
   return lims[pos];
 }
 
-// We significantly change the functionality
-// The function ConjugateStabChain is used only for the conjugation in the part of the code
-// that interest us.
-// The action that correspond to the code as written are
-// OnTuples(orbit, map) with map=cnj. This is the normal action on points.
-// OnTuples(labels, hom) with hom=cnj. This is the action by conjugacy:
-// The action are therefore of the
-template<typename Telt>
-void ConjugateStabChain(StabChain<Telt> & Stot, Telt const& cnj)
+
+
+// The original ConjugateStabChain code
+// It is simplified from the original one with us being in the case
+// IsPerm(hom) and IsPerm(map).
+template<typename Telt, typename Fhom, typename Fmap, typename Fcond>
+StabChain<Telt> ConjugateStabChain(StabChain<Telt> & Stot, StabChain<Telt> & Ttot, Fhom const& hom, Fmap const& map, Fcond const& cond)
 {
-#undef DEBUG_CONJ_STAB_CHAIN
   int n=Stot->comm->n;
-  Telt cnjInv=~cnj;
-  auto hom=[&](Telt const& x) -> Telt {
-#ifdef DEBUG_CONJ_STAB_CHAIN
-    std::cerr << "hom: cnj=" << cnj << " x=" << x << " cnjInv=" << cnjInv << "\n";
-#endif
-    Telt retV = cnjInv*x*cnj;
-#ifdef DEBUG_CONJ_STAB_CHAIN
-    std::cerr << "retV=" << retV << "\n";
-#endif
-    return retV;
-  };
-  auto map=[&](int const& x) -> int {
-    return cnj.at(x);
-  };
+  Telt id=Stot->comm->identity;
   StabChain<Telt> Sptr = Stot;
-#ifdef DEBUG_CONJ_STAB_CHAIN
-  std::cerr << "ConjugateStabChain, step 1\n";
-#endif
-  std::unordered_map<int,int> MappedTrans;
-  while(true) {
-#ifdef DEBUG_CONJ_STAB_CHAIN
-    std::cerr << "ConjugateStabChain, step 2\n";
-#endif
-    if (Sptr == nullptr)
-      break;
-#ifdef DEBUG_CONJ_STAB_CHAIN
-    std::cerr << "ConjugateStabChain, step 3\n";
-#endif
+  StabChain<Telt> Tptr = Ttot;
+  //  std::unordered_map<int,int> MappedTrans;
+
+  std::vector<Telt> labels = ListT(Stot->comm->labels, hom);
+  std::shared_ptr<CommonStabInfo<Telt>> comm_new = std::make_shared<CommonStabInfo<Telt>>(CommonStabInfo<Telt>({n, id, labels}));
+  std::vector<int> genlabels;
+  while (cond(Sptr)) {
     if (Sptr->transversal.size() > 0) {
       std::vector<int> NewTransversal(n);
-      //      std::cerr << "Before loop n=" << n << "\n";
       for (int i=0; i<n; i++) {
-	int iImg=cnj.at(i);
-	//	std::cerr << "i=" << i << " iImg=" << iImg << "\n";
+	int iImg=map(i);
 	int eVal=Sptr->transversal[i];
-	//	std::cerr << "eVal=" << eVal << "\n";
 	NewTransversal[iImg] = eVal;
-        if (eVal != -1)
-          MappedTrans[eVal] = -1;
-	//	std::cerr << "After assignation\n";
+        //        if (eVal != -1)
+        //          MappedTrans[eVal] = -1;
       }
-      //      std::cerr << " After loop\n";
       Sptr->transversal=NewTransversal;
     }
-#ifdef DEBUG_CONJ_STAB_CHAIN
-    std::cerr << "ConjugateStabChain, step 4\n";
-#endif
-    Sptr->treegen = ListT(Sptr->treegen, hom);
-    Sptr->treegeninv = ListT(Sptr->treegeninv, hom);
-    Sptr->aux = ListT(Sptr->aux, hom);
-    Sptr->orbit = ListT(Sptr->orbit, map);
+    Tptr->comm = comm_new;
+    Tptr->genlabels = Sptr->genlabels;
+    Tptr->orbit = ListT(Sptr->orbit, map);
+
+    // Going to the next level.
     Sptr = Sptr->stabilizer;
-#ifdef DEBUG_CONJ_STAB_CHAIN
-    std::cerr << "ConjugateStabChain, step 9\n";
-#endif
+    if (Tptr->stabilizer == nullptr)
+      Tptr->stabilizer = EmptyStabChainPlusCommon<Telt>(comm_new);
+    Tptr = Tptr->stabilizer;
   }
-#ifdef DEBUG_CONJ_STAB_CHAIN
-  std::cerr << "ConjugateStabChain, step 10\n";
-#endif
   //
   // Mapping the labels that showed up.
   //
+  /*
   for (auto & ePair : MappedTrans) {
     Telt img = hom(Stot->comm->labels[ePair.first]);
     int pos = PositionVect(Stot->comm->labels, img);
@@ -1525,10 +1502,12 @@ void ConjugateStabChain(StabChain<Telt> & Stot, Telt const& cnj)
       Stot->comm->labels.push_back(img);
     }
     ePair.second = pos;
-  }
+    }*/
   //
   // Now remapping the labels that occurred.
   //
+
+  /*
   Sptr = Stot;
   while(true) {
     if (Sptr == nullptr)
@@ -1543,11 +1522,31 @@ void ConjugateStabChain(StabChain<Telt> & Stot, Telt const& cnj)
       Sptr->genlabels[i] = MappedTrans[eVal];
     }
     Sptr = Sptr->stabilizer;
-  }
-#ifdef DEBUG_CONJ_STAB_CHAIN
-  std::cerr << "ConjugateStabChain, step 11\n";
-#endif
+    }*/
+  return Tptr;
 }
+
+
+
+template<typename Telt>
+void ConjugateStabChain_Element(StabChain<Telt> & Stot, Telt const& cnj)
+{
+  Telt cnjInv=~cnj;
+  auto hom=[&](Telt const& x) -> Telt {
+    Telt retV = cnjInv*x*cnj;
+    return retV;
+  };
+  auto map=[&](int const& x) -> int {
+    return cnj.at(x);
+  };
+  auto cond=[](StabChain<Telt> const& S) -> bool {
+    if (S->stabilizer == nullptr)
+      return false;
+    return true;
+  };
+  (void)ConjugateStabChain(Stot, Stot, hom, map, cond);
+}
+
 
 template<typename Telt>
 std::string PrintTopOrbit(StabChain<Telt> const& S)
@@ -1754,10 +1753,12 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
   //  std::cerr << "CPP sgs(S) = " << GapStringTVector(SortVector(StrongGeneratorsStabChain(Sptr))) << "\n";
   //  std::cerr << "CPP ChangeStabChain 2 orbit=" << PrintTopOrbit(Gptr) << "\n";
   std::cerr << "CPP Before ConjugateStabChain cnj=" << cnj << "\n";
+  PrintListStabCommPartition("CPP Before ConjugateStabChain XXXListStabChain", ListStabChain(Gptr));
 #endif
   if (!cnj.isIdentity())
-    ConjugateStabChain(Gptr, cnj);
+    ConjugateStabChain_Element(Gptr, cnj);
 #ifdef DEBUG_CHANGE_STAB_CHAIN
+  PrintListStabCommPartition("CPP After ConjugateStabChain XXXListStabChain", ListStabChain(Gptr));
   std::cerr << "CPP ChangeStabChain 3 orbit=" << PrintTopOrbit(Gptr) << "\n";
   std::cerr << "CPP Leaving ChangeStabChain\n";
 #endif
