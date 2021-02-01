@@ -695,21 +695,19 @@ Tint SizeStabChain(StabChain<Telt> const& S)
 template<typename Telt>
 std::vector<Telt> StrongGeneratorsStabChain(StabChain<Telt> const& S)
 {
-  std::set<int> sgs_set;
   StabChain<Telt> Sptr = S;
+  std::set<Telt> sgs_set;
   while(true) {
     if (Sptr == nullptr)
       break;
-    int siz = Sptr->genlabels.size();
-    if (siz == 0)
-      break;
+    std::vector<Telt> const& labels = Sptr->comm->labels;
     for (auto & pos : Sptr->genlabels)
-      sgs_set.insert(pos);
+      sgs_set.insert(labels[pos]);
     Sptr = Sptr->stabilizer;
   }
   std::vector<Telt> sgs;
   for (auto & ePos : sgs_set)
-    sgs.push_back(S->comm->labels[ePos]);
+    sgs.push_back(ePos);
   return sgs;
 }
 

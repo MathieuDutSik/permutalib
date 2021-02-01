@@ -38,6 +38,14 @@ GetStringExpressionOfStabChain:=function(eRec)
 end;
 
 
+SortVector:=function(eV)
+    eVV:=eV;
+    Sort(eVV);
+    return eVV;
+end;
+
+
+
 
 PrintStabChain:=function(eRec)
   local eStab, iLev;
@@ -1503,13 +1511,13 @@ local   G,  base,  reduced,
 #    Print("GAP ChangeStabChain 2 orbit=", PrintTopOrbit(G), "\n");
     Print("GAP Before ConjugateStabChain cnj=", cnj, "\n");
     PrintListStabCommPartition("GAP Before ConjugateStabChain XXXListStabChain", ListStabChain(G));
-    Print("GAP Before ConjugateStabChain XXXListLabels", GetCompleteListLabels(ListStabChain(G)), "\n");
+    Print("DEBUG Before ConjugateStabChain XXXListLabels", GetCompleteListLabels(ListStabChain(G)), "\n");
 
     if cnj <> S.identity  then
         ConjugateStabChain( G, G, cnj, cnj );
     fi;
     PrintListStabCommPartition("GAP After ConjugateStabChain XXXListStabChain", ListStabChain(G));
-    Print("GAP After ConjugateStabChain XXXListLabels", GetCompleteListLabels(ListStabChain(G)), "\n");
+    Print("DEBUG After ConjugateStabChain XXXListLabels", GetCompleteListLabels(ListStabChain(G)), "\n");
     Print("GAP ChangeStabChain 3 orbit=", PrintTopOrbit(G), "\n");
     Print("GAP Leaving ChangeStabChain\n");
     return true;

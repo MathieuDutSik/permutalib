@@ -57,6 +57,9 @@ BindGlobal("STBBCKT_STRING_TWOCLOSURE","TwoClosure");
 # end );
 
 
+
+
+
 PrintRBaseLevel:=function(rbase, str)
   local eD;
   if IsInt(rbase.level) then
@@ -66,9 +69,8 @@ PrintRBaseLevel:=function(rbase, str)
       Print(str, " |rbase.lev|=", Length(rbase.lev), "\n");
       for eD in [1..Length(rbase.lev)]
       do
-        Print("GAP rbase.lev[", eD, "]=", StrongGeneratorsStabChain(rbase.lev[eD]), "\n");
-        PrintStabChainTransversals(rbase.lev[eD]);
-        PrintStabChainOrbits(rbase.lev[eD]);
+        PrintStabChain(rbase.lev[eD]);
+        Print("GAP rbase.lev[", eD, "]=", SortVector(StrongGeneratorsStabChain(rbase.lev[eD])), "\n");
       od;
       Print("GAP rbase.level=", StrongGeneratorsStabChain(rbase.level), "\n");
       Print(str, " PRBL rbase.level, record, |genlabels|=", Length(rbase.level.genlabels), "\n");
