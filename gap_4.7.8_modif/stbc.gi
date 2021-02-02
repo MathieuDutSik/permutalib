@@ -1188,7 +1188,7 @@ InstallGlobalFunction( ConjugateStabChain, function( arg )
         # If this is a  new  labels component, map  the  labels and mark  the
         # component so that it can be recognized at deeper levels.
         if len = 0  or  IsPerm( S.labels[ len ] )  then
-            Print("DEBUG ConjugateStabChain, Begin loop\n");
+            Print("DEBUG ConjugateStabChain, matching test. len=", len, "\n");
             if IsPerm( hom )  then
                 # ND MDS. This is the case that applies to us when calling with permutation mapping
                 labels := OnTuples( S.labels, hom );

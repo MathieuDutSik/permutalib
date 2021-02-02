@@ -1447,10 +1447,23 @@ StabChain<Telt> ConjugateStabChain(StabChain<Telt> & Stot, StabChain<Telt> & Tto
   Telt id=Stot->comm->identity;
   StabChain<Telt> Sptr = Stot;
   StabChain<Telt> Tptr = Ttot;
-  //  std::unordered_map<int,int> MappedTrans;
 
-  std::vector<Telt> labels = ListT(Stot->comm->labels, hom);
-  std::shared_ptr<CommonStabInfo<Telt>> comm_new = std::make_shared<CommonStabInfo<Telt>>(CommonStabInfo<Telt>({n, id, labels}));
+  using Tcomm=std::shared_ptr<CommonStabInfo<Telt>>;
+  std::vector<Tcomm> ListLabels;
+  std::vector<Tcomm> ListLabelsImg;
+
+  auto get_comm=[&](Tcomm const& e_comm) -> Tcomm {
+    for (size_t iLabel=0; iLabel<ListLabels.size(); iLabel++) {
+      if (e_comm == ListLabels[iLabel])
+        return ListLabelsImg[iLabel];
+    }
+    std::vector<Telt> labels = ListT(e_comm->labels, hom);
+    Tcomm comm_new = std::make_shared<CommonStabInfo<Telt>>(CommonStabInfo<Telt>({n, id, labels}));
+    ListLabels.push_back(e_comm);
+    ListLabelsImg.push_back(comm_new);
+    return comm_new;
+  };
+
   std::vector<int> genlabels;
   while (cond(Sptr)) {
     if (Sptr->transversal.size() > 0) {
@@ -1459,54 +1472,22 @@ StabChain<Telt> ConjugateStabChain(StabChain<Telt> & Stot, StabChain<Telt> & Tto
 	int iImg=map(i);
 	int eVal=Sptr->transversal[i];
 	NewTransversal[iImg] = eVal;
-        //        if (eVal != -1)
-        //          MappedTrans[eVal] = -1;
       }
       Sptr->transversal=NewTransversal;
     }
-    Tptr->comm = comm_new;
+    Tptr->comm = get_comm(Sptr->comm);
     Tptr->genlabels = Sptr->genlabels;
     Tptr->orbit = ListT(Sptr->orbit, map);
 
     // Going to the next level.
     Sptr = Sptr->stabilizer;
     if (Tptr->stabilizer == nullptr)
-      Tptr->stabilizer = EmptyStabChainPlusCommon<Telt>(comm_new);
+      Tptr->stabilizer = EmptyStabChainPlusCommon<Telt>(Tptr->comm);
     Tptr = Tptr->stabilizer;
   }
   //
   // Mapping the labels that showed up.
   //
-  /*
-  for (auto & ePair : MappedTrans) {
-    Telt img = hom(Stot->comm->labels[ePair.first]);
-    int pos = PositionVect(Stot->comm->labels, img);
-    if (pos == -1) {
-      pos = Stot->comm->labels.size();
-      Stot->comm->labels.push_back(img);
-    }
-    ePair.second = pos;
-    }*/
-  //
-  // Now remapping the labels that occurred.
-  //
-
-  /*
-  Sptr = Stot;
-  while(true) {
-    if (Sptr == nullptr)
-      break;
-    for (size_t i=0; i<Sptr->transversal.size(); i++) {
-      int eVal = Sptr->transversal[i];
-      if (eVal != -1)
-        Sptr->transversal[i] = MappedTrans[eVal];
-    }
-    for (size_t i=0; i<Sptr->genlabels.size(); i++) {
-      int eVal = Sptr->genlabels[i];
-      Sptr->genlabels[i] = MappedTrans[eVal];
-    }
-    Sptr = Sptr->stabilizer;
-    }*/
   return Tptr;
 }
 
