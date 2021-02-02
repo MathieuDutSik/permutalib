@@ -1396,7 +1396,7 @@ bool StabChainSwap(StabChain<Telt> & Stot)
         std::cerr << "CPP b^gen=" << (PowAct(b, gen)+1) << "\n";
 	int posGen=Stot->stabilizer->transversal[PowAct(b, gen)];
         std::cerr << "DEBUG posGen=" << posGen << "\n";
-	gen = gen * Stot->comm->labels[posGen];
+	gen = gen * Stot->stabilizer->comm->labels[posGen];
       }
       std::cerr << "CPP Determining gen, step 3 gen=" << gen << "\n";
       AddGeneratorsExtendSchreierTree(Tstab, {gen});
