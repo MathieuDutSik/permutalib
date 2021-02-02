@@ -439,7 +439,19 @@ StabChain<Telt> StructuralCopy(StabChain<Telt> const& S)
 {
   if (S == nullptr)
     return nullptr;
-  std::shared_ptr<CommonStabInfo<Telt>> comm_new = std::make_shared<CommonStabInfo<Telt>>(*(S->comm));
+  using Tcomm=std::shared_ptr<CommonStabInfo<Telt>>;
+  std::vector<Tcomm> ListLabels;
+  std::vector<Tcomm> ListLabelsImg;
+  auto get_comm=[&](Tcomm const& e_comm) -> Tcomm {
+     for (size_t i=0; i<ListLabels.size(); i++) {
+       if (ListLabels[i] == e_comm)
+         return ListLabelsImg[i];
+     }
+     Tcomm comm_new = std::make_shared<CommonStabInfo<Telt>>(*e_comm);
+     ListLabels.push_back(e_comm);
+     ListLabelsImg.push_back(comm_new);
+     return comm_new;
+  };
   StabChain<Telt> Sptr = S;
   std::vector<std::shared_ptr<StabLevel<Telt>>> ListPtr;
   while(true) {
@@ -454,7 +466,7 @@ StabChain<Telt> StructuralCopy(StabChain<Telt> const& S)
     size_t j = len - 1 - i;
     std::shared_ptr<StabLevel<Telt>> S2 = std::make_shared<StabLevel<Telt>>(*ListPtr[j]);
     S2->stabilizer = Sret;
-    S2->comm = comm_new;
+    S2->comm = get_comm(ListPtr[j]->comm);
     Sret = S2;
   }
 #ifdef DEBUG
