@@ -885,7 +885,6 @@ bool IsTrivial(StabChain<Telt> const& G)
     for (auto & eIdx : Sptr->genlabels)
       if (!Sptr->comm->labels[eIdx].isIdentity())
         return false;
-      LIdx.insert(eIdx);
     Sptr = Sptr->stabilizer;
   }
   return true;
@@ -1398,32 +1397,14 @@ bool StabChainSwap(StabChain<Telt> & Stot)
   PrintStabChain(Ttot);
   std::cerr << "CPP Tstab=\n";
   PrintStabChain(Tstab);
-  auto MappingIndex=[&](StabChain<Telt> const& Wtot, int const& idx) -> int {
-    if (idx == -1)
-      return -1;
-    std::cerr << "DEBUG idx=" << idx << "\n";
-    Telt eElt=Wtot->comm->labels[idx];
-    return GetLabelIndex(Stot->comm->labels, eElt);
-  };
   auto MapAtLevel=[&](StabChain<Telt> & Swork, StabChain<Telt> const& insStab) -> void {
-    Swork->genlabels.clear();
-    for (int const& posGen : insStab->genlabels) {
-      std::cerr << "DEBUG posGen=" << posGen << "\n";
-      int posGenMap=MappingIndex(insStab, posGen);
-      std::cerr << "DEBUG posGenMap=" << posGenMap << "\n";
-      Swork->genlabels.push_back(posGenMap);
-    }
+    Swork->genlabels = insStab->genlabels;
+    Swork->comm = insStab->comm;
     Swork->orbit = insStab->orbit;
-    for (int u=0; u<n; u++) {
-      int idx=insStab->transversal[u];
-      std::cerr << "DEBUG u=" << u << " idx=" << idx << "\n";
-      int idxMap=MappingIndex(insStab, idx);
-      std::cerr << "DEBUG idxMap=" << idxMap << "\n";
-      Swork->transversal[u] = idxMap;
-    }
-    std::cerr << "DEBUG exising MapAtLevel\n";
+    Swork->transversal = insStab->transversal;
   };
   MapAtLevel(Stot, Ttot);
+  PrintStabChain(Stot);
   std::cerr << "CPP StabChainSwap 1: |orbit|=" << Tstab->orbit.size() << "\n";
   if (Tstab->orbit.size() == 1) {
     Stot->stabilizer = Stot->stabilizer->stabilizer;
@@ -1642,13 +1623,10 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
     if (Sptr->genlabels.size() == 0 && (reduced == int_true || i >= basSiz)) {
 #ifdef DEBUG_CHANGE_STAB_CHAIN
       std::cerr << "CPP Before RemoveStabChain\n";
-      int dep1=GetStabilizerDepth(Sptr);
       KeyUpdating("Before RemoveStabChain");
 #endif
       RemoveStabChain(Sptr);
-      int dep2=GetStabilizerDepth(Sptr);
 #ifdef DEBUG_CHANGE_STAB_CHAIN
-      std::cerr << "CPP RemoveStabChain dep1=" << dep1 << " dep2=" << dep2 << "\n";
       KeyUpdating("After RemoveStabChain");
 #endif
       i = basSiz;
@@ -1662,11 +1640,8 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
 	newBase.push_back(newpnt);
 	if (newpnt != old) {
 	  if (IsFixedStabilizer(Sptr, newpnt)) {
-            int dep1=GetStabilizerDepth(Sptr);
 	    InsertTrivialStabilizer(Sptr, newpnt);
-            int dep2=GetStabilizerDepth(Sptr);
 #ifdef DEBUG_CHANGE_STAB_CHAIN
-            std::cerr << "CPP InsertTrivialStabilizer1 dep1=" << dep1 << " dep2=" << dep2 << "\n";
             KeyUpdating("After InsertTrivialStabilizer");
 #endif
 	  }
@@ -1701,11 +1676,8 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
           std::cerr << "CPP 2: cnj=" << cnj << "\n";
 #endif
 	} else {
-          int dep1=GetStabilizerDepth(Sptr);
 	  InsertTrivialStabilizer(Sptr, newpnt);
-          int dep2=GetStabilizerDepth(Sptr);
 #ifdef DEBUG_CHANGE_STAB_CHAIN
-          std::cerr << "CPP InsertTrivialStabilizer2 dep1=" << dep1 << " dep2=" << dep2 << "\n";
           KeyUpdating("After InsertTrivialStabilizer");
 #endif
 	}
@@ -1729,12 +1701,7 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
         Sptr->transversal.clear();
       }
       if (Sptr->stabilizer->stabilizer != nullptr) {
-        int dep1=GetStabilizerDepth(Sptr);
         Sptr->stabilizer = Sptr->stabilizer->stabilizer;
-        int dep2=GetStabilizerDepth(Sptr);
-#ifdef DEBUG_CHANGE_STAB_CHAIN
-        std::cerr << "CPP Manual Removal dep1=" << dep1 << " dep2=" << dep2 << "\n";
-#endif
       } else {
         Sptr->stabilizer = nullptr;
       }
@@ -1747,22 +1714,14 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
     }
   }
 #ifdef DEBUG_CHANGE_STAB_CHAIN
-  std::cerr << "CPP LEAVE GetStabilizerDepth(S)=" << GetStabilizerDepth(Sptr) << " i=" << (i+1) << " |base|=" << basSiz << "\n";
-  std::cerr << "CPP Ending ChangeStabChain, GetStabilizerDepth(G) = " << GetStabilizerDepth(Gptr) << "\n";
-  std::cerr << "CPP Ending ChangeStabChain, GetStabilizerDepth(S) = " << GetStabilizerDepth(Sptr) << "\n";
-  PrintStabChain(Gptr);
-  PrintStabChain(Sptr);
-  //  std::cerr << "CPP sgs(G) = " << GapStringTVector(SortVector(StrongGeneratorsStabChain(Gptr))) << "\n";
-  //  std::cerr << "CPP sgs(S) = " << GapStringTVector(SortVector(StrongGeneratorsStabChain(Sptr))) << "\n";
-  //  std::cerr << "CPP ChangeStabChain 2 orbit=" << PrintTopOrbit(Gptr) << "\n";
+  std::cerr << "CPP LEAVE i=" << (i+1) << " |base|=" << basSiz << "\n";
+  KeyUpdating("After the loop");
   std::cerr << "CPP Before ConjugateStabChain cnj=" << cnj << "\n";
-  PrintListStabCommPartition("CPP Before ConjugateStabChain XXXListStabChain", ListStabChain(Gptr));
 #endif
   if (!cnj.isIdentity())
     ConjugateStabChain_Element(Gptr, cnj);
 #ifdef DEBUG_CHANGE_STAB_CHAIN
-  PrintListStabCommPartition("CPP After ConjugateStabChain XXXListStabChain", ListStabChain(Gptr));
-  std::cerr << "CPP ChangeStabChain 3 orbit=" << PrintTopOrbit(Gptr) << "\n";
+  KeyUpdating("After ConjugateStabChain");
   std::cerr << "CPP Leaving ChangeStabChain\n";
 #endif
   return true;

@@ -1106,6 +1106,7 @@ InstallGlobalFunction( StabChainSwap, function( S )
     S.orbit       := T.orbit;
     S.translabels := T.translabels;
     S.transversal := T.transversal;
+    PrintStabChain(S);
     Print("GAP StabChainSwap 1: |orbit|=", Length(Tstab.orbit), "\n");
     if Length( Tstab.orbit ) = 1  then
         S.stabilizer := S.stabilizer.stabilizer;
@@ -1405,17 +1406,7 @@ local   G,  base,  reduced,
     i := 1;
     Print("GAP ChangeStabChain base = ", base, "\n");
     Print("GAP ChangeStabChain 1 orbit=", PrintTopOrbit(G), "\n");
-#    while(true)
-#    do
-#        if not IsBound( S.stabilizer ) then
-#          Print("GAP leaving since Sptr == nullptr\n");
-#          break;
-#        fi;
-#        if i > Length( base ) then
-#          Print("GAP leaving since i>= basSiz. i=", i, " |base|=", Length(base), "\n");
-#          break;
-#        fi;
-     while IsBound( S.stabilizer )  or  i <= Length( base )  do
+    while IsBound( S.stabilizer )  or  i <= Length( base )  do
         Print("GAP GetStabilizerDepth(S)=", GetStabilizerDepth(S), " GetStabilizerDepth(G)=", GetStabilizerDepth(G), "\n");
         old := BasePoint( S );
         Print("GAP ChangeStabChain old=", old, " i=", i, " |base|=", Length(base), "\n");
@@ -1424,11 +1415,8 @@ local   G,  base,  reduced,
         if     Length( S.genlabels ) = 0
            and ( reduced = true  or  i > Length( base ) )  then
             Print("GAP Before RemoveStabChain\n");
-            dep1:=GetStabilizerDepth(S);
             KeyUpdating("Before RemoveStabChain");
             RemoveStabChain( S );
-            dep2:=GetStabilizerDepth(S);
-            Print("GAP RemoveStabChain dep1=", dep1, " dep2=", dep2, "\n");
             KeyUpdating("After RemoveStabChain");
             i := Length( base ) + 1;
 
@@ -1443,10 +1431,7 @@ local   G,  base,  reduced,
                 AddSet( newBase, new );
                 if new <> old  then
                     if IsFixedStabilizer( S, new )  then
-                        dep1:=GetStabilizerDepth(S);
                         InsertTrivialStabilizer( S, new );
-                        dep2:=GetStabilizerDepth(S);
-                        Print("GAP InsertTrivialStabilizer1 dep1=", dep1, " dep2=", dep2, "\n");
                         KeyUpdating("After InsertTrivialStabilizer");
                     else
                         Error("<base> must be an extension of base of <G>");
@@ -1469,10 +1454,7 @@ local   G,  base,  reduced,
                                    cnj );
                     Print("GAP 2: cnj=", cnj, "\n");
                 else
-                    dep1:=GetStabilizerDepth(S);
                     InsertTrivialStabilizer( S, new );
-                    dep2:=GetStabilizerDepth(S);
-                    Print("GAP InsertTrivialStabilizer2 dep1=", dep1, " dep2=", dep2, "\n");
                     KeyUpdating("After InsertTrivialStabilizer");
                 fi;
                 AddSet( newBase, S.orbit[ 1 ] );
@@ -1498,10 +1480,7 @@ local   G,  base,  reduced,
                 Unbind( S.transversal );
             fi;
             if IsBound( S.stabilizer.stabilizer )  then
-                dep1:=GetStabilizerDepth(S);
                 S.stabilizer := S.stabilizer.stabilizer;
-                dep2:=GetStabilizerDepth(S);
-                Print("GAP Manual Removal dep1=", dep1, " dep2=", dep2, "\n");
             else
                 Unbind( S.stabilizer );
             fi;
@@ -1514,30 +1493,17 @@ local   G,  base,  reduced,
         fi;
 
     od;
-    Print("GAP LEAVE GetStabilizerDepth(S)=", GetStabilizerDepth(S), " i=", i, " |base|=", Length(base), "\n");
-    Print("GAP Ending ChangeStabChain, GetStabilizerDepth(G) = ", GetStabilizerDepth(G), "\n");
-    Print("GAP Ending ChangeStabChain, GetStabilizerDepth(S) = ", GetStabilizerDepth(S), "\n");
-    PrintStabChain(G);
-    PrintStabChain(S);
-#    Print("GAP sgs(G) = ", StrongGeneratorsStabChain(G), "\n");
-#    Print("GAP sgs(S) = ", StrongGeneratorsStabChain(S), "\n");
+    Print("GAP LEAVE i=", i, " |base|=", Length(base), "\n");
+    KeyUpdating("After the loop");
     strG_final:=GetStringExpressionOfStabChain(G);
     strS:=GetStringExpressionOfStabChain(S);
-#    Print("GAP ChangeStabChainOPER G change: ", strG_orig=strG_final, "\n");
-#    Print("GAP ChangeStabChainOPER S<>G: ", strS=strG_final, "\n");
 
     # Conjugate to move all the points to the beginning of their orbit.
-#    Print("GAP ChangeStabChain 2 orbit=", PrintTopOrbit(G), "\n");
     Print("GAP Before ConjugateStabChain cnj=", cnj, "\n");
-    PrintListStabCommPartition("GAP Before ConjugateStabChain XXXListStabChain", ListStabChain(G));
-    Print("DEBUG Before ConjugateStabChain XXXListLabels", GetCompleteListLabels(ListStabChain(G)), "\n");
-
     if cnj <> S.identity  then
         ConjugateStabChain( G, G, cnj, cnj );
     fi;
-    PrintListStabCommPartition("GAP After ConjugateStabChain XXXListStabChain", ListStabChain(G));
-    Print("DEBUG After ConjugateStabChain XXXListLabels", GetCompleteListLabels(ListStabChain(G)), "\n");
-    Print("GAP ChangeStabChain 3 orbit=", PrintTopOrbit(G), "\n");
+    KeyUpdating("After ConjugateStabChain");
     Print("GAP Leaving ChangeStabChain\n");
     return true;
 end);
