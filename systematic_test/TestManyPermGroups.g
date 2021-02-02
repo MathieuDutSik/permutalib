@@ -49,7 +49,7 @@ GetListCandidateGroups:=function()
 end;
 
 
-TestSpecificGroupSet:=function(nbMov, eGRP, eSet)
+TestSpecificGroupSet_Stabilizer:=function(nbMov, eGRP, eSet)
     local eDir, FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, eStab1, eStab2, test;
     Print("Treating one pair Group/Set\n");
     if Maximum(eSet) > nbMov then
@@ -105,8 +105,84 @@ end;
 
 
 
-TestSpecificGroup:=function(nbMov, eGRP)
-    local iMov, sizSet, i, eSet;
+
+
+
+TestSpecificGroupSet_Equivalence:=function(nbMov, eGRP, eSet, fSet)
+    local eDir, FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, eTest1, eTest2;
+    Print("Treating one pair Group/Set\n");
+    if Maximum(eSet) > nbMov then
+        Error("The eSet is too large");
+    fi;
+    eDir:="/tmp/DebugStabOnSets_datarun/";
+    eCommand:=Concatenation("mkdir -p ", eDir);
+    Exec(eCommand);
+    #
+    FileName:=Concatenation(eDir, "Input");
+    RemoveFileIfExist(FileName);
+    output:=OutputTextFile(FileName, true);
+    LGen:=GeneratorsOfGroup(eGRP);
+    AppendTo(output, Length(LGen), " ", nbMov, "\n");
+    for eGen in LGen
+    do
+        for iMov in [1..nbMov]
+        do
+            eImg:=OnPoints(iMov, eGen);
+            AppendTo(output, " ", eImg-1);
+        od;
+        AppendTo(output, "\n");
+    od;
+    #
+    for iMov in [1..nbMov]
+    do
+        pos:=Position(eSet, iMov);
+        if pos=fail then
+            eVal:=0;
+        else
+            eVal:=1;
+        fi;
+        AppendTo(output, " ", eVal);
+    od;
+    AppendTo(output, "\n");
+    #
+    for iMov in [1..nbMov]
+    do
+        pos:=Position(fSet, iMov);
+        if pos=fail then
+            eVal:=0;
+        else
+            eVal:=1;
+        fi;
+        AppendTo(output, " ", eVal);
+    od;
+    AppendTo(output, "\n");
+    CloseStream(output);
+    #
+    eBinary:="/home/mathieu/GITall/GIT/permutalib/src_gap/GapEquivalenceOnSet";
+    FileErr:=Concatenation(eDir, "CppError");
+    FileRes:=Concatenation(eDir, "GapOutput");
+    eCommand:=Concatenation(eBinary, " ", FileName, " 2> ", FileErr, " ", FileRes);
+    Exec(eCommand);
+    #
+    eTest1:=RepresentativeAction(eGRP, eSet, fSet, OnSets);
+    eTest2:=ReadAsFunction(FileRes)();
+    if eTest1=fail then
+        if eTest2<>fail then
+            Error("Found some error in TestSpecificGroupSet_Equivalence, case 1\n");
+        fi;
+    else
+        if fSet<>OnSets(eSet, eTest2) then
+            Error("Found some error in TestSpecificGroupSet_Equivalence, case 2\n");
+        fi;
+    fi;
+    RemoveFileIfExist(FileErr);
+    RemoveFileIfExist(FileRes);
+end;
+
+
+
+TestSpecificGroup:=function(method, nbMov, eGRP)
+    local iMov, sizSet, i, eSet, fSet;
     for iMov in [1..5]
     do
         if nbMov<4 then
@@ -114,20 +190,37 @@ TestSpecificGroup:=function(nbMov, eGRP)
         else
             sizSet:=Random([2..nbMov-2]);
         fi;
-        for i in [1..5]
-        do
-            eSet:=Local_RandomSubset([1..nbMov], sizSet);
-            TestSpecificGroupSet(nbMov, eGRP, eSet);
-        od;
+        if method="stabilizer" then
+            for i in [1..5]
+            do
+                eSet:=Local_RandomSubset([1..nbMov], sizSet);
+                TestSpecificGroupSet_Stabilizer(nbMov, eGRP, eSet);
+            od;
+        fi;
+        if method="equivalence" then
+            for i in [1..5]
+            do
+                eSet:=Local_RandomSubset([1..nbMov], sizSet);
+                fSet:=Local_RandomSubset([1..nbMov], sizSet);
+                TestSpecificGroupSet_Equivalence(nbMov, eGRP, eSet, fSet);
+            od;
+            for i in [1..5]
+            do
+                eSet:=Local_RandomSubset([1..nbMov], sizSet);
+                eG:=Random(eGRP);
+                fSet:=OnSets(eSet, eG);
+                TestSpecificGroupSet_Equivalence(nbMov, eGRP, eSet, fSet);
+            od;
+        fi;
     od;
 end;
 
 
 
-TestAllGroups:=function()
+TestAllGroups:=function(method)
     local ListGroups, nbGroups, eGRP, nMov, iGRP;
     ListGroups:=GetListCandidateGroups();
-    ListGroups:=Filtered(ListGroups, x->IsSolvable(x)=false);
+#    ListGroups:=Filtered(ListGroups, x->IsSolvable(x)=false);
     nbGroups:=Length(ListGroups);
     Print("|ListGroups|=", nbGroups, "\n");
 
@@ -136,9 +229,9 @@ TestAllGroups:=function()
         eGRP:=ListGroups[iGRP];
         nMov:=LargestMovedPoint(eGRP);
         Print("    iGRP=", iGRP, " / ", nbGroups, " nMov=", nMov, "\n");
-        TestSpecificGroup(nMov, eGRP);
+        TestSpecificGroup(method, nMov, eGRP);
     od;
 end;
 
 
-TestAllGroups();
+TestAllGroups("stabilizer");
