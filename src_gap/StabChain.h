@@ -253,10 +253,35 @@ void PrintStabChainOrbits(StabChain<Telt> const& S)
 
 
 template<typename Telt>
+std::string GetListStabCommPartition(std::vector<StabChain<Telt>> const& ListS)
+{
+  int len = ListS.size();
+  std::vector<int> Status(len,0);
+  std::vector<std::string> ListStr;
+  for (int i=0; i<len; i++) {
+    if (Status[i] == 0) {
+      std::vector<int> LVal;
+      auto ptr = ListS[i]->comm;
+      for (int j=0; j<len; j++) {
+        if (ListS[j]->comm == ptr) {
+          LVal.push_back(j);
+          Status[j] = 1;
+        }
+      }
+      std::string estr = GapStringIntVector(LVal);
+      ListStr.push_back(estr);
+    }
+  }
+  return GapStringTVector(ListStr);
+}
+
+
+template<typename Telt>
 void PrintStabChain(StabChain<Telt> const& S)
 {
   StabChain<Telt> Swork = S;
   int n = Swork->comm->n;
+  std::cerr << "CPP Partition=" << GetListStabCommPartition(ListStabChain(S)) << "\n";
   int iLevel = 0;
   while (Swork != nullptr) {
     std::cerr << "CPP iLev=" << iLevel << "\n";
@@ -291,30 +316,12 @@ void PrintStabChain(StabChain<Telt> const& S)
   }
 }
 
+
 template<typename Telt>
 void PrintListStabCommPartition(std::string const& mesg, std::vector<StabChain<Telt>> const& ListS)
 {
-  int len = ListS.size();
-  std::vector<int> Status(len,0);
-  std::vector<std::string> ListStr;
-  for (int i=0; i<len; i++) {
-    if (Status[i] == 0) {
-      std::vector<int> LVal;
-      auto ptr = ListS[i]->comm;
-      for (int j=0; j<len; j++) {
-        if (ListS[j]->comm == ptr) {
-          LVal.push_back(j);
-          Status[j] = 1;
-        }
-      }
-      std::string estr = GapStringIntVector(LVal);
-      ListStr.push_back(estr);
-    }
-  }
-  std::string estrb = GapStringTVector(ListStr);
-  std::cerr << mesg << " ListStabCommPartition=" << estrb << "\n";
+  std::cerr << mesg << " ListStabCommPartition=" << GetListStabCommPartition(ListS) << "\n";
 }
-
 
 
 
@@ -871,18 +878,16 @@ std::vector<int> MovedPoints(StabChain<Telt> const& S)
 template<typename Telt>
 bool IsTrivial(StabChain<Telt> const& G)
 {
-  std::set<int> LIdx;
   StabChain<Telt> Sptr = G;
   while(true) {
     if (Sptr == nullptr)
       break;
     for (auto & eIdx : Sptr->genlabels)
+      if (!Sptr->comm->labels[eIdx].isIdentity())
+        return false;
       LIdx.insert(eIdx);
     Sptr = Sptr->stabilizer;
   }
-  for (auto & eIdx : LIdx)
-    if (!G->comm->labels[eIdx].isIdentity())
-      return false;
   return true;
 }
 
@@ -1830,8 +1835,8 @@ bool TestEqualityStabChain(StabChain<Telt> const& L, StabChain<Telt> const& R)
       if (Lptr->transversal[u] != -1) {
 	int idxL=Lptr->transversal[u];
 	int idxR=Rptr->transversal[u];
-	Telt permL=L->comm->labels[idxL];
-	Telt permR=L->comm->labels[idxR];
+	Telt permL=Lptr->comm->labels[idxL];
+	Telt permR=Rptr->comm->labels[idxR];
 	if (permL != permR) {
 #ifdef DEBUG_EQUALITY
           std::cerr << "TestEqualityStabChain 7\n";
@@ -1893,7 +1898,7 @@ Telt MinimalElementCosetStabChain(StabChain<Telt> const& Stot, Telt const& g)
     int pp=SlashAct(pMin, gRet);
     while (bp != pp) {
       int pos=Sptr->transversal[pp];
-      gRet=LeftQuotient(Stot->comm->labels[pos], gRet);
+      gRet=LeftQuotient(Sptr->comm->labels[pos], gRet);
       pp = SlashAct(pMin, gRet);
     }
     Sptr = Sptr->stabilizer;

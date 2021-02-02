@@ -47,9 +47,43 @@ end;
 
 
 
+GetListStabCommPartition:=function(ListS)
+    local len, Status, ListStr, i, LVal, j, labels_i, labels_j;
+    len:=Length(ListS);
+    Status:=ListWithIdenticalEntries(len,0);
+    ListStr:=[];
+    for i in [1..len]
+    do
+        if Status[i]=0 then
+            LVal:=[];
+            for j in [1..len]
+            do
+                if IsBound(ListS[i].labels) then
+                    labels_i:=ListS[i].labels;
+                else
+                    labels_i:="unset";
+                fi;
+                if IsBound(ListS[j].labels) then
+                    labels_j:=ListS[j].labels;
+                else
+                    labels_j:="unset";
+                fi;
+                if IsIdenticalObj(labels_i, labels_j) then
+                    Add(LVal, j);
+                    Status[j]:=1;
+                fi;
+            od;
+            Add(ListStr, LVal);
+        fi;
+    od;
+    return ListStr;
+end;
+
+
 PrintStabChain:=function(eRec)
   local eStab, iLev;
   #
+  Print("GAP Partition=", GetListStabCommPartition(ListStabChain(eRec)), "\n");
   eStab:=eRec;
   iLev:=0;
   while(true)
@@ -83,26 +117,11 @@ end;
 
 
 PrintListStabCommPartition:=function(mesg, ListS)
-    local len, Status, ListStr, i, LVal, j;
-    len:=Length(ListS);
-    Status:=ListWithIdenticalEntries(len,0);
-    ListStr:=[];
-    for i in [1..len]
-    do
-        if Status[i]=0 then
-            LVal:=[];
-            for j in [1..len]
-            do
-                if IsIdenticalObj(ListS[i].labels, ListS[j].labels) then
-                    Add(LVal, j);
-                    Status[j]:=1;
-                fi;
-            od;
-            Add(ListStr, LVal);
-        fi;
-    od;
+    local ListStr;
+    ListStr:=GetListStabCommPartition(ListS);
     Print(mesg, " ListStabCommPartition=", ListStr, "\n");
 end;
+
 
 
 GetCompleteListLabels:=function(ListS)
