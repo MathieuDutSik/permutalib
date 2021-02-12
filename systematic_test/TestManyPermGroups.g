@@ -158,7 +158,7 @@ TestSpecificGroupSet_Equivalence:=function(nbMov, eGRP, eSet, fSet)
     AppendTo(output, "\n");
     CloseStream(output);
     #
-    eBinary:="/home/mathieu/GITall/GIT/permutalib/src_gap/GapEquivalenceOnSet";
+    eBinary:="/home/mathieu/GITall/GIT/permutalib/src_gap/GapRepresentativeActionOnSet";
     FileErr:=Concatenation(eDir, "CppError");
     FileRes:=Concatenation(eDir, "GapOutput");
     eCommand:=Concatenation(eBinary, " ", FileName, " 2> ", FileErr, " ", FileRes);
@@ -182,7 +182,7 @@ end;
 
 
 TestSpecificGroup:=function(method, nbMov, eGRP)
-    local iMov, sizSet, i, eSet, fSet;
+    local iMov, sizSet, i, eSet, fSet, eElt;
     for iMov in [1..5]
     do
         if nbMov<4 then
@@ -207,8 +207,8 @@ TestSpecificGroup:=function(method, nbMov, eGRP)
             for i in [1..5]
             do
                 eSet:=Local_RandomSubset([1..nbMov], sizSet);
-                eG:=Random(eGRP);
-                fSet:=OnSets(eSet, eG);
+                eElt:=Random(eGRP);
+                fSet:=OnSets(eSet, eElt);
                 TestSpecificGroupSet_Equivalence(nbMov, eGRP, eSet, fSet);
             od;
         fi;
@@ -220,7 +220,7 @@ end;
 TestAllGroups:=function(method)
     local ListGroups, nbGroups, eGRP, nMov, iGRP;
     ListGroups:=GetListCandidateGroups();
-#    ListGroups:=Filtered(ListGroups, x->IsSolvable(x)=false);
+    ListGroups:=Filtered(ListGroups, x->IsSolvable(x)=false);
     nbGroups:=Length(ListGroups);
     Print("|ListGroups|=", nbGroups, "\n");
 
@@ -234,4 +234,5 @@ TestAllGroups:=function(method)
 end;
 
 
-TestAllGroups("stabilizer");
+#TestAllGroups("stabilizer");
+TestAllGroups("equivalence");

@@ -49,7 +49,7 @@ end;
 
 
 
-  eFile:="ExampleGRP_Set";
+  eFile:="ExampleStabilizerGRP_Set";
 #  CreateExampleOnSetCase(eFile, Group([(1,2,3,4,5,6,7,8,9),(1,2)]), [1, 2, 3]);
 #  CreateExampleOnSetCase(eFile, Group([(1,2,3,4,5),(4,5)]), [1, 2, 3]);
 #  CreateExampleOnSetCase(eFile, Group([(1,2,3,4,5),(3,4,5)]), [1, 2, 3]);
