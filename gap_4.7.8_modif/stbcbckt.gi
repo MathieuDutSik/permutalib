@@ -1508,11 +1508,15 @@ InstallGlobalFunction( PartitionBacktrack,
 
                     # In  the representative  case,  change  the   stabilizer
                     # chains of <L> and <R>.
+                    Print("GAP Before ChangeStabChain L_list[d]\n");
                     ChangeStabChain( L[ d ], [ rbase.base[ d ] ], false );
                     PrintStabChain(L[d]);
+                    Print("GAP After ChangeStabChain L_list[d]\n");
                     L[ d + 1 ] := L[ d ].stabilizer;
+                    Print("GAP Before ChangeStabChain R_list[d]\n");
                     ChangeStabChain( R[ d ], [ rbase.base[ d ] ], false );
                     PrintStabChain(R[d]);
+                    Print("GAP After ChangeStabChain R_list[d]\n");
                     R[ d + 1 ] := R[ d ].stabilizer;
                     Print("GAP L[d]=\n");
                     PrintStabChain(L[d]);
