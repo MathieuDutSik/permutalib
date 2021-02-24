@@ -1,6 +1,7 @@
 #PROGRAM	= TestCompilation
 #PROGRAM	= TestCompilation TestSymmetricGroup TestStabilizerOnSet
-PROGRAM	= TestStabilizerOnSet
+#PROGRAM	= TestStabilizerOnSet
+PROGRAM	= TestRepresentativeActionOnSet
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

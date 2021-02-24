@@ -483,6 +483,13 @@ StabChain<Telt> StructuralCopy(StabChain<Telt> const& S)
 }
 
 
+template<typename Telt>
+StabChain<Telt> CopyStabChain(StabChain<Telt> const& S)
+{
+  return StructuralCopy(S);
+}
+
+
 
 template<typename Telt>
 StabChain<Telt> RestrictedStabChain(StabChain<Telt> const& Stot, int const& eLev)

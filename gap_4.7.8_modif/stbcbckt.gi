@@ -1420,7 +1420,12 @@ InstallGlobalFunction( PartitionBacktrack,
         Print("GAP PBEnumerate, step 4 d=", d, " |rbase.base|=", Length(rbase.base), "\n");
         PrintRBaseLevel(rbase, "GAP Step 4");
         if IsList(L) then
+            Print("GAP |L|=", Length(L), "\n");
             PrintListStabCommPartition("GAP Step 4", L);
+        fi;
+        if IsList(R) then
+            Print("GAP |R|=", Length(R), "\n");
+            PrintListStabCommPartition("GAP Step 4", R);
         fi;
 
         # Recursion comes to an end  if all base  points have been prescribed
@@ -1441,6 +1446,7 @@ InstallGlobalFunction( PartitionBacktrack,
 #                    PrintListStabCommPartition("DEBUG Before CopyStabChain XXXListStabChain", ListStabChain( StabChainOp( L,
 #                                 rec( base := rbase.base,
 #                                      reduced := false ))));
+                    Print("GAP assigning L sequence\n");
                     L := ListStabChain( CopyStabChain( StabChainOp( L,
                                  rec( base := rbase.base,
                                    reduced := false ) ) ) );

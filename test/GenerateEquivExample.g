@@ -49,7 +49,7 @@ CreateExampleOnSetCase:=function(FileName, GRP, eSet, fSet)
   AppendTo(output, "\n");
   CloseStream(output);
   Print("GAP |eG|=", Order(GRP), "\n");
-  Print("GAP Before Stabilizer_OnSets\n");
+  Print("GAP Before RepresentativeAction_OnSets\n");
   eEquiv:=RepresentativeAction(GRP, eSet, fSet, OnSets);
   Print("eEquiv=", eEquiv, "\n");
 end;
@@ -62,5 +62,5 @@ end;
 
 
   eFile:="ExampleEquivGRP_Set";
-  CreateExampleOnSetCase(eFile, Group([(1,2,3,4,5),(3,4,5)]), [1, 5], [1, 5]);
+  CreateExampleOnSetCase(eFile, Group([(1,2,3,4,5),(3,4,5)]), [1, 5], [2, 5]);
 Print("eFile=", eFile, "\n");

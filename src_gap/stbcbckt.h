@@ -988,8 +988,12 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       oldprm2.status = int_false;
     std::cerr << "CPP PBEnumerate, step 4 d=" << (d+1) << " |rbase.base|=" << rbase.base.size() << "\n";
     PrintRBaseLevel(rbase, "CPP Step 4");
+    std::cerr << "CPP |L|=" << L_list.size() << "\n";
     if (L_list.size() > 0)
       PrintListStabCommPartition("CPP Step 4", L_list);
+    std::cerr << "CPP |R|=" << R_list.size() << "\n";
+    if (R_list.size() > 0)
+      PrintListStabCommPartition("CPP Step 4", R_list);
     // Recursion comes to an end  if all base  points have been prescribed
     // images.
     if (d >= int(rbase.base.size())) {
@@ -1008,6 +1012,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  options.reduced = false;
 	  std::cerr << "CPP Before computation of ListStabChain Order(L)=" << Order<Telt,mpz_class>(L) << "\n";
           std::cerr << "CPP sgs(L)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(L))) << " base=" << GapStringIntVector(rbase.base) << "\n";
+          std::cerr << "CPP assigning L sequence\n";
 	  L_list = ListStabChain(StabChainOp_stabchain_nofalse<Telt,Tint>(L, options));
           PrintListStabCommPartition("CPP ListStabChain", L_list);
 	  R_list = L_list; // Corresponds to R := ShallowCopy( L)
@@ -1423,6 +1428,8 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	ProcessFixpoint_image(image, fix[i], fixP[i], -1);
       }
     }
+    L_list = ListStabChain(StructuralCopy(L));
+    R_list = ListStabChain(StructuralCopy(R));
   }
 
   permPlusBool<Telt> rep = PBEnumerate(0, !repr);

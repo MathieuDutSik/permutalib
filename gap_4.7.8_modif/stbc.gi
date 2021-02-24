@@ -39,6 +39,7 @@ end;
 
 
 SortVector:=function(eV)
+    local eVV;
     eVV:=eV;
     Sort(eVV);
     return eVV;
