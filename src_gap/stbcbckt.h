@@ -20,6 +20,8 @@
 ##
 */
 
+#undef DEBUG_STBCBCKT
+
 namespace permutalib {
 
 template<typename Telt>
@@ -63,7 +65,9 @@ std::string STRING_VectInt(std::vector<int> const& V)
 template<typename Telt>
 permPlusBool<Telt> ExtendedT(Telt const& t, int const& pnt, int img, int const& simg, StabChainPlusLev<Telt> const& S)
 {
+#ifdef DEBUG_STBCBCKT
   std::cerr << "CPP ExtendedT sgs(S.Stot)=" << GapStringTVectorB(SortVector(StrongGeneratorsStabChain(S.Stot))) << "\n";
+#endif
   if (simg == -1)
     img = SlashAct(img, t);
   else
@@ -71,22 +75,32 @@ permPlusBool<Telt> ExtendedT(Telt const& t, int const& pnt, int img, int const& 
   // If <G> fixes <pnt>, nothing more can  be changed, so test whether <pnt>
   // = <img>.
   int bpt = BasePoint(S.Stot);
+#ifdef DEBUG_STBCBCKT
   std::cerr << "CPP img=" << (img+1) << " bpt=" << PosFalse_to_string(bpt) << " pnt=" << (pnt+1) << "\n";
+#endif
   if (bpt != pnt) {
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP Case bpt != pnt\n";
+#endif
     if (pnt != img) {
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP ExtendedT, return false 1\n";
+#endif
       return {int_false, {}};
     } else {
       return {int_perm, t};
     }
   }
   if (S.Stot->transversal[img] == -1) {
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP ExtendedT, return false 2\n";
+#endif
     return {int_false, {}};
   }
+#ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Final case t=" << t << "\n";
   std::cerr << "CPP sgs(S.Stot)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(S.Stot))) << "\n";
+#endif
   return {int_perm, LeftQuotient(InverseRepresentative(S.Stot, img), t)};
 }
 
@@ -306,29 +320,45 @@ void PrintRBaseLevel(rbaseType<Telt> const& rbase, std::string const& str)
 template<typename Telt>
 bool ProcessFixpoint_rbase(rbaseType<Telt> & rbase, int const& pnt)
 {
+#ifdef DEBUG_STBCBCKT
   std::cerr << "CPP ProcessFixpoint_rbase beginning pnt=" << (pnt+1) << "\n";
+#endif
   if (rbase.level2.status != int_true && rbase.level2.status != int_false) {
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP Before ChangeStabChain level2\n";
+#endif
     ChangeStabChain(rbase.level2.Stot, {pnt}, int_true);
+#ifdef DEBUG_STBCBCKT
     PrintRBaseLevel(rbase, "CPP After CSC level2");
     std::cerr << "CPP After ChangeStabChain level2\n";
+#endif
     if (BasePoint(rbase.level2) == pnt) {
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP Going to stabilizer of level2\n";
+#endif
       rbase.level2.Stot = rbase.level2.Stot->stabilizer;
     }
   }
   if (rbase.level.status == int_int) {
     rbase.level.value_int--;
   } else {
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP Before ChangeStabChain level\n";
+#endif
     ChangeStabChain(rbase.level.Stot, {pnt}, int_true);
+#ifdef DEBUG_STBCBCKT
     PrintRBaseLevel(rbase, "CPP After CSC level");
     std::cerr << "CPP After ChangeStabChain level\n";
+#endif
     if (BasePoint(rbase.level) == pnt) {
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP Going to stabilizer of level\n";
+#endif
       rbase.level.Stot = rbase.level.Stot->stabilizer;
     } else {
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP returning false\n";
+#endif
       return false;
     }
   }
@@ -357,13 +387,19 @@ template<typename Telt>
 bool ProcessFixpoint_image(imageType<Telt> & image, int const& pnt, int & img, int const& simg)
 {
   if (image.perm.status != int_true) {
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP PFI  sgs(level)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(image.level.Stot))) << "\n";
     std::cerr << "CPP Case image.perm.status = true\n";
     std::cerr << "CPP Before ExtendedT img=" << (img+1) << "\n";
+#endif
     permPlusBool<Telt> t = ExtendedT(image.perm.val, pnt, img, simg, image.level);
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP After ExtendedT img=" << (img+1) << "\n";
+#endif
     if (t.status == int_false) {
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP Returning false 1\n";
+#endif
       return false;
     } else {
       if (BasePoint(image.level ) == pnt)
@@ -372,11 +408,15 @@ bool ProcessFixpoint_image(imageType<Telt> & image, int const& pnt, int & img, i
     image.perm = t;
   }
   if (image.level2.status != int_false) {
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP PFI sgs(level2)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(image.level2.Stot))) << "\n";
     std::cerr << "CPP Case image.perm.status = false\n";
+#endif
     permPlusBool<Telt> t = ExtendedT(image.perm2.val, pnt, img, -1, image.level2);
     if (t.status == int_false) {
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP Returning false 2\n";
+#endif
       return false;
     } else {
       if (BasePoint(image.level2 ) == pnt)
@@ -391,6 +431,7 @@ bool ProcessFixpoint_image(imageType<Telt> & image, int const& pnt, int & img, i
 template<typename Telt>
 bool IsTrivialRBase(rbaseType<Telt> const& rbase)
 {
+#ifdef DEBUG_STBCBCKT
   std::cerr << "CPP IsTrivialRBase : IsInt()=";
   if (rbase.level.status == int_int)
     std::cerr << "true  value_int=" << rbase.level.value_int;
@@ -407,20 +448,27 @@ bool IsTrivialRBase(rbaseType<Telt> const& rbase)
     std::cerr << "false";
   }
   std::cerr << "\n";
+#endif
   //
   if (rbase.level.status == int_int) {
     if (rbase.level.value_int <= 1) {
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP IsTrivialRBase, leaving at case 1 with True\n";
+#endif
       return true;
     }
   }
   if (rbase.level.status == int_stablev) {
     if (rbase.level.Stot->genlabels.size() == 0) {
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP IsTrivialRBase, leaving at case 2 with True\n";
+#endif
       return true;
     }
   }
+#ifdef DEBUG_STBCBCKT
   std::cerr << "CPP IsTrivialRBase, leaving at case 3 with False\n";
+#endif
   return false;
 }
 
@@ -443,9 +491,11 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
       rbase.level2.Stot = EmptyStabChain<Telt>(n);
     } else {
       rbase.level2 = {int_stablev, -555, G[1]};
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP rbase Before bool print\n";
       std::cerr << "CPP bool=" << rbase.level2.Stot->IsBoundCycle << "\n";
       std::cerr << "CPP rbase After bool print\n";
+#endif
       rbase.lev2 = {};
     }
   } else {
@@ -453,7 +503,9 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
   }
   rbase.level = {int_stablev, -666, G[0]};
   for (auto & pnt : Fixcells(P)) {
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP Fixcells call ProcessFixpoint_rbase\n";
+#endif
     ProcessFixpoint_rbase(rbase, pnt);
   }
   return rbase;
@@ -465,11 +517,15 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
 template<typename Telt>
 bool MeetPartitionStrat(rbaseType<Telt> const& rbase, imageType<Telt> & image, Partition const& S, Telt const& g, std::vector<singStrat> const& strat)
 {
+#ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Running MeetPartitionStrat\n";
+#endif
   if (strat.size() == 0)
     return false;
   for (auto & pRec : strat) {
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP ProcessFixpoint_image, Case MeetPartitionStrat\n";
+#endif
     if (pRec.p == -1) {
       int eFix = FixpointCellNo(image.partition, pRec.i);
       if (!ProcessFixpoint_image(image, pRec.s, eFix, -1))
@@ -497,11 +553,6 @@ bool MeetPartitionStrat(rbaseType<Telt> const& rbase, imageType<Telt> & image, P
 template<typename Telt>
 std::vector<singStrat> StratMeetPartition(rbaseType<Telt> & rbase, Partition & P, Partition const& S, Telt const& g)
 {
-  //  std::cerr << "StratMeetPartition begin P\n";
-  //  RawPrintPartition(P);
-  //  std::cerr << "StratMeetPartition begin S\n";
-  //  RawPrintPartition(S);
-  //  std::cerr << "Now working\n";
   std::vector<singStrat> strat;
   std::vector<int> cellsP = P.cellno;
   if (!g.isIdentity()) {
@@ -513,16 +564,12 @@ std::vector<singStrat> StratMeetPartition(rbaseType<Telt> & rbase, Partition & P
       }
     }
   }
-  //  PrintVectDebug("P.cellno=", P.cellno);
-  //  PrintVectDebug("cellsP=", cellsP);
   // If <S> is just a set, it is interpreted as partition ( <S>|<S>^compl ).
   int nrcells = NumberCells(S) - 1;
 
   for (int s=0; s<nrcells; s++) {
     // now split with cell number s of S.
-    //    std::cerr << "s=" << s << "\n";
     std::vector<int> p=Cell(S, s);
-    //    PrintVectDebug("p", p);
 
     std::vector<int> p2;
     for (auto & eVal : p)
@@ -532,8 +579,6 @@ std::vector<singStrat> StratMeetPartition(rbaseType<Telt> & rbase, Partition & P
     std::vector<int> splits;
     for (int h=0; h<int(p3.LVal.size()); h++) {
       // a cell will split iff it contains more points than are in the s-cell
-      //      std::cerr << "h=" << h << " mult=" << p3.LMult[h] << " val=" << p3.LVal[h] << "\n";
-      //      std::cerr << "Before if test\n";
       if (P.lengths[p3.LVal[h]] > p3.LMult[h])
         splits.push_back(p3.LVal[h]);
     }
@@ -552,9 +597,13 @@ std::vector<singStrat> StratMeetPartition(rbaseType<Telt> & rbase, Partition & P
       // If  we have one  or two  new fixpoints, put  them  into the base.
       if (i == 1) {
         int iPart = NumberCells(P) - 1;
+#ifdef DEBUG_STBCBCKT
         std::cerr << "CPP NumberCells=" << (iPart+1) << "\n";
+#endif
         int pnt = FixpointCellNo(P, iPart);
+#ifdef DEBUG_STBCBCKT
         std::cerr << "CPP FixpointCellNo - NumberCells\n";
+#endif
 	ProcessFixpoint_rbase(rbase, pnt);
 	strat.push_back({-1, pnt, iPart});
 	if (IsTrivialRBase(rbase))
@@ -562,7 +611,9 @@ std::vector<singStrat> StratMeetPartition(rbaseType<Telt> & rbase, Partition & P
       }
       if (P.lengths[pVal] == 1) {
         int pnt = FixpointCellNo(P, pVal);
+#ifdef DEBUG_STBCBCKT
         std::cerr << "CPP FixpointCellNo - pVal\n";
+#endif
 	ProcessFixpoint_rbase(rbase, pnt);
 	strat.push_back({-1, pnt, pVal});
 	if (IsTrivialRBase(rbase))
@@ -576,14 +627,20 @@ std::vector<singStrat> StratMeetPartition(rbaseType<Telt> & rbase, Partition & P
 template<typename Telt>
 void AddRefinement(rbaseType<Telt> & rbase, int const& pos, Refinement const& eRfm)
 {
+#ifdef DEBUG_STBCBCKT
   std::cerr << "CPP beginning of AddRefinement\n";
+#endif
   if (IsInsertableRefinement(eRfm)) {
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP Doing RFM insertion\n";
+#endif
     rbase.rfm[pos].push_back(eRfm);
   }
+#ifdef DEBUG_STBCBCKT
   for (size_t i=0; i<rbase.rfm.size(); i++) {
     std::cerr << "CPP i=" << (i+1) << " |rbase.rfm[i]|=" << rbase.rfm[i].size() << "\n";
   }
+#endif
 }
 
 
@@ -591,69 +648,109 @@ template<typename Telt>
 void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, Telt const& TheId)
 {
   if (rbase.level2.status != int_true && rbase.level2.status != int_false) {
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP Inserting rbase.level2 into rbase.lev2\n";
     std::cerr << "CPP rbase.level2.status=" << GetIntTypeNature(rbase.level2.status) << "\n";
+#endif
     rbase.lev2.push_back(rbase.level2);
   }
+#ifdef DEBUG_STBCBCKT
   PrintRBaseLevel(rbase, "CPP RegisterRBasePoint 1");
+#endif
   rbase.lev.push_back(rbase.level);
   rbase.base.push_back(pnt);
+#ifdef DEBUG_STBCBCKT
   KeyUpdatingRbase("RegisterRBasePoint 1", rbase);
+#endif
   int k = IsolatePoint(P, pnt);
+#ifdef DEBUG_STBCBCKT
   NicePrintPartition("CPP After IsolatePoint P", P);
   KeyUpdatingRbase("RegisterRBasePoint 1.1", rbase);
+#endif
   if (!ProcessFixpoint_rbase(rbase, pnt)) {
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP INFO: Warning R-base point is already fixed\n";
+#endif
   }
   //  rbase.lev.push_back(rbase.level);
+#ifdef DEBUG_STBCBCKT
   KeyUpdatingRbase("RegisterRBasePoint 1.2", rbase);
   PrintRBaseLevel(rbase, "CPP RegisterRBasePoint 2");
+#endif
   rbase.where.push_back(k);
   int len=rbase.rfm.size();
   rbase.rfm.push_back({});
+#ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Before P.lengths test k=" << (k+1) << " len=" << rbase.rfm.size() << "\n";
   KeyUpdatingRbase("RegisterRBasePoint 1.3", rbase);
+#endif
   if (P.lengths[k] == 1) {
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP Matching P.lengths test\n";
+#endif
     int pnt = FixpointCellNo(P, k);
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP Section P.lengths after FixpointCellNo pnt=" << (pnt+1) << "\n";
     PrintRBaseLevel(rbase, "CPP RegisterRBasePoint 2.1");
+#endif
     ProcessFixpoint_rbase(rbase, pnt);
+#ifdef DEBUG_STBCBCKT
     PrintRBaseLevel(rbase, "CPP RegisterRBasePoint 2.2");
     KeyUpdatingRbase("RegisterRBasePoint 1.4", rbase);
     std::cerr << "CPP Section P.lengths after ProcessFixpoint_rbase\n";
+#endif
     AddRefinement(rbase, len, Refinement({pnt,k}));
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP After AddRefinement 1\n";
     KeyUpdatingRbase("RegisterRBasePoint 1.5", rbase);
+#endif
   }
+#ifdef DEBUG_STBCBCKT
   PrintRBaseLevel(rbase, "CPP RegisterRBasePoint 3");
   KeyUpdatingRbase("RegisterRBasePoint 2", rbase);
+#endif
   if (rbase.level2.status != int_false) {
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP Matching the ! false test\n";
+#endif
     auto MainInsert=[&](StabChainPlusLev<Telt> const& lev) -> void {
       if (lev.status != int_int) {
 	std::vector<Telt> LGenStrong = StrongGeneratorsStabChain(lev.Stot);
+#ifdef DEBUG_STBCBCKT
 	std::cerr << "CPP StrongGeneratorsStabChain(lev) = " << GapStringTVector(SortVector(LGenStrong)) << "\n";
+#endif
         std::vector<Telt> LGen = GeneratorsStabChain(lev.Stot);
 	Partition O = OrbitsPartition(LGen, lev.Stot->comm->n, rbase.domain);
+#ifdef DEBUG_STBCBCKT
 	NicePrintPartition("CPP Before StratMeetPartition O", O);
         KeyUpdatingRbase("RegisterRBasePoint 2.1", rbase);
+#endif
 	std::vector<singStrat> strat = StratMeetPartition(rbase, P, O, TheId);
+#ifdef DEBUG_STBCBCKT
         KeyUpdatingRbase("RegisterRBasePoint 2.2", rbase);
+#endif
         AddRefinement(rbase, len, Refinement({O,strat}));
+#ifdef DEBUG_STBCBCKT
         std::cerr << "CPP After AddRefinement 2\n";
+#endif
       }
     };
     if (rbase.level2.status == int_true) {
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP Before call to MainInsert(level)\n";
+#endif
       MainInsert(rbase.level);
     } else {
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP Before call to MainInsert(level2)\n";
+#endif
       MainInsert(rbase.level2);
     }
   }
   //  rbase.lev.push_back(rbase.level);
+#ifdef DEBUG_STBCBCKT
   KeyUpdatingRbase("RegisterRBasePoint 3", rbase);
+#endif
 }
 
 
@@ -662,10 +759,9 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
 template<typename Telt>
 void NextRBasePoint(Partition & P, rbaseType<Telt> & rbase, Telt const& TheId)
 {
-  //  std::cerr << "Working with NextRBasePoint rbase.level2.status=" << GetIntTypeNature(rbase.level2.status) << "\n";
-  //  RawPrintPartition(P);
   std::vector<int> lens = P.lengths;
   std::vector<int> order = ClosedInterval(0, NumberCells(P));
+#ifdef DEBUG_STBCBCKT
   std::cerr << "CPP lens=[ ";
   for (size_t i=0; i<lens.size(); i++) {
     if (i>0)
@@ -673,40 +769,29 @@ void NextRBasePoint(Partition & P, rbaseType<Telt> & rbase, Telt const& TheId)
     std::cerr << lens[i];
   }
   std::cerr << " ]\n";
-  //  std::cerr << "Before SortParallel\n";
-  //  PrintVectDebug(" lens", lens);
-  //  PrintVectDebug("order", order);
-  //
+#endif
   SortParallel(lens, order);
-  //  std::cerr << "After SortParallel\n";
-  //  PrintVectDebug(" lens", lens);
-  //  PrintVectDebug("order", order);
-  //
 
 
   int k = PositionProperty(lens, [](int const& x) -> int {return x != 1;});
-  //  std::cerr << "Starting at k=" << k << "\n";
   int l = -1;
   if (rbase.level.status == int_int) {
     l = 0;
   } else {
     while (true) {
-      //      std::cerr << "Before PositionProperty operation len[k]=" << lens[k] << "\n";
       l = PositionProperty(ClosedInterval(0, lens[k]), [&](int const& i) -> bool {
 	  return !IsFixedStabilizer(rbase.level.Stot, P.points[i+P.firsts[order[k]]]);});
-      //      std::cerr << "At k=" << k << " found l=" << l << "\n";
       if (l != -1)
 	break;
       k++;
     }
   }
-  //  std::cerr << "k=" << k << " l=" << l << "\n";
-  //  std::cerr << "order[k]=" << order[k] << "\n";
-  //  std::cerr << "P.firsts[order[k]]=" << P.firsts[order[k]] << "\n";
   int p = P.points[ P.firsts[ order[k] ] + l ];
+#ifdef DEBUG_STBCBCKT
   std::cerr << "CPP p=" << (p+1) << "\n";
   NicePrintPartition("CPP Before RegisterRBasePoint P", P);
   PrintRBaseLevel(rbase, "CPP Before RegisterRBasePoint");
+#endif
   RegisterRBasePoint(P, rbase, p, TheId);
 }
 
@@ -714,7 +799,9 @@ template<typename Telt>
 bool Refinements_ProcessFixpoint(rbaseType<Telt> & rbase, imageType<Telt> & image, int const& pnt, int const& cellnum)
 {
  int img = FixpointCellNo(image.partition, cellnum);
+#ifdef DEBUG_STBCBCKT
  std::cerr << "CPP ProcessFixpoint_image, Case Refinements_ProcessFixpoint\n";
+#endif
  return ProcessFixpoint_image(image, pnt, img, -1);
 }
 
@@ -739,7 +826,9 @@ bool Refinements_Intersection(rbaseType<Telt> & rbase, imageType<Telt> & image, 
 template<typename Telt>
 int RRefine(rbaseType<Telt> & rbase, imageType<Telt> & image, bool const& uscore)
 {
+#ifdef DEBUG_STBCBCKT
   std::cerr << "CPP uscore=" << uscore << "\n";
+#endif
   auto BoolToInt=[&](bool const& val) -> int {
     if (val)
       return int_true;
@@ -753,40 +842,60 @@ int RRefine(rbaseType<Telt> & rbase, imageType<Telt> & image, bool const& uscore
     return true;
   };
   if (!uscore) {
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP case of NOT uscore\n";
+#endif
     for (auto & Rf : rbase.rfm[image.depth]) {
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP Doing one CallFuncList 1\n";
+#endif
       bool t = Evaluation(Rf);
       if (!t) {
+#ifdef DEBUG_STBCBCKT
         std::cerr << "CPP 1 return fail\n";
+#endif
 	return int_fail;
       } else {
 	if (!t) {
+#ifdef DEBUG_STBCBCKT
           std::cerr << "CPP 1 return t\n";
+#endif
 	  return BoolToInt(t);
 	}
       }
     }
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP 1 return true\n";
+#endif
     return int_true;
   } else {
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP case of uscore\n";
+#endif
     for (auto & Rf : rbase.rfm[image.depth]) {
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP Doing one CallFuncList 2\n";
+#endif
       if (UnderscoreNature(Rf.nature)) {
 	bool t = Evaluation(Rf);
 	if (!t) {
+#ifdef DEBUG_STBCBCKT
           std::cerr << "CPP 2 return fail\n";
+#endif
 	  return int_fail;
 	} else {
 	  if (!t) {
+#ifdef DEBUG_STBCBCKT
             std::cerr << "CPP 2 return t\n";
+#endif
 	    return BoolToInt(t);
 	  }
 	}
       }
     }
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP 2 return true\n";
+#endif
     return int_true;
   }
 }
@@ -930,8 +1039,8 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 {
   int n=G->comm->n;
   Telt id = G->comm->identity;
+#ifdef DEBUG_STBCBCKT
   std::cerr << "CPP PartitionBacktrack step 1\n";
-  //  std::cerr << "CPP |L|=" << SizeStabChain<Telt,Tint>(L) << "\n";
   std::cerr << "CPP L=\n";
   PrintStabChain(L);
   std::cerr << "CPP R=\n";
@@ -939,6 +1048,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   std::cerr << "CPP INIT sgs(G)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(G))) << "\n";
   std::cerr << "CPP INIT sgs(L)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(L))) << "\n";
   std::cerr << "CPP INIT sgs(R)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(R))) << "\n";
+#endif
   imageType<Telt> image = BuildInitialImage(repr, rbase, data);
   std::vector<Face> orB; // backup of <orb>.
   int nrback;
@@ -954,7 +1064,9 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   std::vector<int> oldcel_cellno;
   std::vector<StabChain<Telt>> L_list, R_list;
   std::function<permPlusBool<Telt>(int const&,bool const&)> PBEnumerate = [&](int const& d, bool const & wasTriv) -> permPlusBool<Telt> {
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP PBEnumerate, step 1, d=" << (d+1) << " wasTriv=" << wasTriv << "\n";
+#endif
     permPlusBool<Telt> oldprm, oldprm2;
     int a;                // current R-base point
     permPlusBool<Telt> t; // group element constructed, to be handed upwards
@@ -963,29 +1075,40 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     boost::dynamic_bitset<>::size_type b;        // image of base point currently being considered
 
     if (image.perm.status == int_false) {
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP PBEnumerate, EXIT 1, image.perm.status=" << GetIntTypeNature(image.perm.status) << "\n";
+#endif
       return {int_fail, {}};
     }
     image.depth = d;
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP PBEnumerate, step 2\n";
     PrintRBaseLevel(rbase, "CPP Step 2");
+#endif
 
     // Store the original values of <image.*>.
     int undoto = NumberCells(image.partition);
     if (image.perm.status == int_true) {
       oldcel = image.partition;
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP Assigning from image.partition\n";
+#endif
     } else {
       oldcel_cellno = image.partition.cellno;
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP Assigning from image.partition.cellno\n";
       std::cerr << "CPP oldcel=" << GapStringIntVector(oldcel_cellno) << "\n";
+#endif
       oldprm = image.perm;
     }
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP PBEnumerate, step 3\n";
+#endif
     if (image.level2.status != int_false)
       oldprm2 = image.perm2;
     else
       oldprm2.status = int_false;
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP PBEnumerate, step 4 d=" << (d+1) << " |rbase.base|=" << rbase.base.size() << "\n";
     PrintRBaseLevel(rbase, "CPP Step 4");
     std::cerr << "CPP |L|=" << L_list.size() << "\n";
@@ -994,29 +1117,42 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     std::cerr << "CPP |R|=" << R_list.size() << "\n";
     if (R_list.size() > 0)
       PrintListStabCommPartition("CPP Step 4", R_list);
+#endif
     // Recursion comes to an end  if all base  points have been prescribed
     // images.
     if (d >= int(rbase.base.size())) {
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP Matching d > Length(rbase.base) test\n";
+#endif
       if (IsTrivialRBase(rbase)) {
 	blen = rbase.base.size();
+#ifdef DEBUG_STBCBCKT
 	std::cerr << "CPP IsTrivialRBase matching test blen=" << blen << " wasTriv=" << wasTriv << "\n";
+#endif
 	// Do     not  add the   identity    element  in the  subgroup
 	// construction.
 	if (wasTriv) {
+#ifdef DEBUG_STBCBCKT
 	  std::cerr << "CPP wasTriv Critical, step 1\n";
+#endif
 	  // In the subgroup case, assign to  <L> and <R> stabilizer
 	  // chains when the R-base is complete.
 	  StabChainOptions<Tint> options = GetStandardOptions<Tint>(n);
 	  options.base = rbase.base;
 	  options.reduced = false;
+#ifdef DEBUG_STBCBCKT
 	  std::cerr << "CPP Before computation of ListStabChain Order(L)=" << Order<Telt,mpz_class>(L) << "\n";
           std::cerr << "CPP sgs(L)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(L))) << " base=" << GapStringIntVector(rbase.base) << "\n";
           std::cerr << "CPP assigning L sequence\n";
+#endif
 	  L_list = ListStabChain(StabChainOp_stabchain_nofalse<Telt,Tint>(L, options));
+#ifdef DEBUG_STBCBCKT
           PrintListStabCommPartition("CPP ListStabChain", L_list);
+#endif
 	  R_list = L_list; // Corresponds to R := ShallowCopy( L)
+#ifdef DEBUG_STBCBCKT
 	  std::cerr << "CPP PBEnumerate, EXIT 2\n";
+#endif
 	  return {int_fail,{}};
 	} else {
 	  permPlusBool<Telt> prm;
@@ -1026,47 +1162,66 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    prm = image.perm;
 	  if (image.level2.status != int_false) {
 	    if (SiftedPermutation(image.level2.Stot, prm.val * Inverse(image.perm2.val)).isIdentity()) {
+#ifdef DEBUG_STBCBCKT
 	      std::cerr << "CPP PBEnumerate, EXIT 3\n";
+#endif
 	      return prm;
 	    }
 	  } else {
 	    if (Pr(prm.val)) {
+#ifdef DEBUG_STBCBCKT
 	      std::cerr << "CPP PBEnumerate, EXIT 4\n";
+#endif
 	      return {int_perm, prm.val};
 	    }
 	  }
+#ifdef DEBUG_STBCBCKT
 	  std::cerr << "CPP PBEnumerate, EXIT 5\n";
+#endif
 	  return {int_fail, {}};
 	}
 	// Construct the   next refinement  level. This  also  initializes
 	// <image.partition> for the case ``image = base point''.
       } else {
+#ifdef DEBUG_STBCBCKT
 	std::cerr << "CPP Not matching IsTrivialRBase test\n";
         PrintRBaseLevel(rbase, "CPP Before NextRBasePoint");
         std::cerr << "CPP Before NextRBasePoint image.p.c=" << GapStringIntVector(image.partition.cellno) << "\n";
+#endif
 	NextRBasePoint(rbase.partition, rbase, id);
+#ifdef DEBUG_STBCBCKT
         std::cerr << "CPP After NextRBasePoint image.p.c=" << GapStringIntVector(image.partition.cellno) << "\n";
 	PrintRBaseLevel(rbase, "CPP After NextRBasePoint");
+#endif
 	if (image.perm.status == int_true)
 	  rbase.fix.push_back(Fixcells(rbase.partition));
+#ifdef DEBUG_STBCBCKT
 	std::cerr << "CPP After Fixcells insert\n";
+#endif
 	std::vector<int> eNewF(range.size(), 0);
 	org.push_back(eNewF);
 	if (repr) {
 	  // In  the representative  case,  change  the   stabilizer
 	  // chains of <L> and <R>.
+#ifdef DEBUG_STBCBCKT
           std::cerr << "CPP Before ChangeStabChain L_list[d]\n";
+#endif
 	  ChangeStabChain(L_list[d], {rbase.base[d]}, int_false);
+#ifdef DEBUG_STBCBCKT
           PrintStabChain(L_list[d]);
           std::cerr << "CPP After ChangeStabChain L_list[d]\n";
+#endif
           AssignationVectorGapStyle(L_list, d+1, L_list[ d ]->stabilizer);
-          //	  L_list[ d + 1 ] = L_list[ d ]->stabilizer;
+#ifdef DEBUG_STBCBCKT
           std::cerr << "CPP Before ChangeStabChain R_list[d]\n";
+#endif
 	  ChangeStabChain(R_list[d], {rbase.base[d]}, int_false);
+#ifdef DEBUG_STBCBCKT
           PrintStabChain(R_list[d]);
           std::cerr << "CPP After ChangeStabChain R_list[d]\n";
+#endif
           AssignationVectorGapStyle(R_list, d+1, R_list[ d ]->stabilizer);
-          //	  R_list[ d + 1 ] = R_list[ d ]->stabilizer;
+#ifdef DEBUG_STBCBCKT
           std::cerr << "CPP L[d]=\n";
           PrintStabChain(L_list[d]);
           std::cerr << "CPP R[d]=\n";
@@ -1075,17 +1230,22 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
           PrintStabChain(L_list[d+1]);
           std::cerr << "CPP R[d+1]=\n";
           PrintStabChain(R_list[d+1]);
+#endif
 	}
       }
     }
     a = rbase.base[d];
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP PBEnumerate, step 5\n";
     PrintRBaseLevel(rbase, "CPP Step 5");
+#endif
 
     // Intersect  the current cell of <P>  with  the mapped basic orbit of
     // <G> (and also with the one of <H> in the intersection case).
     if (image.perm.status == int_true) {
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP orb assign 1: d=" << (d+1) << "\n";
+#endif
       AssignationVectorGapStyle(orb, d, BlistList(range, Cell(oldcel, rbase.where[d]) ));
       if (image.level2.status != int_false) {
 	b = orb[d].find_first();
@@ -1095,11 +1255,16 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  b = orb[d].find_next(b);
 	}
       }
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP ORB: Case image.perm=true d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
+#endif
     } else {
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP image.perm<>true orb=" << GapStringListBoolVector(orb) << "\n";
       std::cerr << "CPP orb assign 2: d=" << (d+1) << "\n";
+#endif
       AssignationVectorGapStyle(orb, d, BlistList(range, {}));
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP After assignation |orb|=" << orb.size() << "\n";
       // line below needs to be checked.
       std::cerr << "CPP ORB: Before pVal loop d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
@@ -1112,17 +1277,18 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	std::cerr << PrintTopOrbit(eRec.Stot);
       }
       std::cerr << " ]\n";
-      //      std::cerr << "CPP d=" << d << " |rbase.lev|=" << rbase.lev.size() << "\n";
+#endif
       for (auto & pVal : rbase.lev[d].Stot->orbit) {
 	b = PowAct(pVal, image.perm.val);
+#ifdef DEBUG_STBCBCKT
 	std::cerr << "CPP pVal=" << (pVal+1) << " b=" << (b+1) << "\n";
         std::cerr << "CPP oldcell=" << (oldcel_cellno[b]+1) << " rbase.where=" << (rbase.where[d]+1) << "\n";
+#endif
 	if (oldcel_cellno[b] == rbase.where[d]) {
 	  bool DoOper=false;
 	  if (image.level2.status == int_false)
 	    DoOper=true;
 	  if (!DoOper) {
-            //	    std::cerr << "CPP d=" << d << " |rbase.lev2|=" << rbase.lev2.size() << "\n";
 	    if (IsInBasicOrbit(rbase.lev2[d].Stot, SlashAct(b,image.perm2.val)))
 	      DoOper=true;
 	  }
@@ -1132,211 +1298,309 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  }
 	}
       }
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP ORB: After pVal loop d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
+#endif
     }
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP PBEnumerate, step 6 orb=" << GapStringListBoolVector(orb) << "\n";
     PrintRBaseLevel(rbase, "CPP Step 6");
+#endif
     if (d == 0 && ForAll(G->comm->labels, [&](Telt const& x){return PowAct(a, x) == a;})) {
       orb[d][a]=true; // ensure a is a possible image (can happen if acting on permutations with more points)
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP ORB: After assignation d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
+#endif
     }
     AssignationVectorGapStyle(orB, d, orb[d]);
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP PBEnumerate, step 7, wasTriv=" << wasTriv << "\n";
     PrintRBaseLevel(rbase, "CPP Step 7");
+#endif
 
     // Loop  over the candidate images  for the  current base point. First
     // the special case image = base up to current level.
     if (wasTriv) {
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP wasTriv Critical, step 4\n";
+#endif
       AssignationVectorGapStyle(image.bimg, d, a);
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP wasTriv Critical, step 5\n";
       // Refinements that start with '_' must be executed even when base
       // = image since they modify image.data, etc.
 
       std::cerr << "CPP Before RRefine 1 rbase.p.c=" << GapStringIntVector(rbase.partition.cellno) << "\n";
       std::cerr << "CPP Before RRefine 1 image.p.c=" << GapStringIntVector(image.partition.cellno) << "\n";
+#endif
       RRefine(rbase, image, true);
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP After RRefine 1 image.p.c=" << GapStringIntVector(image.partition.cellno) << "\n";
       PrintRBaseLevel(rbase, "CPP After RRefine");
+#endif
       // Recursion.
       PBEnumerate(d + 1, true);
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP wasTriv Critical, step 6 d=" << (d+1) << "\n";
+#endif
       image.depth = d;
       // Now we  can  remove  the  entire   <R>-orbit of <a>  from   the
       // candidate list.
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP ORB 1: Before subtract d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
+#endif
       SubtractBlist(orb[d], BlistList(range, L_list[d]->orbit));
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP ORB 1: After subtract d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
+#endif
     }
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP PBEnumerate, step 8\n";
+#endif
 
     // Only the early points of the orbit have to be considered.
     m = SizeBlist(orB[d] );
     if (m < int(L_list[d]->orbit.size()) ) {
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP PBEnumerate, EXIT 6\n";
+#endif
       return {int_fail,{}};
     }
     max = PositionNthTrueBlist(orB[d], m - L_list[d]->orbit.size());
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP PBEnumerate, step 9\n";
     std::cerr << "CPP wasTriv=" << wasTriv << " a=" << (a+1) << " max=" << (max+1) << "\n";
+#endif
 
     boost::dynamic_bitset<>::size_type a_size = a;
     if (wasTriv && a_size > max) {
       m--;
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP Before test m=" << m << " Length(L[d].orbit)=" << L_list[d]->orbit.size() << "\n";
+#endif
       if (m < int(L_list[d]->orbit.size()) ) {
+#ifdef DEBUG_STBCBCKT
 	std::cerr << "CPP PBEnumerate, EXIT 7\n";
+#endif
 	return {int_fail,{}};
       }
       max = PositionNthTrueBlist( orB[d], m - L_list[d]->orbit.size());
     }
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP PBEnumerate, step 10\n";
+#endif
     // Now the other possible images.
     b = orb[d].find_first();
     while (b != boost::dynamic_bitset<>::npos) {
       int b_int = int(b);
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP b=" << (b+1) << " b_int=" << (b_int+1) << " d=" << (d+1) << "\n";
       std::cerr << "CPP |R[d].orbit|=" << R_list[d]->orbit.size() << "\n";
+#endif
       // Try to prune the node with prop 8(ii) of Leon paper.
       if (!repr && !wasTriv && R_list[d]->orbit.size() > 0) {
+#ifdef DEBUG_STBCBCKT
         std::cerr << "CPP matching if test\n";
+#endif
 	dd = branch;
 	while (dd < d) {
+#ifdef DEBUG_STBCBCKT
           std::cerr << "CPP while dd=" << (dd+1) << " d=" << (d+1) << "\n";
+#endif
 	  if (IsInBasicOrbit(L_list[dd], a) && !PBIsMinimal(range, R_list[dd]->orbit[0], b_int, R_list[d])) {
 	    dd = d + 1;
+#ifdef DEBUG_STBCBCKT
             std::cerr << "CPP first case\n";
+#endif
           } else {
 	    dd = dd + 1;
+#ifdef DEBUG_STBCBCKT
             std::cerr << "CPP second case\n";
+#endif
           }
 	}
       } else {
 	dd = d;
       }
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP dd=" << (dd+1) << " d=" << (d+1) << "\n";
       std::cerr << "CPP L[d]=\n";
       PrintStabChain(L_list[d]);
       std::cerr << "CPP R[d]=\n";
       PrintStabChain(R_list[d]);
+#endif
       if (dd == d) {
+#ifdef DEBUG_STBCBCKT
         std::cerr << "CPP equality dd=d undoto=" << undoto << " |image.partition|=" << NumberCells(image.partition) << "\n";
+#endif
 	// Undo the  changes made to  <image.partition>, <image.level>
 	// and <image.perm>.
         int nbCell=NumberCells(image.partition);
 	for (int i=undoto+1; i<=nbCell; i++) {
+#ifdef DEBUG_STBCBCKT
           std::cerr << "CPP Before UndoRefinement cellno=" << GapStringIntVector(image.partition.cellno) << " i=" << i << "\n";
+#endif
 	  UndoRefinement(image.partition);
+#ifdef DEBUG_STBCBCKT
           std::cerr << "CPP After UndoRefinement cellno=" << GapStringIntVector(image.partition.cellno) << " i=" << i << "\n";
+#endif
         }
+#ifdef DEBUG_STBCBCKT
         std::cerr << "CPP After UndoRefinement loop\n";
+#endif
 	if (image.perm.status != int_true) {
+#ifdef DEBUG_STBCBCKT
           std::cerr << "CPP assignation image.level\n";
+#endif
 	  image.level = rbase.lev[d];
 	  image.perm = oldprm;
 	}
 	if (image.level2.status != int_false) {
+#ifdef DEBUG_STBCBCKT
           std::cerr << "CPP assignation image.level2\n";
+#endif
 	  image.level2 = rbase.lev2[d];
 	  image.perm2  = oldprm2;
 	}
 	// If <b> could not be prescribed as image for  <a>, or if the
 	// refinement was impossible, give up for this image.
+#ifdef DEBUG_STBCBCKT
         std::cerr << "CPP Before AssignationVectorGapStyle b_int=" << (b_int+1) << "\n";
+#endif
 	AssignationVectorGapStyle(image.bimg, d, b_int);
+#ifdef DEBUG_STBCBCKT
         std::cerr << "CPP Before IsolatePoint b_int=" << (b_int+1) << "\n";
         std::cerr << "CPP Before IsolatePoint cellno=" << GapStringIntVector(image.partition.cellno) << "\n";
+#endif
 	IsolatePoint( image.partition, b_int );
+#ifdef DEBUG_STBCBCKT
         std::cerr << "CPP After IsolatePoint cellno=" << GapStringIntVector(image.partition.cellno) << "\n";
         std::cerr << "CPP ProcessFixpoint_image, Case PartitionBacktrack 1\n";
         std::cerr << "CPP Before ProcessFixpoint_image b_int=" << (b_int+1) << "\n";
+#endif
 	bool val = ProcessFixpoint_image(image, a, b_int, org[d][b_int]);
+#ifdef DEBUG_STBCBCKT
 	std::cerr << "CPP a=" << (a+1) << " b=" << (b_int+1) << " org[d][b]=" << (org[d][b_int]+1) << " val=" << val << "\n";
+#endif
 	if (val) {
+#ifdef DEBUG_STBCBCKT
           std::cerr << "CPP Before RRefine 2 oldcel=" << GapStringIntVector(image.partition.cellno) << "\n";
+#endif
 	  t.status = RRefine(rbase, image, false);
+#ifdef DEBUG_STBCBCKT
           std::cerr << "CPP After RRefine 2 oldcel=" << GapStringIntVector(image.partition.cellno) << "\n";
+#endif
         } else {
+#ifdef DEBUG_STBCBCKT
           std::cerr << "CPP assignation of t to fail\n";
+#endif
 	  t.status = int_fail;
         }
+#ifdef DEBUG_STBCBCKT
         std::cerr << "CPP After assignment of t. t.status=" << GapStringTrueFalseFail(t.status) << "\n";
+#endif
 
 	if (t.status != int_fail) {
+#ifdef DEBUG_STBCBCKT
           std::cerr << "CPP case of not fail\n";
+#endif
 	  // Subgroup case, base <> image   at current level:   <R>,
 	  //   which until now is identical to  <L>, must be changed
 	  //   without affecting <L>, so take a copy.
+#ifdef DEBUG_STBCBCKT
           std::cerr << "CPP wasTriv=" << wasTriv << " d=" << (d+1) << "\n";
           std::cerr << "CPP L[d]=\n";
           PrintStabChain(L_list[d]);
           std::cerr << "CPP R[d]=\n";
           PrintStabChain(R_list[d]);
           std::cerr << "CPP IsIdenticalObj=" << IsIdenticalObj(L_list[d], R_list[d]) << "\n";
+#endif
 	  if (wasTriv && IsIdenticalObj(L_list[d], R_list[d])) {
+#ifdef DEBUG_STBCBCKT
             std::cerr << "CPP Assigning R from d\n";
+#endif
 	    SetStabChainFromLevel(R_list, L_list, d, rbase.base.size());
 	    branch = d;
+#ifdef DEBUG_STBCBCKT
             std::cerr << "CPP assignation branch=" << (branch+1) << "\n";
+#endif
 	  }
+#ifdef DEBUG_STBCBCKT
           std::cerr << "CPP After wasTriv test\n";
           std::cerr << "CPP d=" << (d+1) << " blen=" << blen << "\n";
+#endif
 	  if (2 * (d+1) <= blen) {
+#ifdef DEBUG_STBCBCKT
             std::cerr << "CPP Before ChangeStabChain R_list[d] 2\n";
             std::cerr << "CPP XXX Before ChangeStabChain R[d]=\n";
             PrintStabChain(R_list[d]);
+#endif
 	    ChangeStabChain(R_list[d], {b_int}, int_false);
+#ifdef DEBUG_STBCBCKT
             std::cerr << "CPP XXX After ChangeStabChain R[d]=\n";
             PrintStabChain(R_list[d]);
             std::cerr << "CPP After ChangeStabChain R_list[d] 2\n";
+#endif
 	    R_list[ d + 1 ] = R_list[ d ]->stabilizer;
 	  } else {
+#ifdef DEBUG_STBCBCKT
             std::cerr << "CPP Beginning else case\n";
+#endif
 	    std::vector<Telt> LGen = StrongGeneratorsStabChain( R_list[d] );
+#ifdef DEBUG_STBCBCKT
             std::cerr << "CPP LGen=" << GapStringTVector(LGen) << "\n";
             std::cerr << "CPP First generating step done b=" << (b_int+1) << "\n";
+#endif
 	    std::vector<Telt> LGenB = Filtered(LGen, [&](Telt const& gen) -> bool {return PowAct(b_int, gen) == b_int;});
-            //            std::cerr << "CPP |LGenB|=" << LGenB.size() << "\n";
+#ifdef DEBUG_STBCBCKT
             std::cerr << "CPP LGenB=" << GapStringTVector(LGenB) << "\n";
-	    //	    R[ d + 1 ] := rec( generators := Filtered( R[ d + 1 ], gen -> b ^ gen = b ) );
-            //	    int largMov=LargestMovedPoint(LGenB);
-            //	    StabChainOptions<Tint> options = GetStandardOptions<Tint>(n);
-            //	    options.base = ClosedInterval(0, largMov);
-            //            std::cerr << "CPP Before assignation R[d+1]=\n";
-            //            PrintStabChainOrbits(R_list[d+1]);
             std::cerr << "XXX ELIMINATE begin\n";
-            //	    R_list[d+1] = StabChainOp_listgen(LGenB, options);
+#endif
 	    R_list[d+1] = StabChainGenerators(LGenB, n, id);
+#ifdef DEBUG_STBCBCKT
             std::cerr << "XXX ELIMINATE end\n";
             std::cerr << "CPP After assignation R[d+1]=\n";
             PrintStabChainOrbits(R_list[d+1]);
+#endif
 	  }
+#ifdef DEBUG_STBCBCKT
           std::cerr << "CPP R[d+1]=\n";
           PrintStabChainOrbits(R_list[d+1]);
+#endif
 	}
+#ifdef DEBUG_STBCBCKT
         std::cerr << "CPP t step 2\n";
+#endif
 
 	// Recursion.
 	if (t.status == int_true) {
 	  t = PBEnumerate(d + 1, false);
+#ifdef DEBUG_STBCBCKT
           std::cerr << "CPP After PBEnumerate Recursion case\n";
+#endif
 	  nrback++;
 	  image.depth = d;
 	}
+#ifdef DEBUG_STBCBCKT
         std::cerr << "CPP t step 3\n";
+#endif
 
 	// If   <t>   =   fail, either   the   recursive   call  was
 	//   unsuccessful,  or all new  elements   have been added  to
 	//   levels  below  the current one   (this happens if  base =
 	//   image up to current level).
 	if (t.status != int_fail) {
+#ifdef DEBUG_STBCBCKT
           std::cerr << "CPP Matching t<>fail\n";
+#endif
 	  // Representative case, element found: Return it.
 	  // Subgroup case, base <> image  before current level:  We
 	  //   need  only find  a representative  because we already
 	  //   know the stabilizer of <L> at an earlier level.
 	  if (repr || !wasTriv) {
+#ifdef DEBUG_STBCBCKT
 	    std::cerr << "CPP PBEnumerate, EXIT 8\n";
+#endif
 	    return t;
 	  } else {
 	    // Subgroup case, base  <> image at current level: Enlarge
@@ -1346,43 +1610,67 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	    //	      AddGeneratorsExtendSchreierTree( L[ dd ], {t});
             // It is a little bit unclear why the loop was removed and a single call to
             // AGEST with L_list[dd].
+#ifdef DEBUG_STBCBCKT
             PrintListStabCommPartition("CPP AddGen", L_list);
+#endif
             for (int dd=0; dd<=d; dd++) {
+#ifdef DEBUG_STBCBCKT
               std::cerr << "CPP Before AGEST dd=" << (dd+1) << "\n";
+#endif
               AddGeneratorsExtendSchreierTree(L_list[dd], {t.val});
             }
 	    if (m < int(L_list[d]->orbit.size())) {
+#ifdef DEBUG_STBCBCKT
 	      std::cerr << "CPP PBEnumerate, EXIT 9\n";
+#endif
 	      return {int_fail,{}};
 	    }
 	    max = PositionNthTrueBlist( orB[d], m - L_list[d]->orbit.size());
 	    SetStabChainFromLevel(R_list, L_list, d, rbase.base.size());
             //            PrintListStabCommPartition(R_list);
+#ifdef DEBUG_STBCBCKT
             PrintListStabCommPartition("CPP SetStab", L_list);
+#endif
 	  }
 	}
+#ifdef DEBUG_STBCBCKT
         std::cerr << "CPP t step 4\n";
+#endif
 
 	// Now  we can remove the   entire <R>-orbit  of <b> from  the
 	// candidate list.
+#ifdef DEBUG_STBCBCKT
 	std::cerr << "CPP ORB 2: Before subtract d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
+#endif
 	if (R_list[d]->transversal.size() > 0 && R_list[d]->transversal[b] != -1) {
+#ifdef DEBUG_STBCBCKT
           std::cerr << "CPP subtract case 1\n";
+#endif
 	  SubtractBlist(orb[d], BlistList(range, R_list[d]->orbit));
         } else {
+#ifdef DEBUG_STBCBCKT
           std::cerr << "CPP subtract case 2\n";
+#endif
 	  SubtractBlistOrbitStabChain(orb[d], StrongGeneratorsStabChain(R_list[d]), b_int);
         }
+#ifdef DEBUG_STBCBCKT
 	std::cerr << "CPP ORB 2: After subtract d=" << (d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
+#endif
       }
       b = orb[d].find_next(b);
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP End of the loop. 1 Now b=" << PosFail_to_string(b) << "\n";
+#endif
       if (b > max)
         b = boost::dynamic_bitset<>::npos;
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP End of the loop. 2 Now b=" << PosFail_to_string(b) << "\n";
+#endif
 
     }
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP PBEnumerate, step 11, EXIT 10\n";
+#endif
     return {int_fail, {}};
   };
 
@@ -1426,7 +1714,9 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       std::vector<int> fix  = Fixcells(rbase.partition);
       std::vector<int> fixP = Fixcells(image.partition);
       for (int i=0; i<int(fix.size()); i++) {
+#ifdef DEBUG_STBCBCKT
         std::cerr << "CPP ProcessFixpoint_image, Case PartitionBacktrack 2\n";
+#endif
 	ProcessFixpoint_image(image, fix[i], fixP[i], -1);
       }
     }
@@ -1435,7 +1725,9 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   }
 
   permPlusBool<Telt> rep = PBEnumerate(0, !repr);
+#ifdef DEBUG_STBCBCKT
   std::cerr << "CPP After PBEnumerate Call 0, repr\n";
+#endif
   if (!repr) {
     return {int_group, L_list[0], {}};
   } else {
@@ -1482,11 +1774,15 @@ Face OnSets(Face const& f, Telt const& g)
 template<typename Telt, typename Tint>
 ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, Face const& Phi, Face const& Psi)
 {
+#ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Beginning of RepOpSetsPermGroup\n";
   PrintStabChain(G);
+#endif
   int n=G->comm->n;
   std::vector<int> Omega = MovedPoints(G);
+#ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Omega=" << GapStringIntVector(Omega) << "\n";
+#endif
   if (repr && Phi.size() != Psi.size())
     return {int_fail, {}, {}};
   if (IsSubset(Phi, Omega) || ForAll(Omega, [&](int const &p) -> bool {return !Phi[p];})) {
@@ -1525,12 +1821,16 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
 
 
   std::vector<Telt> LGen = StrongGeneratorsStabChain(G);
+#ifdef DEBUG_STBCBCKT
   std::cerr << "CPP G : LGen=" << GapStringTVector(SortVector(LGen)) << "\n";
   std::cerr << "CPP repr=" << repr << "\n";
+#endif
 
   auto GetSubgroup=[&](Face const& Ph) -> StabChain<Telt> {
     std::vector<Telt> sgs=Filtered(LGen, [&](Telt const& g)->bool{return OnSets(Ph, g) == Ph;});
+#ifdef DEBUG_STBCBCKT
     std::cerr << "CPP SelectedGens=" << GapStringTVector(SortVector(sgs)) << "\n";
+#endif
     return MinimalStabChain<Telt,Tint>(SortVector(sgs), n);
   };
 
@@ -1541,9 +1841,13 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
     R = GetSubgroup(Psi);
   else
     R = L;
+#ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Orders: |R|=" << SizeStabChain<Telt,Tint>(R) << " |L|=" << SizeStabChain<Telt,Tint>(L) << "\n";
+#endif
   rbaseType<Telt> rbase = EmptyRBase<Telt>({G, G}, true, Omega, P);
+#ifdef DEBUG_STBCBCKT
   std::cerr << "CPP RepOpSetsPermGroup rbase.level2.status=" << GetIntTypeNature(rbase.level2.status) << "\n";
+#endif
   std::vector<int> Phi_vect = FaceToVector(Phi);
   std::function<bool(Telt const&)> Pr=[&](Telt const& gen) -> bool {
     for (auto & i : Phi_vect) {
@@ -1553,9 +1857,11 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
     }
     return true;
   };
+#ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Before call to PartitionBacktrack\n";
   std::cerr << "CPP bool=" << rbase.level2.Stot->IsBoundCycle << "\n";
   std::cerr << "CPP After bool print\n";
+#endif
   dataType data(Q);
   return PartitionBacktrack<Telt,Tint>( G, Pr, repr, rbase, data, L, R );
 }
@@ -1563,7 +1869,9 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
 template<typename Telt,typename Tint>
 StabChain<Telt> Stabilizer_OnSets(StabChain<Telt> const& G, Face const& Phi)
 {
+#ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Beginning of Stabilizer_OnSets\n";
+#endif
   bool repr=false;
   return RepOpSetsPermGroup<Telt,Tint>(G, repr, Phi, Phi).stab;
 }
@@ -1573,7 +1881,9 @@ StabChain<Telt> Stabilizer_OnSets(StabChain<Telt> const& G, Face const& Phi)
 template<typename Telt,typename Tint>
 std::pair<bool,Telt> RepresentativeAction_OnSets(StabChain<Telt> const& G, Face const& f1, Face const& f2)
 {
+#ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Beginning of RepresentativeAction_OnSets\n";
+#endif
   bool repr=true;
   ResultPBT<Telt> eRec = RepOpSetsPermGroup<Telt,Tint>(G, repr, f1, f2);
   if (eRec.nature == int_fail)
