@@ -99,6 +99,7 @@ TestSpecificGroupSet_Stabilizer:=function(nbMov, eGRP, eSet)
     if test=false then
         Error("Found some error. Please debug");
     fi;
+    RemoveFileIfExist(FileName);
     RemoveFileIfExist(FileErr);
     RemoveFileIfExist(FileRes);
 end;
@@ -175,6 +176,7 @@ TestSpecificGroupSet_Equivalence:=function(nbMov, eGRP, eSet, fSet)
             Error("Found some error in TestSpecificGroupSet_Equivalence, case 2\n");
         fi;
     fi;
+    RemoveFileIfExist(FileName);
     RemoveFileIfExist(FileErr);
     RemoveFileIfExist(FileRes);
 end;
