@@ -54,7 +54,11 @@ int main(int argc, char *argv[])
       f2[i] = eVal;
     }
     std::pair<bool,Telt> ePair = permutalib::RepresentativeAction_OnSets<Telt,Tint>(eG, f1, f2);
-    std::cerr << "CPP test=" << ePair.first << "\n";
+    if (ePair.first) {
+      std::cerr << "CPP test=" << ePair.second << "\n";
+    } else {
+      std::cerr << "CPP test=fail\n";
+    }
     std::cerr << "CPP Normal completion of the program\n";
   }
   catch (TerminalException const& e) {

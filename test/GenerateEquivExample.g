@@ -51,7 +51,7 @@ CreateExampleOnSetCase:=function(FileName, GRP, eSet, fSet)
   Print("GAP |eG|=", Order(GRP), "\n");
   Print("GAP Before RepresentativeAction_OnSets\n");
   eEquiv:=RepresentativeAction(GRP, eSet, fSet, OnSets);
-  Print("eEquiv=", eEquiv, "\n");
+  Print("GAP eEquiv=", eEquiv, "\n");
 end;
 
 
