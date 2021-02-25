@@ -585,7 +585,9 @@ std::vector<singStrat> StratMeetPartition(rbaseType<Telt> & rbase, Partition & P
     for (auto & pVal : splits) {
       // Last argument true means that the cell will split.
       int i = SplitCell_Partition(P, pVal, S, s, g, -1);
+#ifdef DEBUG_STBCBCKT
       std::cerr << "CPP g=" << g << " i=" << i << "\n";
+#endif
       if (!g.isIdentity()) {
 	std::vector<int> cell = Cell(P, NumberCells(P));
 	for (auto & eVal : cell) {

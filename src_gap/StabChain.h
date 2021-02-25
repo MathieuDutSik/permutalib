@@ -209,6 +209,7 @@ StabChain<Telt> StabChainGenerators(std::vector<Telt> const& generators, int con
 
 
 
+#ifdef DEBUG_STABCHAIN
 
 template<typename Telt>
 void PrintStabChainTransversals(StabChain<Telt> const& S)
@@ -231,18 +232,6 @@ void PrintStabChainTransversals(StabChain<Telt> const& S)
     iLevel++;
   }
 }
-
-template<typename Telt>
-void UnbindCycles(StabChain<Telt> const& S)
-{
-  StabChain<Telt> Swork = S;
-  while (Swork != nullptr) {
-    Swork->cycles.clear();
-    Swork->IsBoundCycle = false;
-    Swork = Swork->stabilizer;
-  }
-}
-
 
 
 template<typename Telt>
@@ -327,6 +316,20 @@ void PrintListStabCommPartition(std::string const& mesg, std::vector<StabChain<T
   std::cerr << mesg << " ListStabCommPartition=" << GetListStabCommPartition(ListS) << "\n";
 }
 
+#endif
+
+
+
+template<typename Telt>
+void UnbindCycles(StabChain<Telt> const& S)
+{
+  StabChain<Telt> Swork = S;
+  while (Swork != nullptr) {
+    Swork->cycles.clear();
+    Swork->IsBoundCycle = false;
+    Swork = Swork->stabilizer;
+  }
+}
 
 
 template<typename Telt>
@@ -1251,7 +1254,7 @@ void ChooseNextBasePoint(StabChain<Telt> & S, std::vector<int> const& base, std:
 
 
 template<typename Telt, typename Tint>
-oid StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, StabChainOptions<Tint> const& options)
+void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, StabChainOptions<Tint> const& options)
 {
 #ifdef DEBUG_STABCHAIN
   std::cerr << "CPP Begin StabChainStrong : newgens=" << GapStringTVector(newgens) << "\n";
@@ -1339,9 +1342,7 @@ bool StabChainForcePoint(StabChain<Telt> & Stot, int const& pnt)
 {
 #ifdef DEBUG_STABCHAIN
   std::cerr << "CPP Beginning of StabChainForcePoint pnt=" << (pnt+1) << "\n";
-#endif
   PrintStabChain(Stot);
-#ifdef DEBUG_STABCHAIN
   std::cerr << "DEBUG |Stot->transversal|=" << Stot->transversal.size() << "\n";
 #endif
   if (Stot->transversal.size() == 0 || Stot->transversal[pnt] == -1) {

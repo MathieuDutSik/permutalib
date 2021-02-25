@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
     //    permutalib::StabChain<Telt> eG = permutalib::MinimalStabChain<Telt,Tint>(LGen, n);
     permutalib::StabChain<Telt> eG = permutalib::StabChainOp_group_options<Telt,Tint>(LGen, n);
     //    std::cerr << "CPP After call to MinimalStabChain\n";
-    PrintStabChain(eG);
+    //    PrintStabChain(eG);
     //    std::cerr << "CPP eG=" << eG << "\n";
     //
     std::cerr << "CPP |eG|=" << permutalib::Order<Telt,Tint>(eG) << "\n";
