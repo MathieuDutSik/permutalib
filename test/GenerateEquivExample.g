@@ -62,5 +62,7 @@ end;
 
 
   eFile:="ExampleEquivGRP_Set";
-  CreateExampleOnSetCase(eFile, Group([(1,2,3,4,5),(3,4,5)]), [1, 5], [2, 5]);
+#  CreateExampleOnSetCase(eFile, Group([(1,2,3,4,5),(3,4,5)]), [1, 5], [2, 5]);
+#  CreateExampleOnSetCase(eFile, Group( [ ( 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20,21,22,23), ( 3,17,10, 7, 9)( 4,13,14,19, 5)( 8,18,11,12,23)(15,20,22,21,16) ] ), [ 5, 6, 7, 9, 11, 12, 14, 15, 18, 22, 23 ], [ 5, 6, 8, 11, 13, 14, 18, 19, 20, 21, 23 ]);
+  CreateExampleOnSetCase(eFile, Group( [ ( 1, 9, 6, 7, 5)( 2,10, 3, 8, 4), ( 1,10, 7, 8)( 2, 9, 4, 6) ] ), [ 1, 2, 5, 6, 9 ], [ 3, 6, 8, 9, 10 ]);
 Print("eFile=", eFile, "\n");

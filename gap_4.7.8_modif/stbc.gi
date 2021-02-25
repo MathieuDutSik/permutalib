@@ -55,21 +55,21 @@ GetListStabCommPartition:=function(ListS)
     ListStr:=[];
     for i in [1..len]
     do
+        if IsBound(ListS[i].labels) then
+            labels_i:=ListS[i].labels;
+        else
+            labels_i:="unset";
+        fi;
         if Status[i]=0 then
             LVal:=[];
             for j in [1..len]
             do
-                if IsBound(ListS[i].labels) then
-                    labels_i:=ListS[i].labels;
-                else
-                    labels_i:="unset";
-                fi;
                 if IsBound(ListS[j].labels) then
                     labels_j:=ListS[j].labels;
                 else
                     labels_j:="unset";
                 fi;
-                if IsIdenticalObj(labels_i, labels_j) then
+                if IsIdenticalObj(labels_i, labels_j) or i=j then
                     Add(LVal, j);
                     Status[j]:=1;
                 fi;

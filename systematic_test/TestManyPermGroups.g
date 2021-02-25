@@ -51,7 +51,7 @@ end;
 
 TestSpecificGroupSet_Stabilizer:=function(nbMov, eGRP, eSet)
     local eDir, FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, eStab1, eStab2, test;
-    Print("Treating one pair Group/Set\n");
+    Print("Treating one pair Group/Set eSet=", eSet, "\n");
     if Maximum(eSet) > nbMov then
         Error("The eSet is too large");
     fi;
@@ -111,7 +111,7 @@ end;
 
 TestSpecificGroupSet_Equivalence:=function(nbMov, eGRP, eSet, fSet)
     local eDir, FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, eTest1, eTest2;
-    Print("Treating one pair Group/Set\n");
+    Print("Treating one pair Group/Set eSet=", eSet, " fSet=", fSet, "\n");
     if Maximum(eSet) > nbMov then
         Error("The eSet is too large");
     fi;
@@ -185,6 +185,7 @@ end;
 
 TestSpecificGroup:=function(method, nbMov, eGRP)
     local iMov, sizSet, i, eSet, fSet, eElt;
+    Print("eGRP=", eGRP, "\n");
     for iMov in [1..5]
     do
         if nbMov<4 then
