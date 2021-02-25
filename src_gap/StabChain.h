@@ -281,7 +281,7 @@ void PrintStabChain(StabChain<Telt> const& S)
 {
   StabChain<Telt> Swork = S;
   int n = Swork->comm->n;
-  std::cerr << "CPP Partition=" << GetListStabCommPartition(ListStabChain(S)) << "\n";
+  std::cerr << "CPP Reference Partition=" << GetListStabCommPartition(ListStabChain(S)) << "\n";
   int iLevel = 0;
   while (Swork != nullptr) {
     std::cerr << "CPP iLev=" << iLevel << "\n";
@@ -587,6 +587,10 @@ void RemoveStabChain(StabChain<Telt> & Stot)
   Stot->treegen.clear();
   Stot->treegeninv.clear();
   Stot->aux.clear();
+  //
+  Telt id = Stot->comm->identity;
+  int n = Stot->comm->n;
+  Stot->comm = std::make_shared<CommonStabInfo<Telt>>(CommonStabInfo<Telt>({n, id, {id}}));
 }
 
 

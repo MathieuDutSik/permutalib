@@ -84,7 +84,7 @@ end;
 PrintStabChain:=function(eRec)
   local eStab, iLev;
   #
-  Print("GAP Partition=", GetListStabCommPartition(ListStabChain(eRec)), "\n");
+  Print("GAP Reference Partition=", GetListStabCommPartition(ListStabChain(eRec)), "\n");
   eStab:=eRec;
   iLev:=0;
   while(true)

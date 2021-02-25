@@ -1064,7 +1064,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
           std::cerr << "CPP Before ChangeStabChain R_list[d]\n";
 	  ChangeStabChain(R_list[d], {rbase.base[d]}, int_false);
           PrintStabChain(R_list[d]);
-          std::cerr << "CPP After ChangeStabChain R_list[d] d=" << d << " |R_list|=" << R_list.size() << "\n";
+          std::cerr << "CPP After ChangeStabChain R_list[d]\n";
           AssignationVectorGapStyle(R_list, d+1, R_list[ d ]->stabilizer);
           //	  R_list[ d + 1 ] = R_list[ d ]->stabilizer;
           std::cerr << "CPP L[d]=\n";
