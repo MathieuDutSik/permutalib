@@ -3,8 +3,8 @@
 
 #include "PermGroup.h"
 
-#define DEBUG_PARTITION
-#define CHECK_PARTITION
+#undef DEBUG_PARTITION
+#undef CHECK_PARTITION
 
 namespace permutalib {
 
@@ -246,35 +246,53 @@ int SplitCell_Kernel(Partition & P, int const& i, std::function<bool(int)> const
   else
     maxmov = P.lengths[i]-1;
   int B = l - maxmov;
+#ifdef DEBUG_PARTITION
   std::cerr << "CPP maxmov=" << maxmov << " B=" << (B+1) << "\n";
+#endif
   a--;
   while (a<b) {
+#ifdef DEBUG_PARTITION
     std::cerr << "CPP     1 a=" << (a+1) << " b=" << (b+1) << "\n";
+#endif
     while(true) {
+#ifdef DEBUG_PARTITION
       std::cerr << "CPP B LOOP\n";
+#endif
       b--;
       if (b < B) {
+#ifdef DEBUG_PARTITION
         std::cerr << "CPP exit 1\n";
+#endif
         return -1;
       }
       if (!test(b))
         break;
     }
+#ifdef DEBUG_PARTITION
     std::cerr << "CPP     2 a=" << (a+1) << " b=" << (b+1) << "\n";
+#endif
     while(true) {
+#ifdef DEBUG_PARTITION
       std::cerr << "CPP A LOOP\n";
+#endif
       a++;
       if (a>b || test(a))
         break;
     }
+#ifdef DEBUG_PARTITION
     std::cerr << "CPP     3 a=" << (a+1) << " b=" << (b+1) << "\n";
+#endif
     if (a<b) {
       std::swap(P.points[a], P.points[b]);
     }
   }
+#ifdef DEBUG_PARTITION
   std::cerr << "CPP a=" << (a+1) << " l=" << (l+1) << "\n";
+#endif
   if (a > l) {
+#ifdef DEBUG_PARTITION
     std::cerr << "CPP exit 2\n";
+#endif
     return -1;
   }
   int m=P.firsts.size();
@@ -291,20 +309,24 @@ int SplitCell_Kernel(Partition & P, int const& i, std::function<bool(int)> const
 #endif
 #ifdef CHECK_PARTITION
   CheckConsistencyPartition("Output SplitCell_Kernel", P);
-#endif
   std::cerr << "CPP exit 3\n";
+#endif
   return P.lengths[m];
 }
 
 template<typename Telt>
 int SplitCell_Partition(Partition & P, int const& i, Partition const& Q, int const& j, Telt const& g, int const& out)
 {
+#ifdef DEBUG_PARTITION
   std::cerr << "CPP SplitCell g=" << g << "\n";
   std::cerr << "CPP Q=\n";
   RawPrintPartition(Q);
+#endif
   std::function<bool(int)> test=[&](int const& ePt) -> bool {
     int fPt=PowAct(P.points[ePt], g);
+#ifdef DEBUG_PARTITION
     std::cerr << "CPP SplitCellTestfun1 fPt=" << (fPt+1) << "\n";
+#endif
     return PointInCellNo(Q, fPt, j);
   };
   return SplitCell_Kernel(P, i, test, out);
@@ -475,17 +497,23 @@ Partition TrivialPartition(std::vector<int> const& Omega)
 template<typename Telt>
 std::vector<std::vector<int>> OrbitsPermsB(std::vector<Telt> const& gens, int const&n, std::vector<int> const& Omega)
 {
+#ifdef DEBUG_PARTITION
   std::cerr << "DEBUG OrbitsPermB beginning\n";
+#endif
   int max=LargestMovedPoint(gens);
   Face dom(max+1);
   for (auto & eVal : Omega)
     if (eVal <= max)
       dom[eVal] = 1;
+#ifdef DEBUG_PARTITION
   std::cerr << "DEBUG dom built\n";
+#endif
   Face newF(max+1);
   for (int i=0; i<=max; i++)
     newF[i] = 1;
+#ifdef DEBUG_PARTITION
   std::cerr << "DEBUG newF built\n";
+#endif
   std::vector<std::vector<int>> orbs;
   boost::dynamic_bitset<>::size_type fst=dom.find_first();
   while (fst != boost::dynamic_bitset<>::npos) {
@@ -493,7 +521,9 @@ std::vector<std::vector<int>> OrbitsPermsB(std::vector<Telt> const& gens, int co
     std::vector<int> orb{fst_i};
     newF[fst_i] = 0;
     dom [fst_i] = 0;
+#ifdef DEBUG_PARTITION
     std::cerr << "DEBUG Before beginning of pnt loop\n";
+#endif
     size_t posOrb=0;
     while(true) {
       int pnt = orb[posOrb];
@@ -509,7 +539,9 @@ std::vector<std::vector<int>> OrbitsPermsB(std::vector<Telt> const& gens, int co
       if (posOrb >= orb.size())
         break;
     }
+#ifdef DEBUG_PARTITION
     std::cerr << "DEBUG After the pnt loop\n";
+#endif
     orbs.push_back(orb);
     fst=dom.find_first();
   }
@@ -524,8 +556,10 @@ std::vector<std::vector<int>> OrbitsPermsB(std::vector<Telt> const& gens, int co
 template<typename Telt>
 Partition OrbitsPartition(std::vector<Telt> const& gens, int const&n, std::vector<int> const& Omega)
 {
+#ifdef DEBUG_PARTITION
   std::cerr << "CPP OrbitsPartition, using OrbitsPerms\n";
   std::cerr << "CPP generators=" << GapStringTVector(gens) << "\n";
+#endif
   return GetPartition(OrbitsPermsB(gens, n, Omega));
 }
 
