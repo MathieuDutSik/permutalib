@@ -1874,8 +1874,16 @@ StabChain<Telt> Stabilizer_OnSets(StabChain<Telt> const& G, Face const& Phi)
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Beginning of Stabilizer_OnSets\n";
 #endif
+  size_t n = G->comm->n;
   bool repr=false;
-  return RepOpSetsPermGroup<Telt,Tint>(G, repr, Phi, Phi).stab;
+  if (2 * Phi.count() > n) {
+    Face PhiC(n);
+    for (size_t i=0; i<n; i++)
+      PhiC[i] = 1 - Phi[i];
+    return RepOpSetsPermGroup<Telt,Tint>(G, repr, PhiC, PhiC).stab;
+  } else {
+    return RepOpSetsPermGroup<Telt,Tint>(G, repr, Phi, Phi).stab;
+  }
 }
 
 
@@ -1886,11 +1894,27 @@ std::pair<bool,Telt> RepresentativeAction_OnSets(StabChain<Telt> const& G, Face 
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Beginning of RepresentativeAction_OnSets\n";
 #endif
-  bool repr=true;
-  ResultPBT<Telt> eRec = RepOpSetsPermGroup<Telt,Tint>(G, repr, f1, f2);
-  if (eRec.nature == int_fail)
+  if (f1.count() != f2.count())
     return {false, {}};
-  return {true, eRec.res};
+  auto Process_ResultPBT=[&](ResultPBT<Telt> const& eRec) -> std::pair<bool,Telt> {
+    if (eRec.nature == int_fail)
+      return {false, {}};
+    return {true, eRec.res};
+  };
+  size_t n = G->comm->n;
+  bool repr=true;
+  if (2 * f1.count() > n) {
+    Face f1C(n), f2C(n);
+    for (size_t i=0; i<n; i++) {
+      f1C[i] = 1 - f1[i];
+      f2C[i] = 1 - f2[i];
+    }
+    ResultPBT<Telt> eRec = RepOpSetsPermGroup<Telt,Tint>(G, repr, f1C, f2C);
+    return Process_ResultPBT(eRec);
+  } else {
+    ResultPBT<Telt> eRec = RepOpSetsPermGroup<Telt,Tint>(G, repr, f1, f2);
+    return Process_ResultPBT(eRec);
+  }
 }
 
 

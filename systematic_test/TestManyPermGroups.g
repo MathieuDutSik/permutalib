@@ -223,7 +223,7 @@ end;
 TestAllGroups:=function(method)
     local ListGroups, nbGroups, eGRP, nMov, iGRP;
     ListGroups:=GetListCandidateGroups();
-    ListGroups:=Filtered(ListGroups, x->IsSolvable(x)=false);
+#    ListGroups:=Filtered(ListGroups, x->IsSolvable(x)=false);
     nbGroups:=Length(ListGroups);
     Print("|ListGroups|=", nbGroups, "\n");
 
@@ -231,8 +231,10 @@ TestAllGroups:=function(method)
     do
         eGRP:=ListGroups[iGRP];
         nMov:=LargestMovedPoint(eGRP);
-        Print("    iGRP=", iGRP, " / ", nbGroups, " nMov=", nMov, "\n");
-        TestSpecificGroup(method, nMov, eGRP);
+        if Position([1,2], iGRP) = fail then
+            Print("    iGRP=", iGRP, " / ", nbGroups, " nMov=", nMov, "\n");
+            TestSpecificGroup(method, nMov, eGRP);
+        fi;
     od;
 end;
 
