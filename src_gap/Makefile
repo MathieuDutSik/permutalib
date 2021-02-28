@@ -13,7 +13,8 @@ OBJECTS		= $(PROGRAM:%=%.o)
 #CC		= g++ -I $(BOOST_INCDIR)    -std=c++11 -Wall -g -O2
 #CC		= g++ -std=c++14 -Wall -g -O2 -fsanitize=address -fsanitize=undefined -fstack-protector-all
 #CC		= g++ -std=c++14 -Wall -g -O2 -fsanitize=address -fsanitize=undefined -fsanitize=bool -fstack-protector-all
-CC		= g++ -std=c++17 -Wall -g -O2 -fsanitize=address -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fstack-protector-all
+#CC		= g++ -std=c++17 -Wall -g -O2 -fsanitize=address -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fstack-protector-all
+CC		= g++ -std=c++17 -Wall -g -O2
 
 NOLINKFLAG 	= -c
 OUTPUTFLAG 	= -o

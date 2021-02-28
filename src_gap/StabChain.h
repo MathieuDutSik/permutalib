@@ -1606,6 +1606,7 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
     std::cerr << "CPP Sptr at str=" << str << "\n";
     PrintStabChain(Sptr);
   };
+  KeyUpdating("Begin ChangeStabChain");
 #endif
   std::vector<int> newBase;
   size_t i=0;
@@ -1616,7 +1617,7 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
 #endif
   while (GetStabilizerDepth(Sptr) > 1 || i < basSiz) {
 #ifdef DEBUG_CHANGE_STAB_CHAIN
-    std::cerr << "CPP GetStabilizerDepth(S)=" << GetStabilizerDepth(Sptr) << " GetStabilizerDepth(G)=" << GetStabilizerDepth(Gptr) << "\n";
+    KeyUpdating("Before BasePoint");
 #endif
     int old=BasePoint(Sptr);
 #ifdef DEBUG_CHANGE_STAB_CHAIN
@@ -1695,8 +1696,11 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
 #ifdef DEBUG_CHANGE_STAB_CHAIN
       std::cerr << "CPP Stabilizer shift in ChangeStabChain\n";
 #endif
-
+      Sptr->comm = Sptr->stabilizer->comm;
       Sptr->genlabels = Sptr->stabilizer->genlabels;
+#ifdef DEBUG_CHANGE_STAB_CHAIN
+      KeyUpdating("MissCase 1");
+#endif
       if (Sptr->stabilizer->orbit.size() > 0) {
         Sptr->orbit = Sptr->stabilizer->orbit;
         Sptr->transversal = Sptr->stabilizer->transversal;
@@ -1704,11 +1708,17 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
         Sptr->orbit.clear();
         Sptr->transversal.clear();
       }
+#ifdef DEBUG_CHANGE_STAB_CHAIN
+      KeyUpdating("MissCase 2");
+#endif
       if (Sptr->stabilizer->stabilizer != nullptr) {
         Sptr->stabilizer = Sptr->stabilizer->stabilizer;
       } else {
         Sptr->stabilizer = nullptr;
       }
+#ifdef DEBUG_CHANGE_STAB_CHAIN
+      KeyUpdating("MissCase 3");
+#endif
     } else {
       newBase.push_back(old);
       Sptr = Sptr->stabilizer;

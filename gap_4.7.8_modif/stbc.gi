@@ -1403,12 +1403,13 @@ local   G,  base,  reduced,
       Print("GAP Sptr at str=", str, "\n");
       PrintStabChain(S);
     end;
+    KeyUpdating("Begin ChangeStabChain");
     newBase := [  ];
     i := 1;
     Print("GAP ChangeStabChain base = ", base, "\n");
     Print("GAP ChangeStabChain 1 orbit=", PrintTopOrbit(G), "\n");
     while IsBound( S.stabilizer )  or  i <= Length( base )  do
-        Print("GAP GetStabilizerDepth(S)=", GetStabilizerDepth(S), " GetStabilizerDepth(G)=", GetStabilizerDepth(G), "\n");
+        KeyUpdating("Before BasePoint");
         old := BasePoint( S );
         Print("GAP ChangeStabChain old=", old, " i=", i, " |base|=", Length(base), "\n");
         KeyUpdating("After BasePoint");
@@ -1471,6 +1472,7 @@ local   G,  base,  reduced,
             S.labels     := S.stabilizer.labels;
             S.genlabels  := S.stabilizer.genlabels;
             S.generators := S.stabilizer.generators;
+            KeyUpdating("MissCase 1");
             if IsBound( S.stabilizer.orbit )  then
                 S.orbit       := S.stabilizer.orbit;
                 S.translabels := S.stabilizer.translabels;
@@ -1480,11 +1482,13 @@ local   G,  base,  reduced,
                 Unbind( S.translabels );
                 Unbind( S.transversal );
             fi;
+            KeyUpdating("MissCase 2");
             if IsBound( S.stabilizer.stabilizer )  then
                 S.stabilizer := S.stabilizer.stabilizer;
             else
                 Unbind( S.stabilizer );
             fi;
+            KeyUpdating("MissCase 3");
 
         # Simply move down the stabilizer chain (to look for double points).
         else

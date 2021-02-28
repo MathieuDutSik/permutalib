@@ -185,7 +185,7 @@ end;
 
 TestSpecificGroup:=function(method, nbMov, eGRP)
     local iMov, sizSet, i, eSet, fSet, eElt;
-    Print("eGRP=", eGRP, "\n");
+    Print("ListGens(eGRP)=", GeneratorsOfGroup(eGRP), "\n");
     for iMov in [1..5]
     do
         if nbMov<4 then

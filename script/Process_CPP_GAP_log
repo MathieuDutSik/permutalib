@@ -181,9 +181,10 @@ iline1 = get_firstline(lines1, CritLine)
 iline2 = get_firstline(lines2, CritLine)
 print("iline1=", iline1, " iline2=", iline2)
 
+nbposs1 = len(lines1) - iline1
+nbposs2 = len(lines2) - iline2
 
-
-nbposs= min(len(lines1) - iline1, len(lines2) - iline2)
+nbposs= min(nbposs1, nbposs2)
 
 
 FoundDifferingLine = False
@@ -201,14 +202,14 @@ for iposs in range(nbposs):
         print("LOOP")
         ibegin=-nb_linebef
         iend=nb_lineaft
-        print("                     file1=", File1)
+        print("                     file1=", File1, " iline1=", iline1, " nbposs1=", nbposs1)
         for i in range(ibegin,iend):
             jposs = iposs + i
             if jposs >= 0 and jposs < nbposs:
                 jline1 = iline1 + jposs
                 f_line1=lines1[jline1]
                 print("jline1=", jline1, " : ", f_line1[:-1])
-        print("                     file2=", File2)
+        print("                     file2=", File2, " iline2=", iline2, " nbposs2=", nbposs2)
         for i in range(ibegin,iend):
             jposs = iposs + i
             if jposs >= 0 and jposs < nbposs:
