@@ -1896,6 +1896,8 @@ std::pair<bool,Telt> RepresentativeAction_OnSets(StabChain<Telt> const& G, Face 
 #endif
   if (f1.count() != f2.count())
     return {false, {}};
+  if (f1 == f2)
+    return {true, G->comm->identity};
   auto Process_ResultPBT=[&](ResultPBT<Telt> const& eRec) -> std::pair<bool,Telt> {
     if (eRec.nature == int_fail)
       return {false, {}};

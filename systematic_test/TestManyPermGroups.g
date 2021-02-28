@@ -239,5 +239,5 @@ TestAllGroups:=function(method)
 end;
 
 
-#TestAllGroups("stabilizer");
-TestAllGroups("equivalence");
+TestAllGroups("stabilizer");
+#TestAllGroups("equivalence");
