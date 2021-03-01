@@ -1,9 +1,8 @@
 #include "list.h"
 #include "Permutation.h"
 #include "StabChainMain.h"
-#include "NumberTheory.h"
+#include "gmpxx.h"
 #include "stbcbckt.h"
-//#include "partition.h"
 
 int main(int argc, char *argv[])
 {
@@ -57,8 +56,8 @@ int main(int argc, char *argv[])
     std::pair<bool,Telt> epair = permutalib::RepresentativeAction_OnSets<Telt,Tint>(eG, f1, f2);
     //
     std::ofstream os(argv[2]);
-    if (test.first) {
-      os << "return " << test.second << ";\n";
+    if (epair.first) {
+      os << "return " << epair.second << ";\n";
     } else {
       os << "return fail;\n";
     }

@@ -1,7 +1,7 @@
 #include "list.h"
 #include "Permutation.h"
 #include "StabChainMain.h"
-#include "NumberTheory.h"
+#include "gmpxx.h"
 #include "stbcbckt.h"
 
 int main(int argc, char *argv[])

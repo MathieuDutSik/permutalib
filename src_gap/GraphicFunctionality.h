@@ -1,7 +1,7 @@
 #ifndef GRAPHICAL_BASIC_INCLUDE
 #define GRAPHICAL_BASIC_INCLUDE
 
-#include "Temp_common.h"
+//#include "Temp_common.h"
 
 
 
