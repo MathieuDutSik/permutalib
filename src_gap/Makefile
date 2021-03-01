@@ -20,7 +20,7 @@ CC		= g++ -std=c++17 -Wall -g -O2
 NOLINKFLAG 	= -c
 OUTPUTFLAG 	= -o
 
-CLOCAL          = -I../src_number -I../src_basic -I../src_comb -I/usr/include
+CLOCAL          = -I/usr/include
 
 #CFLAGS 		= -I$(BOOST_INCDIR) -I$(GMP_INCDIR) 
 CFLAGS 		= -I$(BOOST_INCDIR)

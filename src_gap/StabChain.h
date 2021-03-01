@@ -80,7 +80,7 @@ void AssignationVectorGapStyle(std::vector<T> & eVect, int const& pos, T const& 
 #ifdef DEBUG
   if (pos != siz) {
     std::cerr << "Assignation leaves gap in the vector. Not allowed\n";
-    throw TerminalException{1};
+    throw PermutalibException{1};
   }
 #endif
   eVect.push_back(val);
@@ -284,7 +284,7 @@ void PrintStabChain(StabChain<Telt> const& S)
     if (Swork->transversal.size() > 0) {
       if (int(Swork->transversal.size()) != n) {
         std::cerr << "Swork->transversal should be of length 0 or n=" << n << "\n";
-        throw TerminalException{1};
+        throw PermutalibException{1};
       }
       std::vector<std::optional<Telt>> V(n);
       for (int i=0; i<n; i++) {
@@ -483,7 +483,7 @@ StabChain<Telt> StructuralCopy(StabChain<Telt> const& S)
     std::cerr << "We fail to have equality of entries\n";
     std::cerr << "str1=" << str1 << "\n";
     std::cerr << "str2=" << str2 << "\n";
-    throw TerminalException{1};
+    throw PermutalibException{1};
   }
 #endif
   return Sret;
@@ -1022,7 +1022,7 @@ StabChain<Telt> StabChainBaseStrongGenerators(std::vector<int> const& base, std:
 #ifdef DEBUG_PERMUTALIB
   if (sgs.size() == 0) {
     std::cerr << "sgs is empty. StabChainBaseStrongGenerators is broken in that case\n";
-    throw TerminalException{1};
+    throw PermutalibException{1};
   }
 #endif
   int n=sgs[0].size();
@@ -1726,7 +1726,7 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
 #ifdef DEBUG_PERMUTALIB
 	  else {
 	    std::cerr << "CPP <base> must be an extension of base of <G>\n";
-	    throw TerminalException{1};
+	    throw PermutalibException{1};
 	  }
 #endif
 	}

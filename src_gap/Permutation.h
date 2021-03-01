@@ -144,7 +144,7 @@ DoubleSidedPerm operator*(DoubleSidedPerm const& v1, DoubleSidedPerm const& v2)
 #ifdef DEBUG
   if (siz != v2.size() ) {
     std::cerr << "Error in the DoubleSidedPerm product\n";
-    throw TerminalException{1};
+    throw PermutalibException{1};
   }
 #endif
   std::vector<int> vVal(siz), vRev(siz);
@@ -166,7 +166,7 @@ DoubleSidedPerm Conjugation(DoubleSidedPerm const& v1, DoubleSidedPerm const& v2
 #ifdef DEBUG
   if (siz != v2.size() ) {
     std::cerr << "Error in the DoubleSidedPerm conjugation\n";
-    throw TerminalException{1};
+    throw PermutalibException{1};
   }
 #endif
   std::vector<int> v(siz);

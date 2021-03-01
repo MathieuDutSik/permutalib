@@ -119,7 +119,7 @@ GraphSparseImmutable(int const& _nbVert, std::vector<int> const& _ListStart, std
   {
     if (!HasVertexColor) {
       std::cerr << "Call to GetColor while HasVertexColor=false\n";
-      throw TerminalException{1};
+      throw PermutalibException{1};
     }
     return ListVertexColor[iVert];
   }

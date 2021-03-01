@@ -150,7 +150,7 @@ bool IsInsertableRefinement(Refinement const& eRfm)
   }
 #ifdef DEBUG
   std::cerr << "We should never reach that stage\n";
-  throw TerminalException{1};
+  throw PermutalibException{1};
 #endif
   return true;
 }

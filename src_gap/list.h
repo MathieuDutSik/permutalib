@@ -3,7 +3,7 @@
 
 
 #include <vector>
-#include <Boost_bitset.h>
+#include "Face_basic.h"
 
 namespace permutalib {
 

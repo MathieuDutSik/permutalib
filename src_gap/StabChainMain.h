@@ -87,7 +87,7 @@ StabChain<Telt> StabChainOp_stabchain_nofalse(StabChain<Telt> const& G, StabChai
 #ifdef DEBUG_STABCHAINMAIN
     std::cerr << "CPP The nofalse has not been matched\n";
 #endif
-    throw TerminalException{1};
+    throw PermutalibException{1};
   }
   return eRec.second;
 }

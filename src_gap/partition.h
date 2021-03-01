@@ -112,7 +112,7 @@ void CheckConsistencyPartition(std::string const& str, Partition const& P)
   }
   if (nbError > 0) {
     std::cerr << "Error at " << str << ". We found nbError=" << nbError << "\n";
-    throw TerminalException{1};
+    throw PermutalibException{1};
   }
 }
 

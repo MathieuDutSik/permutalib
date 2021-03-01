@@ -220,7 +220,7 @@ Telt PowerGroupElement(Telt const& u, int const& n)
 {
   if (n <= 0) {
     std::cerr << "We should have n >= 1\n";
-    throw TerminalException{1};
+    throw PermutalibException{1};
   }
   Telt pow = u;
   for (int i=1; i<n; i++)
