@@ -1,6 +1,9 @@
 #ifndef GRAPHICAL_BASIC_INCLUDE
 #define GRAPHICAL_BASIC_INCLUDE
 
+#include "COMB_Vectors.h"
+
+namespace permutalib {
 
 
 struct GraphSparseImmutable {
@@ -183,6 +186,6 @@ std::vector<std::vector<int>> ConnectedComponents_set(Tgr const& GR)
 
 
 
-
+}
 
 #endif

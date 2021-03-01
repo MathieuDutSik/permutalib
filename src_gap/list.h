@@ -4,6 +4,7 @@
 
 #include <vector>
 #include "Face_basic.h"
+#include "COMB_Vectors.h"
 
 namespace permutalib {
 
