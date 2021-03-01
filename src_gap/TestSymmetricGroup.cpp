@@ -2,6 +2,7 @@
 #include "Permutation.h"
 #include "StabChainMain.h"
 #include "gmpxx.h"
+#include <fstream>
 
 int main(int argc, char *argv[])
 {
@@ -11,7 +12,7 @@ int main(int argc, char *argv[])
     if (argc != 2) {
       std::cerr << "The program is used as\n";
       std::cerr << "TestSymmetricGroup [n]\n";
-      throw TerminalException{1};
+      throw PermutalibException{1};
     }
     int n;
     (void)sscanf(argv[1], "%d", &n);
@@ -37,7 +38,7 @@ int main(int argc, char *argv[])
     permutalib::StabChain<Telt> S = permutalib::MinimalStabChain<Telt,Tint>(LGen, n);
     std::cerr << "S=" << S << "\n";
   }
-  catch (TerminalException const& e) {
+  catch (PermutalibException const& e) {
     exit(e.eVal);
   }
   std::cerr << "Completion of the program\n";
