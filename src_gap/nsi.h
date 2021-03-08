@@ -57,92 +57,6 @@
 
 _IMAGES_NSI_HASH_LIMIT :=100;
 
-
-_IMAGES_TIME_CLASSES := [];
-
-_IMAGES_DeclareTimeClass := function(name)
-    BindGlobal(name, Length(_IMAGES_TIME_CLASSES)+1);
-    Add(_IMAGES_TIME_CLASSES,MakeImmutable(name));
-end;
-
-
-_IMAGES_DeclareTimeClass("pass2");
-_IMAGES_DeclareTimeClass("pass3");
-_IMAGES_DeclareTimeClass("shortcut");
-_IMAGES_DeclareTimeClass("changeStabChain");
-_IMAGES_DeclareTimeClass("orbit");
-_IMAGES_DeclareTimeClass("skippedorbit");
-_IMAGES_DeclareTimeClass("improve");
-_IMAGES_DeclareTimeClass("check1");
-_IMAGES_DeclareTimeClass("check2");
-_IMAGES_DeclareTimeClass("prune");
-_IMAGES_DeclareTimeClass("ShallowNode");
-_IMAGES_DeclareTimeClass("DeepNode");
-_IMAGES_DeclareTimeClass("FilterOrbCount");
-
-_IMAGES_TIME_CLASSES := MakeImmutable(_IMAGES_TIME_CLASSES);
-
-_IMAGES_nsi_stats := ListWithIdenticalEntries(Length(_IMAGES_TIME_CLASSES),0);
-
-_IMAGES_DO_TIMING := true;
-if IsBound( MakeThreadLocal ) then
-    MakeThreadLocal("_IMAGES_DO_TIMING");
-fi;
-
-if _IMAGES_DO_TIMING then
-    _IMAGES_StartTimer := function(cat)
-        _IMAGES_nsi_stats[cat] := _IMAGES_nsi_stats[cat] - Runtime();
-    end;
-
-    _IMAGES_StopTimer := function(cat)
-        _IMAGES_nsi_stats[cat] := _IMAGES_nsi_stats[cat] + Runtime();
-    end;
-
-    _IMAGES_IncCount := function(cat)
-        _IMAGES_nsi_stats[cat] := _IMAGES_nsi_stats[cat] + 1;
-    end;
-
-    _IMAGES_ResetStats := function()
-        _IMAGES_nsi_stats := ListWithIdenticalEntries(Length(_IMAGES_TIME_CLASSES),0);
-    end;
-
-    _IMAGES_ResetStats();
-    if IsBound( MakeThreadLocal ) then
-        MakeThreadLocal("_IMAGES_nsi_stats");
-    fi;
-
-    _IMAGES_GetStats := function()
-        local   r,  c;
-        r := rec();
-        for c in _IMAGES_TIME_CLASSES do
-            r.(c) := _IMAGES_nsi_stats[ValueGlobal(c)];
-        od;
-        return r;
-    end;
-
-else
-    _IMAGES_StartTimer := function(cat)
-        return;
-    end;
-
-    _IMAGES_StopTimer := function(cat)
-        return;
-    end;
-
-    _IMAGES_IncCount := function(cat)
-        return;
-    end;
-
-    _IMAGES_ResetStats := function()
-        return;
-    end;
-
-    _IMAGES_GetStats := function()
-        return fail;
-    end;
-
-fi;
-
 _IMAGES_Get_Hash := function(m)
     local jenkins_hash;
     if IsBoundGlobal("JENKINS_HASH") then
@@ -193,11 +107,6 @@ _countingDict := function(dictexample)
         dump := function() return data; end
         );
 end;
-
-
-if not IsBound(InfoNSI) then
-    DeclareInfoClass("InfoNSI");
-fi;
 
 _IMAGES_RATIO := function(selector)
     return function(orbmins, orbitCounts, orbsizes)
@@ -590,7 +499,6 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
 
                 orbitMset := [];
                 for y in cands do
-                    _IMAGES_IncCount(check1);
                     x := node.image[y];
                     num := make_orbit(x);
                     Add(orbitMset, orbmins[num]);
@@ -612,7 +520,6 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
 
                 orbitMset := [];
                 for y in cands do
-                    _IMAGES_IncCount(check1);
                     x := node.image[y];
                     num := make_orbit(x);
                     Add(orbitMset, orbmins[num]);
@@ -627,7 +534,6 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
                         minOrbitMset := orbitMset;
                         node2 := node.prev;
                         while node2 <> fail do
-                            _IMAGES_IncCount(FilterOrbCount);
                             delete_node(node2);
                             node2 := node2.prev;
                         od;
@@ -653,7 +559,6 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
                 # not be immediately deleted under rule C
                 #
                 for y in cands do
-                    _IMAGES_IncCount(check1);
                     x := node.image[y];
                     num := make_orbit(x);
 
@@ -684,7 +589,6 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
             #
             node.validkids := [];
             for y in cands do
-                _IMAGES_IncCount(check1);
                 x := node.image[y];
 
                 num := orbnums[x];
@@ -698,15 +602,11 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
                     # better than the current best then go on to the next candidate
                     #
                     if config.skipNewOrbit() then
-                        _IMAGES_IncCount(skippedorbit);
                         continue;
                     fi;
-                    _IMAGES_StartTimer(orbit);
                     num := make_orbit(x);
-                    _IMAGES_StopTimer(orbit);
                     rep := config.getQuality(num);
                     if rep < upb then
-                        _IMAGES_StartTimer(improve);
                         ### CAJ - Support bailing out early when a smaller
                         # set is found
                         if early_exit[1] and rep < early_exit[2][depth] then
@@ -719,23 +619,17 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
                             delete_node(node2);
                             node2 := node2.prev;
                         od;
-                        _IMAGES_IncCount(ShallowNode);
                         node.validkids := [y];
-                        _IMAGES_StopTimer(improve);
                     fi;
                 else
-                    _IMAGES_IncCount(check2);
                     rep := config.getQuality(num);
                     if rep = upb then
-                        _IMAGES_IncCount(ShallowNode);
                         Add(node.validkids,y);
                     fi;
                 fi;
             od;
             if node.validkids = [] then
-                _IMAGES_StartTimer(prune);
                 delete_node(node);
-                _IMAGES_StopTimer(prune);
             fi;
             node := next_node(node);
         od;
@@ -747,16 +641,13 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
         # Second pass. Actually make all the red nodes and turn them blue
         */
         lastupb := upb;
-        _IMAGES_StartTimer(changeStabChain);
         ChangeStabChain(s,[config.getBasePoint(upb)],false);
-        _IMAGES_StopTimer(changeStabChain);
         if Length(s.orbit) = 1 then
             #
             # In this case nothing much can happen. Each surviving node will have exactly one child
             # and none of the imsets will change
             # so we mutate the nodes in-place
             #
-            _IMAGES_StartTimer(shortcut);
             node := leftmost_node(depth);
             while node <> fail do
                 if not IsBound(node.selectedbaselength) then
@@ -767,14 +658,12 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
                 node := next_node(node);
             od;
             s := s.stabilizer;
-            _IMAGES_StopTimer(shortcut);
             if Size(skip_func(leftmost_node(depth+1).selected)) = m then
                 break;
             fi;
 
             continue; // to the next depth
         fi;
-        _IMAGES_StartTimer(pass2);
         node := leftmost_node(depth);
         prevnode := fail;
         nodect := 0;
@@ -782,7 +671,6 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
         while node <> fail do
             node.children := [];
             for x in node.validkids do
-                _IMAGES_IncCount(DeepNode);
                 newnode := rec( selected := Concatenation(node.selected,[x]),
                                 substab := Stabilizer(node.substab,x),
                                 parent := node,
@@ -814,12 +702,10 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
             od;
             node := next_node(node);
         od;
-        _IMAGES_StopTimer(pass2);
         /*
         # Third pass detect stabilizer elements
         */
 
-        _IMAGES_StartTimer(pass3);
         if  changed and config.tryImproveStabilizer then
             node := leftmost_node(depth+1);
             if nodect > _IMAGES_NSI_HASH_LIMIT then
@@ -847,7 +733,6 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
                         fi;
                         node := next_node(node);
                     od;
-                    _IMAGES_StopTimer(pass3);
                     return [OnTuples(bestnode.image,savedArgs.perminv),l^savedArgs.perminv];
                 fi;
             else
@@ -864,14 +749,12 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
                 od;
                 s := s.stabilizer;
                 if Length(s.generators) = 0 then
-                    _IMAGES_StopTimer(pass3);
                     return [OnTuples(imsetnodes[1].image,savedArgs.perminv),l^savedArgs.perminv];
                 fi;
             fi;
         else
             s := s.stabilizer;
         fi;
-        _IMAGES_StopTimer(pass3);
         if Size(skip_func(leftmost_node(depth+1).selected)) = m then
             break;
         fi;
