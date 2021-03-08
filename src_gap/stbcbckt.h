@@ -225,6 +225,7 @@ struct rbaseType {
   std::vector<int> base;
   std::vector<int> where;
   //
+  StabChain<Telt> chain;
   std::vector<std::vector<int>> fix;
   //
   std::vector<std::vector<Refinement>> rfm;
@@ -386,7 +387,7 @@ bool ProcessFixpoint_image(imageType<Telt> & image, int const& pnt, int & img, i
 {
   if (image.perm.status != int_true) {
 #ifdef DEBUG_STBCBCKT
-    std::cerr << "CPP PFI  sgs(level)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(image.level.Stot))) << "\n";
+    std::cerr << "CPP PFI sgs(level)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(image.level.Stot))) << "\n";
     std::cerr << "CPP Case image.perm.status = true\n";
     std::cerr << "CPP Before ExtendedT img=" << (img+1) << "\n";
 #endif
@@ -499,7 +500,8 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
   } else {
     rbase.level2.status = int_false;
   }
-  rbase.level = {int_stablev, -666, G[0]};
+  rbase.chain = CopyStabChain(G[0]);
+  rbase.level = {int_stablev, -666, rbase.chain};
   for (auto & pnt : Fixcells(P)) {
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP Fixcells call ProcessFixpoint_rbase\n";
@@ -1703,7 +1705,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   // If  <Pr> is  function,   multiply  permutations. Otherwise, keep   them
   // factorized.
   image.perm = {int_perm, id};
-  //  image.level = rbase.chain;
+  image.level = {int_stablev, -666, rbase.chain};
 
   if (repr) {
     // In the representative case, map the  fixpoints of the partitions at
@@ -1715,7 +1717,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
       std::vector<int> fixP = Fixcells(image.partition);
       for (int i=0; i<int(fix.size()); i++) {
 #ifdef DEBUG_STBCBCKT
-        std::cerr << "CPP ProcessFixpoint_image, Case PartitionBacktrack 2\n";
+        std::cerr << "CPP ProcessFixpoint_image, Case PartitionBacktrack 2 i=" << (i+1) << " fix=" << (fix[i]+1) << " fixP=" << (fixP[i]+1) << "\n";
 #endif
 	ProcessFixpoint_image(image, fix[i], fixP[i], -1);
       }
@@ -1903,7 +1905,8 @@ std::pair<bool,Telt> RepresentativeAction_OnSets(StabChain<Telt> const& G, Face 
   };
   size_t n = G->comm->n;
   bool repr=true;
-  if (2 * f1.count() > n) {
+  // Put the false for debugging.
+  if (2 * f1.count() > n && false) {
     Face f1C(n), f2C(n);
     for (size_t i=0; i<n; i++) {
       f1C[i] = 1 - f1[i];

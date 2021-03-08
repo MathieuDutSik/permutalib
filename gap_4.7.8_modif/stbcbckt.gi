@@ -1932,7 +1932,7 @@ InstallGlobalFunction( PartitionBacktrack,
             fix  := Fixcells( rbase.partition );
             fixP := Fixcells( image.partition );
             for i  in [ 1 .. Length( fix ) ]  do
-                Print("GAP ProcessFixpoint_image, Case PartitionBacktrack 2\n");
+                Print("GAP ProcessFixpoint_image, Case PartitionBacktrack 2 i=", i, " fix=", fix[i], " fixP=", fixP[i], "\n");
                 ProcessFixpoint( image, fix[ i ], fixP[ i ] );
             od;
         fi;
