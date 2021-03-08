@@ -299,6 +299,7 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
       std::shared_ptr<Node> next;
       std::shared_ptr<Node> prev;
       std::shared_ptr<Node> parent;
+      int selectedbaselength;
       // children
       int childno;
       bool IsBoundChildren;
@@ -347,7 +348,7 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
         }
       }
       if (node->IsBoundChildren) {
-        for (auto & enode : node->children) 
+        for (auto & enode : node->children)
           delete_node(enode);
       }
     };
@@ -358,113 +359,137 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
 
     // Filter nodes by stabilizer group,
     // Updates the stabilizer group of the node,
-    clean_subtree := function(node)
-        local   bad,  seen,  c,  x,  q,  gens,  olen,  pt,  gen,  im;
-        if not IsBound(node.children) then
-            return;
-        fi;
-        bad := [];
+    std::function<void(NodePtr)> clean_subtree =[&](NodePtr & node) -> void {
+      if (!node-IsBoundChildren)
+        return;
+      std::vectror<NodePtr> bad;
 
-        seen := BlistList([1..m],[]);
-        for c in node.children do
-            if IsBound(c.selectedbaselength) then
-                x := c.selected[c.selectedbaselength];
-            else
-                x := c.selected[Length(c.selected)];
-            fi;
-            if seen[x] then
-                Add(bad,c);
-            else
-                q := [x];
-                gens := GeneratorsOfGroup(node.substab);
-                olen := 1;
-                seen[x] := true;
-                for pt in q do
-                    for gen in gens do
-                        im := pt^gen;
-                        if not seen[im] then
-                            seen[im] := true;
-                            Add(q,im);
-                            olen := olen+1;
-                        fi;
-                    od;
-                od;
-                if olen < Size(node.substab)/Size(c.substab) then
-                    c.substab := Stabilizer(node.substab,x);
-                    clean_subtree(c);
-                fi;
-            fi;
-        od;
-        delete_nodes(bad);
-    end;
+      std::vector<int> range= ClosedInterval(0,m);
+      Face seen = BlistList(range,{});
+      int x;
+      for (auto & c : node.children) {
+        if (c->selectedbaselength != -1) {
+          x = c.selected[c.selectedbaselength];
+        } else {
+          x = c.selected[c->selected.size() - 1];
+        }
+        if (seen[x] == 1) {
+          bad.push_back(c);
+        } else {
+          std::vector<int> q = {x};
+          std::vector<Telt> gens = GeneratorsOfGroup(node->substab);
+          size_t olen = 1;
+          size_t pos = 0;
+          seen[x] = 1;
+          while (true) {
+            size_t idx;
+            for (idx=pos; idx<olen; idx++) {
+              int p = q[idx];
+              for (auto & gen : gens) {
+                int im = PowAct(pt,gen);
+                if (seen[im] == 0) {
+                  seen[im] = 1;
+                  q.push_back(im);
+                  olen++;
+                }
+              }
+            }
+            if (idx == olen)
+              break;
+            pos = idx;
+          }
+          mpz_class quot = Size<mpz_class>(node->substab) / Size<mpz_class>(c->substab);
+          if (mpz_class(olen) < quot) {
+            c->substab = Stabilize(node->substab,x);
+            clean_subtree(c);
+          }
+        }
+      }
+      delete_nodes(bad);
+    };
 
     //Add a new stabilizer element, mapping node1 to node2, and then call
     // clean_subtree to remove any new subtrees.
-    handle_new_stabilizer_element := function(node1,node2)
-        local   perm1,  i;
-        # so node1 and node2 represnet group elements that map set to the same
-        # place in two different ways
-        perm1 := PermListList(node1.image, node2.image);
-        Assert(1, not perm1 in l);
-        l := ClosureGroup(l,perm1);
-        root.substab := l;
-        clean_subtree(root);
-    end;
+    auto handle_new_stabilizer_element=[&](NodePtr & node1, NodePtr & node2) -> void {
+      // so node1 and node2 represnet group elements that map set to the same
+      // place in two different ways
+      Telt perm1 = PermListList(node1.image, node2.image);
+      l = ClosureGroup(l,perm1);
+      root->substab = l;
+      clean_subtree(root);
+    };
 
     // Given a group 'gp' and a set 'set', find orbit representatives
     // of 'set' in 'gp' simply.
-    simpleOrbitReps := function(gp,set)
-        local   m,  n,  b,  seed,  reps,  gens,  q,  pt,  gen,  im;
-        m := Length(set);
-        n := set[m];
-        b := BlistList([1..n],set);
-        seed := set[1];
-        reps := [];
-        gens := GeneratorsOfGroup(gp);
-        while seed <> fail and seed <= n do
-            b[seed] := false;
-            q := [seed];
-            Add(reps,seed);
-            for pt in q do
-                for gen in gens do
-                    im := pt^gen;
-                    if b[im] then
-                        b[im] := false;
-                        Add(q,im);
-                    fi;
-                od;
-            od;
-            seed := Position(b,true,seed);
-        od;
-        return reps;
-    end;
+    auto simpleOrbitReps=[&](StabChain<Telt> const& gp, std::vector<int> const& set) -> std::vector<int> {
+      int m = set.size();
+      int n = set[m-1];
+      Face b = BlistList(ClosedInterval(0,n+1), set); // Check the n+1 here
+      int seed = set[0];
+      std::vector<int> reps;
+      std::vector<Telt> gens = GeneratorsOfGroup(gp);
+      while (seed != -1 && seed <= n) {
+        b[seed]=0;
+        std::vector<int> q = {seed};
+        reps.push_back(seed);
+        size_t pos=0;
+        while(true) {
+          size_t idx, qsiz=q.size();
+          for (idx=pos; idx<qsiz; idx++) {
+            int pt = q[idx];
+            for (auto & gen : gens) {
+              int im = PowAct(pt, gen);
+              if (b[im] == 1) {
+                b[im] = 0;
+                q.push_back(im);
+              }
+            }
+          }
+          if (idx == q.size())
+            break;
+          pos = idx;
+        }
+        seed = PositionVect(b,true,seed);
+      }
+      return reps;
+    };
 
     // Make orbit of x, updating orbnums, orbmins and orbsizes as approriate.
-    make_orbit := function(x)
-        local   q,  rep,  num,  pt,  gen,  img;
-        if orbnums[x] <> -1 then
-            return orbnums[x];
-        fi;
-        q := [x];
-        rep := x;
-        num := Length(orbmins)+1;
-        orbnums[x] := num;
-        for pt in q do
-            for gen in gens do
-                img := pt^gen;
-                if orbnums[img] = -1 then
-                    orbnums[img] := num;
-                    Add(q,img);
-                    if img < rep then
-                        rep := img;
-                    fi;
-                fi;
-            od;
-        od;
-        Add(orbmins,rep);
-        Add(orbsizes,Length(q));
-        return num;
-    end;
+    auto make_orbit=[&](int const& x) -> int {
+      if (orbnums[x] != -1) {
+        return orbnums[x];
+      }
+      std::vector<int> q = {x};
+      int rep = x;
+      int num = orbmins.size() + 1;
+      orbnums[x] = num;
+      size_t pos=0;
+      while (true) {
+        size_t idx, qsiz = q.size();
+        for (idx=pos; idx<qsiz; idx++) {
+          int pt = q[idx];
+          for (auto& gen : gens) {
+            int img = PowAct(pt, gen);
+            if (orbnums[img] == -1) {
+              orbnums[img] = num;
+              q.push_back(img);
+              if (img < rep) {
+                rep = img;
+              }
+            }
+          }
+        }
+        if (idx == q.size())
+          break;
+        pos = idx;
+      }
+      orbmins.push_back(rep);
+      orbsizes.push_back(q.size());
+      return num;
+    };
+
+    if (set.size() == 0) {
+    }
 
     if set = [] then
       return [ [], k^(savedArgs.perminv)];
@@ -704,7 +729,6 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
                     newnode.image := image;
                     newnode.imset := node.imset;
                 fi;
-#                Print("Made a node ",newnode.selected, " ",newnode.image,"\n");
             od;
             node := next_node(node);
         od;
