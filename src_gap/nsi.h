@@ -162,6 +162,13 @@ _IMAGES_COMMON_ORBIT := _IMAGES_RATIO(
     end
 );
 
+template<typename T>
+void Remove(std::vector<T> & eV, int const& pos)
+{
+  std::erase(eV.begin() + pos);
+}
+
+
 
 _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCheck_in, config_option)
     local   leftmost_node,  next_node,  delete_node,  delete_nodes,
@@ -293,7 +300,8 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
       std::shared_ptr<Node> prev;
       std::shared_ptr<Node> parent;
       // children
-      bool IsBoundChildreM
+      int childno;
+      bool IsBoundChildren;
       std::vector<std::shared_ptr<Node>> children;
     };
     using NodePtr = std::shared_ptr<Node>;
@@ -308,50 +316,48 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
         return n;
     };
     auto next_node =[&](NodePtr const& node) -> NodePtr {
-        NodePtr n = node;
-        while (true) {
-            n = n->next;
-            if (n == nullptr || !n.deleted)
-              break;
-        }
-        return n;
+      NodePtr n = node;
+      while (true) {
+        n = n->next;
+        if (n == nullptr || !n.deleted)
+          break;
+      }
+      return n;
     };
     //Delete a node, and recursively deleting all it's children.
-    delete_node := function(node)
-        local   i;
-        if node.deleted then
-            return;
-        fi;
-        if node.prev <> fail then
-            node.prev.next := node.next;
-        fi;
-        if node.next <> fail then
-            node.next.prev := node.prev;
-        fi;
-        node.deleted := true;
-        if node.parent <> fail then
-            Remove(node.parent.children, node.childno);
-            if Length(node.parent.children) = 0 then
-                delete_node(node.parent);
-            else
-                for i in [node.childno..Length(node.parent.children)] do
-                    node.parent.children[i].childno := i;
-                od;
-            fi;
-        fi;
-        if IsBound(node.children) then
-            delete_nodes(ShallowCopy(node.children));
-        fi;
-    end;
-    delete_nodes := function(nodes)
-        local   node;
-        for node in nodes do
-            delete_node(node);
-        od;
-    end;
+    std::function<void(NodePtr)> delete_node=[&](NodePtr & node) -> void {
+      if (node->deleted) {
+        return;
+      }
+      if (node->prev != nullptr) {
+        node->prev->next = node->next;
+      }
+      if (node->next != nullptr) {
+        node->next->prev = node->prev;
+      }
+      node->deleted = true;
+      if (node->parent != nullptr) {
+        Remove(node.parent.children, node.childno);
+        if (node->parent->children.size() == 0) {
+          delete_node(node->parent);
+        } else {
+          for (int i=node->childno; i<node->parent->children.size(); i++) {
+            node->parent->children[i]->childno = i;
+          }
+        }
+      }
+      if (node->IsBoundChildren) {
+        for (auto & enode : node->children) 
+          delete_node(enode);
+      }
+    };
+    auto delete_nodes=[&](std::vector<NodePtr> & nodes) {
+       for (auto & e_node : nodes)
+         delete_node(e_node);
+    };
 
-    # Filter nodes by stabilizer group,
-    # Updates the stabilizer group of the node,
+    // Filter nodes by stabilizer group,
+    // Updates the stabilizer group of the node,
     clean_subtree := function(node)
         local   bad,  seen,  c,  x,  q,  gens,  olen,  pt,  gen,  im;
         if not IsBound(node.children) then
@@ -554,10 +560,10 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
                 if Length(cands) > 1 and not IsTrivial(node.substab) then
                     cands := simpleOrbitReps(node.substab,cands);
                 fi;
-                #
+                /*
                 # These index the children of node that will
                 # not be immediately deleted under rule C
-                #
+                */
                 for y in cands do
                     x := node.image[y];
                     num := make_orbit(x);
@@ -583,10 +589,10 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
             if Length(cands) > 1 and not IsTrivial(node.substab) then
                 cands := simpleOrbitReps(node.substab,cands);
             fi;
-            #
+            /*
             # These index the children of node that will
             # not be immediately deleted under rule C
-            #
+            */
             node.validkids := [];
             for y in cands do
                 x := node.image[y];
@@ -633,7 +639,7 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
             fi;
             node := next_node(node);
         od;
-        ### CAJ - Support bailing out early when a larger set is found
+        // CAJ - Support bailing out early when a larger set is found
         if early_exit[1] and upb > early_exit[2][depth] then
             return [MinImage.Larger, l^(savedArgs.perminv)];
         fi;
