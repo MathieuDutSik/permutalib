@@ -36,9 +36,11 @@
 #include "GapPrint.h"
 #include "PermGroup.h"
 
-#undef DEBUG_STABCHAIN
+// Needed for the comparison with 
+#define DEBUG_STABCHAIN
+#define DEBUG_CHANGE_STAB_CHAIN
 
-#undef DEBUG_CHANGE_STAB_CHAIN
+// Other debugging.(but not currently in the gap stuff)
 #undef DEBUG_ADD_GEN_SCH
 #undef DEBUG_INV_REP
 

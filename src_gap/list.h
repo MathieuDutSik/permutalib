@@ -61,7 +61,7 @@ boost::dynamic_bitset<>::size_type PositionNthTrueBlist(Face const& blist, int c
 
 
 
-  std::vector<int> ListBlist(std::vector<int> const& list, std::vector<int8_t> const& blist)
+std::vector<int> ListBlist(std::vector<int> const& list, std::vector<int8_t> const& blist)
 {
   std::vector<int> ret;
   int len=list.size();
@@ -114,13 +114,11 @@ void IntersectBlist(Face & a, Face const& b)
 
 void SubtractBlist(Face & a, Face const& b)
 {
-  //  std::cerr << "CPP Beginning of SubtractBlist\n";
   int siz=a.size();
   for (int i=0; i<siz; i++) {
     if (b[i] == 1)
       a[i]=0;
   }
-  //  std::cerr << "CPP End of SubtractBlist\n";x
 }
 
 

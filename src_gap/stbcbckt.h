@@ -18,7 +18,7 @@
 ##
 */
 
-#undef DEBUG_STBCBCKT
+#define DEBUG_STBCBCKT
 
 namespace permutalib {
 

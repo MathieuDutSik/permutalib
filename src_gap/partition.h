@@ -3,8 +3,8 @@
 
 #include "PermGroup.h"
 
-#undef DEBUG_PARTITION
-#undef CHECK_PARTITION
+#define DEBUG_PARTITION
+#define CHECK_PARTITION
 
 namespace permutalib {
 
