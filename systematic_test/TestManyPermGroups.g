@@ -183,15 +183,19 @@ end;
 
 
 
-TestSpecificGroup:=function(method, nbMov, eGRP)
+TestSpecificGroup:=function(method, size_opt, nbMov, eGRP)
     local iMov, sizSet, i, eSet, fSet, eElt;
     Print("ListGens(eGRP)=", GeneratorsOfGroup(eGRP), "\n");
     for iMov in [1..5]
     do
-        if nbMov<4 then
-            sizSet:=2;
+        if size_opt=1 then
+            sizSet:=1;
         else
-            sizSet:=Random([2..nbMov-2]);
+            if nbMov<4 then
+                sizSet:=2;
+            else
+                sizSet:=Random([2..nbMov-2]);
+            fi;
         fi;
         if method="stabilizer" then
             for i in [1..5]
@@ -220,7 +224,7 @@ end;
 
 
 
-TestAllGroups:=function(method)
+TestAllGroups:=function(method, size_opt)
     local ListGroups, nbGroups, eGRP, nMov, iGRP;
     ListGroups:=GetListCandidateGroups();
 #    ListGroups:=Filtered(ListGroups, x->IsSolvable(x)=false);
@@ -231,13 +235,13 @@ TestAllGroups:=function(method)
     do
         eGRP:=ListGroups[iGRP];
         nMov:=LargestMovedPoint(eGRP);
-        if Position([1,2], iGRP) = fail then
+#        if Position([1,2], iGRP) = fail then
             Print("    iGRP=", iGRP, " / ", nbGroups, " nMov=", nMov, "\n");
-            TestSpecificGroup(method, nMov, eGRP);
-        fi;
+            TestSpecificGroup(method, size_opt, nMov, eGRP);
+#        fi;
     od;
 end;
 
 
-TestAllGroups("stabilizer");
-#TestAllGroups("equivalence");
+#TestAllGroups("stabilizer", 1);
+TestAllGroups("equivalence", 1);

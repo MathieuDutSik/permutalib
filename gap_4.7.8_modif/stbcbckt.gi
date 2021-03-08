@@ -949,7 +949,7 @@ InstallGlobalFunction( EmptyRBase, function( G, Omega, P )
 #        rbase.fix   := [  ];
 #        rbase.level := NrMovedPoints( G );
 #    else
-        rbase.chain := CopyStabChain( StabChainMutable( G ) );
+       rbase.chain := CopyStabChain( StabChainMutable( G ) );
         rbase.level := rbase.chain;
 #    fi;
 
