@@ -67,47 +67,6 @@ _IMAGES_Get_Hash := function(m)
     fi;
 end;
 
-/*
-  GAP dictionaries don't (currently) provide a way of getting the values
-  stored in them, so here we cache them seperately
-*/
-_countingDict := function(dictexample)
-    local data;
-    data := rec(
-        d := NewDictionary(dictexample, true),
-        l := []
-    );
-
-    return rec(
-        add := function(list)
-            local val;
-            val := LookupDictionary(data.d, list);
-            if val = fail then
-                val := 0;
-                Add(data.l, list);
-            fi;
-            val := val + 1;
-            AddDictionary(data.d, list, val);
-        end,
-
-        findElement := function(comp)
-            local smallval, smalllist, val, i;
-            smalllist := data.l[1];
-            smallval := LookupDictionary(data.d, smalllist);
-            for i in data.l do
-                val := LookupDictionary(data.d, i);
-                if comp(val, smallval) or (val = smallval and i < smalllist) then
-                    smallval := val;
-                    smalllist := i;
-                fi;
-            od;
-            return smalllist;
-        end,
-
-        dump := function() return data; end
-        );
-end;
-
 _IMAGES_RATIO := function(selector)
     return function(orbmins, orbitCounts, orbsizes)
         local index, result, i, ret;
@@ -124,44 +83,6 @@ _IMAGES_RATIO := function(selector)
     end;
 end;
 
-_IMAGES_RARE_RATIO_ORBIT := _IMAGES_RATIO(
-    function(i, orbmins, orbitCounts, orbsizes)
-        return (Log2(Float(orbitCounts[i])))/orbsizes[i];
-    end
-);
-
-_IMAGES_COMMON_RATIO_ORBIT := _IMAGES_RATIO(
-    function(i, orbmins, orbitCounts, orbsizes)
-        return -(Log2(Float(orbitCounts[i])))/orbsizes[i];
-    end
-);
-
-_IMAGES_RARE_RATIO_ORBIT_FIX := _IMAGES_RATIO(
-    function(i, orbmins, orbitCounts, orbsizes)
-        if(orbsizes[i]) = 1 then return Float(-(2^32)+orbitCounts[i]); fi;
-        return (Log2(Float(orbitCounts[i])))/orbsizes[i];
-    end
-);
-
-_IMAGES_COMMON_RATIO_ORBIT_FIX := _IMAGES_RATIO(
-    function(i, orbmins, orbitCounts, orbsizes)
-        if(orbsizes[i]) = 1 then return Float(-(2^32)-orbitCounts[i]); fi;
-        return -(Log2(Float(orbitCounts[i])))/orbsizes[i];
-    end
-);
-
-_IMAGES_RARE_ORBIT := _IMAGES_RATIO(
-    function(i, orbmins, orbitCounts, orbsizes)
-        return orbitCounts[i];
-    end
-);
-
-_IMAGES_COMMON_ORBIT := _IMAGES_RATIO(
-    function(i, orbmins, orbitCounts, orbsizes)
-        return -orbitCounts[i];
-    end
-);
-
 template<typename T>
 void Remove(std::vector<T> & eV, int const& pos)
 {
@@ -170,7 +91,20 @@ void Remove(std::vector<T> & eV, int const& pos)
 
 
 
-_NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCheck_in, config_option)
+_IMAGES_RARE_RATIO_ORBIT_FIX := _IMAGES_RATIO(
+    function(i, orbmins, orbitCounts, orbsizes)
+        if(orbsizes[i]) = 1 then return Float(-(2^32)+orbitCounts[i]); fi;
+        return (Log2(Float(orbitCounts[i])))/orbsizes[i];
+    end
+);
+
+
+
+/*
+  Modification done:
+  --- skip_fnuc eliminated as it is the identity in the case that interest us.
+ */
+_NewSmallestImage := function(g, set, k, early_exit, config_option)
     local   leftmost_node,  next_node,  delete_node,  delete_nodes,
             clean_subtree,  handle_new_stabilizer_element,
             simpleOrbitReps,  make_orbit,  n,  s,  l,  m,  hash,
@@ -190,106 +124,20 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
         config_option := ValueGlobal(config_option);
     fi;
 
-    if config_option.branch = "static" then
-            savedArgs := rec( config_option := config_option, g := g, k := k, set := set );
-        if config_option.order = "MinOrbit" then
-            savedArgs.perm := MinOrbitPerm(g);
-        elif config_option.order = "MaxOrbit" then
-            savedArgs.perm := MaxOrbitPerm(g);
-        else
-            ErrorNoReturn("Invalid 'order' when branch = 'static' in CanonicalImage");
-        fi;
-        savedArgs.perminv := savedArgs.perm^-1;
-        g := g^savedArgs.perm;
-        k := k^savedArgs.perm;
-        set := OnTuples(set, savedArgs.perm);
-        config_option := rec(branch := "minimum");
-    else
-        savedArgs := rec(perminv := ());
-    fi;
+    savedArgs := rec(perminv := ());
 
-    if config_option.branch = "minimum" then
-        config := rec(
-                   skipNewOrbit := function() return (upb <= lastupb + 1); end,
-                   getQuality := pt -> orbmins[pt],
-                   getBasePoint := IdFunc,
-                   initial_lastupb := 0,
-                   initial_upb := infinity,
-                   countRareOrbits := false,
-                   tryImproveStabilizer := true,
-                   preFilterByOrbMset := false,
-               );
-    elif config_option.branch = "dynamic" then
+    if config_option.branch = "dynamic" then
         config := rec(skipNewOrbit := ReturnFalse,
-                      preFilterByOrbMset := false);
-        if config_option.order in ["MinOrbit", "MaxOrbit", "SingleMaxOrbit"] then
-            config.getBasePoint := pt->pt[2];
-            config.initial_lastupb := [-infinity, -infinity];
-            config.initial_upb := [infinity, infinity];
-            config.countRareOrbits := false;
-            config.tryImproveStabilizer := true;
-
-            if config_option.order = "MinOrbit" then
-                config.getQuality := pt -> [orbsizes[pt], orbmins[pt]];
-            elif config_option.order = "MaxOrbit" then
-                config.getQuality := pt -> [-orbsizes[pt], orbmins[pt]];
-            elif config_option.order = "SingleMaxOrbit" then
-                config.getQuality := function(pt)
-                                    if orbsizes[pt] = 1 then
-                                        return [-(2^64), orbmins[pt]];
-                                    else
-                                        return [-orbsizes[pt], orbmins[pt]];
-                                    fi;
-                                 end;
-            else
-                ErrorNoReturn("?");
-            fi;
-        elif config_option.order in ["RareOrbit", "CommonOrbit", "RareRatioOrbit", "CommonRatioOrbit",
-                                     "RareRatioOrbitFix", "CommonRatioOrbitFix"] then
-            config.getBasePoint := IdFunc;
-            config.initial_lastupb := 0;
-            config.initial_upb := infinity;
-            config.countRareOrbits := true;
-            config.tryImproveStabilizer := false;
-            config.getQuality := pt -> orbmins[pt];
-            if config_option.order = "RareOrbit" then
-                config.calculateBestOrbit := _IMAGES_RARE_ORBIT;
-            elif config_option.order = "CommonOrbit" then
-                config.calculateBestOrbit := _IMAGES_COMMON_ORBIT;
-            elif config_option.order = "RareRatioOrbit" then
-                config.calculateBestOrbit := _IMAGES_RARE_RATIO_ORBIT;
-            elif config_option.order = "RareRatioOrbitFix" then
-                config.calculateBestOrbit := _IMAGES_RARE_RATIO_ORBIT_FIX;
-            elif config_option.order = "CommonRatioOrbit" then
-                config.calculateBestOrbit := _IMAGES_COMMON_RATIO_ORBIT;
-            elif config_option.order = "CommonRatioOrbitFix" then
-                config.calculateBestOrbit := _IMAGES_COMMON_RATIO_ORBIT_FIX;
-            else
-                ErrorNoReturn("?");
-            fi;
-        else
-            ErrorNoReturn("Invalid ordering: ", config_option.order);
-        fi;
-
-        if IsBound(config_option.orbfilt) then
-            if config_option.orbfilt = "Min" then
-              // This space intensionally blank
-            elif config_option.orbfilt = "Rare" then
-                config.findBestOrbMset := function(x,y) return x < y; end;
-            elif config_option.orbfilt = "Common" then
-                config.findBestOrbMset := function(x,y) return x > y; end;
-            else
-                Error("Invalid 'orbfilt' option");
-            fi;
-            config.preFilterByOrbMset := true;
-        fi;
+                      preFilterByOrbMset := true);
+        config.getBasePoint := IdFunc;
+        config.initial_lastupb := 0;
+        config.initial_upb := infinity;
+        config.getQuality := pt -> orbmins[pt];
+        config.calculateBestOrbit := _IMAGES_RARE_RATIO_ORBIT_FIX;
     else
         ErrorNoReturn("'branch' must be minimum, static or dynamic");
     fi;
 
-    if disableStabilizerCheck_in = true then
-        config.tryImproveStabilizer := false;
-    fi;
     struct Node {
       std::vector<int> selected;
       std::vector<int> image;
@@ -522,95 +370,68 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
         # first pass creates appropriate set of virtual red nodes
         */
 
-        if IsBound(config.findBestOrbMset) then
-            countOrbDict := _countingDict([1,2,3]);
-            node := leftmost_node(depth);
-            while node <> fail do
-                cands := Difference([1..m],skip_func(node.selected));
 
-                orbitMset := [];
-                for y in cands do
-                    x := node.image[y];
-                    num := make_orbit(x);
-                    Add(orbitMset, orbmins[num]);
-                od;
-                Sort(orbitMset);
-                countOrbDict.add(orbitMset);
-                node := next_node(node);
+        minOrbitMset := [infinity];
+        node := leftmost_node(depth);
+        while node <> fail do
+            cands := Difference([1..m],node.selected);
+
+            orbitMset := [];
+            for y in cands do
+                x := node.image[y];
+                num := make_orbit(x);
+                Add(orbitMset, orbmins[num]);
             od;
+            Sort(orbitMset);
+            if IsBound(bestOrbitMset) then
+                if orbitMset <> bestOrbitMset then
+                    delete_node(node);
+                fi;
+            else
+                if orbitMset < minOrbitMset then
+                    minOrbitMset := orbitMset;
+                    node2 := node.prev;
+                    while node2 <> fail do
+                        delete_node(node2);
+                        node2 := node2.prev;
+                    od;
+                elif orbitMset > minOrbitMset then
+                    delete_node(node);
+                fi;
+            fi;
+            node := next_node(node);
+        od;
 
-            bestOrbitMset := countOrbDict.findElement(config.findBestOrbMset);
-            Unbind(countOrbDict); # Free memory
-        fi;
-
-        if config.preFilterByOrbMset then
-            minOrbitMset := [infinity];
-            node := leftmost_node(depth);
-            while node <> fail do
-                cands := Difference([1..m],skip_func(node.selected));
-
-                orbitMset := [];
-                for y in cands do
-                    x := node.image[y];
-                    num := make_orbit(x);
-                    Add(orbitMset, orbmins[num]);
-                od;
-                Sort(orbitMset);
-                if IsBound(bestOrbitMset) then
-                    if orbitMset <> bestOrbitMset then
-                        delete_node(node);
-                    fi;
+        globalOrbitCounts := ListWithIdenticalEntries(Length(orbmins), 0) ;
+        node := leftmost_node(depth);
+        while node <> fail do
+            cands := Difference([1..m],node.selected);
+            if Length(cands) > 1 and not IsTrivial(node.substab) then
+                cands := simpleOrbitReps(node.substab,cands);
+            fi;
+            /*
+              # These index the children of node that will
+              # not be immediately deleted under rule C
+            */
+            for y in cands do
+                x := node.image[y];
+                num := make_orbit(x);
+                if IsBound(globalOrbitCounts[num]) then
+                    globalOrbitCounts[num] := globalOrbitCounts[num] + 1;
                 else
-                    if orbitMset < minOrbitMset then
-                        minOrbitMset := orbitMset;
-                        node2 := node.prev;
-                        while node2 <> fail do
-                            delete_node(node2);
-                            node2 := node2.prev;
-                        od;
-                    elif orbitMset > minOrbitMset then
-                        delete_node(node);
-                    fi;
+                    globalOrbitCounts[num] := 1;
                 fi;
-
-                node := next_node(node);
             od;
-        fi;
-
-        if config.countRareOrbits then
-            globalOrbitCounts := ListWithIdenticalEntries(Length(orbmins), 0) ;
-            node := leftmost_node(depth);
-            while node <> fail do
-                cands := Difference([1..m],skip_func(node.selected));
-                if Length(cands) > 1 and not IsTrivial(node.substab) then
-                    cands := simpleOrbitReps(node.substab,cands);
-                fi;
-                /*
-                # These index the children of node that will
-                # not be immediately deleted under rule C
-                */
-                for y in cands do
-                    x := node.image[y];
-                    num := make_orbit(x);
-
-                    if IsBound(globalOrbitCounts[num]) then
-                        globalOrbitCounts[num] := globalOrbitCounts[num] + 1;
-                    else
-                        globalOrbitCounts[num] := 1;
-                    fi;
-                od;
-                node := next_node(node);
-            od;
-
-            globalBestOrbit := config.calculateBestOrbit(orbmins, globalOrbitCounts, orbsizes);
-            upb := orbmins[globalBestOrbit];
-        fi;
+            node := next_node(node);
+        od;
+        globalBestOrbit := config.calculateBestOrbit(orbmins, globalOrbitCounts, orbsizes);
+        upb := orbmins[globalBestOrbit];
 
 
         node := leftmost_node(depth);
         while node <> fail do
 
-            cands := Difference([1..m],skip_func(node.selected));
+            cands := Difference([1..m],node.selected);
             if Length(cands) > 1 and not IsTrivial(node.substab) then
                 cands := simpleOrbitReps(node.substab,cands);
             fi;
@@ -624,26 +445,26 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
 
                 num := orbnums[x];
                 if num = -1 then
-                    #
+                  /*
                     # Need a new orbit. Also require the smallest point
                     # as the rep.
                     #
                     #
                     # If there is no prospect of the new orbit being
                     # better than the current best then go on to the next candidate
-                    #
+                  */
                     if config.skipNewOrbit() then
                         continue;
                     fi;
                     num := make_orbit(x);
                     rep := config.getQuality(num);
                     if rep < upb then
-                        ### CAJ - Support bailing out early when a smaller
-                        # set is found
+                             // CAJ - Support bailing out early when a smaller
+                             // set is found
                         if early_exit[1] and rep < early_exit[2][depth] then
                             return [MinImage.Smaller, l^(savedArgs.perminv)];
                         fi;
-                        ### END of bailing out early
+                             // END of bailing out early
                         upb := rep;
                         node2 := node.prev;
                         while node2 <> fail do
@@ -689,7 +510,7 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
                 node := next_node(node);
             od;
             s := s.stabilizer;
-            if Size(skip_func(leftmost_node(depth+1).selected)) = m then
+            if Size(leftmost_node(depth+1).selected) = m then
                 break;
             fi;
 
@@ -732,60 +553,9 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
             od;
             node := next_node(node);
         od;
-        /*
-        # Third pass detect stabilizer elements
-        */
 
-        if  changed and config.tryImproveStabilizer then
-            node := leftmost_node(depth+1);
-            if nodect > _IMAGES_NSI_HASH_LIMIT then
-                dict := SparseHashTable(hash);
-                seen := [];
-                while node <> fail do
-                    he := GetHashEntry(dict,node.imset);
-                    if  fail <> he then
-                        handle_new_stabilizer_element(node, he);
-                    else
-                        AddHashEntry(dict, node.imset, node);
-                    fi;
-                    node := next_node(node);
-                od;
-                s := s.stabilizer;
-                if Length(s.generators) = 0 then
-                    node := leftmost_node(depth+1);
-                    bestim := node.imset;
-                    bestnode := node;
-                    node := next_node(node);
-                    while node <> fail do
-                        if node.imset < bestim then
-                            bestim := node.imset;
-                            bestnode := node;
-                        fi;
-                        node := next_node(node);
-                    od;
-                    return [OnTuples(bestnode.image,savedArgs.perminv),l^savedArgs.perminv];
-                fi;
-            else
-                while node <> fail do
-                    imset := node.imset;
-                    p := PositionSorted(imsets, imset);
-                    if p <= Length(imsets) and imsets[p] = imset then
-                        handle_new_stabilizer_element(node, imsetnodes[p]);
-                    else
-                        Add(imsets,imset,p);
-                        Add(imsetnodes,node,p);
-                    fi;
-                    node := next_node(node);
-                od;
-                s := s.stabilizer;
-                if Length(s.generators) = 0 then
-                    return [OnTuples(imsetnodes[1].image,savedArgs.perminv),l^savedArgs.perminv];
-                fi;
-            fi;
-        else
-            s := s.stabilizer;
-        fi;
-        if Size(skip_func(leftmost_node(depth+1).selected)) = m then
+        s := s.stabilizer;
+        if Size(leftmost_node(depth+1).selected) = m then
             break;
         fi;
     od;
