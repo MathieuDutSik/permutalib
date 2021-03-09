@@ -57,16 +57,6 @@
 
 _IMAGES_NSI_HASH_LIMIT :=100;
 
-_IMAGES_Get_Hash := function(m)
-    local jenkins_hash;
-    if IsBoundGlobal("JENKINS_HASH") then
-        jenkins_hash := ValueGlobal("JENKINS_HASH");
-         return s->jenkins_hash(s,GAPInfo.BytesPerVariable*m+GAPInfo.BytesPerVariable);
-     else
-       return s->HashKeyBag(s,57,0,GAPInfo.BytesPerVariable*m+GAPInfo.BytesPerVariable);
-    fi;
-end;
-
 _IMAGES_RATIO := function(selector)
     return function(orbmins, orbitCounts, orbsizes)
         local index, result, i, ret;
@@ -104,21 +94,18 @@ _IMAGES_RARE_RATIO_ORBIT_FIX := _IMAGES_RATIO(
   Modification done:
   --- skip_fnuc eliminated as it is the identity in the case that interest us.
  */
+template<typename Telt, typename Tint>
 _NewSmallestImage := function(g, set, k, early_exit, config_option)
     local   leftmost_node,  next_node,  delete_node,  delete_nodes,
             clean_subtree,  handle_new_stabilizer_element,
             simpleOrbitReps,  make_orbit,  n,  s,  l,  m,  hash,
-            lastupb,  root,  depth,  gens,  orbnums,  orbmins,
+            root,  depth,  gens,  orbnums,  orbmins,
             orbsizes,  upb,  imsets,  imsetnodes,  node,  cands,  y,
             x,  num,  rep,  node2,  prevnode,  nodect,  changed,
             newnode,  image,  dict,  seen,  he,  bestim,  bestnode,
-            imset,  p,
-            config,
+            imset,  p, config,
             globalOrbitCounts, globalBestOrbit, minOrbitMset, orbitMset,
-            savedArgs,
-            countOrbDict,
-            bestOrbitMset
-            ;
+            savedArgs, countOrbDict, bestOrbitMset;
 
     if IsString(config_option) then
         config_option := ValueGlobal(config_option);
@@ -126,17 +113,10 @@ _NewSmallestImage := function(g, set, k, early_exit, config_option)
 
     savedArgs := rec(perminv := ());
 
-    if config_option.branch = "dynamic" then
-        config := rec(skipNewOrbit := ReturnFalse,
-                      preFilterByOrbMset := true);
-        config.getBasePoint := IdFunc;
-        config.initial_lastupb := 0;
-        config.initial_upb := infinity;
-        config.getQuality := pt -> orbmins[pt];
-        config.calculateBestOrbit := _IMAGES_RARE_RATIO_ORBIT_FIX;
-    else
-        ErrorNoReturn("'branch' must be minimum, static or dynamic");
-    fi;
+    config := rec(skipNewOrbit := ReturnFalse);
+    config.initial_upb := infinity;
+    config.getQuality := pt -> orbmins[pt];
+    config.calculateBestOrbit := _IMAGES_RARE_RATIO_ORBIT_FIX;
 
     struct Node {
       std::vector<int> selected;
@@ -155,9 +135,21 @@ _NewSmallestImage := function(g, set, k, early_exit, config_option)
     };
     using NodePtr = std::shared_ptr<Node>;
 
+    n := Maximum(LargestMovedPoint(g), Maximum(set));
+    s := StabChainMutable(g);
+    l := Action(k,set);
+    m := Length(set);
+    root := rec(selected := [],
+                image := set,
+                imset := Immutable(Set(set)),
+                substab := l,
+                deleted := false,
+                next := fail,
+                prev := fail,
+                parent := fail);
+
     // Node exploration functions
     auto leftmost_node =[&](int const& depth) -> NodePtr {
-        local   n,  i;
         NodePtr n = root;
         while (n.selected.size() < depth - 1) {
             n = n->children[0];
@@ -342,21 +334,6 @@ _NewSmallestImage := function(g, set, k, early_exit, config_option)
     if set = [] then
       return [ [], k^(savedArgs.perminv)];
     fi;
-
-    n := Maximum(LargestMovedPoint(g), Maximum(set));
-    s := StabChainMutable(g);
-    l := Action(k,set);
-    m := Length(set);
-    hash := _IMAGES_Get_Hash(m);
-    lastupb := config.initial_lastupb;
-    root := rec(selected := [],
-                image := set,
-                imset := Immutable(Set(set)),
-                substab := l,
-                deleted := false,
-                next := fail,
-                prev := fail,
-                parent := fail);
     for depth in [1..m] do
         gens := s.generators;
         orbnums := ListWithIdenticalEntries(n,-1);
@@ -492,14 +469,13 @@ _NewSmallestImage := function(g, set, k, early_exit, config_option)
         /*
         # Second pass. Actually make all the red nodes and turn them blue
         */
-        lastupb := upb;
-        ChangeStabChain(s,[config.getBasePoint(upb)],false);
+        ChangeStabChain(s, [upb], false);
         if Length(s.orbit) = 1 then
-            #
-            # In this case nothing much can happen. Each surviving node will have exactly one child
-            # and none of the imsets will change
-            # so we mutate the nodes in-place
-            #
+           /*
+             # In this case nothing much can happen. Each surviving node will have exactly one child
+             # and none of the imsets will change
+             # so we mutate the nodes in-place
+           */
             node := leftmost_node(depth);
             while node <> fail do
                 if not IsBound(node.selectedbaselength) then
@@ -538,10 +514,10 @@ _NewSmallestImage := function(g, set, k, early_exit, config_option)
                 Add(node.children,newnode);
 
                 image := node.image;
-                if image[x] <> config.getBasePoint(upb) then
+                if image[x] <> upb then
                     repeat
                         image := OnTuples(image, s.transversal[image[x]]);
-                    until image[x] = config.getBasePoint(upb);
+                    until image[x] = upb;
                     newnode.image := image;
                     newnode.imset := Set(image);
                     MakeImmutable(newnode.imset);
