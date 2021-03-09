@@ -96,22 +96,18 @@ _IMAGES_RARE_RATIO_ORBIT_FIX := _IMAGES_RATIO(
  */
 template<typename Telt, typename Tint>
 _NewSmallestImage := function(g, set, k, early_exit, config_option)
-    local   leftmost_node,  next_node,  delete_node,  delete_nodes,
-            clean_subtree,  handle_new_stabilizer_element,
-            simpleOrbitReps,  make_orbit,  n,  s,  l,  m,  hash,
+    local   n,  s,  l,  m,  hash,
             root,  depth,  gens,  orbnums,  orbmins,
             orbsizes,  upb,  imsets,  imsetnodes,  node,  cands,  y,
             x,  num,  rep,  node2,  prevnode,  nodect,  changed,
             newnode,  image,  dict,  seen,  he,  bestim,  bestnode,
             imset,  p, config,
             globalOrbitCounts, globalBestOrbit, minOrbitMset, orbitMset,
-            savedArgs, countOrbDict, bestOrbitMset;
+            countOrbDict, bestOrbitMset;
 
     if IsString(config_option) then
         config_option := ValueGlobal(config_option);
     fi;
-
-    savedArgs := rec(perminv := ());
 
     config := rec(skipNewOrbit := ReturnFalse);
     config.initial_upb := infinity;
@@ -332,7 +328,7 @@ _NewSmallestImage := function(g, set, k, early_exit, config_option)
     }
 
     if set = [] then
-      return [ [], k^(savedArgs.perminv)];
+      return [ [], k];
     fi;
     for depth in [1..m] do
         gens := s.generators;
@@ -439,7 +435,7 @@ _NewSmallestImage := function(g, set, k, early_exit, config_option)
                              // CAJ - Support bailing out early when a smaller
                              // set is found
                         if early_exit[1] and rep < early_exit[2][depth] then
-                            return [MinImage.Smaller, l^(savedArgs.perminv)];
+                            return [MinImage.Smaller, l];
                         fi;
                              // END of bailing out early
                         upb := rep;
@@ -464,7 +460,7 @@ _NewSmallestImage := function(g, set, k, early_exit, config_option)
         od;
         // CAJ - Support bailing out early when a larger set is found
         if early_exit[1] and upb > early_exit[2][depth] then
-            return [MinImage.Larger, l^(savedArgs.perminv)];
+            return [MinImage.Larger, l];
         fi;
         /*
         # Second pass. Actually make all the red nodes and turn them blue
@@ -535,5 +531,5 @@ _NewSmallestImage := function(g, set, k, early_exit, config_option)
             break;
         fi;
     od;
-    return [OnTuples(leftmost_node(depth+1).image,savedArgs.perminv),l^savedArgs.perminv];
+    return [leftmost_node(depth+1).image, l];
 end;
