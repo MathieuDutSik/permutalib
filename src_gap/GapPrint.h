@@ -1,6 +1,11 @@
 #ifndef GAP_PRINT_INCLUDE
 #define GAP_PRINT_INCLUDE
 
+#include <iostream>
+#include <sstream>
+#include "Face_basic.h"
+
+
 namespace permutalib {
 
 static const int int_reducedm1 = -1;

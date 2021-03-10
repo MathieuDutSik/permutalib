@@ -2,6 +2,7 @@
 #define INCLUDE_NEW_SMALLEST_IMAGE
 
 #include "StabChain.h"
+#include "stbcbckt.h"
 
 /*
 #
@@ -60,10 +61,12 @@
 */
 
 
+namespace permutalib {
+
 template<typename T>
 void Remove(std::vector<T> & eV, int const& pos)
 {
-  std::erase(eV.begin() + pos);
+  eV.erase(eV.begin() + pos);
 }
 
 
@@ -233,14 +236,14 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
   // Filter nodes by stabilizer group,
   // Updates the stabilizer group of the node,
   std::function<void(NodePtr)> clean_subtree =[&](NodePtr & node) -> void {
-    if (!node-IsBoundChildren)
+    if (!node->IsBoundChildren)
       return;
-    std::vectror<NodePtr> bad;
+    std::vector<NodePtr> bad;
 
     std::vector<int> range= ClosedInterval(0,m);
     Face seen = BlistList(range,{});
     int x;
-    for (auto & c : node.children) {
+    for (auto & c : node->children) {
       if (c->selectedbaselength != -1) {
         x = c.selected[c.selectedbaselength];
       } else {
@@ -257,7 +260,7 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
         while (true) {
           size_t idx;
           for (idx=pos; idx<olen; idx++) {
-            int p = q[idx];
+            int pt = q[idx];
             for (auto & gen : gens) {
               int im = PowAct(pt,gen);
               if (seen[im] == 0) {
@@ -271,7 +274,7 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
             break;
           pos = idx;
         }
-        Tint quot = Size<Tint>(node->substab) / Size<Tint>(c->substab);
+        Tint quot = Order<Tint>(node->substab) / Order<Tint>(c->substab);
         if (Tint(olen) < quot) {
           c->substab = Stabilize(node->substab,x);
           clean_subtree(c);
@@ -507,7 +510,8 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
       prevnode = nullptr;
       int nodect = 0;
       while (node != nullptr) {
-        node->children := [];
+        node->IsBoundChildren = false;
+        node->children.clear();
         for (auto & x : node->validkids) {
           Node newnode_v;
           std::vector<int> selected = node->selected;
@@ -563,4 +567,6 @@ std::vector<int> CanonicalImage(StabChain<Telt> const& g, std::vector<int> const
 }
 
 
+
+}
 #endif

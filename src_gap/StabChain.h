@@ -35,6 +35,8 @@
 
 #include "GapPrint.h"
 #include "PermGroup.h"
+#include "list.h"
+#include "COMB_Vectors.h"
 
 // Needed for the comparison with 
 #define DEBUG_STABCHAIN
@@ -1350,7 +1352,7 @@ void ClosureGroup_options(StabChain<Telt> & S, Telt const& g, StabChainOptions<T
 
 
 template<typename Telt, typename Tint>
-void ClosureGroup(StabChain<Telt> & S, Telt const& g, StabChainOptions<Tint> const& options)
+void ClosureGroup(StabChain<Telt> & S, Telt const& g)
 {
   int n = S->comm->n;
   StabChainOptions<Tint> options = GetStandardOptions<Tint>(n);

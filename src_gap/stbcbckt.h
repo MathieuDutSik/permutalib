@@ -1143,7 +1143,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	  options.base = rbase.base;
 	  options.reduced = false;
 #ifdef DEBUG_STBCBCKT
-	  std::cerr << "CPP Before computation of ListStabChain Order(L)=" << Order<Telt,mpz_class>(L) << "\n";
+	  std::cerr << "CPP Before computation of ListStabChain Order(L)=" << Order<Telt,Tint>(L) << "\n";
           std::cerr << "CPP sgs(L)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(L))) << " base=" << GapStringIntVector(rbase.base) << "\n";
           std::cerr << "CPP assigning L sequence\n";
 #endif

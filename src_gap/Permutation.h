@@ -2,6 +2,8 @@
 #define INCLUDE_PERMUTATION_GROUP
 
 #include <vector>
+#include <stdlib.h>
+#include <string>
 
 namespace permutalib {
 
