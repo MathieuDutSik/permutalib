@@ -46,6 +46,14 @@ private:
   T value;
 };
 
+template<typename T>
+Tplusinfinity<T> GetInfinity()
+{
+  T val = 0;
+  Tplusinfinity<T> ret = Tplusinfinity(val);
+  ret.SetToInfinity();
+  return ret;
+}
 
 template<typename T>
 bool operator==(Tplusinfinity<T> const& x, Tplusinfinity<T> const& y)

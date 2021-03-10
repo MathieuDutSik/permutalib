@@ -1328,7 +1328,7 @@ void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, Stab
 	std::cerr << "CPP sch=" << sch << " g=" << g << " rep=" << rep << "\n";
 #endif
 	if (!sch.isIdentity()) {
-	  StabChainStrong(S->stabilizer, {sch}, options );
+	  StabChainStrong(S->stabilizer, {sch}, options);
 	}
       }
     }
@@ -1337,6 +1337,28 @@ void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, Stab
   std::cerr << "CPP exiting StabChainStrong\n";
 #endif
 }
+
+
+template<typename Telt, typename Tint>
+void ClosureGroup_options(StabChain<Telt> & S, Telt const& g, StabChainOptions<Tint> const& options)
+{
+  Telt sch = SiftedPermutation(S, g);
+  if (!sch.isIdentity()) {
+    StabChainStrong(S, {g}, options);
+  }
+}
+
+
+template<typename Telt, typename Tint>
+void ClosureGroup(StabChain<Telt> & S, Telt const& g, StabChainOptions<Tint> const& options)
+{
+  int n = S->comm->n;
+  StabChainOptions<Tint> options = GetStandardOptions<Tint>(n);
+  ClosureGroup_options(S, g, options);
+}
+
+
+
 
 
 template<typename Telt>

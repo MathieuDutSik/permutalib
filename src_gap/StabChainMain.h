@@ -125,7 +125,7 @@ StabChain<Telt> MinimalStabChain(std::vector<Telt> const& LGen, int const& n)
 
 
 template<typename Telt, typename Tint>
-StabChain<Telt> StabChainOp_group_options(std::vector<Telt> const& LGen, int const& n)
+StabChain<Telt> Group(std::vector<Telt> const& LGen, int const& n)
 {
 #ifdef DEBUG_STABCHAINMAIN
   std::cerr << "CPP Beginning of MinimalStabChain\n";
