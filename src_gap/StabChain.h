@@ -72,6 +72,12 @@ std::string GetIntTypeNature(int const& val)
 }
 
 
+template<typename Telt>
+int OnPoints(int const& val, Telt const& g)
+{
+  return PowAct(val, g);
+}
+
 
 template<typename T>
 void AssignationVectorGapStyle(std::vector<T> & eVect, int const& pos, T const& val)
@@ -1577,7 +1583,6 @@ T LabsLims(T const& lab, std::function<T(T const&)> const& hom, std::vector<T> &
 {
   int pos=PositionVect(labs, lab);
   if (pos == -1) {
-    int pos=labs.size();
     labs.push_back(lab);
     T img=hom(lab);
     lims.push_back(img);

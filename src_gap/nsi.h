@@ -3,6 +3,7 @@
 
 #include "StabChain.h"
 #include "stbcbckt.h"
+#include <unordered_map>
 
 /*
 #
@@ -95,6 +96,8 @@ Telt PermListList(std::vector<T> const& list1, std::vector<T> const& list2)
 }
 
 
+
+
 template<typename Telt, typename Tint>
 StabChain<Telt> Action(StabChain<Telt> const& S, std::vector<int> const& set)
 {
@@ -130,13 +133,20 @@ std::vector<int> OnTuples(std::vector<int> const& V, Telt const& g)
 }
 
 
+template<typename T>
+std::vector<T> Set(std::vector<T> const& V)
+{
+  std::vector<T> retV = V;
+  std::sort(retV.begin(), retV.end());
+  return retV;
+}
 
 /*
   Modification done:
   --- skip_fnuc eliminated as it is the identity in the case that interest us.
  */
 template<typename Telt, typename Tint>
-ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> const& set, StabChain<Telt> const& k)
+std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> const& set, StabChain<Telt> const& k)
 {
 
   int infinity = 10 + g->comm->n;
@@ -316,6 +326,8 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
 
   //Add a new stabilizer element, mapping node1 to node2, and then call
   // clean_subtree to remove any new subtrees.
+  // unused in this specific code.
+  /*
   auto handle_new_stabilizer_element=[&](NodePtr & node1, NodePtr & node2) -> void {
     // so node1 and node2 represnet group elements that map set to the same
     // place in two different ways
@@ -325,6 +337,7 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
     root->substab = l_copy;
     clean_subtree(root);
   };
+  */
 
   // Given a group 'gp' and a set 'set', find orbit representatives
   // of 'set' in 'gp' simply.
@@ -363,7 +376,7 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
 
 
   if (set.size() == 0) {
-    return {{}, {}};
+    return {};
   }
   size_t depth;
   for (depth=0; depth<m; depth++) {
@@ -447,7 +460,7 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
     std::vector<int> globalOrbitCounts(orbmins.size(), 0);
     node = leftmost_node(depth);
     while (node != nullptr) {
-      cands = DifferenceVect(ClosedInterval(0, m), node->selected);
+      std::vector<int> cands = DifferenceVect(ClosedInterval(0, m), node->selected);
       if (cands.size() > 1 && !IsTrivial(node->substab)) {
         cands = simpleOrbitReps(node->substab, cands);
       }
@@ -468,7 +481,7 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
 
     node = leftmost_node(depth);
     while (node != nullptr) {
-      cands = DifferenceVect(ClosedInterval(0,m), node->selected);
+      std::vector<int> cands = DifferenceVect(ClosedInterval(0,m), node->selected);
       if (cands.size() > 1 && !IsTrivial(node->substab)) {
         cands = simpleOrbitReps(node->substab, cands);
       }
@@ -587,7 +600,7 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
       }
     }
   }
-  return {leftmost_node(depth+1)->image, l};
+  return leftmost_node(depth+1)->image;
 }
 
 
@@ -603,7 +616,7 @@ Face CanonicalImage(StabChain<Telt> const& g, Face const& set)
   }
   StabChain<Telt> k = Stabilizer_OnSets<Telt,Tint>(g, set);
   Face ret(set.size());
-  for (auto & eVal : NewSmallestImage<Telt,Tint>(g, set, k).set) {
+  for (auto & eVal : NewSmallestImage<Telt,Tint>(g, set_i, k)) {
     ret[eVal] = 1;
   }
   return ret;
