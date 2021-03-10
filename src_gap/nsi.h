@@ -1,3 +1,8 @@
+#ifndef INCLUDE_NEW_SMALLEST_IMAGE
+#define INCLUDE_NEW_SMALLEST_IMAGE
+
+#include "StabChain.h"
+
 /*
 #
 # V 1.1 - Bug fixed
@@ -64,7 +69,7 @@ void Remove(std::vector<T> & eV, int const& pos)
 
 template<typename Telt>
 struct ResultCanonicalization {
-  std::vector<int> face;
+  std::vector<int> set;
   Telt g;
 };
 
@@ -547,3 +552,15 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
   }
   return {leftmost_node(depth+1).image, l};
 }
+
+
+
+template<typename Telt, typename Tint>
+std::vector<int> CanonicalImage(StabChain<Telt> const& g, std::vector<int> const& set)
+{
+  StabChain<Telt> k = Stabilizer_OnSets(g, set);
+  return NewSmallestImage(g, set, k).set;
+}
+
+
+#endif
