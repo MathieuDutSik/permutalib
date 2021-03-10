@@ -188,7 +188,7 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
 
   int n = std::max(LargestMovedPoint(g), set[set.size()-1]);
   StabChain<Telt> s = CopyStabChain(g);
-  StabChain<Telt> l = Action(k, set);
+  StabChain<Telt> l = Action<Telt,Tint>(k, set);
   int m = set.size();
   Node root_v;
   root_v.image = set;
@@ -215,7 +215,7 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
     NodePtr n = node;
     while (true) {
       n = n->next;
-      if (n == nullptr || !n.deleted)
+      if (n == nullptr || !n->deleted)
         break;
     }
     return n;
@@ -295,7 +295,7 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
         }
         Tint quot = Order<Telt,Tint>(node->substab) / Order<Telt,Tint>(c->substab);
         if (Tint(olen) < quot) {
-          c->substab = Stabilize(node->substab,x);
+          c->substab = Stabilizer_OnPoints<Telt,Tint>(node->substab, x);
           clean_subtree(c);
         }
       }

@@ -1887,6 +1887,21 @@ StabChain<Telt> Stabilizer_OnSets(StabChain<Telt> const& G, Face const& Phi)
 }
 
 
+template<typename Telt,typename Tint>
+StabChain<Telt> Stabilizer_OnPoints(StabChain<Telt> const& G, int const& x)
+{
+#ifdef DEBUG_STBCBCKT
+  std::cerr << "CPP Beginning of Stabilizer_OnSets\n";
+#endif
+  size_t n = G->comm->n;
+  Face Phi(n);
+  Phi[x]=1;
+  bool repr=false;
+  return RepOpSetsPermGroup<Telt,Tint>(G, repr, Phi, Phi).stab;
+}
+
+
+
 
 template<typename Telt,typename Tint>
 std::pair<bool,Telt> RepresentativeAction_OnSets(StabChain<Telt> const& G, Face const& f1, Face const& f2)
@@ -1920,7 +1935,19 @@ std::pair<bool,Telt> RepresentativeAction_OnSets(StabChain<Telt> const& G, Face 
   }
 }
 
-
+template<typename Telt,typename Tint>
+std::pair<bool,Telt> RepresentativeAction_OnPoints(StabChain<Telt> const& G, int const& x1, int const& x2)
+{
+  size_t n = G->comm->n;
+  bool repr=true;
+  Face f1(n), f2(n);
+  f1[x1] = 1;
+  f2[x2] = 1;
+  ResultPBT<Telt> eRec = RepOpSetsPermGroup<Telt,Tint>(G, repr, f1, f2);
+  if (eRec.nature == int_fail)
+    return {false, {}};
+  return {true, eRec.res};
+}
 
 
 }
