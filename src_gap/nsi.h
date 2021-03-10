@@ -207,7 +207,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
   };
   using NodePtr = std::shared_ptr<Node>;
 
-  int n = std::max(LargestMovedPoint(g), set[set.size()-1]);
+  int n = std::max(LargestMovedPoint(StrongGeneratorsStabChain(g)), set[set.size()-1]);
   StabChain<Telt> s = CopyStabChain(g);
   StabChain<Telt> l = Action<Telt,Tint>(k, set);
   int m = set.size();
@@ -380,7 +380,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
   }
   size_t depth;
   for (depth=0; depth<m; depth++) {
-    std::vector<Telt> gens = s->generators;
+    std::vector<Telt> gens = GetListGenerators(s);
     std::vector<int> orbnums(n,-1);
     std::vector<int> orbmins;
     std::vector<int> orbsizes;
@@ -436,22 +436,16 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
         orbitMset.push_back(orbmins[num]);
       }
       std::sort(orbitMset.begin(), orbitMset.end());
-      if (IsBound(bestOrbitMset)) {
-        if (orbitMset != bestOrbitMset) {
-          delete_node(node);
+      if (orbitMset < minOrbitMset) {
+        minOrbitMset = orbitMset;
+        NodePtr node2 = node->prev;
+        while (node2 != nullptr) {
+          delete_node(node2);
+          node2 = node2->prev;
         }
       } else {
-        if (orbitMset < minOrbitMset) {
-          minOrbitMset = orbitMset;
-          NodePtr node2 = node->prev;
-          while (node2 != nullptr) {
-            delete_node(node2);
-            node2 = node2->prev;
-          }
-        } else {
-          if (orbitMset > minOrbitMset) {
-            delete_node(node);
-          }
+        if (orbitMset > minOrbitMset) {
+          delete_node(node);
         }
       }
       node = next_node(node);
@@ -539,7 +533,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
       */
       node = leftmost_node(depth);
       while (node != nullptr) {
-        if (!IsBound(node->selectedbaselength)) {
+        if (node->selectedbaselength == -1) {
           node->selectedbaselength = node->selected.size();
         }
         node->selected.push_back(node->validkids[0]);
