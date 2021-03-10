@@ -52,9 +52,6 @@ int main(int argc, char *argv[])
       eFace[i] = eVal;
     }
     Face set_can = permutalib::CanonicalImage<Telt,Tint>(eG, eFace);
-    std::cerr << "CPP eG2=" << eG2 << "\n";
-    std::cerr << "CPP |eG2|=" << permutalib::Order<Telt,Tint>(eG2) << "\n";
-    std::cerr << "CPP Normal completion of the program\n";
     //
     std::ofstream os(OutputFile);
     os << "return [";
@@ -67,6 +64,7 @@ int main(int argc, char *argv[])
       aRow = set_can.find_next(aRow);
     }
     os << "|;\n";
+    std::cerr << "CPP Normal completion of the program\n";
   }
   catch (PermutalibException const& e) {
     std::cerr << "Erroneous completion of the program\n";

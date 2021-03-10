@@ -77,6 +77,24 @@ struct ResultCanonicalization {
 };
 
 
+template<typename Telt,typename T>
+Telt PermListList(std::vector<T> const& list1, std::vector<T> const& list2)
+{
+  std::unordered_map<T,int> eMap;
+  int siz = list2.size();
+  for (int i=0; i<siz; i++) {
+    eMap[list1[i]] = i;
+  }
+  //
+  std::vector<int> eList;
+  for (int i=0; i<siz; i++) {
+    int val = eMap[list2[i]];
+    eList[i] = val;
+  }
+  return PermList(eList);
+}
+
+
 template<typename Telt, typename Tint>
 StabChain<Telt> Action(StabChain<Telt> const& S, std::vector<int> const& set)
 {
@@ -164,6 +182,7 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
     int childno;
     bool IsBoundChildren;
     std::vector<std::shared_ptr<Node>> children;
+    std::vector<int> validkids;
   };
   using NodePtr = std::shared_ptr<Node>;
 
@@ -214,7 +233,7 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
     }
     node->deleted = true;
     if (node->parent != nullptr) {
-      Remove(node.parent.children, node.childno);
+      Remove(node->parent->children, node->childno);
       if (node->parent->children.size() == 0) {
         delete_node(node->parent);
       } else {
@@ -245,9 +264,9 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
     int x;
     for (auto & c : node->children) {
       if (c->selectedbaselength != -1) {
-        x = c.selected[c.selectedbaselength];
+        x = c->selected[c->selectedbaselength];
       } else {
-        x = c.selected[c->selected.size() - 1];
+        x = c->selected[c->selected.size() - 1];
       }
       if (seen[x] == 1) {
         bad.push_back(c);
@@ -274,7 +293,7 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
             break;
           pos = idx;
         }
-        Tint quot = Order<Tint>(node->substab) / Order<Tint>(c->substab);
+        Tint quot = Order<Telt,Tint>(node->substab) / Order<Telt,Tint>(c->substab);
         if (Tint(olen) < quot) {
           c->substab = Stabilize(node->substab,x);
           clean_subtree(c);
@@ -289,9 +308,9 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
   auto handle_new_stabilizer_element=[&](NodePtr & node1, NodePtr & node2) -> void {
     // so node1 and node2 represnet group elements that map set to the same
     // place in two different ways
-    Telt perm1 = PermListList<Telt>(node1.image, node2.image);
+    Telt perm1 = PermListList<Telt,int>(node1->image, node2->image);
     StabChain<Telt> l_copy = CopyStabChain(l);
-    ClosureGroup(l_copy,perm1);
+    ClosureGroup<Telt,Tint>(l_copy,perm1);
     root->substab = l_copy;
     clean_subtree(root);
   };
@@ -326,53 +345,55 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
           break;
         pos = idx;
       }
-      seed = PositionVect(b,true,seed);
+      seed = b.find_next(seed);
     }
     return reps;
   };
 
-  // Make orbit of x, updating orbnums, orbmins and orbsizes as approriate.
-  auto make_orbit=[&](int const& x) -> int {
-    if (orbnums[x] != -1) {
-      return orbnums[x];
-    }
-    std::vector<int> q = {x};
-    int rep = x;
-    int num = orbmins.size() + 1;
-    orbnums[x] = num;
-    size_t pos=0;
-    while (true) {
-      size_t idx, qsiz = q.size();
-      for (idx=pos; idx<qsiz; idx++) {
-        int pt = q[idx];
-        for (auto& gen : gens) {
-          int img = PowAct(pt, gen);
-          if (orbnums[img] == -1) {
-            orbnums[img] = num;
-            q.push_back(img);
-            if (img < rep) {
-              rep = img;
-            }
-          }
-        }
-      }
-      if (idx == q.size())
-        break;
-      pos = idx;
-    }
-    orbmins.push_back(rep);
-    orbsizes.push_back(q.size());
-    return num;
-  };
 
   if (set.size() == 0) {
     return {{}, {}};
   }
-  for (size_t depth=0; depth<m; depth++) {
+  size_t depth;
+  for (depth=0; depth<m; depth++) {
+    std::vector<Telt> gens = s->generators;
     std::vector<int> orbnums(n,-1);
     std::vector<int> orbmins;
     std::vector<int> orbsizes;
     int upb = initial_upb;
+    // Make orbit of x, updating orbnums, orbmins and orbsizes as approriate.
+    auto make_orbit=[&](int const& x) -> int {
+      if (orbnums[x] != -1) {
+        return orbnums[x];
+      }
+      std::vector<int> q = {x};
+      int rep = x;
+      int num = orbmins.size() + 1;
+      orbnums[x] = num;
+      size_t pos=0;
+      while (true) {
+        size_t idx, qsiz = q.size();
+        for (idx=pos; idx<qsiz; idx++) {
+          int pt = q[idx];
+          for (auto& gen : gens) {
+            int img = PowAct(pt, gen);
+            if (orbnums[img] == -1) {
+              orbnums[img] = num;
+              q.push_back(img);
+              if (img < rep) {
+                rep = img;
+              }
+            }
+          }
+        }
+        if (idx == q.size())
+          break;
+        pos = idx;
+      }
+      orbmins.push_back(rep);
+      orbsizes.push_back(q.size());
+      return num;
+    };
     /*
       # At this point, all bottom nodes are blue
       # first pass creates appropriate set of virtual red nodes
@@ -382,15 +403,15 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
     std::vector<int> minOrbitMset = {infinity};
     NodePtr node = leftmost_node(depth);
     while (node != nullptr) {
-      std::vector<int> cands = DifferenceVect(ClosedInterval(0,m), node.selected);
+      std::vector<int> cands = DifferenceVect(ClosedInterval(0,m), node->selected);
 
       std::vector<int> orbitMset;
       for (auto & y : cands) {
-        x = node->image[y];
-        num = make_orbit(x);
+        int x = node->image[y];
+        int num = make_orbit(x);
         orbitMset.push_back(orbmins[num]);
       }
-      Sort(orbitMset);
+      std::sort(orbitMset.begin(), orbitMset.end());
       if (IsBound(bestOrbitMset)) {
         if (orbitMset != bestOrbitMset) {
           delete_node(node);
@@ -424,8 +445,8 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
         # not be immediately deleted under rule C
       */
       for (auto & y : cands) {
-        x = node->image[y];
-        num = make_orbit(x);
+        int x = node->image[y];
+        int num = make_orbit(x);
         globalOrbitCounts[num]++;
       }
       node = next_node(node);
@@ -446,8 +467,8 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
       */
       node->validkids.clear();
       for (auto & y : cands) {
-        x = node->image[y];
-        num = orbnums[x];
+        int x = node->image[y];
+        int num = orbnums[x];
         if (num == -1) {
           /*
             # Need a new orbit. Also require the smallest point
@@ -458,10 +479,10 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
             # better than the current best then go on to the next candidate
           */
           num = make_orbit(x);
-          rep = orbmins[num];
+          int rep = orbmins[num];
           if (rep < upb) {
             upb = rep;
-            NodePtr node2 = node.prev;
+            NodePtr node2 = node->prev;
             while (node2 != nullptr) {
               delete_node(node2);
               node2 = node2->prev;
@@ -469,7 +490,7 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
             node->validkids = {y};
           }
         } else {
-          rep = orbmins[num];
+          int rep = orbmins[num];
           if (rep == upb) {
             node->validkids.push_back(y);
           }
@@ -483,9 +504,9 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
     /*
       # Second pass. Actually make all the red nodes and turn them blue
     */
-    ChangeStabChain(s, [upb], false);
+    ChangeStabChain(s, {upb}, false);
     bool do_continue = false;
-    if (s.orbit.size() == 1) {
+    if (s->orbit.size() == 1) {
       /*
         # In this case nothing much can happen. Each surviving node will have exactly one child
         # and none of the imsets will change
@@ -493,7 +514,7 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
       */
       node = leftmost_node(depth);
       while (node != nullptr) {
-        if (!IsBound(node.selectedbaselength)) {
+        if (!IsBound(node->selectedbaselength)) {
           node->selectedbaselength = node->selected.size();
         }
         node->selected.push_back(node->validkids[0]);
@@ -507,7 +528,7 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
 
     if (!do_continue) {
       node = leftmost_node(depth);
-      prevnode = nullptr;
+      NodePtr prevnode = nullptr;
       int nodect = 0;
       while (node != nullptr) {
         node->IsBoundChildren = false;
@@ -549,21 +570,31 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
       }
 
       s = s->stabilizer;
-      if (int(leftmost_node(depth+1).selected.size()) == m) {
+      if (int(leftmost_node(depth+1)->selected.size()) == m) {
         break;
       }
     }
   }
-  return {leftmost_node(depth+1).image, l};
+  return {leftmost_node(depth+1)->image, l};
 }
 
 
 
 template<typename Telt, typename Tint>
-std::vector<int> CanonicalImage(StabChain<Telt> const& g, std::vector<int> const& set)
+Face CanonicalImage(StabChain<Telt> const& g, Face const& set)
 {
-  StabChain<Telt> k = Stabilizer_OnSets(g, set);
-  return NewSmallestImage(g, set, k).set;
+  std::vector<int> set_i;
+  boost::dynamic_bitset<>::size_type aRow = set.find_first();
+  while (aRow != boost::dynamic_bitset<>::npos) {
+    set_i.push_back(aRow);
+    aRow = set.find_next(aRow);
+  }
+  StabChain<Telt> k = Stabilizer_OnSets<Telt,Tint>(g, set);
+  Face ret(set.size());
+  for (auto & eVal : NewSmallestImage<Telt,Tint>(g, set, k).set) {
+    ret[eVal] = 1;
+  }
+  return ret;
 }
 
 
