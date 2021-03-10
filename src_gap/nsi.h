@@ -62,7 +62,11 @@ void Remove(std::vector<T> & eV, int const& pos)
 }
 
 
-
+template<typename Telt>
+struct ResultCanonicalization {
+  std::vector<int> face;
+  Telt g;
+};
 
 
 /*
@@ -70,20 +74,10 @@ void Remove(std::vector<T> & eV, int const& pos)
   --- skip_fnuc eliminated as it is the identity in the case that interest us.
  */
 template<typename Telt, typename Tint>
-_NewSmallestImage := function(g, set, k)
-    local   n,  s,  l,  m,  hash,
-            root,  depth,  gens,  orbnums,  orbmins,
-            orbsizes,  upb,  imsets,  imsetnodes,  node,  cands,  y,
-            x,  num,  rep,  node2,  prevnode,  nodect,  changed,
-            newnode,  image,  dict,  seen,  he,  bestim,  bestnode,
-            imset,  p, config,
-            globalOrbitCounts, globalBestOrbit, minOrbitMset, orbitMset,
-            countOrbDict, bestOrbitMset;
-
+ResultCanonicalization<Telt> NewSmallestImage(g, set, k) {
 
     config := rec();
     config.initial_upb := infinity;
-    config.getQuality := pt -> orbmins[pt];
 
 
     auto calculateBestOrbit=[&](std::vector<int> const& orbmins, std::vector<int> const& orbitCounts, std::vector<int> const& orbsizes) -> int {
@@ -145,7 +139,7 @@ _NewSmallestImage := function(g, set, k)
     m := Length(set);
     root := rec(selected := [],
                 image := set,
-                imset := Immutable(Set(set)),
+                imset := Set(set),
                 substab := l,
                 deleted := false,
                 next := fail,
@@ -333,19 +327,14 @@ _NewSmallestImage := function(g, set, k)
     };
 
     if (set.size() == 0) {
+      return {{}, {}};
     }
-
-    if set = [] then
-      return [ [], k];
-    fi;
-    for depth in [1..m] do
-        gens := s.generators;
-        orbnums := ListWithIdenticalEntries(n,-1);
-        orbmins := [];
-        orbsizes := [];
-        upb := config.initial_upb;
-        imsets := [];
-        imsetnodes := [];
+    for (size_t depth=0; depth<m; depth++) {
+        gens = s.generators;
+        std::vector<int> orbnums(n,-1);
+        std::vector<int> orbmins;
+        std::vector<int> orbsizes;
+        upb = config.initial_upb;
         /*
         # At this point, all bottom nodes are blue
         # first pass creates appropriate set of virtual red nodes
@@ -353,79 +342,81 @@ _NewSmallestImage := function(g, set, k)
 
 
         minOrbitMset := [infinity];
-        node := leftmost_node(depth);
-        while node <> fail do
-            cands := Difference([1..m],node.selected);
+        NodePtr node = leftmost_node(depth);
+        while (node != nullptr) {
+          std::vector<int> cands = DifferenceVect(ClosedInterval(0,m), node.selected);
 
             orbitMset := [];
-            for y in cands do
-                x := node.image[y];
-                num := make_orbit(x);
-                Add(orbitMset, orbmins[num]);
-            od;
+            for (auto & y : cands) {
+                x = node->image[y];
+                num = make_orbit(x);
+                orbitMset.push_back(orbmins[num]);
+            }
             Sort(orbitMset);
-            if IsBound(bestOrbitMset) then
-                if orbitMset <> bestOrbitMset then
+            if (IsBound(bestOrbitMset)) {
+                if (orbitMset != bestOrbitMset) {
                     delete_node(node);
-                fi;
-            else
-                if orbitMset < minOrbitMset then
-                    minOrbitMset := orbitMset;
-                    node2 := node.prev;
-                    while node2 <> fail do
+                }
+            } else {
+                if (orbitMset < minOrbitMset) {
+                    minOrbitMset = orbitMset;
+                    NodePtr node2 = node->prev;
+                    while (node2 != nullptr) {
                         delete_node(node2);
-                        node2 := node2.prev;
-                    od;
-                elif orbitMset > minOrbitMset then
+                        node2 = node2->prev;
+                    }
+                } else {
+                  if (orbitMset > minOrbitMset) {
                     delete_node(node);
-                fi;
-            fi;
-            node := next_node(node);
-        od;
+                  }
+                }
+            }
+            node = next_node(node);
+        }
 
         globalOrbitCounts := ListWithIdenticalEntries(Length(orbmins), 0) ;
-        node := leftmost_node(depth);
-        while node <> fail do
-            cands := Difference([1..m],node.selected);
-            if Length(cands) > 1 and not IsTrivial(node.substab) then
-                cands := simpleOrbitReps(node.substab,cands);
-            fi;
+        node = leftmost_node(depth);
+        while (node != nullptr) {
+            cands = DifferenceVect(ClosedInterval(0, m), node->selected);
+            if (cands.size() > 1 && !IsTrivial(node->substab)) {
+                cands = simpleOrbitReps(node->substab, cands);
+            }
             /*
               # These index the children of node that will
               # not be immediately deleted under rule C
             */
-            for y in cands do
-                x := node.image[y];
-                num := make_orbit(x);
+            for (auto & y : cands) {
+                x = node->image[y];
+                num = make_orbit(x);
                 if IsBound(globalOrbitCounts[num]) then
                     globalOrbitCounts[num] := globalOrbitCounts[num] + 1;
                 else
                     globalOrbitCounts[num] := 1;
                 fi;
-            od;
-            node := next_node(node);
-        od;
+            }
+            node = next_node(node);
+        }
         globalBestOrbit = calculateBestOrbit(orbmins, globalOrbitCounts, orbsizes);
-        upb := orbmins[globalBestOrbit];
+        upb = orbmins[globalBestOrbit];
 
 
-        node := leftmost_node(depth);
-        while node <> fail do
+        node = leftmost_node(depth);
+        while (node != nullptr) {
 
-            cands := Difference([1..m],node.selected);
-            if Length(cands) > 1 and not IsTrivial(node.substab) then
-                cands := simpleOrbitReps(node.substab,cands);
-            fi;
+            cands = DifferenceVect(ClosedInterval(0,m), node->selected);
+            if (cands.size() > 1 && !IsTrivial(node->substab)) {
+                cands = simpleOrbitReps(node->substab, cands);
+            }
             /*
             # These index the children of node that will
             # not be immediately deleted under rule C
             */
-            node.validkids := [];
-            for y in cands do
-                x := node.image[y];
+            node->validkids.clear();
+            for (auto & y : cands) {
+                x = node->image[y];
 
-                num := orbnums[x];
-                if num = -1 then
+                num = orbnums[x];
+                if (num == -1) {
                   /*
                     # Need a new orbit. Also require the smallest point
                     # as the rep.
@@ -434,62 +425,60 @@ _NewSmallestImage := function(g, set, k)
                     # If there is no prospect of the new orbit being
                     # better than the current best then go on to the next candidate
                   */
-                    num := make_orbit(x);
-                    rep := config.getQuality(num);
-                    if rep < upb then
-                        upb := rep;
-                        node2 := node.prev;
-                        while node2 <> fail do
+                    num = make_orbit(x);
+                    rep = orbmins[num];
+                    if (rep < upb) {
+                        upb = rep;
+                        NodePtr node2 = node.prev;
+                        while (node2 != nullptr) {
                             delete_node(node2);
-                            node2 := node2.prev;
-                        od;
-                        node.validkids := [y];
-                    fi;
-                else
-                    rep := config.getQuality(num);
-                    if rep = upb then
-                        Add(node.validkids,y);
-                    fi;
-                fi;
-            od;
-            if node.validkids = [] then
+                            node2 = node2->prev;
+                        }
+                        node->validkids = {y};
+                    }
+                } else {
+                    rep = orbmins[num];
+                    if (rep == upb) {
+                      node->validkids.push_back(y);
+                    }
+                }
+            }
+            if (node->validkids.size() == 0) {
                 delete_node(node);
-            fi;
-            node := next_node(node);
-        od;
+            }
+            node = next_node(node);
+        }
         /*
         # Second pass. Actually make all the red nodes and turn them blue
         */
         ChangeStabChain(s, [upb], false);
-        if Length(s.orbit) = 1 then
+        if (s.orbit.size() == 1) {
            /*
              # In this case nothing much can happen. Each surviving node will have exactly one child
              # and none of the imsets will change
              # so we mutate the nodes in-place
            */
-            node := leftmost_node(depth);
-            while node <> fail do
-                if not IsBound(node.selectedbaselength) then
-                    node.selectedbaselength := Length(node.selected);
-                fi;
-                Assert(1, Length(node.validkids)=1);
-                Add(node.selected, node.validkids[1]);
-                node := next_node(node);
-            od;
-            s := s.stabilizer;
+            node = leftmost_node(depth);
+            while (node != nullptr) {
+                if (!IsBound(node.selectedbaselength)) {
+                    node->selectedbaselength = node->selected.size();
+                }
+                node->selected.push_back(node->validkids[0]);
+                node = next_node(node);
+            }
+            s = s.stabilizer;
             if Size(leftmost_node(depth+1).selected) = m then
                 break;
             fi;
 
             continue; // to the next depth
         fi;
-        node := leftmost_node(depth);
-        prevnode := fail;
-        nodect := 0;
-        changed := false;
-        while node <> fail do
-            node.children := [];
-            for x in node.validkids do
+        node = leftmost_node(depth);
+        prevnode = nullptr;
+        int nodect = 0;
+        while (node != nullptr) {
+            node->children := [];
+          for (auto & x : node->validkids) {
                 newnode := rec( selected := Concatenation(node.selected,[x]),
                                 substab := Stabilizer(node.substab,x),
                                 parent := node,
@@ -497,34 +486,32 @@ _NewSmallestImage := function(g, set, k)
                                 next := fail,
                                 prev := prevnode,
                                 deleted := false);
-                nodect := nodect+1;
-                if prevnode <> fail then
-                    prevnode.next := newnode;
-                fi;
-                prevnode := newnode;
-                Add(node.children,newnode);
+                nodect = nodect + 1;
+                if (prevnode != nullptr) {
+                    prevnode->next = newnode;
+                }
+                prevnode = newnode;
+                node.children.push_back(newnode);
 
-                image := node.image;
-                if image[x] <> upb then
+                image = node.image;
+                if (image[x] != upb) {
                     repeat
                         image := OnTuples(image, s.transversal[image[x]]);
                     until image[x] = upb;
-                    newnode.image := image;
-                    newnode.imset := Set(image);
-                    MakeImmutable(newnode.imset);
-                    changed := true;
-                else
-                    newnode.image := image;
-                    newnode.imset := node.imset;
-                fi;
-            od;
-            node := next_node(node);
-        od;
+                    newnode->image = image;
+                    newnode->imset = Set(image);
+                } else {
+                    newnode->image = image;
+                    newnode->imset = node->imset;
+                }
+          }
+            node = next_node(node);
+        }
 
-        s := s.stabilizer;
+        s = s.stabilizer;
         if Size(leftmost_node(depth+1).selected) = m then
             break;
         fi;
-    od;
+    }
     return [leftmost_node(depth+1).image, l];
-end;
+}
