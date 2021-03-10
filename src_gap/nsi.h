@@ -55,24 +55,6 @@
 */
 
 
-_IMAGES_NSI_HASH_LIMIT :=100;
-
-_IMAGES_RATIO := function(selector)
-    return function(orbmins, orbitCounts, orbsizes)
-        local index, result, i, ret;
-        index := 1;
-        result := [selector(1, orbmins, orbitCounts, orbsizes), orbmins[1]];
-        for i in [2..Length(orbmins)] do
-            ret := [selector(i, orbmins, orbitCounts, orbsizes), orbmins[i]];
-            if (orbitCounts[index] = 0) or (ret < result and orbitCounts[i] <> 0) then
-                index := i;
-                result := ret;
-            fi;
-        od;
-        return index;
-    end;
-end;
-
 template<typename T>
 void Remove(std::vector<T> & eV, int const& pos)
 {
@@ -81,13 +63,6 @@ void Remove(std::vector<T> & eV, int const& pos)
 
 
 
-_IMAGES_RARE_RATIO_ORBIT_FIX := _IMAGES_RATIO(
-    function(i, orbmins, orbitCounts, orbsizes)
-        if(orbsizes[i]) = 1 then return Float(-(2^32)+orbitCounts[i]); fi;
-        return (Log2(Float(orbitCounts[i])))/orbsizes[i];
-    end
-);
-
 
 
 /*
@@ -95,7 +70,7 @@ _IMAGES_RARE_RATIO_ORBIT_FIX := _IMAGES_RATIO(
   --- skip_fnuc eliminated as it is the identity in the case that interest us.
  */
 template<typename Telt, typename Tint>
-_NewSmallestImage := function(g, set, k, early_exit, config_option)
+_NewSmallestImage := function(g, set, k)
     local   n,  s,  l,  m,  hash,
             root,  depth,  gens,  orbnums,  orbmins,
             orbsizes,  upb,  imsets,  imsetnodes,  node,  cands,  y,
@@ -105,14 +80,47 @@ _NewSmallestImage := function(g, set, k, early_exit, config_option)
             globalOrbitCounts, globalBestOrbit, minOrbitMset, orbitMset,
             countOrbDict, bestOrbitMset;
 
-    if IsString(config_option) then
-        config_option := ValueGlobal(config_option);
-    fi;
 
-    config := rec(skipNewOrbit := ReturnFalse);
+    config := rec();
     config.initial_upb := infinity;
     config.getQuality := pt -> orbmins[pt];
-    config.calculateBestOrbit := _IMAGES_RARE_RATIO_ORBIT_FIX;
+
+
+    auto calculateBestOrbit=[&](std::vector<int> const& orbmins, std::vector<int> const& orbitCounts, std::vector<int> const& orbsizes) -> int {
+      auto selector=[&](int const& i) -> double {
+        if (orbsizes[i] == 1) {
+          return - std::pow(2.0, 32.0) + orbitCounts[i];
+        } else {
+          return (log(double(orbitCounts[i]))/log(2.0)) / double(orbsizes[i]);
+        }
+      };
+      int index = 0;
+      double result_0 = selector(0);
+      int result_1 = orbmins[0];
+      for (size_t i=1; i<orbmins.size(); i++) {
+        double ret_0 = selector(1);
+        int ret_1 = orbmins[i];
+        bool lower=false;
+        if (ret_0 < result_0) {
+          lower=true;
+        } else {
+          if (ret_0 == result_0) {
+            if (ret_1 < result_1)
+              lower=true;
+          }
+        }
+        //
+        if ((orbitCounts[index] == 0) || (lower && orbitCounts[i] != 0)) {
+          index = i;
+          result_0 = ret_0;
+          result_1 = ret_1;
+        }
+      }
+      return index;
+    };
+
+
+
 
     struct Node {
       std::vector<int> selected;
@@ -397,7 +405,7 @@ _NewSmallestImage := function(g, set, k, early_exit, config_option)
             od;
             node := next_node(node);
         od;
-        globalBestOrbit := config.calculateBestOrbit(orbmins, globalOrbitCounts, orbsizes);
+        globalBestOrbit = calculateBestOrbit(orbmins, globalOrbitCounts, orbsizes);
         upb := orbmins[globalBestOrbit];
 
 
@@ -426,18 +434,9 @@ _NewSmallestImage := function(g, set, k, early_exit, config_option)
                     # If there is no prospect of the new orbit being
                     # better than the current best then go on to the next candidate
                   */
-                    if config.skipNewOrbit() then
-                        continue;
-                    fi;
                     num := make_orbit(x);
                     rep := config.getQuality(num);
                     if rep < upb then
-                             // CAJ - Support bailing out early when a smaller
-                             // set is found
-                        if early_exit[1] and rep < early_exit[2][depth] then
-                            return [MinImage.Smaller, l];
-                        fi;
-                             // END of bailing out early
                         upb := rep;
                         node2 := node.prev;
                         while node2 <> fail do
@@ -458,10 +457,6 @@ _NewSmallestImage := function(g, set, k, early_exit, config_option)
             fi;
             node := next_node(node);
         od;
-        // CAJ - Support bailing out early when a larger set is found
-        if early_exit[1] and upb > early_exit[2][depth] then
-            return [MinImage.Larger, l];
-        fi;
         /*
         # Second pass. Actually make all the red nodes and turn them blue
         */
