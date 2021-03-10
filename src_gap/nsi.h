@@ -119,6 +119,17 @@ StabChain<Telt> Action(StabChain<Telt> const& S, std::vector<int> const& set)
   return Group<Telt,Tint>(LGen, siz);
 }
 
+template<typename Telt>
+std::vector<int> OnTuples(std::vector<int> const& V, Telt const& g)
+{
+  std::vector<int> retV(V.size());
+  for (size_t i=0; i<V.size(); i++) {
+    retV[i] = PowAct(V[i], g);
+  }
+  return retV;
+}
+
+
 
 /*
   Modification done:
@@ -206,7 +217,7 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
   // Node exploration functions
   auto leftmost_node =[&](int const& depth) -> NodePtr {
     NodePtr n = root;
-    while (n.selected.size() < depth - 1) {
+    while (int(n->selected.size()) < depth - 1) {
       n = n->children[0];
     }
     return n;
@@ -221,7 +232,7 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
     return n;
   };
   //Delete a node, and recursively deleting all it's children.
-  std::function<void(NodePtr)> delete_node=[&](NodePtr & node) -> void {
+  std::function<void(NodePtr &)> delete_node=[&](NodePtr & node) -> void {
     if (node->deleted) {
       return;
     }
@@ -237,7 +248,7 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
       if (node->parent->children.size() == 0) {
         delete_node(node->parent);
       } else {
-        for (int i=node->childno; i<node->parent->children.size(); i++) {
+        for (int i=node->childno; i<int(node->parent->children.size()); i++) {
           node->parent->children[i]->childno = i;
         }
       }
@@ -254,7 +265,7 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
 
   // Filter nodes by stabilizer group,
   // Updates the stabilizer group of the node,
-  std::function<void(NodePtr)> clean_subtree =[&](NodePtr & node) -> void {
+  std::function<void(NodePtr &)> clean_subtree =[&](NodePtr & node) -> void {
     if (!node->IsBoundChildren)
       return;
     std::vector<NodePtr> bad;
@@ -487,7 +498,8 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
               delete_node(node2);
               node2 = node2->prev;
             }
-            node->validkids = {y};
+            node->validkids.clear();
+            node->validkids.push_back(y);
           }
         } else {
           int rep = orbmins[num];
@@ -521,7 +533,7 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
         node = next_node(node);
       }
       s = s->stabilizer;
-      if (int(leftmost_node(depth+1).selected.size()) != m) {
+      if (int(leftmost_node(depth+1)->selected.size()) != m) {
         do_continue = true;
       }
     }
@@ -538,7 +550,7 @@ ResultCanonicalization<Telt> NewSmallestImage(StabChain<Telt> const& g, std::vec
           std::vector<int> selected = node->selected;
           selected.push_back(x);
           newnode_v.selected = selected;
-          newnode_v.substab = Stabilizer_OnPoints(node->substab, x);
+          newnode_v.substab = Stabilizer_OnPoints<Telt,Tint>(node->substab, x);
           newnode_v.parent = node;
           newnode_v.childno = node->children.size();
           newnode_v.next = nullptr;
