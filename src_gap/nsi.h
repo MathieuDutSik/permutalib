@@ -378,7 +378,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
   if (set.size() == 0) {
     return {};
   }
-  size_t depth;
+  int depth;
   for (depth=0; depth<m; depth++) {
     std::vector<Telt> gens = GetListGenerators(s);
     std::vector<int> orbnums(n,-1);

@@ -1,4 +1,3 @@
-#include "list.h"
 #include "Permutation.h"
 #include "StabChainMain.h"
 #include "gmpxx.h"
