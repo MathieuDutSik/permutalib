@@ -238,7 +238,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
     std::cerr << "CPP Beginning of leftmost_node\n";
 #endif
     NodePtr n = root;
-    while (int(n->selected.size()) < depth - 1) {
+    while (int(n->selected.size()) < depth) {
       n = n->children[0];
     }
     return n;
@@ -403,6 +403,9 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
   }
   int depth;
   for (depth=0; depth<m; depth++) {
+#ifdef DEBUG_NSI
+    std::cerr << "CPP depth=" << (depth+1) << "\n";
+#endif
     std::vector<Telt> gens = GetListGenerators(s);
     std::vector<int> orbnums(n,-1);
     std::vector<int> orbmins;
@@ -606,6 +609,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
           node->selectedbaselength = node->selected.size();
         }
         node->selected.push_back(node->validkids[0]);
+        std::cerr << "CPP Now node.selected=" << GapStringIntVector(node->selected) << "\n";
         node = next_node(node);
       }
       s = s->stabilizer;
@@ -621,6 +625,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
       while (node != nullptr) {
         node->IsBoundChildren = false;
         node->children.clear();
+        std::cerr << "CPP node.validkids=" << GapStringIntVector(node->validkids) << "\n";
         for (auto & x : node->validkids) {
           Node newnode_v;
           std::vector<int> selected = node->selected;
@@ -632,6 +637,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
           newnode_v.next = nullptr;
           newnode_v.prev = prevnode;
           newnode_v.deleted = false;
+          std::cerr << "CPP newnode.selected=" << GapStringIntVector(selected) << "\n";
           NodePtr newnode = std::make_shared<Node>(newnode_v);
           nodect = nodect + 1;
           if (prevnode != nullptr) {
