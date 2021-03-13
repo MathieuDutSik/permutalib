@@ -37,11 +37,9 @@ int main(int argc, char *argv[])
     }
     std::cerr.setf(std::ios::boolalpha);
     //
-    std::cerr << "CPP Before call to MinimalStabChain\n";
     //    permutalib::StabChain<Telt> eG = permutalib::MinimalStabChain<Telt,Tint>(LGen, n);
     permutalib::StabChain<Telt> eG = permutalib::Group<Telt,Tint>(LGen, n);
-    std::cerr << "CPP After call to MinimalStabChain\n";
-    std::cerr << "CPP eG=" << eG << "\n";
+    //    std::cerr << "CPP eG=" << eG << "\n";
     //
     std::cerr << "CPP |eG|=" << permutalib::Order<Telt,Tint>(eG) << "\n";
     //

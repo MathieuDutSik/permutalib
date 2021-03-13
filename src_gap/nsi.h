@@ -152,13 +152,16 @@ template<typename Telt, typename Tint>
 std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> const& set, StabChain<Telt> const& k)
 {
 #ifdef DEBUG_NSI
-  std::cerr << "CPP NewSmallestImage, beginning\n";
+  std::cerr << "CPP NewSmallestImage : beginning\n";
 #endif
   int infinity = 10 + g->comm->n;
   int initial_upb = infinity;
 
 
   auto calculateBestOrbit=[&](std::vector<int> const& orbmins, std::vector<int> const& orbitCounts, std::vector<int> const& orbsizes) -> int {
+#ifdef DEBUG_NSI
+    std::cerr << "CPP Beginning of calculateBestOrbit\n";
+#endif
     auto selector=[&](int const& i) -> double {
       if (orbsizes[i] == 1) {
         return - std::pow(2.0, 32.0) + orbitCounts[i];
@@ -231,6 +234,9 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
 
   // Node exploration functions
   auto leftmost_node =[&](int const& depth) -> NodePtr {
+#ifdef DEBUG_NSI
+    std::cerr << "CPP Beginning of leftmost_node\n";
+#endif
     NodePtr n = root;
     while (int(n->selected.size()) < depth - 1) {
       n = n->children[0];
@@ -238,6 +244,9 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
     return n;
   };
   auto next_node =[&](NodePtr const& node) -> NodePtr {
+#ifdef DEBUG_NSI
+    std::cerr << "CPP Beginning of next_node\n";
+#endif
     NodePtr n = node;
     while (true) {
       n = n->next;
@@ -248,6 +257,9 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
   };
   //Delete a node, and recursively deleting all it's children.
   std::function<void(NodePtr &)> delete_node=[&](NodePtr & node) -> void {
+#ifdef DEBUG_NSI
+    std::cerr << "CPP Beginning of delete_node\n";
+#endif
     if (node->deleted) {
       return;
     }
@@ -281,6 +293,9 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
   // Filter nodes by stabilizer group,
   // Updates the stabilizer group of the node,
   std::function<void(NodePtr &)> clean_subtree =[&](NodePtr & node) -> void {
+#ifdef DEBUG_NSI
+    std::cerr << "CPP Beginning of clean_subtree\n";
+#endif
     if (!node->IsBoundChildren)
       return;
     std::vector<NodePtr> bad;
@@ -347,6 +362,9 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
   // Given a group 'gp' and a set 'set', find orbit representatives
   // of 'set' in 'gp' simply.
   auto simpleOrbitReps=[&](StabChain<Telt> const& gp, std::vector<int> const& set) -> std::vector<int> {
+#ifdef DEBUG_NSI
+    std::cerr << "CPP Beginning of simpleOrbitReps\n";
+#endif
     int m = set.size();
     int n = set[m-1];
     Face b = BlistList(ClosedInterval(0,n+1), set); // Check the n+1 here
@@ -392,6 +410,9 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
     int upb = initial_upb;
     // Make orbit of x, updating orbnums, orbmins and orbsizes as approriate.
     auto make_orbit=[&](int const& x) -> int {
+#ifdef DEBUG_NSI
+      std::cerr << "CPP Beginning of make_orbit\n";
+#endif
       if (orbnums[x] != -1) {
         return orbnums[x];
       }
