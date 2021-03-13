@@ -1,8 +1,6 @@
 #ifndef DEFINE_STAB_CHAIN_H
 #define DEFINE_STAB_CHAIN_H
 
-#define DEBUG_PERMUTALIB
-
 /*
   Version of the code used. It must be from Summer 2016.
  */
@@ -39,8 +37,10 @@
 #include "COMB_Vectors.h"
 
 // Needed for the comparison with 
-#define DEBUG_STABCHAIN
-#define DEBUG_CHANGE_STAB_CHAIN
+#ifdef SYNCHRONIZED_DEBUG_GAP478
+# define DEBUG_STABCHAIN
+# define DEBUG_CHANGE_STAB_CHAIN
+#endif
 
 // Other debugging.(but not currently in the gap stuff)
 #undef DEBUG_ADD_GEN_SCH
@@ -1029,7 +1029,7 @@ std::vector<StabChain<Telt>> ListStabChain(StabChain<Telt> const& S)
 template<typename Telt>
 StabChain<Telt> StabChainBaseStrongGenerators(std::vector<int> const& base, std::vector<Telt> const& sgs)
 {
-#ifdef DEBUG_PERMUTALIB
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   if (sgs.size() == 0) {
     std::cerr << "sgs is empty. StabChainBaseStrongGenerators is broken in that case\n";
     throw PermutalibException{1};
@@ -1234,8 +1234,7 @@ void ChooseNextBasePoint(StabChain<Telt> & S, std::vector<int> const& base, std:
   if (S->orbit.size() > 0) {
     bpt = S->orbit[0];
     pos = PositionVect(base, bpt);
-  }
-  else {
+  } else {
     bpt = S->comm->n + 444; // value in GAP is infinity
     pos = -1;
   }
@@ -1386,8 +1385,7 @@ bool StabChainForcePoint(StabChain<Telt> & Stot, int const& pnt)
       std::cerr << "CPP Matching the second test\n";
 #endif
       InsertTrivialStabilizer(Stot, pnt);
-    }
-    else {
+    } else {
       if (!StabChainForcePoint(Stot->stabilizer, pnt) || !StabChainSwap(Stot)) {
 #ifdef DEBUG_STABCHAIN
         std::cerr << "CPP StabChainForcePoint, return false\n";
@@ -1754,7 +1752,7 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
             KeyUpdating("After InsertTrivialStabilizer");
 #endif
 	  }
-#ifdef DEBUG_PERMUTALIB
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
 	  else {
 	    std::cerr << "CPP <base> must be an extension of base of <G>\n";
 	    throw PermutalibException{1};

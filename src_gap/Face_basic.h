@@ -1,5 +1,5 @@
-#ifndef INCLUDE_FACE_BASIC_H
-#define INCLUDE_FACE_BASIC_H
+#ifndef DEFINE_FACE_BASIC_H
+#define DEFINE_FACE_BASIC_H
 
 #include <iostream>
 #include "exception.h"

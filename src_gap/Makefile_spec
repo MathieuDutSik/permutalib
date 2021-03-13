@@ -15,7 +15,7 @@ CC		= g++ -std=c++17 -Wall -g -O2
 NOLINKFLAG 	= -c
 OUTPUTFLAG 	= -o
 
-CLOCAL          = -I../src_number -I../src_basic -I../src_comb
+CLOCAL          = -I../src_number -I../src_basic -I../src_comb -DPERMUTALIB_BLOCKING_SANITY_CHECK
 
 CFLAGS 		= -I$(GMP_INCDIR) -I$(BOOST_INCDIR)
 

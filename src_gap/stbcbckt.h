@@ -18,7 +18,9 @@
 ##
 */
 
-#define DEBUG_STBCBCKT
+#ifdef SYNCHRONIZED_DEBUG_GAP478
+# define DEBUG_STBCBCKT
+#endif
 
 namespace permutalib {
 

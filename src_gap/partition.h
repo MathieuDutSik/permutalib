@@ -3,8 +3,15 @@
 
 #include "PermGroup.h"
 
-#define DEBUG_PARTITION
-#define CHECK_PARTITION
+#ifdef SYNCHRONIZED_DEBUG_GAP478
+# define DEBUG_PARTITION
+#endif
+
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+# define CHECK_PARTITION
+#endif
+
+
 
 namespace permutalib {
 
@@ -309,6 +316,8 @@ int SplitCell_Kernel(Partition & P, int const& i, std::function<bool(int)> const
 #endif
 #ifdef CHECK_PARTITION
   CheckConsistencyPartition("Output SplitCell_Kernel", P);
+#endif
+#ifdef DEBUG_PARTITION
   std::cerr << "CPP exit 3\n";
 #endif
   return P.lengths[m];
