@@ -1,5 +1,5 @@
-#ifndef INCLUDE_NEW_SMALLEST_IMAGE
-#define INCLUDE_NEW_SMALLEST_IMAGE
+#ifndef DEFINE_NSI_H
+#define DEFINE_NSI_H
 
 #include "StabChain.h"
 #include "stbcbckt.h"
@@ -60,6 +60,9 @@
 # tree. Continue with surviving nodes at current level.
 
 */
+
+
+#define DEBUG_NSI
 
 
 namespace permutalib {
@@ -148,7 +151,9 @@ std::vector<T> Set(std::vector<T> const& V)
 template<typename Telt, typename Tint>
 std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> const& set, StabChain<Telt> const& k)
 {
-
+#ifdef DEBUG_NSI
+  std::cerr << "CPP NewSmallestImage, beginning\n";
+#endif
   int infinity = 10 + g->comm->n;
   int initial_upb = infinity;
 

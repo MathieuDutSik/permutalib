@@ -1,5 +1,5 @@
-#ifndef INCLUDE_FACE_BITSET
-#define INCLUDE_FACE_BITSET
+#ifndef INCLUDE_FACE_BASIC_H
+#define INCLUDE_FACE_BASIC_H
 
 #include <iostream>
 #include "exception.h"

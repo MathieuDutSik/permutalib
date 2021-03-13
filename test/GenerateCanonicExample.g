@@ -39,7 +39,7 @@ CreateExampleOnSetCase:=function(FileName, GRP, eSet)
   Print("GAP |eG|=", Order(GRP), "\n");
   Print("GAP Before Stabilizer_OnSets\n");
   eSetCan:=CanonicalImage(GRP, eSet, OnSets);
-  Print("|eSetCan|=", Order(eSetCan), "\n");
+  Print("eSetCan=", eSetCan, "\n");
 end;
 
 

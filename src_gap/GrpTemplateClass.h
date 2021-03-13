@@ -1,5 +1,5 @@
-#ifndef GRP_TEMPLATE_CLASS_H
-#define GRP_TEMPLATE_CLASS_H
+#ifndef DEFINE_GRP_TEMPLATE_CLASS_H
+#define DEFINE_GRP_TEMPLATE_CLASS_H
 
 
 namespace permutalib {

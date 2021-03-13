@@ -1,5 +1,5 @@
-#ifndef DEFINE_PARTITION_CODE
-#define DEFINE_PARTITION_CODE
+#ifndef DEFINE_PARTITION_H
+#define DEFINE_PARTITION_H
 
 #include "PermGroup.h"
 

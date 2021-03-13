@@ -1,5 +1,5 @@
-#ifndef INCLUDE_PERMUTATION_GROUP
-#define INCLUDE_PERMUTATION_GROUP
+#ifndef DEFINE_PERMUTATION_H
+#define DEFINE_PERMUTATION_H
 
 #include <vector>
 #include <stdlib.h>

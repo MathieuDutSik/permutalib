@@ -1,5 +1,5 @@
-#ifndef SRC_GAP_LIST_H
-#define SRC_GAP_LIST_H
+#ifndef DEFINE_LIST_H
+#define DEFINE_LIST_H
 
 
 #include <vector>

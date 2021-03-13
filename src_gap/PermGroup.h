@@ -1,5 +1,5 @@
-#ifndef DEFINE_INCLUDE_PERM_GROUP
-#define DEFINE_INCLUDE_PERM_GROUP
+#ifndef DEFINE_PERM_GROUP_H
+#define DEFINE_PERM_GROUP_H
 
 #include "Face_basic.h"
 

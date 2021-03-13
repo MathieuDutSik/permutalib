@@ -1,5 +1,5 @@
-#ifndef GAP_PRINT_INCLUDE
-#define GAP_PRINT_INCLUDE
+#ifndef DEFINE_GAP_PRINT_H
+#define DEFINE_GAP_PRINT_H
 
 #include <iostream>
 #include <sstream>

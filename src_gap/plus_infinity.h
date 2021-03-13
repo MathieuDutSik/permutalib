@@ -1,5 +1,5 @@
-#ifndef PLUS_INFINITY_INCLUDE
-#define PLUS_INFINITY_INCLUDE
+#ifndef DEFINE_PLUS_INFINITY_H
+#define DEFINE_PLUS_INFINITY_H
 
 #include <iostream>
 

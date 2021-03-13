@@ -1,5 +1,5 @@
-#ifndef DEFINE_BLOCK_SYSTEM_H
-#define DEFINE_BLOCK_SYSTEM_H
+#ifndef DEFINE_BLOCK_SYSTEMS_H
+#define DEFINE_BLOCK_SYSTEMS_H
 
 #include "Face_basic.h"
 #include "GraphicFunctionality.h"

@@ -1,5 +1,5 @@
-#ifndef DEFINE_INCLUDE_STAB_CHAIN_RANDOM
-#define DEFINE_INCLUDE_STAB_CHAIN_RANDOM
+#ifndef DEFINE_STBCRAND_H
+#define DEFINE_STBCRAND_H
 
 // Functions return type
 // SCRSift           : returns permutation
