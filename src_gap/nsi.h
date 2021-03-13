@@ -411,15 +411,25 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
     // Make orbit of x, updating orbnums, orbmins and orbsizes as approriate.
     auto make_orbit=[&](int const& x) -> int {
 #ifdef DEBUG_NSI
-      std::cerr << "CPP Beginning of make_orbit\n";
+      if (orbnums[x] == -1) {
+        std::cerr << "CPP Beginning of make_orbit x=" << (x+1) << " orbnums[x]=" << (-1) << "\n";
+      } else {
+        std::cerr << "CPP Beginning of make_orbit x=" << (x+1) << " orbnums[x]=" << (orbnums[x]+1) << "\n";
+      }
 #endif
       if (orbnums[x] != -1) {
         return orbnums[x];
       }
+#ifdef DEBUG_NSI
+      std::cerr << "CPP After check\n";
+#endif
       std::vector<int> q = {x};
       int rep = x;
-      int num = orbmins.size() + 1;
+      int num = orbmins.size();
       orbnums[x] = num;
+#ifdef DEBUG_NSI
+      std::cerr << "CPP 1 : x=" << (x+1) << " Assign orbnums[x]=" << (orbnums[x] + 1) << "\n";
+#endif
       size_t pos=0;
       while (true) {
         size_t idx, qsiz = q.size();
@@ -429,6 +439,9 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
             int img = PowAct(pt, gen);
             if (orbnums[img] == -1) {
               orbnums[img] = num;
+#ifdef DEBUG_NSI
+              std::cerr << "CPP 2 : img=" << (img+1) << " Assign orbnums[img]=" << (orbnums[img] + 1) << "\n";
+#endif
               q.push_back(img);
               if (img < rep) {
                 rep = img;
@@ -440,6 +453,9 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
           break;
         pos = idx;
       }
+#ifdef DEBUG_NSI
+      std::cerr << "CPP make_orbit rep=" << (rep+1) << " |q|=" << q.size() << " num=" << (num+1) << "\n";
+#endif
       orbmins.push_back(rep);
       orbsizes.push_back(q.size());
       return num;
@@ -453,16 +469,34 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
     std::vector<int> minOrbitMset = {infinity};
     NodePtr node = leftmost_node(depth);
     while (node != nullptr) {
+#ifdef DEBUG_NSI
+      std::cerr << "CPP m=" << m << " node.selected=" << GapStringIntVector(node->selected) << "\n";
+#endif
       std::vector<int> cands = DifferenceVect(ClosedInterval(0,m), node->selected);
+#ifdef DEBUG_NSI
+      std::cerr << "CPP 1 : cands=" << GapStringIntVector(cands) << "\n";
+#endif
 
       std::vector<int> orbitMset;
       for (auto & y : cands) {
         int x = node->image[y];
         int num = make_orbit(x);
+#ifdef DEBUG_NSI
+        std::cerr << "CPP x=" << (x+1) << " num=" << (num+1) << "\n";
+#endif
         orbitMset.push_back(orbmins[num]);
       }
+#ifdef DEBUG_NSI
+      std::cerr << "CPP bef orbitMset=" << GapStringIntVector(orbitMset) << "\n";
+#endif
       std::sort(orbitMset.begin(), orbitMset.end());
+#ifdef DEBUG_NSI
+      std::cerr << "CPP aft orbitMset=" << GapStringIntVector(orbitMset) << "\n";
+#endif
       if (orbitMset < minOrbitMset) {
+#ifdef DEBUG_NSI
+        std::cerr << "CPP orbitMset comparison case 1\n";
+#endif
         minOrbitMset = orbitMset;
         NodePtr node2 = node->prev;
         while (node2 != nullptr) {
@@ -471,6 +505,9 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
         }
       } else {
         if (orbitMset > minOrbitMset) {
+#ifdef DEBUG_NSI
+          std::cerr << "CPP orbitMset comparison case 2\n";
+#endif
           delete_node(node);
         }
       }
@@ -481,6 +518,9 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
     node = leftmost_node(depth);
     while (node != nullptr) {
       std::vector<int> cands = DifferenceVect(ClosedInterval(0, m), node->selected);
+#ifdef DEBUG_NSI
+      std::cerr << "CPP 2 : cands=" << GapStringIntVector(cands) << "\n";
+#endif
       if (cands.size() > 1 && !IsTrivial(node->substab)) {
         cands = simpleOrbitReps(node->substab, cands);
       }
@@ -502,6 +542,9 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
     node = leftmost_node(depth);
     while (node != nullptr) {
       std::vector<int> cands = DifferenceVect(ClosedInterval(0,m), node->selected);
+#ifdef DEBUG_NSI
+      std::cerr << "CPP 3 : cands=" << GapStringIntVector(cands) << "\n";
+#endif
       if (cands.size() > 1 && !IsTrivial(node->substab)) {
         cands = simpleOrbitReps(node->substab, cands);
       }
