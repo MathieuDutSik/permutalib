@@ -1813,7 +1813,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
       if (Ph[eVal] == 0)
 	DiffVect.push_back(eVal);
     }
-    std::cerr << "CPP IntVect=" << GapStringIntVector(IntVect) << " DiffVect=" << GapStringIntVector(DiffVect) << "\n";
+    //    std::cerr << "CPP IntVect=" << GapStringIntVector(IntVect) << " DiffVect=" << GapStringIntVector(DiffVect) << "\n";
     return GetPartition({IntVect, DiffVect});
   };
 

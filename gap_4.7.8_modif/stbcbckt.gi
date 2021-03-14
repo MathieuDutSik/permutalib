@@ -2634,11 +2634,11 @@ InstallGlobalFunction( RepOpSetsPermGroup, function( arg )
         return fail;
     fi;
 
-    Print("GAP IntVect=", Intersection( Omega, Phi ), " DiffVect=", Difference( Omega, Phi ), "\n");
+#    Print("GAP IntVect=", Intersection( Omega, Phi ), " DiffVect=", Difference( Omega, Phi ), "\n");
     P := Partition( [ Intersection( Omega, Phi ),
                         Difference( Omega, Phi ) ] );
     if repr  then
-        Print("GAP IntVect=", Intersection( Omega, Psi ), " DiffVect=", Difference( Omega, Psi ), "\n");
+#        Print("GAP IntVect=", Intersection( Omega, Psi ), " DiffVect=", Difference( Omega, Psi ), "\n");
         Q := Partition( [ Intersection( Omega, Psi ),
                                        Difference( Omega, Psi ) ] );
              else  Q := P;                                            fi;

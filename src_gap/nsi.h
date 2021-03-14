@@ -637,7 +637,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
           std::vector<int> selected = node->selected;
           selected.push_back(x);
           newnode_v.selected = selected;
-          PrintStabChain(node->substab);
+          //          PrintStabChain(node->substab);
           std::cerr << "DEBUG Before Stabilize_OnPoints x=" << (x+1) << "\n";
           newnode_v.substab = Stabilizer_OnPoints<Telt,Tint>(node->substab, x);
           std::cerr << "DEBUG After Stabilize_OnPoints\n";
@@ -694,7 +694,9 @@ Face CanonicalImage(StabChain<Telt> const& g, Face const& set)
   }
   StabChain<Telt> k = Stabilizer_OnSets<Telt,Tint>(g, set);
   Face ret(set.size());
-  for (auto & eVal : NewSmallestImage<Telt,Tint>(g, set_i, k)) {
+  std::vector<int> eSetCan = NewSmallestImage<Telt,Tint>(g, set_i, k);
+  std::cerr << "CPP eSetCan=" << GapStringIntVector(eSetCan) << "\n";
+  for (auto & eVal : eSetCan) {
     ret[eVal] = 1;
   }
   return ret;
