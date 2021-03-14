@@ -108,6 +108,65 @@ end;
 
 
 
+TestSpecificGroupSet_Canonical:=function(nbMov, eGRP, eSet)
+    local eDir, FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, eSet1, eSet2, test;
+    Print("Treating one pair Group/Set eSet=", eSet, "\n");
+    if Maximum(eSet) > nbMov then
+        Error("The eSet is too large");
+    fi;
+    eDir:="/tmp/DebugStabOnSets_datarun/";
+    eCommand:=Concatenation("mkdir -p ", eDir);
+    Exec(eCommand);
+    #
+    FileName:=Concatenation(eDir, "Input");
+    RemoveFileIfExist(FileName);
+    output:=OutputTextFile(FileName, true);
+    LGen:=GeneratorsOfGroup(eGRP);
+    AppendTo(output, Length(LGen), " ", nbMov, "\n");
+    for eGen in LGen
+    do
+        for iMov in [1..nbMov]
+        do
+            eImg:=OnPoints(iMov, eGen);
+            AppendTo(output, " ", eImg-1);
+        od;
+        AppendTo(output, "\n");
+    od;
+    #
+    for iMov in [1..nbMov]
+    do
+        pos:=Position(eSet, iMov);
+        if pos=fail then
+            eVal:=0;
+        else
+            eVal:=1;
+        fi;
+        AppendTo(output, " ", eVal);
+    od;
+    AppendTo(output, "\n");
+    CloseStream(output);
+    #
+    eBinary:="/home/mathieu/GITall/GIT/permutalib/src_gap/GapCanonicalImage";
+    FileErr:=Concatenation(eDir, "CppError");
+    FileRes:=Concatenation(eDir, "GapOutput");
+    eCommand:=Concatenation(eBinary, " ", FileName, " 2> ", FileErr, " ", FileRes);
+    Exec(eCommand);
+    #
+    eSet1:=CanonicalImage(eGRP, eSet, OnSets);
+    eSet2:=ReadAsFunction(FileRes)();
+    test:=eSet1=eSet2;
+    if test=false then
+        Error("Found some error. Please debug");
+    fi;
+    RemoveFileIfExist(FileName);
+    RemoveFileIfExist(FileErr);
+    RemoveFileIfExist(FileRes);
+end;
+
+
+
+
+
 
 TestSpecificGroupSet_Equivalence:=function(nbMov, eGRP, eSet, fSet)
     local eDir, FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, eTest1, eTest2;
@@ -219,6 +278,13 @@ TestSpecificGroup:=function(method, size_opt, nbMov, eGRP)
                 TestSpecificGroupSet_Equivalence(nbMov, eGRP, eSet, fSet);
             od;
         fi;
+        if method="canonical" then
+            for i in [1..5]
+            do
+                eSet:=Local_RandomSubset([1..nbMov], sizSet);
+                TestSpecificGroupSet_Canonical(nbMov, eGRP, eSet);
+            od;
+        fi;
     od;
 end;
 
@@ -235,13 +301,12 @@ TestAllGroups:=function(method, size_opt)
     do
         eGRP:=ListGroups[iGRP];
         nMov:=LargestMovedPoint(eGRP);
-#        if Position([1,2], iGRP) = fail then
-            Print("    iGRP=", iGRP, " / ", nbGroups, " nMov=", nMov, "\n");
-            TestSpecificGroup(method, size_opt, nMov, eGRP);
-#        fi;
+        Print("    iGRP=", iGRP, " / ", nbGroups, " nMov=", nMov, "\n");
+        TestSpecificGroup(method, size_opt, nMov, eGRP);
     od;
 end;
 
 
 #TestAllGroups("stabilizer", 1);
 TestAllGroups("equivalence", 1);
+TestAllGroups("canonical", 1);
