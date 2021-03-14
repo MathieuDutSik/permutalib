@@ -214,6 +214,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
     std::vector<int> validkids;
   };
   using NodePtr = std::shared_ptr<Node>;
+  std::vector<NodePtr> ListPtr;
 
   int n = std::max(LargestMovedPoint(StrongGeneratorsStabChain(g)), set[set.size()-1]);
   StabChain<Telt> s = CopyStabChain(g);
@@ -231,6 +232,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
   root_v.selectedbaselength = -1;
   root_v.IsBoundChildren = false;
   NodePtr root = std::make_shared<Node>(root_v);
+  ListPtr.push_back(root);
 
   // Node exploration functions
   auto leftmost_node =[&](int const& depth) -> NodePtr {
@@ -396,9 +398,19 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
     }
     return reps;
   };
-
-
+  // We need to break all the cycles in order to the memory free to happen correctly.
+  // We use a hack in order to get that behavior: A vector of all the nodes, then
+  // set the pointer to zero and so all cycles eliminated.
+  // Maybe we could do better, but the hack should be adequate.
+  auto free_all_nodes=[&]() -> void {
+    for (auto & e_node : ListPtr) {
+      e_node->prev=nullptr;
+      e_node->next=nullptr;
+      e_node->parent=nullptr;
+    }
+  };
   if (set.size() == 0) {
+    free_all_nodes();
     return {};
   }
   int depth;
@@ -649,6 +661,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
           newnode_v.IsBoundChildren = false;
           std::cerr << "CPP newnode.selected=" << GapStringIntVector(selected) << "\n";
           NodePtr newnode = std::make_shared<Node>(newnode_v);
+          ListPtr.push_back(newnode);
           nodect = nodect + 1;
           if (prevnode != nullptr) {
             prevnode->next = newnode;
@@ -680,6 +693,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
       }
     }
   }
+  free_all_nodes();
   return leftmost_node(depth+1)->image;
 }
 
