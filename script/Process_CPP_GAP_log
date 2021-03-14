@@ -178,7 +178,7 @@ def process_lines(l_linesA):
 #    print("l_linesD=", l_linesD, "\n")
 #    print("l_linesE=", l_linesE, "\n")
     print("l_lines |A|=", len(l_linesA), " |B|=", len(l_linesB), " |C|=", len(l_linesC), " |D|=", len(l_linesD), " |E|=", len(l_linesE), " |F|=", len(l_linesF), " |G|=", len(l_linesG), " |H|=", len(l_linesH))
-    return l_linesG
+    return l_linesH
 
 
 

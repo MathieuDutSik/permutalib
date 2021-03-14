@@ -2634,9 +2634,12 @@ InstallGlobalFunction( RepOpSetsPermGroup, function( arg )
         return fail;
     fi;
 
+    Print("GAP IntVect=", Intersection( Omega, Phi ), " DiffVect=", Difference( Omega, Phi ), "\n");
     P := Partition( [ Intersection( Omega, Phi ),
                         Difference( Omega, Phi ) ] );
-    if repr  then  Q := Partition( [ Intersection( Omega, Psi ),
+    if repr  then
+        Print("GAP IntVect=", Intersection( Omega, Psi ), " DiffVect=", Difference( Omega, Psi ), "\n");
+        Q := Partition( [ Intersection( Omega, Psi ),
                                        Difference( Omega, Psi ) ] );
              else  Q := P;                                            fi;
 
@@ -2688,13 +2691,14 @@ InstallGlobalFunction( RepOpSetsPermGroup, function( arg )
     else
         R := L;
     fi;
-    Print(" Orders: |R|=", Order(R), " |L|=", Order(L), "\n");
+    Print("GAP Orders: |R|=", Order(R), " |L|=", Order(L), "\n");
 #    Print("Lengths: |R|=", Length(R), " |L|=", Length(L), "\n");
 
 
     # Construct an R-base.
     rbase := EmptyRBase( [ G, G ], Omega, P );
     rbase.nextLevel := NextRBasePoint;
+#    Print("GAP RepOpSetsPermGroup rbase.level2.status=", rbase.level2.status, "\n");
 
     #Pr := gen -> IsSubsetSet( OnTuples( Phi, gen ), Psi );
 

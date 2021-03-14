@@ -1115,12 +1115,14 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP PBEnumerate, step 4 d=" << (d+1) << " |rbase.base|=" << rbase.base.size() << "\n";
     PrintRBaseLevel(rbase, "CPP Step 4");
-    std::cerr << "CPP |L|=" << L_list.size() << "\n";
-    if (L_list.size() > 0)
+    if (L_list.size() > 0) {
+      std::cerr << "CPP |L|=" << L_list.size() << "\n";
       PrintListStabCommPartition("CPP Step 4", L_list);
-    std::cerr << "CPP |R|=" << R_list.size() << "\n";
-    if (R_list.size() > 0)
+    }
+    if (R_list.size() > 0) {
+      std::cerr << "CPP |R|=" << R_list.size() << "\n";
       PrintListStabCommPartition("CPP Step 4", R_list);
+    }
 #endif
     // Recursion comes to an end  if all base  points have been prescribed
     // images.
@@ -1811,6 +1813,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
       if (Ph[eVal] == 0)
 	DiffVect.push_back(eVal);
     }
+    std::cerr << "CPP IntVect=" << GapStringIntVector(IntVect) << " DiffVect=" << GapStringIntVector(DiffVect) << "\n";
     return GetPartition({IntVect, DiffVect});
   };
 
@@ -1849,9 +1852,9 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
   std::cerr << "CPP Orders: |R|=" << SizeStabChain<Telt,Tint>(R) << " |L|=" << SizeStabChain<Telt,Tint>(L) << "\n";
 #endif
   rbaseType<Telt> rbase = EmptyRBase<Telt>({G, G}, true, Omega, P);
-#ifdef DEBUG_STBCBCKT
-  std::cerr << "CPP RepOpSetsPermGroup rbase.level2.status=" << GetIntTypeNature(rbase.level2.status) << "\n";
-#endif
+  //#ifdef DEBUG_STBCBCKT
+  //  std::cerr << "CPP RepOpSetsPermGroup rbase.level2.status=" << GetIntTypeNature(rbase.level2.status) << "\n";
+  //#endif
   std::vector<int> Phi_vect = FaceToVector(Phi);
   std::function<bool(Telt const&)> Pr=[&](Telt const& gen) -> bool {
     for (auto & i : Phi_vect) {
@@ -1863,8 +1866,6 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
   };
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Before call to PartitionBacktrack\n";
-  std::cerr << "CPP bool=" << rbase.level2.Stot->IsBoundCycle << "\n";
-  std::cerr << "CPP After bool print\n";
 #endif
   dataType data(Q);
   return PartitionBacktrack<Telt,Tint>( G, Pr, repr, rbase, data, L, R );

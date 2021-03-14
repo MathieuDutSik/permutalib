@@ -225,7 +225,7 @@ InstallMethod( StabChainOp,"trivial group",
   [ IsPermGroup and IsTrivial, IsRecord ],
     function( G, options )
     local   S,  T,  pnt;
-    Print("GAP Call to StabChainOp (trivial group)\n");
+#    Print("GAP Call to StabChainOp (trivial group)\n");
 
     S := EmptyStabChain( [  ], One( G ) );
     if     IsBound( options.base )

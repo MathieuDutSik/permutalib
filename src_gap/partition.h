@@ -70,8 +70,13 @@ void RawPrintPartition(Partition const& P)
 void CheckConsistencyPartition(std::string const& str, Partition const& P)
 {
   int nbError=0;
-  if (P.cellno.size() != P.points.size()) {
-    std::cerr << "1: P.cellno and P.points have different lengths\n";
+  int Max_points=-1;
+  for (auto & eVal : P.points)
+    if (eVal > Max_points)
+      Max_points = eVal;
+  Max_points++;
+  if (int(P.cellno.size()) != Max_points) {
+    std::cerr << "1: We should have |P.cellno| = Maximum(P.points) (at least, that's true at init)\n";
     nbError++;
   }
   if (P.firsts.size() != P.lengths.size()) {
@@ -87,12 +92,12 @@ void CheckConsistencyPartition(std::string const& str, Partition const& P)
       std::cerr << "3: Error, iPart=" << iPart << " but nbPart=" << nbPart << "\n";
       nbError++;
     }
-    if (iPart < nbPart)
+    if (iPart >= 0 && iPart < nbPart)
       MeasuredLength[iPart]++;
   }
   for (int iPart=0; iPart<nbPart; iPart++) {
     if (MeasuredLength[iPart] != P.lengths[iPart]) {
-      std::cerr << "4: At iPart=" << iPart << " we have error in lengths\n";
+      std::cerr << "4: At iPart=" << iPart << " we have error in lengths: MeasuredLength[iPart]=" << MeasuredLength[iPart] << " and P.lengths[iPart]=" << P.lengths[iPart] << "\n";
       nbError++;
     }
     if (MeasuredLength[iPart] == 0) {
@@ -133,14 +138,18 @@ Partition GetPartition(std::vector<std::vector<int>> const& list)
   std::cerr << "CPP list=" << GapStringTVector(LStr) << "\n";
 #endif
   std::vector<int> points;
+  int Max_NbPoint = -1;
   for (auto & eList : list)
-    for (auto & eVal : eList)
+    for (auto & eVal : eList) {
       points.push_back(eVal);
-  int nbPoint=points.size();
+      if (eVal > Max_NbPoint)
+        Max_NbPoint = eVal;
+    }
+  int nbPoint=Max_NbPoint+1;
   int nbPart=list.size();
   std::vector<int> firsts(nbPart);
   std::vector<int> lengths(nbPart);
-  std::vector<int> cellno(nbPoint);
+  std::vector<int> cellno(nbPoint, -1);
   int i=0;
   for (int iPart=0; iPart<nbPart; iPart++) {
     int len=list[iPart].size();
