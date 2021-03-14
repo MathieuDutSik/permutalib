@@ -926,6 +926,7 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
                 fi;
             fi;
         else
+            Print("GAP Before s:=s.stabilizer operation\n");
             s := s.stabilizer;
         fi;
         _IMAGES_StopTimer(pass3);

@@ -629,7 +629,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
       NodePtr prevnode = nullptr;
       int nodect = 0;
       while (node != nullptr) {
-        node->IsBoundChildren = false;
+        node->IsBoundChildren = true;
         node->children.clear();
         std::cerr << "CPP node.validkids=" << GapStringIntVector(node->validkids) << "\n";
         for (auto & x : node->validkids) {
@@ -646,6 +646,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
           newnode_v.next = nullptr;
           newnode_v.prev = prevnode;
           newnode_v.deleted = false;
+          newnode_v.IsBoundChildren = false;
           std::cerr << "CPP newnode.selected=" << GapStringIntVector(selected) << "\n";
           NodePtr newnode = std::make_shared<Node>(newnode_v);
           nodect = nodect + 1;
@@ -672,6 +673,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
         node = next_node(node);
       }
 
+      std::cerr << "CPP Before s:=s.stabilizer operation\n";
       s = s->stabilizer;
       if (int(leftmost_node(depth+1)->selected.size()) == m) {
         break;
