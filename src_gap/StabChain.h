@@ -216,11 +216,6 @@ StabChain<Telt> StabChainGenerators(std::vector<Telt> const& generators, int con
 }
 
 
-
-
-
-#ifdef DEBUG_STABCHAIN
-
 template<typename Telt>
 void PrintStabChainTransversals(StabChain<Telt> const& S)
 {
@@ -325,9 +320,6 @@ void PrintListStabCommPartition(std::string const& mesg, std::vector<StabChain<T
 {
   std::cerr << mesg << " ListStabCommPartition=" << GetListStabCommPartition(ListS) << "\n";
 }
-
-#endif
-
 
 
 template<typename Telt>

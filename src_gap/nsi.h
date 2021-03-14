@@ -595,7 +595,13 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
     /*
       # Second pass. Actually make all the red nodes and turn them blue
     */
+#ifdef DEBUG_NSI
+    std::cerr << "CPP Before ChangeStabChain\n";
+#endif
     ChangeStabChain(s, {upb}, false);
+#ifdef DEBUG_NSI
+    std::cerr << "CPP After ChangeStabChain\n";
+#endif
     bool do_continue = false;
     if (s->orbit.size() == 1) {
       /*
@@ -631,7 +637,10 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
           std::vector<int> selected = node->selected;
           selected.push_back(x);
           newnode_v.selected = selected;
+          PrintStabChain(node->substab);
+          std::cerr << "DEBUG Before Stabilize_OnPoints x=" << (x+1) << "\n";
           newnode_v.substab = Stabilizer_OnPoints<Telt,Tint>(node->substab, x);
+          std::cerr << "DEBUG After Stabilize_OnPoints\n";
           newnode_v.parent = node;
           newnode_v.childno = node->children.size();
           newnode_v.next = nullptr;
