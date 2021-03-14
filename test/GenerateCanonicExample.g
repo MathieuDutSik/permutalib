@@ -1,4 +1,4 @@
-RequirePackage("gapcommon");
+#RequirePackage("gapcommon");
 Local_RemoveFileIfExist:=function(FileName)
   if IsExistingFile(FileName)=true then
     RemoveFile(FileName);
@@ -7,7 +7,7 @@ end;
 
 
 CreateExampleOnSetCase:=function(FileName, GRP, eSet)
-  local LGen, eGen, nbMov, output, iMov, eImg, pos, eVal, eStab;
+  local LGen, eGen, nbMov, output, iMov, eImg, pos, eVal, eSetCan;
   nbMov:=Maximum(LargestMovedPoint(GRP), Maximum(eSet));
   #
   Local_RemoveFileIfExist(FileName);
