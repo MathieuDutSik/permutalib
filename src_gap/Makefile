@@ -20,7 +20,7 @@ CC		= g++ -std=c++17 -Wall -g -O2
 NOLINKFLAG 	= -c
 OUTPUTFLAG 	= -o
 
-CLOCAL          = -I/usr/include
+CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK
 
 #CFLAGS 		= -I$(BOOST_INCDIR) -I$(GMP_INCDIR) 
 CFLAGS 		= -I$(BOOST_INCDIR)

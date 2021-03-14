@@ -15,7 +15,8 @@ CC		= g++ -std=c++17 -Wall -g -O2 -fsanitize=address -fsanitize=undefined -fstac
 NOLINKFLAG 	= -c
 OUTPUTFLAG 	= -o
 
-CLOCAL          = -I../src_number -I../src_basic -I../src_comb -DPERMUTALIB_BLOCKING_SANITY_CHECK
+CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK
+#CLOCAL          = -I../src_number -I../src_basic -I../src_comb -DPERMUTALIB_BLOCKING_SANITY_CHECK
 #CLOCAL          = -I../src_number -I../src_basic -I../src_comb -DPERMUTALIB_BLOCKING_SANITY_CHECK -DSYNCHRONIZED_DEBUG_GAP478
 
 CFLAGS 		= -I$(GMP_INCDIR) -I$(BOOST_INCDIR)
