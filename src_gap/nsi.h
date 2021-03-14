@@ -672,7 +672,8 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
           std::vector<int> image = node->image;
           if (image[x] != upb) {
             while (true) {
-              image = OnTuples(image, s->transversal[image[x]]);
+              Telt g = s->comm->labels[s->transversal[image[x]]];
+              image = OnTuples(image, g);
               if (image[x] == upb)
                 break;
             }
