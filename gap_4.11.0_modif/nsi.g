@@ -203,6 +203,7 @@ _IMAGES_RATIO := function(selector)
         index := 1;
         comparisonLower:=function(a, b)
             local i, pow1, pow2;
+            Print("GAP compLower a=", a.orbCount, " / ", a.orbSize, " b=", b.orbCount, " / ", b.orbSize, "\n");
             if a.orbSize = 1 then
                 if b.orbSize = 1 then
                     return a.orbCount < b.orbCount;
@@ -225,11 +226,13 @@ _IMAGES_RATIO := function(selector)
                     pow2 := pow2 * b.orbCount;
                 od;
                 #
+                Print("GAP pow1=", pow1, " pow2=", pow2, "\n");
                 return pow1 < pow2;
             fi;
         end;
         comparisonEqual:=function(a, b)
             local i, pow1, pow2;
+            Print("GAP compEqual a=", a.orbCount, " / ", a.orbSize, " b=", b.orbCount, " / ", b.orbSize, "\n");
             if a.orbSize = 1 then
                 if b.orbSize = 1 then
                     return a.orbCount = b.orbCount;
@@ -270,6 +273,7 @@ _IMAGES_RATIO := function(selector)
                     fi;
                 fi;
             fi;
+            Print("GAP lower=", lower, "\n");
             if (orbitCounts[index] = 0) or (lower and orbitCounts[i] <> 0) then
                 index := i;
                 result := ret;

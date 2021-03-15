@@ -5,6 +5,9 @@
 #include "stbcbckt.h"
 #include <unordered_map>
 
+
+//#define DEBUG_NSI
+
 /*
 #
 # V 1.1 - Bug fixed
@@ -60,9 +63,6 @@
 # tree. Continue with surviving nodes at current level.
 
 */
-
-
-#define DEBUG_NSI
 
 
 namespace permutalib {
@@ -171,6 +171,9 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
     // whish is equivalent to
     // a.orbCount ^ b.orbSize    <    b.orbCount ^ a.orbSize
     auto comparisonLower=[](typeCnt const& a, typeCnt const& b) -> bool {
+#ifdef DEBUG_NSI
+      std::cerr << "CPP compLower a=" << a.orbCount << " / " << a.orbSize << " b=" << b.orbCount << " / " << b.orbSize << "\n";
+#endif
       if (a.orbSize == 1) {
         if (b.orbSize == 1) {
           return a.orbCount < b.orbCount;
@@ -188,12 +191,16 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
         Tint pow2 = 1;
         eV = b.orbCount;
         for (int idx=0; idx<a.orbSize; idx++)
-          pow2 += eV;
+          pow2 *= eV;
         //
+#ifdef DEBUG_NSI
+        std::cerr << "CPP pow1=" << pow1 << " pow2=" << pow2 << "\n";
+#endif
         return pow1 < pow2;
       }
     };
     auto comparisonEqual=[](typeCnt const& a, typeCnt const& b) -> bool {
+      std::cerr << "CPP compEqual a=" << a.orbCount << " / " << a.orbSize << " b=" << b.orbCount << " / " << b.orbSize << "\n";
       if (a.orbSize == 1) {
         if (b.orbSize == 1) {
           return a.orbCount == b.orbCount;
@@ -211,7 +218,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
         Tint pow2 = 1;
         eV = b.orbCount;
         for (int idx=0; idx<a.orbSize; idx++)
-          pow2 += eV;
+          pow2 *= eV;
         //
         return pow1 == pow2;
       }
@@ -246,6 +253,9 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
             lower=true;
         }
       }
+#ifdef DEBUG_NSI
+      std::cerr << "CPP lower=" << lower << "\n";
+#endif
       //
       if ((orbitCounts[index] == 0) || (lower && orbitCounts[i] != 0)) {
         index = i;
