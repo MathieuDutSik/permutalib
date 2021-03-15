@@ -62,7 +62,7 @@
 */
 
 
-//#define DEBUG_NSI
+#define DEBUG_NSI
 
 
 namespace permutalib {
@@ -162,24 +162,82 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
 #ifdef DEBUG_NSI
     std::cerr << "CPP Beginning of calculateBestOrbit\n";
 #endif
-    auto selector=[&](int const& i) -> double {
+    struct typeCnt {
+      int orbSize;
+      int orbCount;
+    };
+    // The comparison goes
+    // log(a.orbCount) / a.orbSize < log(b.orbCount) / b.orbSize
+    // whish is equivalent to
+    // a.orbCount ^ b.orbSize    <    b.orbCount ^ a.orbSize
+    auto comparisonLower=[](typeCnt const& a, typeCnt const& b) -> bool {
+      if (a.orbSize == 1) {
+        if (b.orbSize == 1) {
+          return a.orbCount < b.orbCount;
+        } else {
+          return true;
+        }
+      } else {
+        if (b.orbSize == 1)
+          return false;
+        Tint pow1 = 1;
+        Tint eV = a.orbCount;
+        for (int i=0; i<b.orbSize; i++)
+          pow1 *= eV;
+        //
+        Tint pow2 = 1;
+        eV = b.orbCount;
+        for (int i=0; i<a.orbSize; i++)
+          pow2 += eV;
+        //
+        return pow1 < pow2;
+      }
+    };
+    auto comparisonEqual=[](typeCnt const& a, typeCnt const& b) -> bool {
+      if (a.orbSize == 1) {
+        if (b.orbSize == 1) {
+          return a.orbCount == b.orbCount;
+        } else {
+          return false;
+        }
+      } else {
+        if (b.orbSize == 1)
+          return false;
+        Tint pow1 = 1;
+        Tint eV = a.orbCount;
+        for (int i=0; i<b.orbSize; i++)
+          pow1 *= eV;
+        //
+        Tint pow2 = 1;
+        eV = b.orbCount;
+        for (int i=0; i<a.orbSize; i++)
+          pow2 += eV;
+        //
+        return pow1 == pow2;
+      }
+    };
+    auto selector=[&](int const& i) -> typeCnt {
+      return {orbsizes[i], orbitCounts[i]};
+      /*
       if (orbsizes[i] == 1) {
         return - std::pow(2.0, 32.0) + orbitCounts[i];
       } else {
         return (log(double(orbitCounts[i]))/log(2.0)) / double(orbsizes[i]);
-      }
+      }*/
     };
     int index = 0;
-    double result_0 = selector(0);
+    typeCnt result_0 = selector(0);
     int result_1 = orbmins[0];
+    std::cerr << "CPP result_0=" << result_0.orbCount << " / " << result_0.orbSize << "   result_1=" << (result_1+1) << "\n";
     for (size_t i=1; i<orbmins.size(); i++) {
-      double ret_0 = selector(1);
+      typeCnt ret_0 = selector(1);
       int ret_1 = orbmins[i];
       bool lower=false;
-      if (ret_0 < result_0) {
+      std::cerr << "CPP ret_0=" << ret_0.orbCount << " / " << ret_0.orbSize << "   ret_1=" << (ret_1+1) << "\n";
+      if (comparisonLower(ret_0, result_0)) {
         lower=true;
       } else {
-        if (ret_0 == result_0) {
+        if (comparisonEqual(ret_0, result_0)) {
           if (ret_1 < result_1)
             lower=true;
         }
@@ -193,7 +251,6 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
     }
     return index;
   };
-
 
 
 
@@ -552,6 +609,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
     }
     int globalBestOrbit = calculateBestOrbit(orbmins, globalOrbitCounts, orbsizes);
     upb = orbmins[globalBestOrbit];
+    std::cerr << "CPP globalBestOrbit=" << (globalBestOrbit+1) << " upb=" << (upb+1) << "\n";
 
 
     node = leftmost_node(depth);
@@ -591,11 +649,14 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
             }
             node->validkids.clear();
             node->validkids.push_back(y);
+            std::cerr << "CPP validkids set to {y} with y=" << (y+1) << "\n";
           }
         } else {
           int rep = orbmins[num];
+          std::cerr << "CPP before insertion rep=" << (rep+1) << " num=" << (num+1) << " upb=" << (upb+1) << "\n";
           if (rep == upb) {
             node->validkids.push_back(y);
+            std::cerr << "CPP validkids inserting y=" << (y+1) << "\n";
           }
         }
       }

@@ -198,13 +198,79 @@ fi;
 
 _IMAGES_RATIO := function(selector)
     return function(orbmins, orbitCounts, orbsizes)
-        local index, result, i, ret;
+        local index, result, i, ret, comparisonLower, comparisonEqual, lower;
         Print("GAP Beginning of calculateBestOrbit\n");
         index := 1;
+        comparisonLower:=function(a, b)
+            local i, pow1, pow2;
+            if a.orbSize = 1 then
+                if b.orbSize = 1 then
+                    return a.orbCount < b.orbCount;
+                else
+                    return true;
+                fi;
+            else
+                if b.orbSize = 1 then
+                    return false;
+                fi;
+                pow1:=1;
+                for i in [1..b.orbSize]
+                do
+                    pow1 := pow1 * a.orbCount;
+                od;
+                #
+                pow2:=1;
+                for i in [1..a.orbSize]
+                do
+                    pow2 := pow2 * b.orbCount;
+                od;
+                #
+                return pow1 < pow2;
+            fi;
+        end;
+        comparisonEqual:=function(a, b)
+            local i, pow1, pow2;
+            if a.orbSize = 1 then
+                if b.orbSize = 1 then
+                    return a.orbCount = b.orbCount;
+                else
+                    return false;
+                fi;
+            else
+                if b.orbSize = 1 then
+                    return false;
+                fi;
+                pow1:=1;
+                for i in [1..b.orbSize]
+                do
+                    pow1 := pow1 * a.orbCount;
+                od;
+                #
+                pow2:=1;
+                for i in [1..a.orbSize]
+                do
+                    pow2 := pow2 * b.orbCount;
+                od;
+                #
+                return pow1 = pow2;
+            fi;
+        end;
         result := [selector(1, orbmins, orbitCounts, orbsizes), orbmins[1]];
+        Print("GAP result_0=", result[1].orbCount, " / ", result[1].orbSize, "   result_1=", result[2], "\n");
         for i in [2..Length(orbmins)] do
             ret := [selector(i, orbmins, orbitCounts, orbsizes), orbmins[i]];
-            if (orbitCounts[index] = 0) or (ret < result and orbitCounts[i] <> 0) then
+            Print("GAP ret_0=", ret[1].orbCount, " / ", ret[1].orbSize, "   ret_1=", ret[2], "\n");
+            lower:=false;
+            if comparisonLower(ret[1], result[1]) then
+                lower:=true;
+            else
+                if comparisonEqual(ret[1], result[1]) then
+                    if ret[2] < result[2] then
+                        lower:=true;
+                    fi;
+                fi;
+            fi;
+            if (orbitCounts[index] = 0) or (lower and orbitCounts[i] <> 0) then
                 index := i;
                 result := ret;
             fi;
@@ -227,8 +293,7 @@ _IMAGES_COMMON_RATIO_ORBIT := _IMAGES_RATIO(
 
 _IMAGES_RARE_RATIO_ORBIT_FIX := _IMAGES_RATIO(
     function(i, orbmins, orbitCounts, orbsizes)
-        if(orbsizes[i]) = 1 then return Float(-(2^32)+orbitCounts[i]); fi;
-        return (Log2(Float(orbitCounts[i])))/orbsizes[i];
+        return rec(orbSize:=orbsizes[i], orbCount:=orbitCounts[i]);
     end
 );
 
@@ -697,6 +762,7 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
 
             globalBestOrbit := config.calculateBestOrbit(orbmins, globalOrbitCounts, orbsizes);
             upb := orbmins[globalBestOrbit];
+            Print("GAP globalBestOrbit=", globalBestOrbit, " upb=", upb, "\n");
         fi;
 
 
@@ -754,15 +820,18 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
                         od;
                         _IMAGES_IncCount(ShallowNode);
                         node.validkids := [y];
+                        Print("GAP validkids set to {y} with y=", y, "\n");
                         Info(InfoNSI,3,"Best down to ",upb);
                         _IMAGES_StopTimer(improve);
                     fi;
                 else
                     _IMAGES_IncCount(check2);
                     rep := config.getQuality(num);
+                    Print("GAP before insertion rep=", rep, " num=", num, " upb=", upb, "\n");
                     if rep = upb then
                         _IMAGES_IncCount(ShallowNode);
                         Add(node.validkids,y);
+                        Print("GAP validkids inserting y=", y, "\n");
                     fi;
                 fi;
             od;
