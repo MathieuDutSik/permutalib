@@ -182,12 +182,12 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
           return false;
         Tint pow1 = 1;
         Tint eV = a.orbCount;
-        for (int i=0; i<b.orbSize; i++)
+        for (int idx=0; idx<b.orbSize; idx++)
           pow1 *= eV;
         //
         Tint pow2 = 1;
         eV = b.orbCount;
-        for (int i=0; i<a.orbSize; i++)
+        for (int idx=0; idx<a.orbSize; idx++)
           pow2 += eV;
         //
         return pow1 < pow2;
@@ -205,19 +205,19 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
           return false;
         Tint pow1 = 1;
         Tint eV = a.orbCount;
-        for (int i=0; i<b.orbSize; i++)
+        for (int idx=0; idx<b.orbSize; idx++)
           pow1 *= eV;
         //
         Tint pow2 = 1;
         eV = b.orbCount;
-        for (int i=0; i<a.orbSize; i++)
+        for (int idx=0; idx<a.orbSize; idx++)
           pow2 += eV;
         //
         return pow1 == pow2;
       }
     };
-    auto selector=[&](int const& i) -> typeCnt {
-      return {orbsizes[i], orbitCounts[i]};
+    auto selector=[&](int const& jdx) -> typeCnt {
+      return {orbsizes[jdx], orbitCounts[jdx]};
       /*
       if (orbsizes[i] == 1) {
         return - std::pow(2.0, 32.0) + orbitCounts[i];
@@ -230,10 +230,10 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
     int result_1 = orbmins[0];
     std::cerr << "CPP result_0=" << result_0.orbCount << " / " << result_0.orbSize << "   result_1=" << (result_1+1) << "\n";
     for (size_t i=1; i<orbmins.size(); i++) {
-      typeCnt ret_0 = selector(1);
+      typeCnt ret_0 = selector(i);
       int ret_1 = orbmins[i];
       bool lower=false;
-      std::cerr << "CPP ret_0=" << ret_0.orbCount << " / " << ret_0.orbSize << "   ret_1=" << (ret_1+1) << "\n";
+      std::cerr << "CPP i=" << (i+1) << " ret_0=" << ret_0.orbCount << " / " << ret_0.orbSize << "   ret_1=" << (ret_1+1) << "\n";
       if (comparisonLower(ret_0, result_0)) {
         lower=true;
       } else {
@@ -274,6 +274,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
   std::vector<NodePtr> ListPtr;
 
   int n = std::max(LargestMovedPoint(StrongGeneratorsStabChain(g)), set[set.size()-1]);
+  std::cerr << "CPP n=" << n << "\n";
   StabChain<Telt> s = CopyStabChain(g);
   StabChain<Telt> l = Action<Telt,Tint>(k, set);
   int m = set.size();
@@ -602,11 +603,21 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
       */
       for (auto & y : cands) {
         int x = node->image[y];
+        std::cerr << "CPP y=" << (y+1) << " x=" << (x+1) << "\n";
         int num = make_orbit(x);
-        globalOrbitCounts[num]++;
+        int siz = globalOrbitCounts.size();
+        if (num < siz) {
+          globalOrbitCounts[num]++;
+        } else {
+          for (int u=siz; u<=num; u++)
+            globalOrbitCounts.push_back(0);
+          globalOrbitCounts[num]=1;
+        }
+        std::cerr << "CPP globalOrbitCounts : num=" << (num+1) << " cnt=" << globalOrbitCounts[num] << "\n";
       }
       node = next_node(node);
     }
+    std::cerr << "CPP globalOrbitCounts=" << GapStringTVector(globalOrbitCounts) << "\n";
     int globalBestOrbit = calculateBestOrbit(orbmins, globalOrbitCounts, orbsizes);
     upb = orbmins[globalBestOrbit];
     std::cerr << "CPP globalBestOrbit=" << (globalBestOrbit+1) << " upb=" << (upb+1) << "\n";

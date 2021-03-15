@@ -259,7 +259,7 @@ _IMAGES_RATIO := function(selector)
         Print("GAP result_0=", result[1].orbCount, " / ", result[1].orbSize, "   result_1=", result[2], "\n");
         for i in [2..Length(orbmins)] do
             ret := [selector(i, orbmins, orbitCounts, orbsizes), orbmins[i]];
-            Print("GAP ret_0=", ret[1].orbCount, " / ", ret[1].orbSize, "   ret_1=", ret[2], "\n");
+            Print("GAP i=", i, " ret_0=", ret[1].orbCount, " / ", ret[1].orbSize, "   ret_1=", ret[2], "\n");
             lower:=false;
             if comparisonLower(ret[1], result[1]) then
                 lower:=true;
@@ -626,6 +626,7 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
     fi;
 
     n := Maximum(LargestMovedPoint(g), Maximum(set));
+    Print("GAP n=", n, "\n");
     s := StabChainMutable(g);
     l := Action(k,set);
 #    Print("GAP NSI k=", k, " set=", set, " l=", l, "\n");
@@ -749,6 +750,7 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
                 for y in cands do
                     _IMAGES_IncCount(check1);
                     x := node.image[y];
+                    Print("GAP y=", y, " x=", x, "\n");
                     num := make_orbit(x);
 
                     if IsBound(globalOrbitCounts[num]) then
@@ -756,10 +758,12 @@ _NewSmallestImage := function(g,set,k,skip_func, early_exit, disableStabilizerCh
                     else
                         globalOrbitCounts[num] := 1;
                     fi;
+                    Print("GAP globalOrbitCounts : num=", num, " cnt=", globalOrbitCounts[num], "\n");
                 od;
                 node := next_node(node);
             od;
 
+            Print("GAP globalOrbitCounts=", globalOrbitCounts, "\n");
             globalBestOrbit := config.calculateBestOrbit(orbmins, globalOrbitCounts, orbsizes);
             upb := orbmins[globalBestOrbit];
             Print("GAP globalBestOrbit=", globalBestOrbit, " upb=", upb, "\n");
