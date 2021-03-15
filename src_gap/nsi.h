@@ -627,7 +627,9 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
           node->selectedbaselength = node->selected.size();
         }
         node->selected.push_back(node->validkids[0]);
+#ifdef DEBUG_NSI
         std::cerr << "CPP Now node.selected=" << GapStringIntVector(node->selected) << "\n";
+#endif
         node = next_node(node);
       }
       s = s->stabilizer;
@@ -643,23 +645,31 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
       while (node != nullptr) {
         node->IsBoundChildren = true;
         node->children.clear();
+#ifdef DEBUG_NSI
         std::cerr << "CPP node.validkids=" << GapStringIntVector(node->validkids) << "\n";
+#endif
         for (auto & x : node->validkids) {
           Node newnode_v;
           std::vector<int> selected = node->selected;
           selected.push_back(x);
           newnode_v.selected = selected;
           //          PrintStabChain(node->substab);
+#ifdef DEBUG_NSI
           std::cerr << "DEBUG Before Stabilize_OnPoints x=" << (x+1) << "\n";
+#endif
           newnode_v.substab = Stabilizer_OnPoints<Telt,Tint>(node->substab, x);
+#ifdef DEBUG_NSI
           std::cerr << "DEBUG After Stabilize_OnPoints\n";
+#endif
           newnode_v.parent = node;
           newnode_v.childno = node->children.size();
           newnode_v.next = nullptr;
           newnode_v.prev = prevnode;
           newnode_v.deleted = false;
           newnode_v.IsBoundChildren = false;
+#ifdef DEBUG_NSI
           std::cerr << "CPP newnode.selected=" << GapStringIntVector(selected) << "\n";
+#endif
           NodePtr newnode = std::make_shared<Node>(newnode_v);
           ListPtr.push_back(newnode);
           nodect = nodect + 1;
@@ -687,7 +697,9 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
         node = next_node(node);
       }
 
+#ifdef DEBUG_NSI
       std::cerr << "CPP Before s:=s.stabilizer operation\n";
+#endif
       s = s->stabilizer;
       if (int(leftmost_node(depth+1)->selected.size()) == m) {
         break;
@@ -712,7 +724,9 @@ Face CanonicalImage(StabChain<Telt> const& g, Face const& set)
   StabChain<Telt> k = Stabilizer_OnSets<Telt,Tint>(g, set);
   Face ret(set.size());
   std::vector<int> eSetCan = NewSmallestImage<Telt,Tint>(g, set_i, k);
+#ifdef DEBUG_NSI
   std::cerr << "CPP eSetCan=" << GapStringIntVector(eSetCan) << "\n";
+#endif
   for (auto & eVal : eSetCan) {
     ret[eVal] = 1;
   }

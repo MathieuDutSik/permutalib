@@ -318,4 +318,4 @@ end;
 
 #TestAllGroups("stabilizer", 1);
 #TestAllGroups("equivalence", 1);
-TestAllGroups("canonical", 1);
+TestAllGroups("canonical", 2);
