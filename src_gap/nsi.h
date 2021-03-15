@@ -62,7 +62,7 @@
 */
 
 
-#define DEBUG_NSI
+//#define DEBUG_NSI
 
 
 namespace permutalib {

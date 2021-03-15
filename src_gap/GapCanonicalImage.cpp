@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
       os << (aRow + 1);
       aRow = set_can.find_next(aRow);
     }
-    os << "|;\n";
+    os << "];\n";
     std::cerr << "CPP Normal completion of the program\n";
   }
   catch (PermutalibException const& e) {

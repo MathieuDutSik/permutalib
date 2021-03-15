@@ -1,3 +1,12 @@
+MyRemoveFileIfExist:=function(FileName)
+    if IsExistingFile(FileName) then
+        RemoveFile(FileName);
+    fi;
+end;
+
+
+
+
 Local_RandomSubset:=function(eSet, k)
     local i, sSet, V, h;
     sSet:=[];
@@ -60,7 +69,7 @@ TestSpecificGroupSet_Stabilizer:=function(nbMov, eGRP, eSet)
     Exec(eCommand);
     #
     FileName:=Concatenation(eDir, "Input");
-    RemoveFileIfExist(FileName);
+    MyRemoveFileIfExist(FileName);
     output:=OutputTextFile(FileName, true);
     LGen:=GeneratorsOfGroup(eGRP);
     AppendTo(output, Length(LGen), " ", nbMov, "\n");
@@ -99,9 +108,9 @@ TestSpecificGroupSet_Stabilizer:=function(nbMov, eGRP, eSet)
     if test=false then
         Error("Found some error. Please debug");
     fi;
-    RemoveFileIfExist(FileName);
-    RemoveFileIfExist(FileErr);
-    RemoveFileIfExist(FileRes);
+    MyRemoveFileIfExist(FileName);
+    MyRemoveFileIfExist(FileErr);
+    MyRemoveFileIfExist(FileRes);
 end;
 
 
@@ -119,7 +128,7 @@ TestSpecificGroupSet_Canonical:=function(nbMov, eGRP, eSet)
     Exec(eCommand);
     #
     FileName:=Concatenation(eDir, "Input");
-    RemoveFileIfExist(FileName);
+    MyRemoveFileIfExist(FileName);
     output:=OutputTextFile(FileName, true);
     LGen:=GeneratorsOfGroup(eGRP);
     AppendTo(output, Length(LGen), " ", nbMov, "\n");
@@ -158,9 +167,9 @@ TestSpecificGroupSet_Canonical:=function(nbMov, eGRP, eSet)
     if test=false then
         Error("Found some error. Please debug");
     fi;
-    RemoveFileIfExist(FileName);
-    RemoveFileIfExist(FileErr);
-    RemoveFileIfExist(FileRes);
+    MyRemoveFileIfExist(FileName);
+    MyRemoveFileIfExist(FileErr);
+    MyRemoveFileIfExist(FileRes);
 end;
 
 
@@ -179,7 +188,7 @@ TestSpecificGroupSet_Equivalence:=function(nbMov, eGRP, eSet, fSet)
     Exec(eCommand);
     #
     FileName:=Concatenation(eDir, "Input");
-    RemoveFileIfExist(FileName);
+    MyRemoveFileIfExist(FileName);
     output:=OutputTextFile(FileName, true);
     LGen:=GeneratorsOfGroup(eGRP);
     AppendTo(output, Length(LGen), " ", nbMov, "\n");
@@ -235,9 +244,9 @@ TestSpecificGroupSet_Equivalence:=function(nbMov, eGRP, eSet, fSet)
             Error("Found some error in TestSpecificGroupSet_Equivalence, case 2\n");
         fi;
     fi;
-    RemoveFileIfExist(FileName);
-    RemoveFileIfExist(FileErr);
-    RemoveFileIfExist(FileRes);
+    MyRemoveFileIfExist(FileName);
+    MyRemoveFileIfExist(FileErr);
+    MyRemoveFileIfExist(FileRes);
 end;
 
 
@@ -308,5 +317,5 @@ end;
 
 
 #TestAllGroups("stabilizer", 1);
-TestAllGroups("equivalence", 1);
+#TestAllGroups("equivalence", 1);
 TestAllGroups("canonical", 1);
