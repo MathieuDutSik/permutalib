@@ -228,12 +228,16 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
     int index = 0;
     typeCnt result_0 = selector(0);
     int result_1 = orbmins[0];
+#ifdef DEBUG_NSI
     std::cerr << "CPP result_0=" << result_0.orbCount << " / " << result_0.orbSize << "   result_1=" << (result_1+1) << "\n";
+#endif
     for (size_t i=1; i<orbmins.size(); i++) {
       typeCnt ret_0 = selector(i);
       int ret_1 = orbmins[i];
       bool lower=false;
+#ifdef DEBUG_NSI
       std::cerr << "CPP i=" << (i+1) << " ret_0=" << ret_0.orbCount << " / " << ret_0.orbSize << "   ret_1=" << (ret_1+1) << "\n";
+#endif
       if (comparisonLower(ret_0, result_0)) {
         lower=true;
       } else {
@@ -274,7 +278,9 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
   std::vector<NodePtr> ListPtr;
 
   int n = std::max(LargestMovedPoint(StrongGeneratorsStabChain(g)), set[set.size()-1]);
+#ifdef DEBUG_NSI
   std::cerr << "CPP n=" << n << "\n";
+#endif
   StabChain<Telt> s = CopyStabChain(g);
   StabChain<Telt> l = Action<Telt,Tint>(k, set);
   int m = set.size();
@@ -603,7 +609,9 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
       */
       for (auto & y : cands) {
         int x = node->image[y];
+#ifdef DEBUG_NSI
         std::cerr << "CPP y=" << (y+1) << " x=" << (x+1) << "\n";
+#endif
         int num = make_orbit(x);
         int siz = globalOrbitCounts.size();
         if (num < siz) {
@@ -613,14 +621,20 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
             globalOrbitCounts.push_back(0);
           globalOrbitCounts[num]=1;
         }
+#ifdef DEBUG_NSI
         std::cerr << "CPP globalOrbitCounts : num=" << (num+1) << " cnt=" << globalOrbitCounts[num] << "\n";
+#endif
       }
       node = next_node(node);
     }
+#ifdef DEBUG_NSI
     std::cerr << "CPP globalOrbitCounts=" << GapStringTVector(globalOrbitCounts) << "\n";
+#endif
     int globalBestOrbit = calculateBestOrbit(orbmins, globalOrbitCounts, orbsizes);
     upb = orbmins[globalBestOrbit];
+#ifdef DEBUG_NSI
     std::cerr << "CPP globalBestOrbit=" << (globalBestOrbit+1) << " upb=" << (upb+1) << "\n";
+#endif
 
 
     node = leftmost_node(depth);
@@ -660,14 +674,20 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
             }
             node->validkids.clear();
             node->validkids.push_back(y);
+#ifdef DEBUG_NSI
             std::cerr << "CPP validkids set to {y} with y=" << (y+1) << "\n";
+#endif
           }
         } else {
           int rep = orbmins[num];
+#ifdef DEBUG_NSI
           std::cerr << "CPP before insertion rep=" << (rep+1) << " num=" << (num+1) << " upb=" << (upb+1) << "\n";
+#endif
           if (rep == upb) {
             node->validkids.push_back(y);
+#ifdef DEBUG_NSI
             std::cerr << "CPP validkids inserting y=" << (y+1) << "\n";
+#endif
           }
         }
       }
