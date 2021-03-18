@@ -13,8 +13,8 @@ namespace permutalib {
 template<typename Telt_inp, typename Tint_inp>
 struct Group {
 public:
-  //  typedef Telt_inp Telt;
-  //  typedef Tint_inp Tint;
+  using Telt = Telt_inp;
+  using Tint = Tint_inp;
   Group(StabChain<Telt_inp> const& _S) : S(_S), size_tint(Order<Telt_inp,Tint_inp>(_S))
   {
   }
