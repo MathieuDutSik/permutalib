@@ -767,7 +767,7 @@ std::vector<Telt> GeneratorsStabChain(StabChain<Telt> const& S)
 
 
 template<typename Telt>
-std::vector<Telt> GeneratorsOfGroup(StabChain<Telt> const& S)
+std::vector<Telt> Kernel_GeneratorsOfGroup(StabChain<Telt> const& S)
 {
   return StrongGeneratorsStabChain(S);
 }

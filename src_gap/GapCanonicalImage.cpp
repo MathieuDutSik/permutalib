@@ -1,8 +1,8 @@
 #include "Permutation.h"
-#include "StabChainMain.h"
-#include "nsi.h"
 #include "gmpxx.h"
 #include <fstream>
+
+#include "Group.h"
 
 int main(int argc, char *argv[])
 {
@@ -38,10 +38,10 @@ int main(int argc, char *argv[])
     std::cerr.setf(std::ios::boolalpha);
     //
     //    permutalib::StabChain<Telt> eG = permutalib::MinimalStabChain<Telt,Tint>(LGen, n);
-    permutalib::StabChain<Telt> eG = permutalib::Group<Telt,Tint>(LGen, n);
+    permutalib::Group<Telt,Tint> eG = permutalib::Group<Telt,Tint>(LGen, n);
     //    std::cerr << "CPP eG=" << eG << "\n";
     //
-    std::cerr << "CPP |eG|=" << permutalib::Order<Telt,Tint>(eG) << "\n";
+    std::cerr << "CPP |eG|=" << eG.size() << "\n";
     //
     Face eFace(n);
     for (int i=0; i<n; i++) {
@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
       is >> eVal;
       eFace[i] = eVal;
     }
-    Face set_can = permutalib::CanonicalImage<Telt,Tint>(eG, eFace);
+    Face set_can = eG.CanonicalImage(eFace);
     //
     std::ofstream os(OutputFile);
     os << "return [";

@@ -1,8 +1,8 @@
 #include "Permutation.h"
-#include "StabChainMain.h"
 #include "gmpxx.h"
-#include "stbcbckt.h"
 #include <fstream>
+
+#include "Group.h"
 
 int main(int argc, char *argv[])
 {
@@ -34,11 +34,10 @@ int main(int argc, char *argv[])
     //
     std::cerr << "CPP Before call to MinimalStabChain\n";
     //    permutalib::StabChain<Telt> eG = permutalib::MinimalStabChain<Telt,Tint>(LGen, n);
-    permutalib::StabChain<Telt> eG = permutalib::Group<Telt,Tint>(LGen, n);
+    permutalib::Group<Telt,Tint> eG = permutalib::Group<Telt,Tint>(LGen, n);
     std::cerr << "CPP After call to MinimalStabChain\n";
-    std::cerr << "CPP eG=" << eG << "\n";
     //
-    std::cerr << "CPP |eG|=" << permutalib::Order<Telt,Tint>(eG) << "\n";
+    std::cerr << "CPP |eG|=" << eG.size() << "\n";
     //
     Face f1(n);
     for (int i=0; i<n; i++) {
@@ -53,7 +52,7 @@ int main(int argc, char *argv[])
       is >> eVal;
       f2[i] = eVal;
     }
-    std::pair<bool,Telt> epair = permutalib::RepresentativeAction_OnSets<Telt,Tint>(eG, f1, f2);
+    std::pair<bool,Telt> epair = eG.RepresentativeAction_OnSets(f1, f2);
     //
     std::ofstream os(argv[2]);
     if (epair.first) {

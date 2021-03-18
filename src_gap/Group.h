@@ -1,0 +1,73 @@
+#ifndef DEFINE_GROUP_H
+#define DEFINE_GROUP_H
+
+
+#include "StabChainMain.h"
+#include "stbcbckt.h"
+#include "nsi.h"
+
+
+namespace permutalib {
+
+
+template<typename Telt_inp, typename Tint_inp>
+struct Group {
+public:
+  //  typedef Telt_inp Telt;
+  //  typedef Tint_inp Tint;
+  Group(StabChain<Telt_inp> const& _S) : S(_S), size_tint(Order<Telt_inp,Tint_inp>(_S))
+  {
+  }
+  Group(std::vector<Telt_inp> const& LGen, int const& n)
+  {
+#ifdef DEBUG_STABCHAINMAIN
+    std::cerr << "CPP Beginning of MinimalStabChain\n";
+#endif
+    StabChainOptions<Tint_inp> options = GetStandardOptions<Tint_inp>(n);
+    options.base = {};
+#ifdef DEBUG_STABCHAINMAIN
+    std::cerr << "CPP Before StabChainOp_listgen\n";
+#endif
+    S = StabChainOp_listgen(LGen, options);
+    UnbindCycles(S);
+    size_tint = Order<Telt_inp,Tint_inp>(S);
+  }
+  Group<Telt_inp,Tint_inp> Stabilizer_OnPoints(int const& x)
+  {
+    return Group(Kernel_Stabilizer_OnPoints<Telt_inp,Tint_inp>(S, x));
+  }
+  std::pair<bool,Telt_inp> RepresentativeAction_OnPoints(int const& x1, int const& x2)
+  {
+    return Kernel_RepresentativeAction_OnPoints<Telt_inp,Tint_inp>(S, x1, x2);
+  }
+  Group<Telt_inp,Tint_inp> Stabilizer_OnSets(Face const& f)
+  {
+    return Group(Kernel_Stabilizer_OnSets<Telt_inp,Tint_inp>(S, f));
+  }
+  std::pair<bool,Telt_inp> RepresentativeAction_OnSets(Face const& f1, Face const& f2)
+  {
+    return Kernel_RepresentativeAction_OnSets<Telt_inp,Tint_inp>(S, f1, f2);
+  }
+  std::vector<Telt_inp> GeneratorsOfGroup() const
+  {
+    return Kernel_GeneratorsOfGroup(S);
+  }
+  Face CanonicalImage(Face const& f)
+  {
+    return Kernel_CanonicalImage<Telt_inp,Tint_inp>(S, f);
+  }
+  Tint_inp size() const
+  {
+    return size_tint;
+  }
+private:
+  StabChain<Telt_inp> S;
+  Tint_inp size_tint;
+};
+
+
+
+}
+
+
+#endif

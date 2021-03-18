@@ -1,8 +1,8 @@
 #include "Permutation.h"
-#include "StabChainMain.h"
 #include "gmpxx.h"
-#include "stbcbckt.h"
 #include <fstream>
+
+#include "Group.h"
 
 int main(int argc, char *argv[])
 {
@@ -34,12 +34,12 @@ int main(int argc, char *argv[])
     //
     std::cerr << "CPP Before call to MinimalStabChain\n";
     //    permutalib::StabChain<Telt> eG = permutalib::MinimalStabChain<Telt,Tint>(LGen, n);
-    permutalib::StabChain<Telt> eG = permutalib::Group<Telt,Tint>(LGen, n);
+    permutalib::Group<Telt,Tint> eG = permutalib::Group<Telt,Tint>(LGen, n);
     //    std::cerr << "CPP After call to MinimalStabChain\n";
     //    PrintStabChain(eG);
     //    std::cerr << "CPP eG=" << eG << "\n";
     //
-    std::cerr << "CPP |eG|=" << permutalib::Order<Telt,Tint>(eG) << "\n";
+    std::cerr << "CPP |eG|=" << eG.size() << "\n";
     //
     Face eFace(n);
     for (int i=0; i<n; i++) {
@@ -47,9 +47,8 @@ int main(int argc, char *argv[])
       is >> eVal;
       eFace[i] = eVal;
     }
-    permutalib::StabChain<Telt> eG2 = permutalib::Stabilizer_OnSets<Telt,Tint>(eG, eFace);
-    std::cerr << "CPP eG2=" << eG2 << "\n";
-    std::cerr << "CPP |eG2|=" << permutalib::Order<Telt,Tint>(eG2) << "\n";
+    permutalib::Group<Telt,Tint> eG2 = eG.Stabilizer_OnSets(eFace);
+    std::cerr << "CPP |eG2|=" << eG2.size() << "\n";
     std::cerr << "CPP Normal completion of the program\n";
   }
   catch (PermutalibException const& e) {

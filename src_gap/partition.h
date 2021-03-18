@@ -2,6 +2,7 @@
 #define DEFINE_PARTITION_H
 
 #include "PermGroup.h"
+#include "GapPrint.h"
 
 #ifdef SYNCHRONIZED_DEBUG_GAP478
 # define DEBUG_PARTITION

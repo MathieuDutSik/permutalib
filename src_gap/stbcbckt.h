@@ -1872,7 +1872,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
 }
 
 template<typename Telt,typename Tint>
-StabChain<Telt> Stabilizer_OnSets(StabChain<Telt> const& G, Face const& Phi)
+StabChain<Telt> Kernel_Stabilizer_OnSets(StabChain<Telt> const& G, Face const& Phi)
 {
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Beginning of Stabilizer_OnSets\n";
@@ -1891,7 +1891,7 @@ StabChain<Telt> Stabilizer_OnSets(StabChain<Telt> const& G, Face const& Phi)
 
 
 template<typename Telt,typename Tint>
-StabChain<Telt> Stabilizer_OnPoints(StabChain<Telt> const& G, int const& x)
+StabChain<Telt> Kernel_Stabilizer_OnPoints(StabChain<Telt> const& G, int const& x)
 {
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Beginning of Stabilizer_OnSets\n";
@@ -1907,7 +1907,7 @@ StabChain<Telt> Stabilizer_OnPoints(StabChain<Telt> const& G, int const& x)
 
 
 template<typename Telt,typename Tint>
-std::pair<bool,Telt> RepresentativeAction_OnSets(StabChain<Telt> const& G, Face const& f1, Face const& f2)
+std::pair<bool,Telt> Kernel_RepresentativeAction_OnSets(StabChain<Telt> const& G, Face const& f1, Face const& f2)
 {
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Beginning of RepresentativeAction_OnSets\n";
@@ -1939,7 +1939,7 @@ std::pair<bool,Telt> RepresentativeAction_OnSets(StabChain<Telt> const& G, Face 
 }
 
 template<typename Telt,typename Tint>
-std::pair<bool,Telt> RepresentativeAction_OnPoints(StabChain<Telt> const& G, int const& x1, int const& x2)
+std::pair<bool,Telt> Kernel_RepresentativeAction_OnPoints(StabChain<Telt> const& G, int const& x1, int const& x2)
 {
   size_t n = G->comm->n;
   bool repr=true;

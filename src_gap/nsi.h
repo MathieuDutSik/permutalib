@@ -111,7 +111,7 @@ StabChain<Telt> Action(StabChain<Telt> const& S, std::vector<int> const& set)
     map_idx[set[i]] = i;
   //
   std::vector<Telt> LGen;
-  for (auto & eGen : GeneratorsOfGroup(S)) {
+  for (auto & eGen : Kernel_GeneratorsOfGroup(S)) {
     std::vector<int> eList(siz);
     for (int i=0; i<siz; i++) {
       int ePt = set[i];
@@ -122,7 +122,7 @@ StabChain<Telt> Action(StabChain<Telt> const& S, std::vector<int> const& set)
     Telt ePerm = PermList(eList);
     LGen.push_back(ePerm);
   }
-  return Group<Telt,Tint>(LGen, siz);
+  return FCT_Group<Telt,Tint>(LGen, siz);
 }
 
 template<typename Telt>
@@ -389,7 +389,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
         bad.push_back(c);
       } else {
         std::vector<int> q = {x};
-        std::vector<Telt> gens = GeneratorsOfGroup(node->substab);
+        std::vector<Telt> gens = Kernel_GeneratorsOfGroup(node->substab);
         size_t olen = 1;
         size_t pos = 0;
         seen[x] = 1;
@@ -412,7 +412,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
         }
         Tint quot = Order<Telt,Tint>(node->substab) / Order<Telt,Tint>(c->substab);
         if (Tint(olen) < quot) {
-          c->substab = Stabilizer_OnPoints<Telt,Tint>(node->substab, x);
+          c->substab = Kernel_Stabilizer_OnPoints<Telt,Tint>(node->substab, x);
           clean_subtree(c);
         }
       }
@@ -446,7 +446,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
     Face b = BlistList(ClosedInterval(0,n+1), set); // Check the n+1 here
     int seed = set[0];
     std::vector<int> reps;
-    std::vector<Telt> gens = GeneratorsOfGroup(gp);
+    std::vector<Telt> gens = Kernel_GeneratorsOfGroup(gp);
     while (seed != -1 && seed <= n) {
       b[seed]=0;
       std::vector<int> q = {seed};
@@ -759,7 +759,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
 #ifdef DEBUG_NSI
           std::cerr << "DEBUG Before Stabilize_OnPoints x=" << (x+1) << "\n";
 #endif
-          newnode_v.substab = Stabilizer_OnPoints<Telt,Tint>(node->substab, x);
+          newnode_v.substab = Kernel_Stabilizer_OnPoints<Telt,Tint>(node->substab, x);
 #ifdef DEBUG_NSI
           std::cerr << "DEBUG After Stabilize_OnPoints\n";
 #endif
@@ -815,7 +815,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
 
 
 template<typename Telt, typename Tint>
-Face CanonicalImage(StabChain<Telt> const& g, Face const& set)
+Face Kernel_CanonicalImage(StabChain<Telt> const& g, Face const& set)
 {
   std::vector<int> set_i;
   boost::dynamic_bitset<>::size_type aRow = set.find_first();
@@ -823,7 +823,7 @@ Face CanonicalImage(StabChain<Telt> const& g, Face const& set)
     set_i.push_back(aRow);
     aRow = set.find_next(aRow);
   }
-  StabChain<Telt> k = Stabilizer_OnSets<Telt,Tint>(g, set);
+  StabChain<Telt> k = Kernel_Stabilizer_OnSets<Telt,Tint>(g, set);
   Face ret(set.size());
   std::vector<int> eSetCan = NewSmallestImage<Telt,Tint>(g, set_i, k);
 #ifdef DEBUG_NSI
