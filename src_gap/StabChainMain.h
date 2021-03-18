@@ -125,7 +125,7 @@ StabChain<Telt> MinimalStabChain(std::vector<Telt> const& LGen, int const& n)
 
 
 template<typename Telt, typename Tint>
-StabChain<Telt> Group(std::vector<Telt> const& LGen, int const& n)
+StabChain<Telt> Group_V1(std::vector<Telt> const& LGen, int const& n)
 {
 #ifdef DEBUG_STABCHAINMAIN
   std::cerr << "CPP Beginning of MinimalStabChain\n";
@@ -139,6 +139,53 @@ StabChain<Telt> Group(std::vector<Telt> const& LGen, int const& n)
   UnbindCycles(S);
   return S;
 }
+
+
+template<typename Telt, typename Tint>
+struct Group {
+  typedef Telt Telt;
+  typedef Tint Tint;
+  Group(StabChain<Telt> const& _S) : S(_S)
+  {
+  }
+  Group(std::vector<Telt> const& LGen, int const& n)
+  {
+#ifdef DEBUG_STABCHAINMAIN
+    std::cerr << "CPP Beginning of MinimalStabChain\n";
+#endif
+    StabChainOptions<Tint> options = GetStandardOptions<Tint>(n);
+    options.base = {};
+#ifdef DEBUG_STABCHAINMAIN
+    std::cerr << "CPP Before StabChainOp_listgen\n";
+#endif
+    S = StabChainOp_listgen(LGen, options);
+    UnbindCycles(S);
+  }
+  Group<Telt,Tint> Stabilizer_OnPoints(int const& x)
+  {
+    return Group(Stabilizer_OnPoints(S, x));
+  }
+  std::pair<bool,Telt> RepresentativeAction_OnPoints(int const& x1, int const& x2)
+  {
+    return RepresentativeAction_OnPoints(S, x1, x2);
+  }
+  Group<Telt,Tint> Stabilizer_OnSets(Face const& f)
+  {
+    return Group(Stabilizer_OnSets(S, f));
+  }
+  std::pair<bool,Telt> RepresentativeAction_OnPoints(Face const& f1, Face const& f2)
+  {
+    return RepresentativeAction_OnSets(S, f1, f2);
+  }
+  Face CanonicalImage(Face const& f)
+  {
+    return CanonicalImage(S, f);
+  }
+private:
+  StabChain<Telt> S;
+};
+
+
 
 
 
