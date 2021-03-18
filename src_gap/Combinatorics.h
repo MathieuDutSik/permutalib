@@ -8,7 +8,7 @@
 
 
 template<typename T1, typename T2>
-void SortParallel(std::vector<T1> & list1, std::vector<T2> & list2)
+void SortParallel_PairList(std::vector<T1> & list1, std::vector<T2> & list2)
 {
   struct PairData {
     T1 val1;

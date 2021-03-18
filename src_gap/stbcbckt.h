@@ -774,7 +774,7 @@ void NextRBasePoint(Partition & P, rbaseType<Telt> & rbase, Telt const& TheId)
   }
   std::cerr << " ]\n";
 #endif
-  SortParallel(lens, order);
+  SortParallel_PairList(lens, order);
 
 
   int k = PositionProperty(lens, [](int const& x) -> int {return x != 1;});
