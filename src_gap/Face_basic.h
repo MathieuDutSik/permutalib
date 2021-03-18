@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include "exception.h"
+#include <functional>
 
 #include <bitset>
 #include <boost/dynamic_bitset.hpp>
