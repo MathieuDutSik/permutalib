@@ -4,6 +4,7 @@
 #include <vector>
 #include <stdlib.h>
 #include <string>
+#include <iostream>
 
 namespace permutalib {
 
@@ -312,16 +313,16 @@ std::ostream& operator<<(std::ostream& os, DoubleSidedPerm const& ePerm)
 }
 
 
-DoubleSidePerm ParsePermutation(std::string_view const& estr)
+DoubleSidedPerm ParsePermutation(std::string_view const& estr)
 {
   std::vector<int> ListVal;
   std::vector<int> ListRev;
   size_t maxlen = 0;
   auto insertLVal=[&](std::vector<int> const& LVal) -> void {
     for (auto & eVal : LVal)
-      if (eVal+1 >= maxlen)
+      if (eVal+1 >= int(maxlen))
         maxlen = eVal + 1;
-    for (int pos=ListVal.size(); pos<maxlen; pos++) {
+    for (size_t pos=ListVal.size(); pos<maxlen; pos++) {
       ListVal[pos] = pos;
       ListRev[pos] = pos;
     }
@@ -342,20 +343,20 @@ DoubleSidePerm ParsePermutation(std::string_view const& estr)
     std::vector<int> LVal;
     auto insert=[&](size_t const& pos1, size_t const& pos2) -> void {
       size_t len = pos2 - pos1;
-      int eVal = std::stoi(estr.substr(pos_start, len)) - 1;
+      std::string_view ustr = estr.substr(pos_start, len);
+      int eVal = std::stoi(std::string(ustr)) - 1;
       LVal.push_back(eVal);
       pos_start = pos2 + 1;
     };
     for (size_t i_char=0; i_char<n_char; i_char++) {
-      std::string echar = estr.substr(i_char, 1);
+      std::string_view echar = estr.substr(i_char, 1);
       if (echar == ",")
         insert(pos_start, i_char);
     }
     insert(pos_start, n_char);
     return LVal;
-  }
+  };
   //
-  int LevelParenthesis=0;
   size_t n_char = estr.size();
   size_t pos_start=0;
   for (size_t i_char=0; i_char<n_char; i_char++) {
@@ -365,7 +366,7 @@ DoubleSidePerm ParsePermutation(std::string_view const& estr)
     if (estr.substr(i_char,1) == ")") {
       size_t pos_end = i_char;
       size_t len = pos_end - pos_start;
-      std::string sstr = estr.substr(pos_start, len);
+      std::string_view sstr = estr.substr(pos_start, len);
       std::vector<int> LVal = ParseStringByComma(sstr);
       insertLVal(LVal);
     }
