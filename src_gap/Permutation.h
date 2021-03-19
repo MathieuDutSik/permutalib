@@ -313,7 +313,13 @@ std::ostream& operator<<(std::ostream& os, DoubleSidedPerm const& ePerm)
 }
 
 
-DoubleSidedPerm ParsePermutation(std::string_view const& estr)
+
+
+
+
+}
+
+permutalib::DoubleSidedPerm ParsePermutation(std::string_view const& estr)
 {
   std::vector<int> ListVal;
   std::vector<int> ListRev;
@@ -371,12 +377,10 @@ DoubleSidedPerm ParsePermutation(std::string_view const& estr)
       insertLVal(LVal);
     }
   }
-  return DoubleSidedPerm(ListVal, ListRev);
+  return permutalib::DoubleSidedPerm(ListVal, ListRev);
 }
 
 
 
-
-}
 
 #endif
