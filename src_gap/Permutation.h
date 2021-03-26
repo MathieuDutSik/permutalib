@@ -11,6 +11,76 @@ namespace permutalib {
 
 struct DoubleSidedPerm {
 public:
+  DoubleSidedPerm(std::string_view const& estr)
+  {
+    size_t maxlen = 0;
+    auto insertLVal=[&](std::vector<int> const& LVal) -> void {
+      for (auto & eVal : LVal)
+        if (eVal+1 >= int(maxlen))
+          maxlen = eVal + 1;
+      for (size_t pos=ListVal.size(); pos<maxlen; pos++) {
+        ListVal[pos] = pos;
+        ListRev[pos] = pos;
+      }
+      size_t len = LVal.size();
+      for (size_t i=0; i<len; i++) {
+        size_t j = i+1;
+        if (j == len)
+          j = 0;
+        int val1 = LVal[i];
+        int val2 = LVal[j];
+        ListVal[val1] = val2;
+        ListRev[val2] = val1;
+      }
+    };
+    auto ParseStringByComma=[&](std::string_view const& estr) -> std::vector<int> {
+      size_t n_char=estr.size();
+      size_t pos_start = 0;
+      std::vector<int> LVal;
+      auto insert=[&](size_t const& pos1, size_t const& pos2) -> void {
+        size_t len = pos2 - pos1;
+        std::string_view ustr = estr.substr(pos_start, len);
+        int eVal = std::stoi(std::string(ustr)) - 1;
+        LVal.push_back(eVal);
+        pos_start = pos2 + 1;
+      };
+      for (size_t i_char=0; i_char<n_char; i_char++) {
+        std::string_view echar = estr.substr(i_char, 1);
+        if (echar == ",")
+          insert(pos_start, i_char);
+      }
+      insert(pos_start, n_char);
+      return LVal;
+    };
+    //
+    size_t n_char = estr.size();
+    size_t pos_start=0;
+    for (size_t i_char=0; i_char<n_char; i_char++) {
+      if (estr.substr(i_char,1) == "(") {
+        pos_start = i_char + 1;
+      }
+      if (estr.substr(i_char,1) == ")") {
+        size_t pos_end = i_char;
+        size_t len = pos_end - pos_start;
+        std::string_view sstr = estr.substr(pos_start, len);
+        std::vector<int> LVal = ParseStringByComma(sstr);
+        insertLVal(LVal);
+      }
+    }
+  }
+  DoubleSidedPerm(DoubleSidedPerm const& ePerm, int const& n)
+  {
+    if (ePerm.size() > n) {
+      std::cerr << "ePerm.size()=" << ePerm.size() << " n=" << n << "\n";
+      std::cerr << "ExtendPermutation to a size that is lower than the current size\n";
+    }
+    ListVal = ePerm.getListVal();
+    ListRev = ePerm.getListRev();
+    for (int pos=ePerm.size(); pos<n; pos++) {
+      ListVal.push_back(pos);
+      ListRev.push_back(pos);
+    }
+  }
   DoubleSidedPerm ()
   {
     siz=0;
@@ -245,23 +315,6 @@ DoubleSidedPerm Inverse(DoubleSidedPerm const& ePerm)
 }
 
 
-DoubleSidedPerm ExtendPermutation(DoubleSidedPerm const& ePerm, int const& n)
-{
-  if (ePerm.size() > n) {
-    std::cerr << "ePerm.size()=" << ePerm.size() << " n=" << n << "\n";
-    std::cerr << "ExtendPermutation to a size that is lower than the current size\n";
-  }
-  std::vector<int> ListVal = ePerm.getListVal();
-  std::vector<int> ListRev = ePerm.getListRev();
-  for (int pos=ePerm.size(); pos<n; pos++) {
-    ListVal.push_back(pos);
-    ListRev.push_back(pos);
-  }
-  return DoubleSidedPerm(ListVal, ListRev);
-}
-
-
-
 
 // Input / Output
 
@@ -319,67 +372,6 @@ std::ostream& operator<<(std::ostream& os, DoubleSidedPerm const& ePerm)
 
 }
 
-
-permutalib::DoubleSidedPerm ParsePermutation(std::string_view const& estr)
-{
-  std::vector<int> ListVal;
-  std::vector<int> ListRev;
-  size_t maxlen = 0;
-  auto insertLVal=[&](std::vector<int> const& LVal) -> void {
-    for (auto & eVal : LVal)
-      if (eVal+1 >= int(maxlen))
-        maxlen = eVal + 1;
-    for (size_t pos=ListVal.size(); pos<maxlen; pos++) {
-      ListVal[pos] = pos;
-      ListRev[pos] = pos;
-    }
-    size_t len = LVal.size();
-    for (size_t i=0; i<len; i++) {
-      size_t j = i+1;
-      if (j == len)
-        j = 0;
-      int val1 = LVal[i];
-      int val2 = LVal[j];
-      ListVal[val1] = val2;
-      ListRev[val2] = val1;
-    }
-  };
-  auto ParseStringByComma=[&](std::string_view const& estr) -> std::vector<int> {
-    size_t n_char=estr.size();
-    size_t pos_start = 0;
-    std::vector<int> LVal;
-    auto insert=[&](size_t const& pos1, size_t const& pos2) -> void {
-      size_t len = pos2 - pos1;
-      std::string_view ustr = estr.substr(pos_start, len);
-      int eVal = std::stoi(std::string(ustr)) - 1;
-      LVal.push_back(eVal);
-      pos_start = pos2 + 1;
-    };
-    for (size_t i_char=0; i_char<n_char; i_char++) {
-      std::string_view echar = estr.substr(i_char, 1);
-      if (echar == ",")
-        insert(pos_start, i_char);
-    }
-    insert(pos_start, n_char);
-    return LVal;
-  };
-  //
-  size_t n_char = estr.size();
-  size_t pos_start=0;
-  for (size_t i_char=0; i_char<n_char; i_char++) {
-    if (estr.substr(i_char,1) == "(") {
-      pos_start = i_char + 1;
-    }
-    if (estr.substr(i_char,1) == ")") {
-      size_t pos_end = i_char;
-      size_t len = pos_end - pos_start;
-      std::string_view sstr = estr.substr(pos_start, len);
-      std::vector<int> LVal = ParseStringByComma(sstr);
-      insertLVal(LVal);
-    }
-  }
-  return permutalib::DoubleSidedPerm(ListVal, ListRev);
-}
 
 
 
