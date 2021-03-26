@@ -319,6 +319,7 @@ std::ostream& operator<<(std::ostream& os, DoubleSidedPerm const& ePerm)
 
 }
 
+
 permutalib::DoubleSidedPerm ParsePermutation(std::string_view const& estr)
 {
   std::vector<int> ListVal;

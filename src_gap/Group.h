@@ -32,6 +32,12 @@ public:
     UnbindCycles(S);
     size_tint = Order<Telt_inp,Tint_inp>(S);
   }
+  Group(int const& n) : Group({}, n)
+  {
+  }
+  Group() : Group(0)
+  {
+  }
   Group<Telt_inp,Tint_inp> Stabilizer_OnPoints(int const& x) const
   {
     return Group(Kernel_Stabilizer_OnPoints<Telt_inp,Tint_inp>(S, x));
