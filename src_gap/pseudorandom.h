@@ -1,12 +1,12 @@
-#ifndef DEFINE_PSEUDO_RANDOM_H
-#define DEFINE_PSEUDO_RANDOM_H
+#ifndef DEFINE_PERMUTALIB_PSEUDO_RANDOM_H
+#define DEFINE_PERMUTALIB_PSEUDO_RANDOM_H
 
 #include "Face_basic.h"
 
 namespace permutalib {
 
 using Tarith = int;
-  
+
 struct InfoPseudoRandom {
   Tarith R_228;
   int R_N;

@@ -1,5 +1,5 @@
-#ifndef DEFINE_GROUP_H
-#define DEFINE_GROUP_H
+#ifndef DEFINE_PERMUTALIB_GROUP_H
+#define DEFINE_PERMUTALIB_GROUP_H
 
 
 #include "StabChainMain.h"

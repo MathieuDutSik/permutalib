@@ -1,5 +1,5 @@
-#ifndef DEFINE_STAB_CHAIN_H
-#define DEFINE_STAB_CHAIN_H
+#ifndef DEFINE_PERMUTALIB_STAB_CHAIN_H
+#define DEFINE_PERMUTALIB_STAB_CHAIN_H
 
 /*
   Version of the code used. It must be from Summer 2016.

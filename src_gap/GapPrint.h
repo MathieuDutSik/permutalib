@@ -1,5 +1,5 @@
-#ifndef DEFINE_GAP_PRINT_H
-#define DEFINE_GAP_PRINT_H
+#ifndef DEFINE_PERMUTALIB_GAP_PRINT_H
+#define DEFINE_PERMUTALIB_GAP_PRINT_H
 
 #include <iostream>
 #include <sstream>

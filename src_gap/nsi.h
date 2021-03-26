@@ -1,5 +1,5 @@
-#ifndef DEFINE_NSI_H
-#define DEFINE_NSI_H
+#ifndef DEFINE_PERMUTALIB_NSI_H
+#define DEFINE_PERMUTALIB_NSI_H
 
 #include "StabChain.h"
 #include "stbcbckt.h"

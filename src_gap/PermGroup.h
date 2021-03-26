@@ -1,5 +1,5 @@
-#ifndef DEFINE_PERM_GROUP_H
-#define DEFINE_PERM_GROUP_H
+#ifndef DEFINE_PERMUTALIB_PERM_GROUP_H
+#define DEFINE_PERMUTALIB_PERM_GROUP_H
 
 #include "Face_basic.h"
 #include <set>

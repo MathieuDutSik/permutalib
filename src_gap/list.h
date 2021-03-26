@@ -1,5 +1,5 @@
-#ifndef DEFINE_LIST_H
-#define DEFINE_LIST_H
+#ifndef DEFINE_PERMUTALIB_LIST_H
+#define DEFINE_PERMUTALIB_LIST_H
 
 
 #include <vector>

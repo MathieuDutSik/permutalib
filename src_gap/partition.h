@@ -1,5 +1,5 @@
-#ifndef DEFINE_PARTITION_H
-#define DEFINE_PARTITION_H
+#ifndef DEFINE_PERMUTALIB_PARTITION_H
+#define DEFINE_PERMUTALIB_PARTITION_H
 
 #include "PermGroup.h"
 #include "GapPrint.h"

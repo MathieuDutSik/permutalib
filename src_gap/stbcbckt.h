@@ -1,5 +1,5 @@
-#ifndef DEFINE_STBCBCKT_H
-#define DEFINE_STBCBCKT_H
+#ifndef DEFINE_PERMUTALIB_STBCBCKT_H
+#define DEFINE_PERMUTALIB_STBCBCKT_H
 
 #include "StabChainMain.h"
 #include "partition.h"

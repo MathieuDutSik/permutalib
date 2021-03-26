@@ -1,5 +1,5 @@
-#ifndef DEFINE_PERMUTATION_H
-#define DEFINE_PERMUTATION_H
+#ifndef DEFINE_PERMUTALIB_PERMUTATION_H
+#define DEFINE_PERMUTALIB_PERMUTATION_H
 
 #include <vector>
 #include <stdlib.h>

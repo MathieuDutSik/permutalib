@@ -1,5 +1,5 @@
-#ifndef DEFINE_STBCRAND_H
-#define DEFINE_STBCRAND_H
+#ifndef DEFINE_PERMUTALIB_STBCRAND_H
+#define DEFINE_PERMUTALIB_STBCRAND_H
 
 // Functions return type
 // SCRSift           : returns permutation
