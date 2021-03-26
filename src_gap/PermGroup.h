@@ -2,6 +2,7 @@
 #define DEFINE_PERM_GROUP_H
 
 #include "Face_basic.h"
+#include <set>
 
 namespace permutalib {
 
