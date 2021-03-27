@@ -13,6 +13,8 @@ namespace permutalib {
 std::pair<std::vector<int>, std::vector<int>> GetListValRev(std::string_view const& estr)
 {
   size_t maxlen = 0;
+  std::vector<int> ListVal;
+  std::vector<int> ListRev;
   auto insertLVal=[&](std::vector<int> const& LVal) -> void {
     for (auto & eVal : LVal)
       if (eVal+1 >= int(maxlen))
