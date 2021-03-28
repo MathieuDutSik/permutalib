@@ -200,7 +200,9 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
       }
     };
     auto comparisonEqual=[](typeCnt const& a, typeCnt const& b) -> bool {
+#ifdef DEBUG_NSI
       std::cerr << "CPP compEqual a=" << a.orbCount << " / " << a.orbSize << " b=" << b.orbCount << " / " << b.orbSize << "\n";
+#endif
       if (a.orbSize == 1) {
         if (b.orbSize == 1) {
           return a.orbCount == b.orbCount;
