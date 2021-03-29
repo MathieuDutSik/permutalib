@@ -141,6 +141,7 @@ public:
     siz = ePerm.siz;
     ListVal = std::move(ePerm.ListVal);
     ListRev = std::move(ePerm.ListRev);
+    ePerm.siz = 0;
   }
   //
   // Copy operator
@@ -150,7 +151,6 @@ public:
     siz = ePerm.siz;
     ListVal = ePerm.ListVal;
     ListRev = ePerm.ListRev;
-    ePerm.siz = 0;
     return *this;
   }
   DoubleSidedPerm operator=(DoubleSidedPerm&& ePerm)
