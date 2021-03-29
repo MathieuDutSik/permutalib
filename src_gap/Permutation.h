@@ -76,6 +76,9 @@ std::pair<std::vector<int>, std::vector<int>> GetListValRev(std::string_view con
 
 struct DoubleSidedPerm {
 public:
+  //
+  // The constructors
+  //
   DoubleSidedPerm(std::string_view const& estr)
   {
     std::pair<std::vector<int>, std::vector<int>> epair = GetListValRev(estr);
@@ -127,22 +130,46 @@ public:
     ListVal=v1;
     ListRev=v2;
   }
-  ~DoubleSidedPerm()
-  {
-  }
   DoubleSidedPerm(DoubleSidedPerm const& ePerm)
   {
     siz=ePerm.siz;
     ListVal=ePerm.ListVal;
     ListRev=ePerm.ListRev;
   }
+  DoubleSidedPerm(DoubleSidedPerm&& ePerm)
+  {
+    siz = ePerm.siz;
+    ListVal = std::move(ePerm.ListVal);
+    ListRev = std::move(ePerm.ListRev);
+  }
+  //
+  // Copy operator
+  //
   DoubleSidedPerm operator=(DoubleSidedPerm const& ePerm)
   {
     siz = ePerm.siz;
     ListVal = ePerm.ListVal;
     ListRev = ePerm.ListRev;
+    ePerm.siz = 0;
     return *this;
   }
+  DoubleSidedPerm operator=(DoubleSidedPerm&& ePerm)
+  {
+    siz = ePerm.siz;
+    ListVal = std::move(ePerm.ListVal);
+    ListRev = std::move(ePerm.ListRev);
+    ePerm.siz = 0;
+    return *this;
+  }
+  //
+  // The destructor
+  //
+  ~DoubleSidedPerm()
+  {
+  }
+  //
+  // The destructor
+  //
   bool isIdentity() const
   {
     for (int i=0; i<siz; i++)

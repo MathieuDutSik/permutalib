@@ -1786,6 +1786,8 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
 #endif
   int n=G->comm->n;
   std::vector<int> Omega = MovedPoints(G);
+  //  int n_phi = Phi.size();
+  //  std::cerr << "n_phi=" << n_phi << " n=" << n << "\n";
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Omega=" << GapStringIntVector(Omega) << "\n";
 #endif
