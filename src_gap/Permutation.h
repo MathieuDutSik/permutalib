@@ -9,13 +9,13 @@
 namespace permutalib {
 
 
-
-std::pair<std::vector<int>, std::vector<int>> GetListValRev(std::string const& estr)
+template<typename Tidx>
+std::pair<std::vector<Tidx>, std::vector<Tidx>> GetListValRev(std::string const& estr)
 {
   size_t maxlen = 0;
-  std::vector<int> ListVal;
-  std::vector<int> ListRev;
-  auto insertLVal=[&](std::vector<int> const& LVal) -> void {
+  std::vector<Tidx> ListVal;
+  std::vector<Tidx> ListRev;
+  auto insertLVal=[&](std::vector<Tidx> const& LVal) -> void {
     for (auto & eVal : LVal)
       if (eVal+1 >= int(maxlen))
         maxlen = eVal + 1;
@@ -28,20 +28,20 @@ std::pair<std::vector<int>, std::vector<int>> GetListValRev(std::string const& e
       size_t j = i+1;
       if (j == len)
         j = 0;
-      int val1 = LVal[i];
-      int val2 = LVal[j];
+      Tidx val1 = LVal[i];
+      Tidx val2 = LVal[j];
       ListVal[val1] = val2;
       ListRev[val2] = val1;
     }
   };
-  auto ParseStringByComma=[&](std::string const& estr) -> std::vector<int> {
+  auto ParseStringByComma=[&](std::string const& estr) -> std::vector<Tidx> {
     size_t n_char=estr.size();
     size_t pos_start = 0;
-    std::vector<int> LVal;
+    std::vector<Tidx> LVal;
     auto insert=[&](size_t const& pos1, size_t const& pos2) -> void {
       size_t len = pos2 - pos1;
       std::string ustr = estr.substr(pos_start, len);
-      int eVal = std::stoi(std::string(ustr)) - 1;
+      Tidx eVal = std::stoi(std::string(ustr)) - 1;
       LVal.push_back(eVal);
       pos_start = pos2 + 1;
     };
@@ -64,7 +64,7 @@ std::pair<std::vector<int>, std::vector<int>> GetListValRev(std::string const& e
       size_t pos_end = i_char;
       size_t len = pos_end - pos_start;
       std::string sstr = estr.substr(pos_start, len);
-      std::vector<int> LVal = ParseStringByComma(sstr);
+      std::vector<Tidx> LVal = ParseStringByComma(sstr);
       insertLVal(LVal);
     }
   }
@@ -74,14 +74,16 @@ std::pair<std::vector<int>, std::vector<int>> GetListValRev(std::string const& e
 
 
 
+template<typename Tidx_inp>
 struct DoubleSidedPerm {
 public:
+  using Tidx = Tidx_inp;
   //
   // The constructors
   //
   DoubleSidedPerm(std::string const& estr)
   {
-    std::pair<std::vector<int>, std::vector<int>> epair = GetListValRev(estr);
+    std::pair<std::vector<Tidx>, std::vector<Tidx>> epair = GetListValRev<Tidx>(estr);
     ListVal = epair.first;
     ListRev = epair.second;
     siz = ListVal.size();
@@ -109,14 +111,14 @@ public:
   DoubleSidedPerm (int const& n)
   {
     siz=n;
-    ListVal = std::vector<int>(n);
-    ListRev = std::vector<int>(n);
+    ListVal = std::vector<Tidx>(n);
+    ListRev = std::vector<Tidx>(n);
     for (int i=0; i<n; i++) {
       ListVal[i]=i;
       ListRev[i]=i;
     }
   }
-  DoubleSidedPerm(std::vector<int> const& v)
+  DoubleSidedPerm(std::vector<Tidx> const& v)
   {
     ListVal=v;
     siz=v.size();
@@ -124,7 +126,7 @@ public:
     for (int i=0; i<siz; i++)
       ListRev[v[i]]=i;
   }
-  DoubleSidedPerm(std::vector<int> const& v1, std::vector<int> const& v2)
+  DoubleSidedPerm(std::vector<Tidx> const& v1, std::vector<Tidx> const& v2)
   {
     siz=v1.size();
     ListVal=v1;
@@ -132,9 +134,9 @@ public:
   }
   DoubleSidedPerm(DoubleSidedPerm const& ePerm)
   {
-    siz=ePerm.siz;
-    ListVal=ePerm.ListVal;
-    ListRev=ePerm.ListRev;
+    siz     = ePerm.siz;
+    ListVal = ePerm.ListVal;
+    ListRev = ePerm.ListRev;
   }
   DoubleSidedPerm(DoubleSidedPerm&& ePerm)
   {
@@ -146,14 +148,14 @@ public:
   //
   // Copy operator
   //
-  DoubleSidedPerm operator=(DoubleSidedPerm const& ePerm)
+  DoubleSidedPerm<Tidx> operator=(DoubleSidedPerm const& ePerm)
   {
-    siz = ePerm.siz;
+    siz     = ePerm.siz;
     ListVal = ePerm.ListVal;
     ListRev = ePerm.ListRev;
     return *this;
   }
-  DoubleSidedPerm operator=(DoubleSidedPerm&& ePerm)
+  DoubleSidedPerm<Tidx> operator=(DoubleSidedPerm&& ePerm)
   {
     siz = ePerm.siz;
     ListVal = std::move(ePerm.ListVal);
@@ -185,11 +187,11 @@ public:
   {
     return ListRev[i];
   }
-  std::vector<int> getListVal() const
+  std::vector<Tidx> getListVal() const
   {
     return ListVal;
   }
-  std::vector<int> getListRev() const
+  std::vector<Tidx> getListRev() const
   {
     return ListRev;
   }
@@ -204,12 +206,14 @@ public:
   //
 private:
   int siz;
-  std::vector<int> ListVal;
-  std::vector<int> ListRev;
+  std::vector<Tidx> ListVal;
+  std::vector<Tidx> ListRev;
 };
 
 
-bool operator==(DoubleSidedPerm const& v1, DoubleSidedPerm const& v2)
+
+template<typename Tidx>
+bool operator==(DoubleSidedPerm<Tidx> const& v1, DoubleSidedPerm<Tidx> const& v2)
 {
   int siz=v1.size();
   if (siz != v2.size() )
@@ -221,7 +225,8 @@ bool operator==(DoubleSidedPerm const& v1, DoubleSidedPerm const& v2)
 }
 
 
-bool operator!=(DoubleSidedPerm const& v1, DoubleSidedPerm const& v2)
+template<typename Tidx>
+bool operator!=(DoubleSidedPerm<Tidx> const& v1, DoubleSidedPerm<Tidx> const& v2)
 {
   int siz=v1.size();
   if (siz != v2.size() )
@@ -233,7 +238,8 @@ bool operator!=(DoubleSidedPerm const& v1, DoubleSidedPerm const& v2)
 }
 
 
-bool operator<(DoubleSidedPerm const& v1, DoubleSidedPerm const& v2)
+template<typename Tidx>
+bool operator<(DoubleSidedPerm<Tidx> const& v1, DoubleSidedPerm<Tidx> const& v2)
 {
   int siz1=v1.size();
   int siz2=v2.size();
@@ -247,9 +253,10 @@ bool operator<(DoubleSidedPerm const& v1, DoubleSidedPerm const& v2)
   return false;
 }
 
-DoubleSidedPerm operator~(DoubleSidedPerm const& ePerm)
+template<typename Tidx>
+DoubleSidedPerm<Tidx> operator~(DoubleSidedPerm<Tidx> const& ePerm)
 {
-  return DoubleSidedPerm(ePerm.getListRev(), ePerm.getListVal());
+  return DoubleSidedPerm<Tidx>(ePerm.getListRev(), ePerm.getListVal());
 }
 
 
@@ -259,7 +266,8 @@ DoubleSidedPerm operator~(DoubleSidedPerm const& ePerm)
 
 
 // Form the product v1 * v2
-DoubleSidedPerm operator*(DoubleSidedPerm const& v1, DoubleSidedPerm const& v2)
+template<typename Tidx>
+DoubleSidedPerm<Tidx> operator*(DoubleSidedPerm<Tidx> const& v1, DoubleSidedPerm<Tidx> const& v2)
 {
   int siz=v1.size();
 #ifdef DEBUG
@@ -268,7 +276,7 @@ DoubleSidedPerm operator*(DoubleSidedPerm const& v1, DoubleSidedPerm const& v2)
     throw PermutalibException{1};
   }
 #endif
-  std::vector<int> vVal(siz), vRev(siz);
+  std::vector<Tidx> vVal(siz), vRev(siz);
   for (int i=0; i<siz; i++) {
     int j=v1.at(i);
     int k=v2.at(j);
@@ -278,10 +286,13 @@ DoubleSidedPerm operator*(DoubleSidedPerm const& v1, DoubleSidedPerm const& v2)
     int k2=v1.atRev(j2);
     vRev[i]=k2;
   }
-  return DoubleSidedPerm(vVal, vRev);
+  return DoubleSidedPerm<Tidx>(vVal, vRev);
 }
 
-DoubleSidedPerm Conjugation(DoubleSidedPerm const& v1, DoubleSidedPerm const& v2)
+
+
+template<typename Tidx>
+DoubleSidedPerm<Tidx> Conjugation(DoubleSidedPerm<Tidx> const& v1, DoubleSidedPerm<Tidx> const& v2)
 {
   int siz=v1.size();
 #ifdef DEBUG
@@ -290,32 +301,39 @@ DoubleSidedPerm Conjugation(DoubleSidedPerm const& v1, DoubleSidedPerm const& v2
     throw PermutalibException{1};
   }
 #endif
-  std::vector<int> v(siz);
+  std::vector<Tidx> v(siz);
   for (int i=0; i<siz; i++) {
     int j=v1[i];
     int i2=v2[i];
     int j2=v2[j];
     v[i2]=j2;
   }
-  return DoubleSidedPerm(v);
+  return DoubleSidedPerm<Tidx>(v);
 }
 
-int PowAct(int const& i, DoubleSidedPerm const& g)
+
+
+template<typename Tidx>
+int PowAct(int const& i, DoubleSidedPerm<Tidx> const& g)
 {
   return g.at(i);
 }
 
-int SlashAct(int const& i, DoubleSidedPerm const& g)
+
+
+template<typename Tidx>
+int SlashAct(int const& i, DoubleSidedPerm<Tidx> const& g)
 {
   return g.atRev(i);
 }
 
 
 // LeftQuotient(x,y) = x^{-1}*y in the list.gi file
-DoubleSidedPerm LeftQuotient(DoubleSidedPerm const& a, DoubleSidedPerm const& b)
+template<typename Tidx>
+DoubleSidedPerm<Tidx> LeftQuotient(DoubleSidedPerm<Tidx> const& a, DoubleSidedPerm<Tidx> const& b)
 {
   int siz=a.size();
-  std::vector<int> ListVal(siz), ListRev(siz);
+  std::vector<Tidx> ListVal(siz), ListRev(siz);
   for (int i=0; i<siz; i++) {
     int i1=a.atRev(i);
     int j1=b.at(i1);
@@ -324,13 +342,15 @@ DoubleSidedPerm LeftQuotient(DoubleSidedPerm const& a, DoubleSidedPerm const& b)
     int j2=a.at(i2);
     ListRev[i]=j2;
   }
-  return DoubleSidedPerm(ListVal, ListRev);
+  return DoubleSidedPerm<Tidx>(ListVal, ListRev);
 }
 
 
-DoubleSidedPerm SCRandomPerm(int const& d)
+
+template<typename Tidx>
+DoubleSidedPerm<Tidx> SCRandomPerm(int const& d)
 {
-  std::vector<int> rnd(d);
+  std::vector<Tidx> rnd(d);
   for (int i=0; i<d; i++)
     rnd[i]=i;
   for (int i=0; i<d; i++) {
@@ -343,10 +363,13 @@ DoubleSidedPerm SCRandomPerm(int const& d)
       rnd[k]=tmp;
     }
   }
-  return DoubleSidedPerm(rnd);
+  return DoubleSidedPerm<Tidx>(rnd);
 }
 
-DoubleSidedPerm Inverse(DoubleSidedPerm const& ePerm)
+
+
+template<typename Tidx>
+DoubleSidedPerm<Tidx> Inverse(DoubleSidedPerm<Tidx> const& ePerm)
 {
   return ~ePerm;
 }
@@ -355,7 +378,8 @@ DoubleSidedPerm Inverse(DoubleSidedPerm const& ePerm)
 
 // Input / Output
 
-std::string GapStyleStringShift(DoubleSidedPerm const& ePerm, int const& eShift)
+template<typename Tidx>
+std::string GapStyleStringShift(DoubleSidedPerm<Tidx> const& ePerm, int const& eShift)
 {
   int n=ePerm.size();
   std::vector<int> ListStat(n,1);
@@ -390,13 +414,15 @@ std::string GapStyleStringShift(DoubleSidedPerm const& ePerm, int const& eShift)
   return "()";
 }
 
-std::string GapStyleString(DoubleSidedPerm const& ePerm)
+template<typename Tidx>
+std::string GapStyleString(DoubleSidedPerm<Tidx> const& ePerm)
 {
   return GapStyleStringShift(ePerm, 1);
 }
 
 
-std::ostream& operator<<(std::ostream& os, DoubleSidedPerm const& ePerm)
+template<typename Tidx>
+std::ostream& operator<<(std::ostream& os, DoubleSidedPerm<Tidx> const& ePerm)
 {
   os << GapStyleStringShift(ePerm,1);
   return os;

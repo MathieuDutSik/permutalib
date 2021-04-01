@@ -6,7 +6,8 @@
 int main(int argc, char *argv[])
 {
   try {
-    using Telt = permutalib::DoubleSidedPerm;
+    using Tidx = int16_t;
+    using Telt = permutalib::DoubleSidedPerm<Tidx>;
     using Tint = mpz_class;
     if (argc != 2) {
       std::cerr << "The program is used as\n";
@@ -16,7 +17,7 @@ int main(int argc, char *argv[])
     int n;
     (void)sscanf(argv[1], "%d", &n);
     //
-    std::vector<int> ePermV1(n);
+    std::vector<Tidx> ePermV1(n);
     for (int i=0; i<n; i++) {
       int iNext=i+1;
       if (iNext == n)
@@ -25,7 +26,7 @@ int main(int argc, char *argv[])
     }
     Telt ePerm1(ePermV1);
     //
-    std::vector<int> ePermV2(n);
+    std::vector<Tidx> ePermV2(n);
     for (int i=0; i<n; i++)
       ePermV2[i] = i;
     ePermV2[1]=0;

@@ -104,6 +104,7 @@ Telt PermListList(std::vector<T> const& list1, std::vector<T> const& list2)
 template<typename Telt, typename Tint>
 StabChain<Telt> Action(StabChain<Telt> const& S, std::vector<int> const& set)
 {
+  using Tidx = typename Telt::Tidx;
   int n = S->comm->n;
   int siz = set.size();
   std::vector<int> map_idx(n, -1);
@@ -112,7 +113,7 @@ StabChain<Telt> Action(StabChain<Telt> const& S, std::vector<int> const& set)
   //
   std::vector<Telt> LGen;
   for (auto & eGen : Kernel_GeneratorsOfGroup(S)) {
-    std::vector<int> eList(siz);
+    std::vector<Tidx> eList(siz);
     for (int i=0; i<siz; i++) {
       int ePt = set[i];
       int fPt = OnPoints(ePt, eGen);

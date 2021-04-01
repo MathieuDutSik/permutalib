@@ -7,7 +7,8 @@
 int main(int argc, char *argv[])
 {
   try {
-    using Telt = permutalib::DoubleSidedPerm;
+    using Tidx = int16_t;
+    using Telt = permutalib::DoubleSidedPerm<Tidx>;
     using Tint = mpz_class;
     if (argc != 3) {
       std::cerr << "We should have argc = 2\n";
@@ -21,7 +22,7 @@ int main(int argc, char *argv[])
     is >> n;
     std::vector<Telt> LGen(nbGen);
     for (int iGen=0; iGen<nbGen; iGen++) {
-      std::vector<int> ePermV(n);
+      std::vector<Tidx> ePermV(n);
       for (int i=0; i<n; i++) {
 	int eVal;
 	is >> eVal;

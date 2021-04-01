@@ -985,7 +985,8 @@ struct ResultPBT {
 template<typename Telt>
 Telt MappingPermListList(int const& n, std::vector<int> const& src, std::vector<int> const& dst)
 {
-  std::vector<int> ListImage(n);
+  using Tidx = typename Telt::Tidx;
+  std::vector<Tidx> ListImage(n);
   Face StatusSrc(n);
   Face StatusDst(n);
   for (int i=0; i<n; i++) {
