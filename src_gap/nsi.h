@@ -480,7 +480,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
   // set the pointer to zero and so all cycles eliminated.
   // Maybe we could do better, but the hack should be adequate.
   auto free_all_nodes=[&]() -> void {
-    std::cerr << "|ListPtr|=" << ListPtr.size() << "\n";
+                        //    std::cerr << "|ListPtr|=" << ListPtr.size() << "\n";
     for (auto & e_node : ListPtr) {
       e_node->prev=nullptr;
       e_node->next=nullptr;
