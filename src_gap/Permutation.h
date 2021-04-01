@@ -346,12 +346,6 @@ DoubleSidedPerm SCRandomPerm(int const& d)
   return DoubleSidedPerm(rnd);
 }
 
-
-DoubleSidedPerm PermList(std::vector<int> const& eList)
-{
-  return DoubleSidedPerm(eList);
-}
-
 DoubleSidedPerm Inverse(DoubleSidedPerm const& ePerm)
 {
   return ~ePerm;

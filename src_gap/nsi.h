@@ -95,7 +95,7 @@ Telt PermListList(std::vector<T> const& list1, std::vector<T> const& list2)
     int val = eMap[list2[i]];
     eList[i] = val;
   }
-  return PermList(eList);
+  return Telt(eList);
 }
 
 
@@ -119,7 +119,7 @@ StabChain<Telt> Action(StabChain<Telt> const& S, std::vector<int> const& set)
       int j = map_idx[fPt];
       eList[i] = j;
     }
-    Telt ePerm = PermList(eList);
+    Telt ePerm = Telt(eList);
     LGen.push_back(ePerm);
   }
   return FCT_Group<Telt,Tint>(LGen, siz);
@@ -479,6 +479,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
   // set the pointer to zero and so all cycles eliminated.
   // Maybe we could do better, but the hack should be adequate.
   auto free_all_nodes=[&]() -> void {
+    std::cerr << "|ListPtr|=" << ListPtr.size() << "\n";
     for (auto & e_node : ListPtr) {
       e_node->prev=nullptr;
       e_node->next=nullptr;
