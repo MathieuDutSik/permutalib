@@ -10,7 +10,7 @@ namespace permutalib {
 
 
 
-std::pair<std::vector<int>, std::vector<int>> GetListValRev(std::string_view const& estr)
+std::pair<std::vector<int>, std::vector<int>> GetListValRev(std::string const& estr)
 {
   size_t maxlen = 0;
   std::vector<int> ListVal;
@@ -34,19 +34,19 @@ std::pair<std::vector<int>, std::vector<int>> GetListValRev(std::string_view con
       ListRev[val2] = val1;
     }
   };
-  auto ParseStringByComma=[&](std::string_view const& estr) -> std::vector<int> {
+  auto ParseStringByComma=[&](std::string const& estr) -> std::vector<int> {
     size_t n_char=estr.size();
     size_t pos_start = 0;
     std::vector<int> LVal;
     auto insert=[&](size_t const& pos1, size_t const& pos2) -> void {
       size_t len = pos2 - pos1;
-      std::string_view ustr = estr.substr(pos_start, len);
+      std::string ustr = estr.substr(pos_start, len);
       int eVal = std::stoi(std::string(ustr)) - 1;
       LVal.push_back(eVal);
       pos_start = pos2 + 1;
     };
     for (size_t i_char=0; i_char<n_char; i_char++) {
-      std::string_view echar = estr.substr(i_char, 1);
+      std::string echar = estr.substr(i_char, 1);
       if (echar == ",")
         insert(pos_start, i_char);
     }
@@ -63,7 +63,7 @@ std::pair<std::vector<int>, std::vector<int>> GetListValRev(std::string_view con
     if (estr.substr(i_char,1) == ")") {
       size_t pos_end = i_char;
       size_t len = pos_end - pos_start;
-      std::string_view sstr = estr.substr(pos_start, len);
+      std::string sstr = estr.substr(pos_start, len);
       std::vector<int> LVal = ParseStringByComma(sstr);
       insertLVal(LVal);
     }
@@ -79,7 +79,7 @@ public:
   //
   // The constructors
   //
-  DoubleSidedPerm(std::string_view const& estr)
+  DoubleSidedPerm(std::string const& estr)
   {
     std::pair<std::vector<int>, std::vector<int>> epair = GetListValRev(estr);
     ListVal = epair.first;
