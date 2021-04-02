@@ -431,6 +431,289 @@ std::ostream& operator<<(std::ostream& os, DoubleSidedPerm<Tidx> const& ePerm)
 
 
 
+template<typename Tidx_inp>
+struct SingleSidedPerm {
+public:
+  using Tidx = Tidx_inp;
+  //
+  // The constructors
+  //
+  SingleSidedPerm(std::string const& estr)
+  {
+    std::pair<std::vector<Tidx>, std::vector<Tidx>> epair = GetListValRev<Tidx>(estr);
+    ListVal = epair.first;
+    siz = ListVal.size();
+  }
+  SingleSidedPerm(SingleSidedPerm const& ePerm, int const& n)
+  {
+    if (ePerm.size() > n) {
+      std::cerr << "ePerm.size()=" << ePerm.size() << " n=" << n << "\n";
+      std::cerr << "ExtendPermutation to a size that is lower than the current size\n";
+    }
+    ListVal = ePerm.getListVal();
+    for (int pos=ePerm.size(); pos<n; pos++)
+      ListVal.push_back(pos);
+    siz = n;
+  }
+  SingleSidedPerm ()
+  {
+    siz=0;
+    ListVal = {};
+  }
+  SingleSidedPerm (int const& n)
+  {
+    siz=n;
+    ListVal = std::vector<Tidx>(n);
+    for (int i=0; i<n; i++)
+      ListVal[i]=i;
+  }
+  SingleSidedPerm(std::vector<Tidx> const& v)
+  {
+    ListVal=v;
+    siz=v.size();
+  }
+  SingleSidedPerm(std::vector<Tidx> const& v1, std::vector<Tidx> const& v2)
+  {
+    siz=v1.size();
+    ListVal=v1;
+  }
+  SingleSidedPerm(SingleSidedPerm const& ePerm)
+  {
+    siz     = ePerm.siz;
+    ListVal = ePerm.ListVal;
+  }
+  SingleSidedPerm(SingleSidedPerm&& ePerm)
+  {
+    siz = ePerm.siz;
+    ListVal = std::move(ePerm.ListVal);
+    ePerm.siz = 0;
+  }
+  //
+  // Copy operator
+  //
+  SingleSidedPerm<Tidx> operator=(SingleSidedPerm const& ePerm)
+  {
+    siz     = ePerm.siz;
+    ListVal = ePerm.ListVal;
+    return *this;
+  }
+  SingleSidedPerm<Tidx> operator=(SingleSidedPerm&& ePerm)
+  {
+    siz = ePerm.siz;
+    ListVal = std::move(ePerm.ListVal);
+    ePerm.siz = 0;
+    return *this;
+  }
+  //
+  // The destructor
+  //
+  ~SingleSidedPerm()
+  {
+  }
+  //
+  // The destructor
+  //
+  bool isIdentity() const
+  {
+    for (int i=0; i<siz; i++)
+      if (ListVal[i] != i)
+	return false;
+    return true;
+  }
+  int at(int const& i) const
+  {
+    return ListVal[i];
+  }
+  int atRev(int const& i) const
+  {
+    for (int j=0; j<siz; j++)
+      if (ListVal[j] == i)
+        return j;
+    return -1;
+  }
+  std::vector<Tidx> getListVal() const
+  {
+    return ListVal;
+  }
+  int operator[](int const& i) const
+  {
+    return ListVal[i];
+  }
+  int size() const
+  {
+    return siz;
+  }
+  //
+private:
+  int siz;
+  std::vector<Tidx> ListVal;
+};
+
+
+template<typename Tidx>
+bool operator==(SingleSidedPerm<Tidx> const& v1, SingleSidedPerm<Tidx> const& v2)
+{
+  int siz=v1.size();
+  if (siz != v2.size() )
+    return false;
+  for (int i=0; i<siz; i++)
+    if (v1.at(i) != v2.at(i))
+      return false;
+  return true;
+}
+
+
+template<typename Tidx>
+bool operator!=(SingleSidedPerm<Tidx> const& v1, SingleSidedPerm<Tidx> const& v2)
+{
+  int siz=v1.size();
+  if (siz != v2.size() )
+    return true;
+  for (int i=0; i<siz; i++)
+    if (v1.at(i) != v2.at(i))
+      return true;
+  return false;
+}
+
+
+template<typename Tidx>
+bool operator<(SingleSidedPerm<Tidx> const& v1, SingleSidedPerm<Tidx> const& v2)
+{
+  int siz1=v1.size();
+  int siz2=v2.size();
+  if (siz1 != siz2)
+    return siz1<siz2;
+  int siz=siz1;
+  for (int i=0; i<siz; i++) {
+    if (v1.at(i) != v2.at(i))
+      return v1.at(i) < v2.at(i);
+  }
+  return false;
+}
+
+template<typename Tidx>
+SingleSidedPerm<Tidx> operator~(SingleSidedPerm<Tidx> const& ePerm)
+{
+  int siz = ePerm.size();
+  std::vector<Tidx> LVal = ePerm.getListVal();
+  std::vector<Tidx> v(siz);
+  for (int i=0; i<siz; i++)
+    v[LVal[i]] = i;
+  return SingleSidedPerm<Tidx>(v);
+}
+
+
+
+
+
+
+
+// Form the product v1 * v2
+template<typename Tidx>
+SingleSidedPerm<Tidx> operator*(SingleSidedPerm<Tidx> const& v1, SingleSidedPerm<Tidx> const& v2)
+{
+  int siz=v1.size();
+#ifdef DEBUG
+  if (siz != v2.size() ) {
+    std::cerr << "Error in the DoubleSidedPerm product\n";
+    throw PermutalibException{1};
+  }
+#endif
+  std::vector<Tidx> vVal(siz);
+  for (int i=0; i<siz; i++) {
+    int j=v1.at(i);
+    int k=v2.at(j);
+    vVal[i]=k;
+  }
+  return SingleSidedPerm<Tidx>(vVal);
+}
+
+
+
+template<typename Tidx>
+SingleSidedPerm<Tidx> Conjugation(SingleSidedPerm<Tidx> const& v1, SingleSidedPerm<Tidx> const& v2)
+{
+  int siz=v1.size();
+#ifdef DEBUG
+  if (siz != v2.size() ) {
+    std::cerr << "Error in the DoubleSidedPerm conjugation\n";
+    throw PermutalibException{1};
+  }
+#endif
+  std::vector<Tidx> v(siz);
+  for (int i=0; i<siz; i++) {
+    int j=v1[i];
+    int i2=v2[i];
+    int j2=v2[j];
+    v[i2]=j2;
+  }
+  return SingleSidedPerm<Tidx>(v);
+}
+
+
+
+template<typename Tidx>
+int PowAct(int const& i, SingleSidedPerm<Tidx> const& g)
+{
+  return g.at(i);
+}
+
+
+
+template<typename Tidx>
+int SlashAct(int const& i, SingleSidedPerm<Tidx> const& g)
+{
+  return g.atRev(i);
+}
+
+
+// LeftQuotient(x,y) = x^{-1}*y in the list.gi file
+template<typename Tidx>
+SingleSidedPerm<Tidx> LeftQuotient(SingleSidedPerm<Tidx> const& a, SingleSidedPerm<Tidx> const& b)
+{
+  int siz=a.size();
+  std::vector<Tidx> ListVal(siz);
+  for (int i=0; i<siz; i++) {
+    int i1=a.atRev(i);
+    int j1=b.at(i1);
+    ListVal[i]=j1;
+  }
+  return SingleSidedPerm<Tidx>(ListVal);
+}
+
+
+
+template<typename Tidx>
+SingleSidedPerm<Tidx> SCRandomPerm(int const& d)
+{
+  std::vector<Tidx> rnd(d);
+  for (int i=0; i<d; i++)
+    rnd[i]=i;
+  for (int i=0; i<d; i++) {
+    int idx=d-i;
+    int res=d-i;
+    int k=rand() % res;
+    if (k != idx) {
+      int tmp=rnd[idx];
+      rnd[idx]=rnd[k];
+      rnd[k]=tmp;
+    }
+  }
+  return DoubleSidedPerm<Tidx>(rnd);
+}
+
+
+
+template<typename Tidx>
+SingleSidedPerm<Tidx> Inverse(SingleSidedPerm<Tidx> const& ePerm)
+{
+  return ~ePerm;
+}
+
+
+
+
+
 
 
 }
