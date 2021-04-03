@@ -821,6 +821,8 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
 template<typename Telt, typename Tint>
 Face Kernel_CanonicalImage(StabChain<Telt> const& g, Face const& set)
 {
+  if (set.count() == 0)
+    return set;
   std::vector<int> set_i;
   boost::dynamic_bitset<>::size_type aRow = set.find_first();
   while (aRow != boost::dynamic_bitset<>::npos) {
