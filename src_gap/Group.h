@@ -10,6 +10,24 @@
 namespace permutalib {
 
 
+
+template<typename Telt>
+Telt RandomElement(std::vector<Telt> const& LGen, int const& n)
+{
+  int len = rand() % 100;
+  size_t n_gen = LGen.size();
+  Telt eElt(n);
+  for (int iIter=0; iIter<len; iIter++) {
+    size_t pos = rand() % n_gen;
+    eElt = eElt * LGen[pos];
+  }
+  return eElt;
+}
+
+
+
+
+
 template<typename Telt_inp, typename Tint_inp>
 struct Group {
 public:
@@ -69,6 +87,10 @@ public:
   int n_act() const
   {
     return S->comm->n;
+  }
+  Telt_inp rand() const
+  {
+    return RandomElement(Kernel_GeneratorsOfGroup(S), S->comm->n);
   }
 private:
   StabChain<Telt_inp> S;

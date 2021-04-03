@@ -316,6 +316,32 @@ TestAllGroups:=function(method, size_opt)
 end;
 
 
+WriteAllGroupsInFile:=function(eFile)
+    local ListGroups, output, eGRP, LGen, nbMov, eGen, iMov, eImg;
+    ListGroups:=GetListCandidateGroups();
+    output:=OutputTextFile(eFile, true);
+    AppendTo(output, Length(ListGroups), "\n");
+    for eGRP in ListGroups
+    do
+        LGen:=GeneratorsOfGroup(eGRP);
+        nbMov:=LargestMovedPoint(eGRP);
+        AppendTo(output, Length(LGen), " ", nbMov, "\n");
+        for eGen in LGen
+        do
+            for iMov in [1..nbMov]
+            do
+                eImg:=OnPoints(iMov, eGen);
+                AppendTo(output, " ", eImg-1);
+            od;
+            AppendTo(output, "\n");
+        od;
+    od;
+    CloseStream(output);
+end;
+
+
 #TestAllGroups("stabilizer", 1);
 #TestAllGroups("equivalence", 1);
-TestAllGroups("canonical", 2);
+#TestAllGroups("canonical", 2);
+WriteAllGroupsInFile("AllFileTest");
+

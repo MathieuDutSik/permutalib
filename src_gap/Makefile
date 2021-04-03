@@ -1,10 +1,10 @@
-PROGRAM	= GapRepresentativeActionOnSet GapStabilizerOnSet TestStabilizerOnSet TestRepresentativeActionOnSet GapEquivalenceOnSet GapCanonicalImage
+#PROGRAM	= GapRepresentativeActionOnSet GapStabilizerOnSet TestStabilizerOnSet TestRepresentativeActionOnSet GapEquivalenceOnSet GapCanonicalImage
 #PROGRAM	= TestStabilizerOnSet
 #PROGRAM	= GapStabilizerOnSet
 #PROGRAM	= GapRepresentativeActionOnSet
 #PROGRAM	= TestRepresentativeActionOnSet
-#PROGRAM	= TestCompilation TestSymmetricGroup TestStabilizerOnSet
 #PROGRAM	= TestSymmetricGroup
+PROGRAM	= GapCanonicalImage
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
