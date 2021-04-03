@@ -821,22 +821,39 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
 template<typename Telt, typename Tint>
 Face Kernel_CanonicalImage(StabChain<Telt> const& g, Face const& set)
 {
-  if (set.count() == 0)
+  if (set.count() == 0 || set.count() == set.size())
     return set;
   std::vector<int> set_i;
-  boost::dynamic_bitset<>::size_type aRow = set.find_first();
-  while (aRow != boost::dynamic_bitset<>::npos) {
-    set_i.push_back(aRow);
-    aRow = set.find_next(aRow);
-  }
-  StabChain<Telt> k = Kernel_Stabilizer_OnSets<Telt,Tint>(g, set);
   Face ret(set.size());
-  std::vector<int> eSetCan = NewSmallestImage<Telt,Tint>(g, set_i, k);
+  if (2 * set.count() <= set.size()) {
+    boost::dynamic_bitset<>::size_type aRow = set.find_first();
+    while (aRow != boost::dynamic_bitset<>::npos) {
+      set_i.push_back(aRow);
+      aRow = set.find_next(aRow);
+    }
+    StabChain<Telt> k = Kernel_Stabilizer_OnSets<Telt,Tint>(g, set);
+    std::vector<int> eSetCan = NewSmallestImage<Telt,Tint>(g, set_i, k);
 #ifdef DEBUG_NSI
-  std::cerr << "CPP eSetCan=" << GapStringIntVector(eSetCan) << "\n";
+    std::cerr << "CPP eSetCan=" << GapStringIntVector(eSetCan) << "\n";
 #endif
-  for (auto & eVal : eSetCan) {
-    ret[eVal] = 1;
+    for (auto & eVal : eSetCan) {
+      ret[eVal] = 1;
+    }
+  } else {
+    Face setC(set.size());
+    for (size_t i=0; i<set.size(); i++)
+      setC[i] = 1 - set[i];
+    boost::dynamic_bitset<>::size_type aRow = setC.find_first();
+    while (aRow != boost::dynamic_bitset<>::npos) {
+      set_i.push_back(aRow);
+      aRow = setC.find_next(aRow);
+    }
+    StabChain<Telt> k = Kernel_Stabilizer_OnSets<Telt,Tint>(g, setC);
+    std::vector<int> eSetCan = NewSmallestImage<Telt,Tint>(g, set_i, k);
+    for (size_t i=0; i<set.size(); i++)
+      ret[i] = 1;
+    for (auto & eVal : eSetCan)
+      ret[eVal] = 0;
   }
   return ret;
 }

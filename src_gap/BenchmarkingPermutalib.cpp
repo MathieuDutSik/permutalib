@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
           int eVal = rand() % 2;
           eFace[i] = eVal;
         }
-        //        std::cerr << "  |eFace|=" << eFace.count() << "\n";
+        //        std::cerr << "  |eFace|=" << eFace.count() << " / " << eFace.size() << "\n";
         //
         if (opt == "canonical") {
           Face set_can = eG.CanonicalImage(eFace);
