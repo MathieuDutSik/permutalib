@@ -16,7 +16,7 @@
 #include "COMB_Vectors.h"
 
 namespace permutalib {
-  
+
 template<typename Telt>
 void SCRExtend(std::vector<Telt> & labels, std::vector<int> & orb, std::vector<int> & transversal, std::vector<Telt> & treegen, std::vector<Telt> & treegeninv, int & len)
 {
@@ -43,7 +43,7 @@ void SCRExtend(std::vector<Telt> & labels, std::vector<int> & orb, std::vector<i
       }
     }
 }
-  
+
 
 struct noticeType {
   bool res;
@@ -83,7 +83,7 @@ noticeType SCRNotice_B(std::vector<int> const& orb, std::vector<int> const& tran
 
 
 
- 
+
 int QuoInt(int const& a, int const& b)
 {
   int res=a % b;
@@ -103,7 +103,7 @@ T LogInt(T const& TheNB, T const& expo)
   }
 }
 
- 
+
 Face SCRRandomString(int const& n)
 {
   InfoPseudoRandom* R = GetPseudoRandom();
@@ -137,7 +137,7 @@ Telt SCRRandomPerm(int const& d )
 
 
 
- 
+
 template<typename Telt>
 std::vector<Telt> CosetRepAsWord(std::vector<Telt> const& labels, int const& x, int const& y, std::vector<int> const& transversal)
 {
@@ -179,7 +179,7 @@ std::vector<Telt> InverseAsWord(std::vector<Telt> const& word, std::vector<Telt>
   }
   return inverse;
 }
- 
+
 template<typename Telt>
 int ImageInWord(int const& x, std::vector<Telt> const& word)
 {
@@ -232,7 +232,7 @@ std::vector<Telt> RandomElmAsWord(StabChain<Telt> const& S)
   }
   return word;
 }
- 
+
 
 
 template<typename Telt>
@@ -296,7 +296,7 @@ Telt Product(std::vector<Telt> const& eList)
 
 
 
-  
+
 template<typename Telt>
 void SCRSchTree(StabChain<Telt> & S, std::vector<Telt> const& newgens )
 {
@@ -518,7 +518,7 @@ std::vector<Telt> GetWpair(std::vector<Telt> const& Saux, int const& k, paramOpt
     else
       return {Saux[2*k-2], TheId};
   }
-  
+
 }
 
 
@@ -678,7 +678,7 @@ Telt VerifyStabilizer(StabChain<Telt> const& S, Telt const& z, std::vector<int> 
     if (where1[i] == -1) {
       orbit1count++;
       leaders.push_back(i);
-      orb = {i}; 
+      orb = {i};
       where1[i] = orbit1count;
       transversal[i] = GetLabelIndex_const(S->comm->labels, S->comm->identity);
       int j = 0;
@@ -716,7 +716,7 @@ Telt VerifyStabilizer(StabChain<Telt> const& S, Telt const& z, std::vector<int> 
 	Telt g = chain->comm->labels[iGen];
 	if (result.isIdentity()) {
 	  if (correct) {
-	    // There is a possible source of problems here 
+	    // There is a possible source of problems here
 	    std::pair<std::vector<Telt>, int> residue = SiftAsWord(stab, {w1inv,g,w1});
 	    if (residue.second != 0) {
 	      result = Product(residue.first);
@@ -770,7 +770,7 @@ Telt VerifyStabilizer(StabChain<Telt> const& S, Telt const& z, std::vector<int> 
 	  }
 	}
 	std::vector<Telt> w1 = CosetRepAsWord(S->comm->labels, pt1, leaders[where1[i]], S->transversal);
-	std::vector<Telt> w2 = CosetRepAsWord(S->comm->labels, leaders[where1[i]], i, transversal); 
+	std::vector<Telt> w2 = CosetRepAsWord(S->comm->labels, leaders[where1[i]], i, transversal);
 	std::vector<Telt> w3 = CosetRepAsWord(S->comm->labels, leaders[where1[ipZ]], ipZ, transversal);
 	std::vector<Telt> w4;
 	if (where1[i] != where1[ipZ]) {
@@ -808,10 +808,10 @@ Telt VerifyStabilizer(StabChain<Telt> const& S, Telt const& z, std::vector<int> 
 
 
 
-  
+
 
 template<typename Telt, typename Tint>
-StabChain<Telt> StabChainRandomPermGroup(std::vector<Telt> const& gens, Telt const& id, StabChainOptions<Tint> const& options)
+StabChain<Telt> StabChainRandomPermGroup(std::vector<Telt> const& gens, Telt const& id, StabChainOptions<Tint, typename Telt::Tidx> const& options)
 {
   int k;
   if (options.random == 1000) {
@@ -952,7 +952,7 @@ StabChain<Telt> StabChainRandomPermGroup(std::vector<Telt> const& gens, Telt con
 	      if (warning > 5)
 		std::cerr << "Warning, computed and given size differ\n";
 	      result=SCRStrongGenTest(S, param, orbits, basesize, base, correct, missing);
-	      if (result.isIdentity()) 
+	      if (result.isIdentity())
 		result=SCRStrongGenTest2(S, param);
 	    }
 	  }
@@ -1019,7 +1019,7 @@ StabChain<Telt> StabChainRandomPermGroup(std::vector<Telt> const& gens, Telt con
 
 // Is the Stot really a const function? Not sure really.
 template<typename Telt>
-std::pair<bool,Telt> VerifySGS(StabChain<Telt> const& S, std::vector<int> const& missing, bool const& correct) 
+std::pair<bool,Telt> VerifySGS(StabChain<Telt> const& S, std::vector<int> const& missing, bool const& correct)
 {
   int n = S->comm->n;
   std::vector<StabChain<Telt>> list = ListStabChain(S);
@@ -1065,7 +1065,7 @@ std::pair<bool,Telt> VerifySGS(StabChain<Telt> const& S, std::vector<int> const&
 	StabChain<Telt> temp2;
 	Telt newgen;
 	if (set.size() == 1) {
-	  temp2 = temp; 
+	  temp2 = temp;
 	  newgen = gen;
 	}
 	else {
@@ -1099,7 +1099,7 @@ std::pair<bool,Telt> VerifySGS(StabChain<Telt> const& S, std::vector<int> const&
 	      int leader = temp2->orbit[0];
 	      std::vector<int> block = GetBlock(blks, leader);
 	      int point = GetNonTrivialPointInBlock(block, leader);
-	      newgen = Product(CosetRepAsWord(S->comm->labels, leader, point, temp2->transversal)); 
+	      newgen = Product(CosetRepAsWord(S->comm->labels, leader, point, temp2->transversal));
 	      temp2 = temp2->stabilizer;
 	      InsertTrivialStabilizer(temp2, leader);
 	      AddGeneratorsExtendSchreierTree(temp2, {newgen});
@@ -1113,7 +1113,7 @@ std::pair<bool,Telt> VerifySGS(StabChain<Telt> const& S, std::vector<int> const&
 	      gencount--;
 	    }
 	    else {
-	      result.second = VerifyStabilizer(temp2, newgen, missing, correct); 
+	      result.second = VerifyStabilizer(temp2, newgen, missing, correct);
 	      if (temp2->orbit[0] >= n) {
 		AddGeneratorsExtendSchreierTree(temp, {gen});
 	      }
@@ -1131,6 +1131,6 @@ std::pair<bool,Telt> VerifySGS(StabChain<Telt> const& S, std::vector<int> const&
 }
 
 
-} 
+}
 
 #endif

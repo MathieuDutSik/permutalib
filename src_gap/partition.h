@@ -175,7 +175,7 @@ Partition<Tidx> GetPartition(std::vector<std::vector<Tidx>> const& list)
     for (auto & eVal : list[iPart])
       cellno[eVal] = iPart;
   }
-  Partition P{points, firsts, lengths, cellno};
+  Partition<Tidx> P{points, firsts, lengths, cellno};
 #ifdef DEBUG_PARTITION
   std::cerr << "CPP After GetPartition operation P=\n";
   RawPrintPartition(P);
@@ -187,16 +187,18 @@ Partition<Tidx> GetPartition(std::vector<std::vector<Tidx>> const& list)
 }
 
 
-int GetNumberPoint(Partition const& ePartition)
+template<typename Tidx>
+Tidx GetNumberPoint(Partition<Tidx> const& ePartition)
 {
-  int nbPoint = ePartition.points.size();
+  Tidx nbPoint = ePartition.points.size();
   return nbPoint;
 }
 
 
-int NumberCells(Partition const& ePartition)
+template<typename Tidx>
+Tidx NumberCells(Partition<Tidx> const& ePartition)
 {
-  int nbPart=ePartition.firsts.size();
+  Tidx nbPart=ePartition.firsts.size();
   return nbPart;
 }
 
@@ -356,7 +358,7 @@ Tidx SplitCell_Kernel(Partition<Tidx> & P, Tidx const& i, std::function<bool(Tid
 }
 
 template<typename Telt>
-typename Telt::Tidx SplitCell_Partition(Partition<<typename Telt::Tidx> & P, typename Telt::Tidx const& i, Partition<typename Telt::Tidx> const& Q, typename Telt::Tidx const& j, Telt const& g, typename Telt::Tidx const& out)
+typename Telt::Tidx SplitCell_Partition(Partition<typename Telt::Tidx> & P, typename Telt::Tidx const& i, Partition<typename Telt::Tidx> const& Q, typename Telt::Tidx const& j, Telt const& g, typename Telt::Tidx const& out)
 {
   using Tidx = typename Telt::Tidx;
 #ifdef DEBUG_PARTITION
@@ -395,7 +397,8 @@ typename Telt::Tidx SplitCell_Face(Partition<typename Telt::Tidx> & P, typename 
 }
 
 
-int IsolatePoint(Partition & P, int const& a)
+template<typename Tidx>
+Tidx IsolatePoint(Partition<Tidx> & P, Tidx const& a)
 {
 #ifdef CHECK_PARTITION
   CheckConsistencyPartition("Input IsolatePoint", P);
@@ -404,16 +407,16 @@ int IsolatePoint(Partition & P, int const& a)
   std::cerr << "CPP Input Partition\n";
   RawPrintPartition(P);
 #endif
-  int nbPart=P.firsts.size();
-  int iPart=P.cellno[a];
-  int eFirst=P.firsts[iPart];
-  int len=P.lengths[iPart];
+  Tidx nbPart=P.firsts.size();
+  Tidx iPart=P.cellno[a];
+  Tidx eFirst=P.firsts[iPart];
+  Tidx len=P.lengths[iPart];
   //  std::cerr << "a=" << a << " iPart=" << iPart << " eFirst=" << eFirst << " len=" << len << "\n";
   if (len == 1)
     return -1;
-  int pos=-1;
-  for (int j=eFirst; j<eFirst + len; j++) {
-    int ePt=P.points[j];
+  Tidx pos=0;
+  for (Tidx j=eFirst; j<eFirst + len; j++) {
+    Tidx ePt=P.points[j];
     if (ePt == a)
       pos=j;
   }
@@ -439,20 +442,21 @@ int IsolatePoint(Partition & P, int const& a)
 
 
 
-int UndoRefinement(Partition & P)
+template<typename Tidx>
+Tidx UndoRefinement(Partition<Tidx> & P)
 {
 #ifdef CHECK_PARTITION
   CheckConsistencyPartition("Input UndoRefinement", P);
 #endif
-  int nbPart=P.firsts.size();
-  int pfm=P.firsts[nbPart-1];
+  Tidx nbPart=P.firsts.size();
+  Tidx pfm=P.firsts[nbPart-1];
   if (pfm == 0)
-    return -1;
-  int plm=P.lengths[nbPart-1];
-  int m=P.cellno[P.points[pfm-1]];
+    return std::numeric_limits<Tidx>::max();
+  Tidx plm=P.lengths[nbPart-1];
+  Tidx m=P.cellno[P.points[pfm-1]];
   P.lengths[m] += plm;
-  for (int j=pfm; j<pfm + plm; j++) {
-    int ePt=P.points[j];
+  for (Tidx j=pfm; j<pfm + plm; j++) {
+    Tidx ePt=P.points[j];
     P.cellno[ePt]=m;
   }
   P.firsts.pop_back();
@@ -503,7 +507,7 @@ struct typeFixcellsCell {
 
 
 template<typename Tidx>
-typeFixcellsCell FixcellsCell(Partition<Tidx> const& P, Partition<Tidx> const& Q, std::set<Tidx> & old)
+typeFixcellsCell<Tidx> FixcellsCell(Partition<Tidx> const& P, Partition<Tidx> const& Q, std::set<Tidx> & old)
 {
   std::vector<Tidx> K, I;
   Tidx nbPart=P.firsts.size();

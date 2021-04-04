@@ -126,22 +126,25 @@ struct singStrat {
 };
 
 
+template<typename Tidx>
 struct Refinement {
 public:
   Refinement(int const& val1, int const& val2) {
     nature = 0;
     inputProcessfix = {val1, val2};
   }
-  Refinement(Partition const& ePart, std::vector<singStrat> const& strat) {
+  Refinement(Partition<Tidx> const& ePart, std::vector<singStrat> const& strat) {
     nature = 1;
     inputIntersection = {ePart, strat};
   }
   int nature; // 0 for PROCESSFIX, 1 for INTERSECTION
   std::pair<int,int> inputProcessfix;
-  std::pair<Partition,std::vector<singStrat>> inputIntersection;
+  std::pair<Partition<Tidx>,std::vector<singStrat>> inputIntersection;
 };
 
-bool IsInsertableRefinement(Refinement const& eRfm)
+
+template<typename Tidx>
+bool IsInsertableRefinement(Refinement<Tidx> const& eRfm)
 {
   if (eRfm.nature == 0)
     return true;
@@ -168,12 +171,13 @@ int UnderscoreNature(int const& nature)
 
 
 
+template<typename Tidx>
 struct dataType {
-  Partition& P;
-  dataType(Partition& _P) : P(_P)
+  Partition<Tidx>& P;
+  dataType(Partition<Tidx>& _P) : P(_P)
   {
   }
-  dataType operator=(dataType& data)
+  dataType<Tidx> operator=(dataType<Tidx>& data)
   {
     return dataType(data.P);
   }
@@ -230,8 +234,8 @@ struct rbaseType {
   StabChain<Telt> chain;
   std::vector<std::vector<int>> fix;
   //
-  std::vector<std::vector<Refinement>> rfm;
-  Partition partition;
+  std::vector<std::vector<Refinement<typename Telt::Tidx>>> rfm;
+  Partition<typename Telt::Tidx> partition;
   std::vector<StabChainPlusLev<Telt>> lev;
   StabChainPlusLev<Telt> level;
   //
@@ -371,7 +375,7 @@ bool ProcessFixpoint_rbase(rbaseType<Telt> & rbase, int const& pnt)
 template<typename Telt>
 struct imageType {
   int depth;
-  Partition& partition;
+  Partition<typename Telt::Tidx>& partition;
   permPlusBool<Telt> perm;
   StabChainPlusLev<Telt> level;
   std::vector<int> bimg;
@@ -476,7 +480,7 @@ bool IsTrivialRBase(rbaseType<Telt> const& rbase)
 
 
 template<typename Telt>
-rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& IsId, std::vector<int> const& Omega, Partition const& P)
+rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& IsId, std::vector<int> const& Omega, Partition<typename Telt::Tidx> const& P)
 {
   rbaseType<Telt> rbase;
   rbase.domain = Omega;
@@ -517,7 +521,7 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
 
 
 template<typename Telt>
-bool MeetPartitionStrat(rbaseType<Telt> const& rbase, imageType<Telt> & image, Partition const& S, Telt const& g, std::vector<singStrat> const& strat)
+bool MeetPartitionStrat(rbaseType<Telt> const& rbase, imageType<Telt> & image, Partition<typename Telt::Tidx> const& S, Telt const& g, std::vector<singStrat> const& strat)
 {
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Running MeetPartitionStrat\n";
@@ -553,7 +557,7 @@ bool MeetPartitionStrat(rbaseType<Telt> const& rbase, imageType<Telt> & image, P
 ##
 */
 template<typename Telt>
-std::vector<singStrat> StratMeetPartition(rbaseType<Telt> & rbase, Partition & P, Partition const& S, Telt const& g)
+std::vector<singStrat> StratMeetPartition(rbaseType<Telt> & rbase, Partition<typename Telt::Tidx> & P, Partition<typename Telt::Tidx> const& S, Telt const& g)
 {
   std::vector<singStrat> strat;
   std::vector<int> cellsP = P.cellno;
@@ -629,7 +633,7 @@ std::vector<singStrat> StratMeetPartition(rbaseType<Telt> & rbase, Partition & P
 }
 
 template<typename Telt>
-void AddRefinement(rbaseType<Telt> & rbase, int const& pos, Refinement const& eRfm)
+void AddRefinement(rbaseType<Telt> & rbase, int const& pos, Refinement<typename Telt::Tidx> const& eRfm)
 {
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP beginning of AddRefinement\n";
@@ -649,7 +653,7 @@ void AddRefinement(rbaseType<Telt> & rbase, int const& pos, Refinement const& eR
 
 
 template<typename Telt>
-void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, Telt const& TheId)
+void RegisterRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt> & rbase, int const& pnt, Telt const& TheId)
 {
   if (rbase.level2.status != int_true && rbase.level2.status != int_false) {
 #ifdef DEBUG_STBCBCKT
@@ -666,7 +670,7 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
 #ifdef DEBUG_STBCBCKT
   KeyUpdatingRbase("RegisterRBasePoint 1", rbase);
 #endif
-  int k = IsolatePoint(P, pnt);
+  Tidx k = IsolatePoint(P, pnt);
 #ifdef DEBUG_STBCBCKT
   NicePrintPartition("CPP After IsolatePoint P", P);
   KeyUpdatingRbase("RegisterRBasePoint 1.1", rbase);
@@ -703,7 +707,7 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
     KeyUpdatingRbase("RegisterRBasePoint 1.4", rbase);
     std::cerr << "CPP Section P.lengths after ProcessFixpoint_rbase\n";
 #endif
-    AddRefinement(rbase, len, Refinement({pnt,k}));
+    AddRefinement(rbase, len, Refinement<Tidx>({pnt,k}));
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP After AddRefinement 1\n";
     KeyUpdatingRbase("RegisterRBasePoint 1.5", rbase);
@@ -724,7 +728,7 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
 	std::cerr << "CPP StrongGeneratorsStabChain(lev) = " << GapStringTVector(SortVector(LGenStrong)) << "\n";
 #endif
         std::vector<Telt> LGen = GeneratorsStabChain(lev.Stot);
-	Partition O = OrbitsPartition(LGen, lev.Stot->comm->n, rbase.domain);
+	Partition<Tidx> O = OrbitsPartition(LGen, lev.Stot->comm->n, rbase.domain);
 #ifdef DEBUG_STBCBCKT
 	NicePrintPartition("CPP Before StratMeetPartition O", O);
         KeyUpdatingRbase("RegisterRBasePoint 2.1", rbase);
@@ -733,7 +737,7 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
 #ifdef DEBUG_STBCBCKT
         KeyUpdatingRbase("RegisterRBasePoint 2.2", rbase);
 #endif
-        AddRefinement(rbase, len, Refinement({O,strat}));
+        AddRefinement(rbase, len, Refinement<Tidx>({O,strat}));
 #ifdef DEBUG_STBCBCKT
         std::cerr << "CPP After AddRefinement 2\n";
 #endif
@@ -761,8 +765,9 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
 
 
 template<typename Telt>
-void NextRBasePoint(Partition & P, rbaseType<Telt> & rbase, Telt const& TheId)
+void NextRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt> & rbase, Telt const& TheId)
 {
+  using Tidx=typename Telt::Tidx;
   std::vector<Tidx> lens = P.lengths;
   std::vector<Tidx> order = ClosedInterval<Tidx>(0, NumberCells(P));
 #ifdef DEBUG_STBCBCKT
@@ -811,7 +816,7 @@ bool Refinements_ProcessFixpoint(rbaseType<Telt> & rbase, imageType<Telt> & imag
 
 
 template<typename Telt>
-bool Refinements_Intersection(rbaseType<Telt> & rbase, imageType<Telt> & image, Partition const& Q, std::vector<singStrat> const& strat)
+bool Refinements_Intersection(rbaseType<Telt> & rbase, imageType<Telt> & image, Partition<typename Telt::Tidx> const& Q, std::vector<singStrat> const& strat)
 {
   Telt t;
   if (image.level2.status == int_false) {
@@ -830,6 +835,7 @@ bool Refinements_Intersection(rbaseType<Telt> & rbase, imageType<Telt> & image, 
 template<typename Telt>
 int RRefine(rbaseType<Telt> & rbase, imageType<Telt> & image, bool const& uscore)
 {
+  using Tidx=typename Telt::Tidx;
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP uscore=" << uscore << "\n";
 #endif
@@ -838,7 +844,7 @@ int RRefine(rbaseType<Telt> & rbase, imageType<Telt> & image, bool const& uscore
       return int_true;
     return int_false;
   };
-  auto Evaluation=[&](Refinement const& eRef) -> bool {
+  auto Evaluation=[&](Refinement<Tidx> const& eRef) -> bool {
     if (eRef.nature == int_false)
       return Refinements_ProcessFixpoint(rbase, image, eRef.inputProcessfix.first, eRef.inputProcessfix.second);
     if (eRef.nature == int_true)
@@ -1042,6 +1048,7 @@ imageType<Telt> BuildInitialImage(bool const&repr, rbaseType<Telt> & rbase, data
 template<typename Telt, typename Tint>
 ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(Telt const&)> const& Pr, bool const& repr, rbaseType<Telt> & rbase, dataType & data, StabChain<Telt> & L, StabChain<Telt> & R)
 {
+  using Tidx=typename Telt::Tidx;
   int n=G->comm->n;
   Telt id = G->comm->identity;
 #ifdef DEBUG_STBCBCKT
@@ -1065,7 +1072,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   int lenD=rbase.domain[rbase.domain.size()-1];
   for (int i=0; i<=lenD; i++)
     range.push_back(i);
-  Partition oldcel;       // old value of <image.partition.cellno>
+  Partition<Tidx> oldcel;       // old value of <image.partition.cellno>
   std::vector<int> oldcel_cellno;
   std::vector<StabChain<Telt>> L_list, R_list;
   std::function<permPlusBool<Telt>(int const&,bool const&)> PBEnumerate = [&](int const& d, bool const & wasTriv) -> permPlusBool<Telt> {
@@ -1807,7 +1814,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
     if (repr && (IsSubset(Psi, Omega) || ForAll(Omega, [&](int const& p) -> bool {return !Psi[p];})))
       return {int_fail, {}, {}};
   }
-  auto GetPartitionFromPair=[&](Face const& Ph) -> Partition {
+  auto GetPartitionFromPair=[&](Face const& Ph) -> Partition<Tidx> {
     std::vector<int> IntVect;
     std::vector<int> DiffVect;
     for (auto & eVal : Omega) {
@@ -1821,8 +1828,8 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
   };
 
 
-  Partition P = GetPartitionFromPair(Phi);
-  Partition Q;
+  Partition<Tidx> P = GetPartitionFromPair(Phi);
+  Partition<Tidx> Q;
   if (repr) {
     Q = GetPartitionFromPair(Psi);
   } else {

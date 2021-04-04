@@ -1342,7 +1342,7 @@ void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, Stab
 
 
 template<typename Telt, typename Tint>
-void ClosureGroup_options(StabChain<Telt> & S, Telt const& g, StabChainOptions<Tint> const& options)
+void ClosureGroup_options(StabChain<Telt> & S, Telt const& g, StabChainOptions<Tint, typename Telt::Tidx> const& options)
 {
   Telt sch = SiftedPermutation(S, g);
   if (!sch.isIdentity()) {
