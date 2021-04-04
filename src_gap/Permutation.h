@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string>
 #include <iostream>
+#include "exception.h"
 
 namespace permutalib {
 
@@ -88,15 +89,16 @@ public:
     ListRev = epair.second;
     siz = ListVal.size();
   }
-  DoubleSidedPerm(DoubleSidedPerm const& ePerm, int const& n)
+  DoubleSidedPerm(DoubleSidedPerm const& ePerm, Tidx const& n)
   {
     if (ePerm.size() > n) {
       std::cerr << "ePerm.size()=" << ePerm.size() << " n=" << n << "\n";
       std::cerr << "ExtendPermutation to a size that is lower than the current size\n";
+      throw PermutalibException{1};
     }
     ListVal = ePerm.getListVal();
     ListRev = ePerm.getListRev();
-    for (int pos=ePerm.size(); pos<n; pos++) {
+    for (Tidx pos=ePerm.size(); pos<n; pos++) {
       ListVal.push_back(pos);
       ListRev.push_back(pos);
     }
@@ -104,26 +106,26 @@ public:
   }
   DoubleSidedPerm ()
   {
-    siz=0;
+    siz = 0;
     ListVal = {};
     ListRev = {};
   }
-  DoubleSidedPerm (int const& n)
+  DoubleSidedPerm(Tidx const& n)
   {
-    siz=n;
+    siz = n;
     ListVal = std::vector<Tidx>(n);
     ListRev = std::vector<Tidx>(n);
-    for (int i=0; i<n; i++) {
+    for (Tidx i=0; i<n; i++) {
       ListVal[i]=i;
       ListRev[i]=i;
     }
   }
   DoubleSidedPerm(std::vector<Tidx> const& v)
   {
-    ListVal=v;
+    ListVal = v;
     siz=v.size();
     ListRev.resize(siz);
-    for (int i=0; i<siz; i++)
+    for (Tidx i=0; i<siz; i++)
       ListRev[v[i]]=i;
   }
   DoubleSidedPerm(std::vector<Tidx> const& v1, std::vector<Tidx> const& v2)
@@ -174,16 +176,16 @@ public:
   //
   bool isIdentity() const
   {
-    for (int i=0; i<siz; i++)
+    for (Tidx i=0; i<siz; i++)
       if (ListVal[i] != i)
 	return false;
     return true;
   }
-  int at(int const& i) const
+  Tidx at(Tidx const& i) const
   {
     return ListVal[i];
   }
-  int atRev(int const& i) const
+  Tidx atRev(Tidx const& i) const
   {
     return ListRev[i];
   }
@@ -195,17 +197,17 @@ public:
   {
     return ListRev;
   }
-  int operator[](int const& i) const
+  Tidx operator[](Tidx const& i) const
   {
     return ListVal[i];
   }
-  int size() const
+  Tidx size() const
   {
     return siz;
   }
   //
 private:
-  int siz;
+  Tidx siz;
   std::vector<Tidx> ListVal;
   std::vector<Tidx> ListRev;
 };
@@ -215,10 +217,10 @@ private:
 template<typename Tidx>
 bool operator==(DoubleSidedPerm<Tidx> const& v1, DoubleSidedPerm<Tidx> const& v2)
 {
-  int siz=v1.size();
+  Tidx siz=v1.size();
   if (siz != v2.size() )
     return false;
-  for (int i=0; i<siz; i++)
+  for (Tidx i=0; i<siz; i++)
     if (v1.at(i) != v2.at(i))
       return false;
   return true;
@@ -228,10 +230,10 @@ bool operator==(DoubleSidedPerm<Tidx> const& v1, DoubleSidedPerm<Tidx> const& v2
 template<typename Tidx>
 bool operator!=(DoubleSidedPerm<Tidx> const& v1, DoubleSidedPerm<Tidx> const& v2)
 {
-  int siz=v1.size();
+  Tidx siz=v1.size();
   if (siz != v2.size() )
     return true;
-  for (int i=0; i<siz; i++)
+  for (Tidx i=0; i<siz; i++)
     if (v1.at(i) != v2.at(i))
       return true;
   return false;
@@ -241,12 +243,12 @@ bool operator!=(DoubleSidedPerm<Tidx> const& v1, DoubleSidedPerm<Tidx> const& v2
 template<typename Tidx>
 bool operator<(DoubleSidedPerm<Tidx> const& v1, DoubleSidedPerm<Tidx> const& v2)
 {
-  int siz1=v1.size();
-  int siz2=v2.size();
+  Tidx siz1=v1.size();
+  Tidx siz2=v2.size();
   if (siz1 != siz2)
     return siz1<siz2;
-  int siz=siz1;
-  for (int i=0; i<siz; i++) {
+  Tidx siz=siz1;
+  for (Tidx i=0; i<siz; i++) {
     if (v1.at(i) != v2.at(i))
       return v1.at(i) < v2.at(i);
   }
@@ -314,7 +316,7 @@ DoubleSidedPerm<Tidx> Conjugation(DoubleSidedPerm<Tidx> const& v1, DoubleSidedPe
 
 
 template<typename Tidx>
-int PowAct(int const& i, DoubleSidedPerm<Tidx> const& g)
+Tidx PowAct(Tidx const& i, DoubleSidedPerm<Tidx> const& g)
 {
   return g.at(i);
 }
@@ -322,7 +324,7 @@ int PowAct(int const& i, DoubleSidedPerm<Tidx> const& g)
 
 
 template<typename Tidx>
-int SlashAct(int const& i, DoubleSidedPerm<Tidx> const& g)
+Tidx SlashAct(Tidx const& i, DoubleSidedPerm<Tidx> const& g)
 {
   return g.atRev(i);
 }
@@ -520,11 +522,11 @@ public:
 	return false;
     return true;
   }
-  int at(int const& i) const
+  Tidx at(Tidx const& i) const
   {
     return ListVal[i];
   }
-  int atRev(int const& i) const
+  Tidx atRev(Tidx const& i) const
   {
     for (int j=0; j<siz; j++)
       if (ListVal[j] == i)
@@ -535,17 +537,17 @@ public:
   {
     return ListVal;
   }
-  int operator[](int const& i) const
+  Tidx operator[](Tidx const& i) const
   {
     return ListVal[i];
   }
-  int size() const
+  Tidx size() const
   {
     return siz;
   }
   //
 private:
-  int siz;
+  Tidx siz;
   std::vector<Tidx> ListVal;
 };
 
@@ -653,7 +655,7 @@ SingleSidedPerm<Tidx> Conjugation(SingleSidedPerm<Tidx> const& v1, SingleSidedPe
 
 
 template<typename Tidx>
-int PowAct(int const& i, SingleSidedPerm<Tidx> const& g)
+Tidx PowAct(Tidx const& i, SingleSidedPerm<Tidx> const& g)
 {
   return g.at(i);
 }
@@ -661,7 +663,7 @@ int PowAct(int const& i, SingleSidedPerm<Tidx> const& g)
 
 
 template<typename Tidx>
-int SlashAct(int const& i, SingleSidedPerm<Tidx> const& g)
+Tidx SlashAct(Tidx const& i, SingleSidedPerm<Tidx> const& g)
 {
   return g.atRev(i);
 }

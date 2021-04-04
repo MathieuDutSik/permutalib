@@ -857,7 +857,7 @@ struct StabChainOptions {
 
 
 template<typename Tint, typename Tidx>
-StabChainOptions<Tint> GetStandardOptions(int const& n)
+StabChainOptions<Tint,Tidx> GetStandardOptions(int const& n)
 {
   std::vector<Tidx> base;
   std::vector<Tidx> knownBase;
@@ -884,7 +884,7 @@ std::vector<typename Telt::Tidx> MovedPoints(StabChain<Telt> const& S)
   using Tidx = typename Telt::Tidx;
   std::unordered_set<int> LGen;
   StabChain<Telt> Sptr = S;
-  while(Sptr != nullptr)
+  while (Sptr != nullptr) {
     for (auto & eIdx : Sptr->genlabels) {
       Telt eGen = S->comm->labels[eIdx];
       LGen.insert(eGen);
@@ -983,15 +983,16 @@ void InsertTrivialStabilizer(StabChain<Telt> & Stot, int const& pnt)
 
 
 template<typename Telt, typename Tint>
-StabChain<Telt> StabChainOp_trivial_group(StabChain<Telt> const& Stot, StabChainOptions<Tint> const& options)
+StabChain<Telt> StabChainOp_trivial_group(StabChain<Telt> const& Stot, StabChainOptions<Tint, typename Telt::Tidx> const& options)
 {
+  using Tidx = typename Telt::Tidx;
 #ifdef DEBUG
   std::cerr << "CPP Call to StabChainOp (trivial group)\n";
 #endif
   StabChain<Telt> S = EmptyStabChain<Telt>(Stot->comm->n);
   if (options.base.size() > 0 && !options.reduced) {
     StabChain<Telt> T = S;
-    for (int const& pnt : options.base) {
+    for (Tidx const& pnt : options.base) {
       InsertTrivialStabilizer( T, pnt );
       T = T->stabilizer;
     }
@@ -1196,7 +1197,7 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
 
 
 template<typename Telt>
-void ChooseNextBasePoint(StabChain<Telt> & S, std::vector<int> const& base, std::vector<Telt> const& newgens)
+void ChooseNextBasePoint(StabChain<Telt> & S, std::vector<typename Telt::Tidx> const& base, std::vector<Telt> const& newgens)
 {
 #ifdef DEBUG_STABCHAIN
   std::cerr << "CPP base = " << GapStringIntVector(base) << "\n";
@@ -1256,7 +1257,7 @@ void ChooseNextBasePoint(StabChain<Telt> & S, std::vector<int> const& base, std:
 
 
 template<typename Telt, typename Tint>
-void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, StabChainOptions<Tint> const& options)
+void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, StabChainOptions<Tint, typename Telt::Tidx> const& options)
 {
   using Tidx = typename Telt::Tidx;
 #ifdef DEBUG_STABCHAIN
@@ -1839,7 +1840,7 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<int> const& base, int c
 }
 
 template<typename Telt>
-bool ExtendStabChain(StabChain<Telt> & Stot, std::vector<int> const& base)
+bool ExtendStabChain(StabChain<Telt> & Stot, std::vector<typename Telt::Tidx> const& base)
 {
 #ifdef DEBUG_STABCHAIN
   std::cerr << "CPP Beginning of ExtendStabChain\n";

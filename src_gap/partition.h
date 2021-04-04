@@ -16,29 +16,32 @@
 
 namespace permutalib {
 
+
+template<typename Tidx>
 struct Partition {
-  std::vector<int> points;
-  std::vector<int> firsts;
-  std::vector<int> lengths;
-  std::vector<int> cellno;
+  std::vector<Tidx> points;
+  std::vector<Tidx> firsts;
+  std::vector<Tidx> lengths;
+  std::vector<Tidx> cellno;
 };
 
 
-void NicePrintPartition(std::string const& str, Partition const& P)
+template<typename Tidx>
+void NicePrintPartition(std::string const& str, Partition<Tidx> const& P)
 {
-  int nbPart=P.firsts.size();
+  Tidx nbPart=P.firsts.size();
   std::cerr << str << " = [ ";
-  for (int iPart=0; iPart<nbPart; iPart++) {
+  for (Tidx iPart=0; iPart<nbPart; iPart++) {
     if (iPart > 0)
       std::cerr << ", ";
-    int eFirst=P.firsts[iPart];
-    int len=P.lengths[iPart];
+    Tidx eFirst=P.firsts[iPart];
+    Tidx len=P.lengths[iPart];
     std::cerr << "[ ";
-    for (int i=0; i<len; i++) {
+    for (Tidx i=0; i<len; i++) {
       if (i >0)
 	std::cerr << ", ";
-      int ePt = P.points[eFirst + i];
-      std::cerr << (ePt+1);
+      Tidx ePt = P.points[eFirst + i];
+      std::cerr << int(ePt+1);
     }
     std::cerr << " ]";
   }
@@ -46,16 +49,17 @@ void NicePrintPartition(std::string const& str, Partition const& P)
 }
 
 
-void RawPrintPartition(Partition const& P)
+template<typename Tidx>
+void RawPrintPartition(Partition<Tidx> const& P)
 {
-  int nbPart=P.lengths.size();
+  Tidx nbPart=P.lengths.size();
   std::vector<std::string> LPart(nbPart);
-  for (int iPart=0; iPart<nbPart; iPart++) {
-    int len=P.lengths[iPart];
-    int eFirst=P.firsts[iPart];
-    std::vector<int> eList(len);
-    for (int u=0; u<len; u++) {
-      int ePt = P.points[eFirst + u];
+  for (Tidx iPart=0; iPart<nbPart; iPart++) {
+    Tidx len=P.lengths[iPart];
+    Tidx eFirst=P.firsts[iPart];
+    std::vector<Tidx> eList(len);
+    for (Tidx u=0; u<len; u++) {
+      Tidx ePt = P.points[eFirst + u];
       eList[u] = ePt;
     }
     LPart[iPart] = GapStringIntVector(eList);
@@ -68,15 +72,20 @@ void RawPrintPartition(Partition const& P)
 }
 
 
-void CheckConsistencyPartition(std::string const& str, Partition const& P)
+template<typename Tidx>
+void CheckConsistencyPartition(std::string const& str, Partition<Tidx> const& P)
 {
-  int nbError=0;
-  int Max_points=-1;
+  Tidx nbError=0;
+  Tidx Max_points=0;
+  bool ChangeVal=false;
   for (auto & eVal : P.points)
-    if (eVal > Max_points)
+    if (eVal > Max_points) {
       Max_points = eVal;
-  Max_points++;
-  if (int(P.cellno.size()) != Max_points) {
+      ChangeVal=true;
+    }
+  if (ChangeVal)
+    Max_points++;
+  if (Tidx(P.cellno.size()) != Max_points) {
     std::cerr << "1: We should have |P.cellno| = Maximum(P.points) (at least, that's true at init)\n";
     nbError++;
   }
@@ -84,11 +93,11 @@ void CheckConsistencyPartition(std::string const& str, Partition const& P)
     std::cerr << "2: P.firsts and P.lengths have different lengths\n";
     nbError++;
   }
-  int nbPoint=P.cellno.size();
-  int nbPart=P.lengths.size();
-  std::vector<int> MeasuredLength(nbPart,0);
-  for (int iPoint=0; iPoint<nbPoint; iPoint++) {
-    int iPart=P.cellno[iPoint];
+  Tidx nbPoint=P.cellno.size();
+  Tidx nbPart=P.lengths.size();
+  std::vector<Tidx> MeasuredLength(nbPart,0);
+  for (Tidx iPoint=0; iPoint<nbPoint; iPoint++) {
+    Tidx iPart=P.cellno[iPoint];
     if (iPart >= nbPart) {
       std::cerr << "3: Error, iPart=" << iPart << " but nbPart=" << nbPart << "\n";
       nbError++;
@@ -96,7 +105,7 @@ void CheckConsistencyPartition(std::string const& str, Partition const& P)
     if (iPart >= 0 && iPart < nbPart)
       MeasuredLength[iPart]++;
   }
-  for (int iPart=0; iPart<nbPart; iPart++) {
+  for (Tidx iPart=0; iPart<nbPart; iPart++) {
     if (MeasuredLength[iPart] != P.lengths[iPart]) {
       std::cerr << "4: At iPart=" << iPart << " we have error in lengths: MeasuredLength[iPart]=" << MeasuredLength[iPart] << " and P.lengths[iPart]=" << P.lengths[iPart] << "\n";
       nbError++;
@@ -106,11 +115,11 @@ void CheckConsistencyPartition(std::string const& str, Partition const& P)
       nbError++;
     }
   }
-  for (int iPart=0; iPart<nbPart; iPart++) {
-    int len=P.lengths[iPart];
-    int eFirst=P.firsts[iPart];
-    for (int u=0; u<len; u++) {
-      int ePt = P.points[eFirst + u];
+  for (Tidx iPart=0; iPart<nbPart; iPart++) {
+    Tidx len=P.lengths[iPart];
+    Tidx eFirst=P.firsts[iPart];
+    for (Tidx u=0; u<len; u++) {
+      Tidx ePt = P.points[eFirst + u];
       if (ePt < 0 || ePt >= nbPoint) {
 	std::cerr << "6: At iPart=" << iPart << " u=" << u << " ePt=" << ePt << " point out of range\n";
 	nbError++;
@@ -130,7 +139,8 @@ void CheckConsistencyPartition(std::string const& str, Partition const& P)
 }
 
 
-Partition GetPartition(std::vector<std::vector<int>> const& list)
+template<typename Tidx>
+Partition<Tidx> GetPartition(std::vector<std::vector<Tidx>> const& list)
 {
 #ifdef DEBUG_PARTITION
   std::vector<std::string> LStr;
@@ -139,17 +149,22 @@ Partition GetPartition(std::vector<std::vector<int>> const& list)
   std::cerr << "CPP list=" << GapStringTVector(LStr) << "\n";
 #endif
   std::vector<int> points;
-  int Max_NbPoint = -1;
+  Tidx Max_NbPoint = 0;
+  bool ChangeVal = false;
   for (auto & eList : list)
     for (auto & eVal : eList) {
       points.push_back(eVal);
-      if (eVal > Max_NbPoint)
+      if (eVal > Max_NbPoint) {
         Max_NbPoint = eVal;
+        ChangeVal = true;
+      }
     }
-  int nbPoint=Max_NbPoint+1;
-  int nbPart=list.size();
-  std::vector<int> firsts(nbPart);
-  std::vector<int> lengths(nbPart);
+  if (ChangeVal)
+    Max_NbPoint++;
+  Tidx nbPoint=Max_NbPoint;
+  Tidx nbPart=list.size();
+  std::vector<Tidx> firsts(nbPart);
+  std::vector<Tidx> lengths(nbPart);
   std::vector<int> cellno(nbPoint, -1);
   int i=0;
   for (int iPart=0; iPart<nbPart; iPart++) {
@@ -186,56 +201,63 @@ int NumberCells(Partition const& ePartition)
 }
 
 
-std::vector<int> Cell(Partition const& ePartition, int const& iPart)
+template<typename Tidx>
+std::vector<Tidx> Cell(Partition<Tidx> const& ePartition, Tidx const& iPart)
 {
-  int len=ePartition.lengths[iPart];
-  int eFirst=ePartition.firsts[iPart];
-  std::vector<int> eList(len);
-  for (int i=0; i<len; i++) {
-    int eVal=ePartition.points[eFirst + i];
-    eList[i]=eVal;
-  }
+  Tidx len=ePartition.lengths[iPart];
+  Tidx eFirst=ePartition.firsts[iPart];
+  std::vector<Tidx> eList(len);
+  for (Tidx i=0; i<len; i++)
+    eList[i]=ePartition.points[eFirst + i];
   return eList;
 }
 
-std::vector<std::vector<int>> Cells(Partition const& ePartition)
+
+template<typename Tidx>
+std::vector<std::vector<Tidx>> Cells(Partition<Tidx> const& ePartition)
 {
-  int nbPart=ePartition.firsts.size();
-  std::vector<std::vector<int>> eListList(nbPart);
-  for (int iPart=0; iPart<nbPart; iPart++)
+  Tidx nbPart=ePartition.firsts.size();
+  std::vector<std::vector<Tidx>> eListList(nbPart);
+  for (Tidx iPart=0; iPart<nbPart; iPart++)
     eListList[iPart] = Cell(ePartition, iPart);
   return eListList;
 }
 
 
-int CellNoPoint(Partition const& ePartition, int const& pt)
+template<typename Tidx>
+Tidx CellNoPoint(Partition<Tidx> const& ePartition, Tidx const& pt)
 {
   return ePartition.cellno[pt];
 }
 
 
-std::vector<int> CellNoPoints(Partition const& ePartition, std::vector<int> const& pts)
+template<typename Tidx>
+std::vector<Tidx> CellNoPoints(Partition<Tidx> const& ePartition, std::vector<Tidx> const& pts)
 {
-  int len=pts.size();
-  std::vector<int> ret(len);
-  for (int i=0; i<len; i++)
+  Tidx len=pts.size();
+  std::vector<Tidx> ret(len);
+  for (Tidx i=0; i<len; i++)
     ret[i] = ePartition.cellno[pts[i]];
   return ret;
 }
 
-bool PointInCellNo(Partition const& ePartition, int const& pt, int const& iPart)
+
+template<typename Tidx>
+bool PointInCellNo(Partition<Tidx> const& ePartition, Tidx const& pt, Tidx const& iPart)
 {
   return ePartition.cellno[pt] == iPart;
 }
 
-std::vector<int> Fixcells(Partition const& ePartition)
+
+template<typename Tidx>
+std::vector<Tidx> Fixcells(Partition<Tidx> const& ePartition)
 {
-  std::vector<int> fix;
-  int nbPart=ePartition.firsts.size();
-  for (int iPart=0; iPart<nbPart; iPart++) {
+  std::vector<Tidx> fix;
+  Tidx nbPart=ePartition.firsts.size();
+  for (Tidx iPart=0; iPart<nbPart; iPart++) {
     if (ePartition.lengths[iPart] == 1) {
-      int eFirst=ePartition.firsts[iPart];
-      int eVal=ePartition.points[eFirst];
+      Tidx eFirst=ePartition.firsts[iPart];
+      Tidx eVal=ePartition.points[eFirst];
       fix.push_back(eVal);
     }
   }
@@ -243,33 +265,34 @@ std::vector<int> Fixcells(Partition const& ePartition)
 }
 
 
-int SplitCell_Kernel(Partition & P, int const& i, std::function<bool(int)> const& test, int const& out)
+template<typename Tidx>
+Tidx SplitCell_Kernel(Partition<Tidx> & P, Tidx const& i, std::function<bool(Tidx)> const& test, Tidx const& out)
 {
 #ifdef DEBUG_PARTITION
-  //  std::cerr << "CPP i=" << (i+1) << " out=" << out << "\n";
+  //  std::cerr << "CPP i=" << int(i+1) << " out=" << out << "\n";
   std::cerr << "CPP Before SplitCell_Kernel operation P=\n";
   RawPrintPartition(P);
 #endif
 #ifdef CHECK_PARTITION
   CheckConsistencyPartition("Input SplitCell_Kernel", P);
 #endif
-  int a=P.firsts[i];
-  int b=a + P.lengths[i];
-  int l=b-1;
+  Tidx a=P.firsts[i];
+  Tidx b=a + P.lengths[i];
+  Tidx l=b-1;
 
-  int maxmov;
+  Tidx maxmov;
   if (out >= 0)
     maxmov = out;
   else
     maxmov = P.lengths[i]-1;
-  int B = l - maxmov;
+  Tidx B = l - maxmov;
 #ifdef DEBUG_PARTITION
-  std::cerr << "CPP maxmov=" << maxmov << " B=" << (B+1) << "\n";
+  std::cerr << "CPP maxmov=" << maxmov << " B=" << int(B+1) << "\n";
 #endif
   a--;
   while (a<b) {
 #ifdef DEBUG_PARTITION
-    std::cerr << "CPP     1 a=" << (a+1) << " b=" << (b+1) << "\n";
+    std::cerr << "CPP     1 a=" << int(a+1) << " b=" << int(b+1) << "\n";
 #endif
     while(true) {
 #ifdef DEBUG_PARTITION
@@ -286,7 +309,7 @@ int SplitCell_Kernel(Partition & P, int const& i, std::function<bool(int)> const
         break;
     }
 #ifdef DEBUG_PARTITION
-    std::cerr << "CPP     2 a=" << (a+1) << " b=" << (b+1) << "\n";
+    std::cerr << "CPP     2 a=" << int(a+1) << " b=" << int(b+1) << "\n";
 #endif
     while(true) {
 #ifdef DEBUG_PARTITION
@@ -297,14 +320,14 @@ int SplitCell_Kernel(Partition & P, int const& i, std::function<bool(int)> const
         break;
     }
 #ifdef DEBUG_PARTITION
-    std::cerr << "CPP     3 a=" << (a+1) << " b=" << (b+1) << "\n";
+    std::cerr << "CPP     3 a=" << int(a+1) << " b=" << int(b+1) << "\n";
 #endif
     if (a<b) {
       std::swap(P.points[a], P.points[b]);
     }
   }
 #ifdef DEBUG_PARTITION
-  std::cerr << "CPP a=" << (a+1) << " l=" << (l+1) << "\n";
+  std::cerr << "CPP a=" << int(a+1) << " l=" << int(l+1) << "\n";
 #endif
   if (a > l) {
 #ifdef DEBUG_PARTITION
@@ -313,9 +336,8 @@ int SplitCell_Kernel(Partition & P, int const& i, std::function<bool(int)> const
     return -1;
   }
   int m=P.firsts.size();
-  for (int idx=a; idx<=l; idx++) {
+  for (int idx=a; idx<=l; idx++)
     P.cellno[P.points[idx]] = m;
-  }
   P.firsts.push_back(a);
   P.lengths.push_back(l - a + 1);
   P.lengths[i] = P.lengths[i] - P.lengths[m];
@@ -334,17 +356,18 @@ int SplitCell_Kernel(Partition & P, int const& i, std::function<bool(int)> const
 }
 
 template<typename Telt>
-int SplitCell_Partition(Partition & P, int const& i, Partition const& Q, int const& j, Telt const& g, int const& out)
+typename Telt::Tidx SplitCell_Partition(Partition<<typename Telt::Tidx> & P, typename Telt::Tidx const& i, Partition<typename Telt::Tidx> const& Q, typename Telt::Tidx const& j, Telt const& g, typename Telt::Tidx const& out)
 {
+  using Tidx = typename Telt::Tidx;
 #ifdef DEBUG_PARTITION
   std::cerr << "CPP SplitCell g=" << g << "\n";
   std::cerr << "CPP Q=\n";
   RawPrintPartition(Q);
 #endif
-  std::function<bool(int)> test=[&](int const& ePt) -> bool {
-    int fPt=PowAct(P.points[ePt], g);
+  std::function<bool(Tidx)> test=[&](Tidx ePt) -> bool {
+    Tidx fPt=PowAct(P.points[ePt], g);
 #ifdef DEBUG_PARTITION
-    std::cerr << "CPP SplitCellTestfun1 fPt=" << (fPt+1) << "\n";
+    std::cerr << "CPP SplitCellTestfun1 fPt=" << int(fPt+1) << "\n";
 #endif
     return PointInCellNo(Q, fPt, j);
   };
@@ -353,16 +376,16 @@ int SplitCell_Partition(Partition & P, int const& i, Partition const& Q, int con
 
 
 template<typename Telt>
-int SplitCell_Face(Partition & P, int const& i, Face const& f, int const& j, Telt const& g, int const& out)
+typename Telt::Tidx SplitCell_Face(Partition<typename Telt::Tidx> & P, typename Telt::Tidx const& i, Face const& f, typename Telt::Tidx const& j, Telt const& g, typename Telt::Tidx const& out)
 {
-  std::function<bool(int)> test=[&](int const& ePt) -> bool {
-    int fPt=PowAct(P.points[ePt], g);
+  using Tidx = typename Telt::Tidx;
+  std::function<bool(Tidx)> test=[&](Tidx ePt) -> bool {
+    Tidx fPt=PowAct(P.points[ePt], g);
     if (j == 1) {
       if (f[fPt] == 1)
 	return true;
       return false;
-    }
-    else {
+    } else {
       if (f[fPt] == 0)
 	return true;
       return false;
@@ -445,44 +468,48 @@ int UndoRefinement(Partition & P)
 }
 
 
-int FixpointCellNo(Partition const& P, int const& i)
+template<typename Tidx>
+Tidx FixpointCellNo(Partition<Tidx> const& P, Tidx const& i)
 {
   return P.points[P.firsts[i]];
 }
 
 
-int FixcellPoint(Partition const& P, std::set<int> & old)
+template<typename Tidx>
+Tidx FixcellPoint(Partition<Tidx> const& P, std::set<Tidx> & old)
 {
-  int nbPart=P.lengths.size();
-  std::vector<int> poss;
-  for (int iPart=0; iPart<nbPart; iPart++) {
+  Tidx nbPart=P.lengths.size();
+  std::vector<Tidx> poss;
+  for (Tidx iPart=0; iPart<nbPart; iPart++) {
     if (P.lengths[iPart] == 1 && old.find(iPart) == old.end())
       poss.push_back(iPart);
   }
-  int nbPoss=poss.size();
+  Tidx nbPoss=poss.size();
   if (nbPoss == 0)
-    return -1;
-  int idx=rand() % nbPoss;
-  int p=poss[idx];
+    return std::numeric_limits<Tidx>::max();
+  Tidx idx=rand() % nbPoss;
+  Tidx p=poss[idx];
   old.insert(p);
   return p;
 }
 
 
+template<typename Tidx>
 struct typeFixcellsCell {
   bool res;
-  std::vector<int> K;
-  std::vector<int> I;
+  std::vector<Tidx> K;
+  std::vector<Tidx> I;
 };
 
 
-typeFixcellsCell FixcellsCell(Partition const& P, Partition const& Q, std::set<int> & old)
+template<typename Tidx>
+typeFixcellsCell FixcellsCell(Partition<Tidx> const& P, Partition<Tidx> const& Q, std::set<Tidx> & old)
 {
-  std::vector<int> K, I;
-  int nbPart=P.firsts.size();
-  for (int iPart=0; iPart<nbPart; iPart++) {
-    int start=P.firsts[iPart];
-    int kPart=CellNoPoint(Q, P.points[start]);
+  std::vector<Tidx> K, I;
+  Tidx nbPart=P.firsts.size();
+  for (Tidx iPart=0; iPart<nbPart; iPart++) {
+    Tidx start=P.firsts[iPart];
+    Tidx kPart=CellNoPoint(Q, P.points[start]);
     if (old.find(kPart) == old.end()) {
       std::function<bool()> eval=[&]() -> bool {
 	for (int j=1; j<P.lengths[iPart]; j++) {
@@ -507,19 +534,21 @@ typeFixcellsCell FixcellsCell(Partition const& P, Partition const& Q, std::set<i
 }
 
 
-Partition TrivialPartition(std::vector<int> const& Omega)
+template<typename Tidx>
+Partition<Tidx> TrivialPartition(std::vector<Tidx> const& Omega)
 {
   return GetPartition({Omega});
 }
 
 
 template<typename Telt>
-std::vector<std::vector<int>> OrbitsPermsB(std::vector<Telt> const& gens, int const&n, std::vector<int> const& Omega)
+std::vector<std::vector<typename Telt::Tidx>> OrbitsPermsB(std::vector<Telt> const& gens, typename Telt::Tidx const&n, std::vector<typename Telt::Tidx> const& Omega)
 {
+  using Tidx = typename Telt::Tidx;
 #ifdef DEBUG_PARTITION
   std::cerr << "DEBUG OrbitsPermB beginning\n";
 #endif
-  int max=LargestMovedPoint(gens);
+  Tidx max=LargestMovedPoint(gens);
   Face dom(max+1);
   for (auto & eVal : Omega)
     if (eVal <= max)
@@ -528,16 +557,16 @@ std::vector<std::vector<int>> OrbitsPermsB(std::vector<Telt> const& gens, int co
   std::cerr << "DEBUG dom built\n";
 #endif
   Face newF(max+1);
-  for (int i=0; i<=max; i++)
+  for (Tidx i=0; i<=max; i++)
     newF[i] = 1;
 #ifdef DEBUG_PARTITION
   std::cerr << "DEBUG newF built\n";
 #endif
-  std::vector<std::vector<int>> orbs;
+  std::vector<std::vector<Tidx>> orbs;
   boost::dynamic_bitset<>::size_type fst=dom.find_first();
   while (fst != boost::dynamic_bitset<>::npos) {
-    int fst_i = int(fst);
-    std::vector<int> orb{fst_i};
+    Tidx fst_i = Tidx(fst);
+    std::vector<Tidx> orb{fst_i};
     newF[fst_i] = 0;
     dom [fst_i] = 0;
 #ifdef DEBUG_PARTITION
@@ -545,9 +574,9 @@ std::vector<std::vector<int>> OrbitsPermsB(std::vector<Telt> const& gens, int co
 #endif
     size_t posOrb=0;
     while(true) {
-      int pnt = orb[posOrb];
+      Tidx pnt = orb[posOrb];
       for (auto & gen : gens) {
-        int img = PowAct(pnt, gen);
+        Tidx img = PowAct(pnt, gen);
         if (newF[img]) {
           orb.push_back(img);
           newF[img] = 0;
@@ -573,7 +602,7 @@ std::vector<std::vector<int>> OrbitsPermsB(std::vector<Telt> const& gens, int co
 
 
 template<typename Telt>
-Partition OrbitsPartition(std::vector<Telt> const& gens, int const&n, std::vector<int> const& Omega)
+Partition<typename Telt::Tidx> OrbitsPartition(std::vector<Telt> const& gens, typename Telt::Tidx const&n, std::vector<typename Telt::Tidx> const& Omega)
 {
 #ifdef DEBUG_PARTITION
   std::cerr << "CPP OrbitsPartition, using OrbitsPerms\n";
@@ -598,25 +627,24 @@ int SmallestPrimeDivisor(Tarith const& size)
 }
 
 
-template<typename Tarith>
-Partition CollectedPartition(Partition const& P, Tarith const& size)
+template<typename Tarith, typename Tidx>
+Partition<Tidx> CollectedPartition(Partition<Tidx> const& P, Tarith const& size)
 {
-  Partition C=P;
-  int div=SmallestPrimeDivisor(size);
-  int nbPart=P.firsts.size();
-  int nbPartTot=nbPart;
-  for (int iPart=0; iPart<nbPart; iPart++) {
-    int sizPart=P.lengths[iPart];
+  Partition<Tidx> C = P;
+  Tidx div=SmallestPrimeDivisor(size);
+  Tidx nbPart=P.firsts.size();
+  Tidx nbPartTot=nbPart;
+  for (Tidx iPart=0; iPart<nbPart; iPart++) {
+    Tidx sizPart=P.lengths[iPart];
     if (sizPart < div) {
-      int eFirst=P.firsts[iPart];
-      for (int i=0; i<sizPart; i++) {
-	int ePt=P.points[eFirst + i];
+      Tidx eFirst=P.firsts[iPart];
+      for (Tidx i=0; i<sizPart; i++) {
+	Tidx ePt=P.points[eFirst + i];
 	if (i == 0) {
 	  C.lengths[iPart]=1;
-	}
-	else {
-	  C.cellno[ePt]=nbPartTot;
-	  C.firsts.push_back(eFirst+i);
+	} else {
+	  C.cellno[ePt] = nbPartTot;
+	  C.firsts.push_back(eFirst + i);
 	  C.lengths.push_back(1);
 	}
       }

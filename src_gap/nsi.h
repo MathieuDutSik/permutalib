@@ -150,14 +150,14 @@ std::vector<T> Set(std::vector<T> const& V)
   --- skip_fnuc eliminated as it is the identity in the case that interest us.
  */
 template<typename Telt, typename Tint>
-std::vector<typename Telt::Tidx> NewSmallestImage(StabChain<Telt> const& g, std::vector<typename Telt::Tidx> const& set, StabChain<Telt> const& k)
+std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::vector<typename Telt::Tidx> const& set, StabChain<Telt> const& k)
 {
   using Tidx = typename Telt::Tidx;
 #ifdef DEBUG_NSI
-  std::cerr << "CPP NewSmallestImage : beginning\n";
+  std::cerr << "CPP NewCanonicImage : beginning\n";
 #endif
-  int infinity = 10 + g->comm->n;
-  int initial_upb = infinity;
+  Tidx infinity = std::numeric_limits<Tidx>::max();
+  Tidx initial_upb = infinity;
   Tidx max_val_type = std::numeric_limits<Tidx>::max();
 
 
@@ -814,9 +814,16 @@ std::vector<typename Telt::Tidx> NewSmallestImage(StabChain<Telt> const& g, std:
 template<typename Telt, typename Tint>
 Face Kernel_CanonicalImage(StabChain<Telt> const& g, Face const& set)
 {
+  using Tidx = typename Telt::Tidx;
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+  if (Tidx(g->comm->n) != Tidx(set.size())) {
+    std::cerr << "The set set should have the same size as the number of elements on which g acts\n";
+    throw PermutalibException{1};
+  }
+#endif
   if (set.count() == 0 || set.count() == set.size())
     return set;
-  std::vector<int> set_i;
+  std::vector<Tidx> set_i;
   Face ret(set.size());
   if (2 * set.count() <= set.size()) {
     boost::dynamic_bitset<>::size_type aRow = set.find_first();
@@ -825,7 +832,7 @@ Face Kernel_CanonicalImage(StabChain<Telt> const& g, Face const& set)
       aRow = set.find_next(aRow);
     }
     StabChain<Telt> k = Kernel_Stabilizer_OnSets<Telt,Tint>(g, set);
-    std::vector<int> eSetCan = NewSmallestImage<Telt,Tint>(g, set_i, k);
+    std::vector<Tidx> eSetCan = NewCanonicImage<Telt,Tint>(g, set_i, k);
 #ifdef DEBUG_NSI
     std::cerr << "CPP eSetCan=" << GapStringIntVector(eSetCan) << "\n";
 #endif
@@ -842,7 +849,7 @@ Face Kernel_CanonicalImage(StabChain<Telt> const& g, Face const& set)
       aRow = setC.find_next(aRow);
     }
     StabChain<Telt> k = Kernel_Stabilizer_OnSets<Telt,Tint>(g, setC);
-    std::vector<int> eSetCan = NewSmallestImage<Telt,Tint>(g, set_i, k);
+    std::vector<Tidx> eSetCan = NewCanonicImage<Telt,Tint>(g, set_i, k);
     for (size_t i=0; i<set.size(); i++)
       ret[i] = 1;
     for (auto & eVal : eSetCan)
