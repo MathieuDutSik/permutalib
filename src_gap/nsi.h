@@ -102,37 +102,37 @@ Telt PermListList(std::vector<T> const& list1, std::vector<T> const& list2)
 
 
 template<typename Telt, typename Tint>
-StabChain<Telt> Action(StabChain<Telt> const& S, std::vector<int> const& set)
+StabChain<Telt> Action(StabChain<Telt> const& S, std::vector<typename Telt::Tidx> const& set)
 {
   using Tidx = typename Telt::Tidx;
   int n = S->comm->n;
-  int siz = set.size();
-  std::vector<int> map_idx(n, -1);
-  for (int i=0; i<siz; i++)
+  Tidx siz = set.size();
+  std::vector<Tidx> map_idx(n, 0);
+  for (Tidx i=0; i<siz; i++)
     map_idx[set[i]] = i;
   //
   std::vector<Telt> LGen;
   for (auto & eGen : Kernel_GeneratorsOfGroup(S)) {
     std::vector<Tidx> eList(siz);
-    for (int i=0; i<siz; i++) {
-      int ePt = set[i];
-      int fPt = OnPoints(ePt, eGen);
-      int j = map_idx[fPt];
+    for (Tidx i=0; i<siz; i++) {
+      Tidx ePt = set[i];
+      Tidx fPt = OnPoints(ePt, eGen);
+      Tidx j = map_idx[fPt];
       eList[i] = j;
     }
     Telt ePerm = Telt(eList);
-    LGen.push_back(ePerm);
+    LGen.emplace_back(ePerm);
   }
   return FCT_Group<Telt,Tint>(LGen, siz);
 }
 
-template<typename Telt>
-std::vector<int> OnTuples(std::vector<int> const& V, Telt const& g)
+template<typename Telt, typename Tidx>
+std::vector<Tidx> OnTuples(std::vector<Tidx> const& V, Telt const& g)
 {
-  std::vector<int> retV(V.size());
-  for (size_t i=0; i<V.size(); i++) {
+  Tidx len = V.size();
+  std::vector<Tidx> retV(len);
+  for (Tidx i=0; i<len; i++)
     retV[i] = PowAct(V[i], g);
-  }
   return retV;
 }
 
@@ -150,22 +150,24 @@ std::vector<T> Set(std::vector<T> const& V)
   --- skip_fnuc eliminated as it is the identity in the case that interest us.
  */
 template<typename Telt, typename Tint>
-std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> const& set, StabChain<Telt> const& k)
+std::vector<typename Telt::Tidx> NewSmallestImage(StabChain<Telt> const& g, std::vector<typename Telt::Tidx> const& set, StabChain<Telt> const& k)
 {
+  using Tidx = typename Telt::Tidx;
 #ifdef DEBUG_NSI
   std::cerr << "CPP NewSmallestImage : beginning\n";
 #endif
   int infinity = 10 + g->comm->n;
   int initial_upb = infinity;
+  Tidx max_val_type = std::numeric_limits<Tidx>::max();
 
 
-  auto calculateBestOrbit=[&](std::vector<int> const& orbmins, std::vector<int> const& orbitCounts, std::vector<int> const& orbsizes) -> int {
+  auto calculateBestOrbit=[&](std::vector<Tidx> const& orbmins, std::vector<Tidx> const& orbitCounts, std::vector<Tidx> const& orbsizes) -> Tidx {
 #ifdef DEBUG_NSI
     std::cerr << "CPP Beginning of calculateBestOrbit\n";
 #endif
     struct typeCnt {
-      int orbSize;
-      int orbCount;
+      Tidx orbSize;
+      Tidx orbCount;
     };
     // The comparison goes
     // log(a.orbCount) / a.orbSize < log(b.orbCount) / b.orbSize
@@ -186,12 +188,12 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
           return false;
         Tint pow1 = 1;
         Tint eV = a.orbCount;
-        for (int idx=0; idx<b.orbSize; idx++)
+        for (Tidx idx=0; idx<b.orbSize; idx++)
           pow1 *= eV;
         //
         Tint pow2 = 1;
         eV = b.orbCount;
-        for (int idx=0; idx<a.orbSize; idx++)
+        for (Tidx idx=0; idx<a.orbSize; idx++)
           pow2 *= eV;
         //
 #ifdef DEBUG_NSI
@@ -215,18 +217,18 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
           return false;
         Tint pow1 = 1;
         Tint eV = a.orbCount;
-        for (int idx=0; idx<b.orbSize; idx++)
+        for (Tidx idx=0; idx<b.orbSize; idx++)
           pow1 *= eV;
         //
         Tint pow2 = 1;
         eV = b.orbCount;
-        for (int idx=0; idx<a.orbSize; idx++)
+        for (Tidx idx=0; idx<a.orbSize; idx++)
           pow2 *= eV;
         //
         return pow1 == pow2;
       }
     };
-    auto selector=[&](int const& jdx) -> typeCnt {
+    auto selector=[&](Tidx const& jdx) -> typeCnt {
       return {orbsizes[jdx], orbitCounts[jdx]};
       /*
       if (orbsizes[i] == 1) {
@@ -235,18 +237,18 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
         return (log(double(orbitCounts[i]))/log(2.0)) / double(orbsizes[i]);
       }*/
     };
-    int index = 0;
+    Tidx index = 0;
     typeCnt result_0 = selector(0);
-    int result_1 = orbmins[0];
+    Tidx result_1 = orbmins[0];
 #ifdef DEBUG_NSI
-    std::cerr << "CPP result_0=" << result_0.orbCount << " / " << result_0.orbSize << "   result_1=" << (result_1+1) << "\n";
+    std::cerr << "CPP result_0=" << result_0.orbCount << " / " << result_0.orbSize << "   result_1=" << int(result_1+1) << "\n";
 #endif
     for (size_t i=1; i<orbmins.size(); i++) {
       typeCnt ret_0 = selector(i);
-      int ret_1 = orbmins[i];
+      Tidx ret_1 = orbmins[i];
       bool lower=false;
 #ifdef DEBUG_NSI
-      std::cerr << "CPP i=" << (i+1) << " ret_0=" << ret_0.orbCount << " / " << ret_0.orbSize << "   ret_1=" << (ret_1+1) << "\n";
+      std::cerr << "CPP i=" << int(i+1) << " ret_0=" << ret_0.orbCount << " / " << ret_0.orbSize << "   ret_1=" << int(ret_1+1) << "\n";
 #endif
       if (comparisonLower(ret_0, result_0)) {
         lower=true;
@@ -272,54 +274,51 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
 
 
   struct Node {
-    std::vector<int> selected;
-    std::vector<int> image;
-    std::vector<int> imset;
+    std::vector<Tidx> selected;
+    std::vector<Tidx> image;
     StabChain<Telt> substab;
     bool deleted;
     std::shared_ptr<Node> next;
     std::shared_ptr<Node> prev;
     std::shared_ptr<Node> parent;
-    int selectedbaselength;
+    Tidx selectedbaselength;
     // children
-    int childno;
+    Tidx childno;
     bool IsBoundChildren;
     std::vector<std::shared_ptr<Node>> children;
-    std::vector<int> validkids;
+    std::vector<Tidx> validkids;
   };
   using NodePtr = std::shared_ptr<Node>;
   std::vector<NodePtr> ListPtr;
 
-  int n = std::max(LargestMovedPoint(StrongGeneratorsStabChain(g)), set[set.size()-1]);
+  Tidx n = std::max(LargestMovedPoint(StrongGeneratorsStabChain(g)), set[set.size()-1]);
 #ifdef DEBUG_NSI
-  std::cerr << "CPP n=" << n << "\n";
+  std::cerr << "CPP n=" << Tidx(n) << "\n";
 #endif
   StabChain<Telt> s = CopyStabChain(g);
   StabChain<Telt> l = Action<Telt,Tint>(k, set);
-  int m = set.size();
+  Tidx m = set.size();
   Node root_v;
   root_v.image = set;
-  root_v.imset = set;
   root_v.substab = l;
   root_v.deleted = false;
   root_v.next = nullptr;
   root_v.prev = nullptr;
   root_v.parent = nullptr;
   // unset values
-  root_v.selectedbaselength = -1;
+  root_v.selectedbaselength = max_val_type;
   root_v.IsBoundChildren = false;
   NodePtr root = std::make_shared<Node>(root_v);
   ListPtr.push_back(root);
 
   // Node exploration functions
-  auto leftmost_node =[&](int const& depth) -> NodePtr {
+  auto leftmost_node =[&](Tidx const& depth) -> NodePtr {
 #ifdef DEBUG_NSI
     std::cerr << "CPP Beginning of leftmost_node\n";
 #endif
     NodePtr n = root;
-    while (int(n->selected.size()) < depth) {
+    while (Tidx(n->selected.size()) < depth)
       n = n->children[0];
-    }
     return n;
   };
   auto next_node =[&](NodePtr const& node) -> NodePtr {
@@ -354,7 +353,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
       if (node->parent->children.size() == 0) {
         delete_node(node->parent);
       } else {
-        for (int i=node->childno; i<int(node->parent->children.size()); i++) {
+        for (Tidx i=node->childno; i<Tidx(node->parent->children.size()); i++) {
           node->parent->children[i]->childno = i;
         }
       }
@@ -379,11 +378,11 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
       return;
     std::vector<NodePtr> bad;
 
-    std::vector<int> range= ClosedInterval(0,m);
+    std::vector<Tidx> range= ClosedInterval<Tidx>(0,m);
     Face seen = BlistList(range,{});
-    int x;
+    Tidx x;
     for (auto & c : node->children) {
-      if (c->selectedbaselength != -1) {
+      if (c->selectedbaselength != max_val_type) {
         x = c->selected[c->selectedbaselength];
       } else {
         x = c->selected[c->selected.size() - 1];
@@ -391,7 +390,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
       if (seen[x] == 1) {
         bad.push_back(c);
       } else {
-        std::vector<int> q = {x};
+        std::vector<Tidx> q = {x};
         std::vector<Telt> gens = Kernel_GeneratorsOfGroup(node->substab);
         size_t olen = 1;
         size_t pos = 0;
@@ -399,12 +398,12 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
         while (true) {
           size_t idx;
           for (idx=pos; idx<olen; idx++) {
-            int pt = q[idx];
+            Tidx pt = q[idx];
             for (auto & gen : gens) {
-              int im = PowAct(pt,gen);
+              Tidx im = PowAct(pt,gen);
               if (seen[im] == 0) {
                 seen[im] = 1;
-                q.push_back(im);
+                q.emplace_back(im);
                 olen++;
               }
             }
@@ -440,30 +439,30 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
 
   // Given a group 'gp' and a set 'set', find orbit representatives
   // of 'set' in 'gp' simply.
-  auto simpleOrbitReps=[&](StabChain<Telt> const& gp, std::vector<int> const& set) -> std::vector<int> {
+  auto simpleOrbitReps=[&](StabChain<Telt> const& gp, std::vector<Tidx> const& set) -> std::vector<Tidx> {
 #ifdef DEBUG_NSI
     std::cerr << "CPP Beginning of simpleOrbitReps\n";
 #endif
-    int m = set.size();
-    int n = set[m-1];
-    Face b = BlistList(ClosedInterval(0,n+1), set); // Check the n+1 here
-    int seed = set[0];
-    std::vector<int> reps;
+    Tidx m = set.size();
+    Tidx n = set[m-1];
+    Face b = BlistList(ClosedInterval<Tidx>(0,n+1), set); // Check the n+1 here
+    Tidx seed = set[0];
+    std::vector<Tidx> reps;
     std::vector<Telt> gens = Kernel_GeneratorsOfGroup(gp);
     while (seed != -1 && seed <= n) {
       b[seed]=0;
-      std::vector<int> q = {seed};
+      std::vector<Tidx> q = {seed};
       reps.push_back(seed);
       size_t pos=0;
       while(true) {
         size_t idx, qsiz=q.size();
         for (idx=pos; idx<qsiz; idx++) {
-          int pt = q[idx];
+          Tidx pt = q[idx];
           for (auto & gen : gens) {
-            int im = PowAct(pt, gen);
+            Tidx im = PowAct(pt, gen);
             if (b[im] == 1) {
               b[im] = 0;
-              q.push_back(im);
+              q.emplace_back(im);
             }
           }
         }
@@ -491,54 +490,53 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
     free_all_nodes();
     return {};
   }
-  int depth;
+  Tidx depth;
   for (depth=0; depth<m; depth++) {
 #ifdef DEBUG_NSI
-    std::cerr << "CPP depth=" << (depth+1) << "\n";
+    std::cerr << "CPP depth=" << int(depth+1) << "\n";
 #endif
     std::vector<Telt> gens = GetListGenerators(s);
-    std::vector<int> orbnums(n,-1);
-    std::vector<int> orbmins;
-    std::vector<int> orbsizes;
-    int upb = initial_upb;
+    std::vector<Tidx> orbnums(n,max_val_type);
+    std::vector<Tidx> orbmins;
+    std::vector<Tidx> orbsizes;
+    Tidx upb = initial_upb;
     // Make orbit of x, updating orbnums, orbmins and orbsizes as approriate.
-    auto make_orbit=[&](int const& x) -> int {
+    auto make_orbit=[&](Tidx const& x) -> Tidx {
 #ifdef DEBUG_NSI
-      if (orbnums[x] == -1) {
-        std::cerr << "CPP Beginning of make_orbit x=" << (x+1) << " orbnums[x]=" << (-1) << "\n";
+      if (orbnums[x] == max_val_type) {
+        std::cerr << "CPP Beginning of make_orbit x=" << int(x+1) << " orbnums[x]=" << int(-1) << "\n";
       } else {
-        std::cerr << "CPP Beginning of make_orbit x=" << (x+1) << " orbnums[x]=" << (orbnums[x]+1) << "\n";
+        std::cerr << "CPP Beginning of make_orbit x=" << int(x+1) << " orbnums[x]=" << int(orbnums[x]+1) << "\n";
       }
 #endif
-      if (orbnums[x] != -1) {
+      if (orbnums[x] != max_val_type) {
         return orbnums[x];
       }
 #ifdef DEBUG_NSI
       std::cerr << "CPP After check\n";
 #endif
-      std::vector<int> q = {x};
-      int rep = x;
-      int num = orbmins.size();
+      std::vector<Tidx> q = {x};
+      Tidx rep = x;
+      Tidx num = orbmins.size();
       orbnums[x] = num;
 #ifdef DEBUG_NSI
-      std::cerr << "CPP 1 : x=" << (x+1) << " Assign orbnums[x]=" << (orbnums[x] + 1) << "\n";
+      std::cerr << "CPP 1 : x=" << int(x+1) << " Assign orbnums[x]=" << int(orbnums[x] + 1) << "\n";
 #endif
       size_t pos=0;
       while (true) {
         size_t idx, qsiz = q.size();
         for (idx=pos; idx<qsiz; idx++) {
-          int pt = q[idx];
+          Tidx pt = q[idx];
           for (auto& gen : gens) {
-            int img = PowAct(pt, gen);
-            if (orbnums[img] == -1) {
+            Tidx img = PowAct(pt, gen);
+            if (orbnums[img] == max_val_type) {
               orbnums[img] = num;
 #ifdef DEBUG_NSI
-              std::cerr << "CPP 2 : img=" << (img+1) << " Assign orbnums[img]=" << (orbnums[img] + 1) << "\n";
+              std::cerr << "CPP 2 : img=" << int(img+1) << " Assign orbnums[img]=" << int(orbnums[img] + 1) << "\n";
 #endif
               q.push_back(img);
-              if (img < rep) {
+              if (img < rep)
                 rep = img;
-              }
             }
           }
         }
@@ -547,7 +545,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
         pos = idx;
       }
 #ifdef DEBUG_NSI
-      std::cerr << "CPP make_orbit rep=" << (rep+1) << " |q|=" << q.size() << " num=" << (num+1) << "\n";
+      std::cerr << "CPP make_orbit rep=" << int(rep+1) << " |q|=" << q.size() << " num=" << int(num+1) << "\n";
 #endif
       orbmins.push_back(rep);
       orbsizes.push_back(q.size());
@@ -559,23 +557,23 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
     */
 
 
-    std::vector<int> minOrbitMset = {infinity};
+    std::vector<Tidx> minOrbitMset = {infinity};
     NodePtr node = leftmost_node(depth);
     while (node != nullptr) {
 #ifdef DEBUG_NSI
       std::cerr << "CPP m=" << m << " node.selected=" << GapStringIntVector(node->selected) << "\n";
 #endif
-      std::vector<int> cands = DifferenceVect(ClosedInterval(0,m), node->selected);
+      std::vector<Tidx> cands = DifferenceVect(ClosedInterval<Tidx>(0, m), node->selected);
 #ifdef DEBUG_NSI
       std::cerr << "CPP 1 : cands=" << GapStringIntVector(cands) << "\n";
 #endif
 
-      std::vector<int> orbitMset;
+      std::vector<Tidx> orbitMset;
       for (auto & y : cands) {
-        int x = node->image[y];
-        int num = make_orbit(x);
+        Tidx x = node->image[y];
+        Tidx num = make_orbit(x);
 #ifdef DEBUG_NSI
-        std::cerr << "CPP x=" << (x+1) << " num=" << (num+1) << "\n";
+        std::cerr << "CPP x=" << int(x+1) << " num=" << int(num+1) << "\n";
 #endif
         orbitMset.push_back(orbmins[num]);
       }
@@ -607,10 +605,10 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
       node = next_node(node);
     }
 
-    std::vector<int> globalOrbitCounts(orbmins.size(), 0);
+    std::vector<Tidx> globalOrbitCounts(orbmins.size(), 0);
     node = leftmost_node(depth);
     while (node != nullptr) {
-      std::vector<int> cands = DifferenceVect(ClosedInterval(0, m), node->selected);
+      std::vector<Tidx> cands = DifferenceVect(ClosedInterval<Tidx>(0, m), node->selected);
 #ifdef DEBUG_NSI
       std::cerr << "CPP 2 : cands=" << GapStringIntVector(cands) << "\n";
 #endif
@@ -622,21 +620,21 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
         # not be immediately deleted under rule C
       */
       for (auto & y : cands) {
-        int x = node->image[y];
+        Tidx x = node->image[y];
 #ifdef DEBUG_NSI
-        std::cerr << "CPP y=" << (y+1) << " x=" << (x+1) << "\n";
+        std::cerr << "CPP y=" << int(y+1) << " x=" << int(x+1) << "\n";
 #endif
-        int num = make_orbit(x);
-        int siz = globalOrbitCounts.size();
+        Tidx num = make_orbit(x);
+        Tidx siz = globalOrbitCounts.size();
         if (num < siz) {
           globalOrbitCounts[num]++;
         } else {
-          for (int u=siz; u<=num; u++)
+          for (Tidx u=siz; u<=num; u++)
             globalOrbitCounts.push_back(0);
-          globalOrbitCounts[num]=1;
+          globalOrbitCounts[num] = 1;
         }
 #ifdef DEBUG_NSI
-        std::cerr << "CPP globalOrbitCounts : num=" << (num+1) << " cnt=" << globalOrbitCounts[num] << "\n";
+        std::cerr << "CPP globalOrbitCounts : num=" << int(num+1) << " cnt=" << globalOrbitCounts[num] << "\n";
 #endif
       }
       node = next_node(node);
@@ -644,16 +642,16 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
 #ifdef DEBUG_NSI
     std::cerr << "CPP globalOrbitCounts=" << GapStringTVector(globalOrbitCounts) << "\n";
 #endif
-    int globalBestOrbit = calculateBestOrbit(orbmins, globalOrbitCounts, orbsizes);
+    Tidx globalBestOrbit = calculateBestOrbit(orbmins, globalOrbitCounts, orbsizes);
     upb = orbmins[globalBestOrbit];
 #ifdef DEBUG_NSI
-    std::cerr << "CPP globalBestOrbit=" << (globalBestOrbit+1) << " upb=" << (upb+1) << "\n";
+    std::cerr << "CPP globalBestOrbit=" << int(globalBestOrbit+1) << " upb=" << int(upb+1) << "\n";
 #endif
 
 
     node = leftmost_node(depth);
     while (node != nullptr) {
-      std::vector<int> cands = DifferenceVect(ClosedInterval(0,m), node->selected);
+      std::vector<Tidx> cands = DifferenceVect(ClosedInterval<Tidx>(0,m), node->selected);
 #ifdef DEBUG_NSI
       std::cerr << "CPP 3 : cands=" << GapStringIntVector(cands) << "\n";
 #endif
@@ -666,9 +664,9 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
       */
       node->validkids.clear();
       for (auto & y : cands) {
-        int x = node->image[y];
-        int num = orbnums[x];
-        if (num == -1) {
+        Tidx x = node->image[y];
+        Tidx num = orbnums[x];
+        if (num == max_val_type) {
           /*
             # Need a new orbit. Also require the smallest point
             # as the rep.
@@ -678,7 +676,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
             # better than the current best then go on to the next candidate
           */
           num = make_orbit(x);
-          int rep = orbmins[num];
+          Tidx rep = orbmins[num];
           if (rep < upb) {
             upb = rep;
             NodePtr node2 = node->prev;
@@ -689,18 +687,18 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
             node->validkids.clear();
             node->validkids.push_back(y);
 #ifdef DEBUG_NSI
-            std::cerr << "CPP validkids set to {y} with y=" << (y+1) << "\n";
+            std::cerr << "CPP validkids set to {y} with y=" << int(y+1) << "\n";
 #endif
           }
         } else {
-          int rep = orbmins[num];
+          Tidx rep = orbmins[num];
 #ifdef DEBUG_NSI
-          std::cerr << "CPP before insertion rep=" << (rep+1) << " num=" << (num+1) << " upb=" << (upb+1) << "\n";
+          std::cerr << "CPP before insertion rep=" << int(rep+1) << " num=" << int(num+1) << " upb=" << int(upb+1) << "\n";
 #endif
           if (rep == upb) {
             node->validkids.push_back(y);
 #ifdef DEBUG_NSI
-            std::cerr << "CPP validkids inserting y=" << (y+1) << "\n";
+            std::cerr << "CPP validkids inserting y=" << int(y+1) << "\n";
 #endif
           }
         }
@@ -729,9 +727,8 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
       */
       node = leftmost_node(depth);
       while (node != nullptr) {
-        if (node->selectedbaselength == -1) {
+        if (node->selectedbaselength == max_val_type)
           node->selectedbaselength = node->selected.size();
-        }
         node->selected.push_back(node->validkids[0]);
 #ifdef DEBUG_NSI
         std::cerr << "CPP Now node.selected=" << GapStringIntVector(node->selected) << "\n";
@@ -739,7 +736,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
         node = next_node(node);
       }
       s = s->stabilizer;
-      if (int(leftmost_node(depth+1)->selected.size()) != m) {
+      if (Tidx(leftmost_node(depth+1)->selected.size()) != m) {
         do_continue = true;
       }
     }
@@ -747,7 +744,6 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
     if (!do_continue) {
       node = leftmost_node(depth);
       NodePtr prevnode = nullptr;
-      int nodect = 0;
       while (node != nullptr) {
         node->IsBoundChildren = true;
         node->children.clear();
@@ -756,12 +752,12 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
 #endif
         for (auto & x : node->validkids) {
           Node newnode_v;
-          std::vector<int> selected = node->selected;
+          std::vector<Tidx> selected = node->selected;
           selected.push_back(x);
           newnode_v.selected = selected;
           //          PrintStabChain(node->substab);
 #ifdef DEBUG_NSI
-          std::cerr << "DEBUG Before Stabilize_OnPoints x=" << (x+1) << "\n";
+          std::cerr << "DEBUG Before Stabilize_OnPoints x=" << int(x+1) << "\n";
 #endif
           newnode_v.substab = Kernel_Stabilizer_OnPoints<Telt,Tint>(node->substab, x);
 #ifdef DEBUG_NSI
@@ -778,14 +774,13 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
 #endif
           NodePtr newnode = std::make_shared<Node>(newnode_v);
           ListPtr.push_back(newnode);
-          nodect = nodect + 1;
           if (prevnode != nullptr) {
             prevnode->next = newnode;
           }
           prevnode = newnode;
           node->children.push_back(newnode);
 
-          std::vector<int> image = node->image;
+          std::vector<Tidx> image = node->image;
           if (image[x] != upb) {
             while (true) {
               Telt g = s->comm->labels[s->transversal[image[x]]];
@@ -794,10 +789,8 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
                 break;
             }
             newnode->image = image;
-            newnode->imset = Set(image);
           } else {
             newnode->image = image;
-            newnode->imset = node->imset;
           }
         }
         node = next_node(node);
@@ -807,7 +800,7 @@ std::vector<int> NewSmallestImage(StabChain<Telt> const& g, std::vector<int> con
       std::cerr << "CPP Before s:=s.stabilizer operation\n";
 #endif
       s = s->stabilizer;
-      if (int(leftmost_node(depth+1)->selected.size()) == m) {
+      if (Tidx(leftmost_node(depth+1)->selected.size()) == m) {
         break;
       }
     }

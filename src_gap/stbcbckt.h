@@ -248,7 +248,7 @@ void KeyUpdatingRbase(std::string const& str, rbaseType<Telt> & rbase)
   bool DoPrint=false;
   std::vector<std::string> ListKey;
   for (auto & x : rbase.lev)
-    ListKey.push_back(GetStringExpressionOfStabChain(x.Stot));
+    ListKey.emplace_back(GetStringExpressionOfStabChain(x.Stot));
   //
   if (DoPrint) {
     size_t len = rbase.lev.size();
@@ -619,7 +619,7 @@ std::vector<singStrat> StratMeetPartition(rbaseType<Telt> & rbase, Partition & P
         std::cerr << "CPP FixpointCellNo - pVal\n";
 #endif
 	ProcessFixpoint_rbase(rbase, pnt);
-	strat.push_back({-1, pnt, pVal});
+	strat.emplace_back({-1, pnt, pVal});
 	if (IsTrivialRBase(rbase))
 	  return strat;
       }
@@ -638,7 +638,7 @@ void AddRefinement(rbaseType<Telt> & rbase, int const& pos, Refinement const& eR
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP Doing RFM insertion\n";
 #endif
-    rbase.rfm[pos].push_back(eRfm);
+    rbase.rfm[pos].emplace_back(eRfm);
   }
 #ifdef DEBUG_STBCBCKT
   for (size_t i=0; i<rbase.rfm.size(); i++) {
@@ -763,8 +763,8 @@ void RegisterRBasePoint(Partition & P, rbaseType<Telt> & rbase, int const& pnt, 
 template<typename Telt>
 void NextRBasePoint(Partition & P, rbaseType<Telt> & rbase, Telt const& TheId)
 {
-  std::vector<int> lens = P.lengths;
-  std::vector<int> order = ClosedInterval(0, NumberCells(P));
+  std::vector<Tidx> lens = P.lengths;
+  std::vector<Tidx> order = ClosedInterval<Tidx>(0, NumberCells(P));
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP lens=[ ";
   for (size_t i=0; i<lens.size(); i++) {
@@ -777,13 +777,13 @@ void NextRBasePoint(Partition & P, rbaseType<Telt> & rbase, Telt const& TheId)
   SortParallel_PairList(lens, order);
 
 
-  int k = PositionProperty(lens, [](int const& x) -> int {return x != 1;});
+  int k = PositionProperty(lens, [](Tidx const& x) -> bool {return x != 1;});
   int l = -1;
   if (rbase.level.status == int_int) {
     l = 0;
   } else {
     while (true) {
-      l = PositionProperty(ClosedInterval(0, lens[k]), [&](int const& i) -> bool {
+      l = PositionProperty(ClosedInterval<Tidx>(0, lens[k]), [&](Tidx const& i) -> bool {
 	  return !IsFixedStabilizer(rbase.level.Stot, P.points[i+P.firsts[order[k]]]);});
       if (l != -1)
 	break;
@@ -935,7 +935,7 @@ bool PBIsMinimal(std::vector<int> const& range, int const& a, int const& b, Stab
           if (img < a)
             return false;
           old[img]=true;
-          orb.push_back(img);
+          orb.emplace_back(img);
         }
       }
     }
@@ -962,7 +962,7 @@ void SubtractBlistOrbitStabChain(Face & blist, std::vector<Telt> const& LGen, in
         int img = PowAct(pnt, eGen);
         if (blist[img]) {
           blist[img]=false;
-          orb.push_back(img);
+          orb.emplace_back(img);
         }
       }
     }
@@ -1201,12 +1201,12 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 	PrintRBaseLevel(rbase, "CPP After NextRBasePoint");
 #endif
 	if (image.perm.status == int_true)
-	  rbase.fix.push_back(Fixcells(rbase.partition));
+	  rbase.fix.emplace_back(Fixcells(rbase.partition));
 #ifdef DEBUG_STBCBCKT
 	std::cerr << "CPP After Fixcells insert\n";
 #endif
 	std::vector<int> eNewF(range.size(), 0);
-	org.push_back(eNewF);
+	org.emplace_back(eNewF);
 	if (repr) {
 	  // In  the representative  case,  change  the   stabilizer
 	  // chains of <L> and <R>.

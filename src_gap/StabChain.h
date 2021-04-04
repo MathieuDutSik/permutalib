@@ -844,11 +844,11 @@ std::vector<Telt> ElementsStabChain(StabChain<Telt> const& Stot)
 
 
 // is base is empty then this just replaces the IsBound(options.base)
-template<typename Tint>
+template<typename Tint, typename Tidx>
 struct StabChainOptions {
   int n;
-  std::vector<int> base;
-  std::vector<int> knownBase;
+  std::vector<Tidx> base;
+  std::vector<Tidx> knownBase;
   int random;
   bool reduced;
   Tint size;
@@ -856,11 +856,11 @@ struct StabChainOptions {
 };
 
 
-template<typename Tint>
+template<typename Tint, typename Tidx>
 StabChainOptions<Tint> GetStandardOptions(int const& n)
 {
-  std::vector<int> base;
-  std::vector<int> knownBase;
+  std::vector<Tidx> base;
+  std::vector<Tidx> knownBase;
   int random = 1000;
   bool reduced=true;
   Tint size=0;
@@ -879,27 +879,27 @@ bool IsTrivial_ListGen(std::vector<Telt> const& LGen)
 }
 
 template<typename Telt>
-std::vector<int> MovedPoints(StabChain<Telt> const& S)
+std::vector<typename Telt::Tidx> MovedPoints(StabChain<Telt> const& S)
 {
-  std::set<int> LIdx;
+  using Tidx = typename Telt::Tidx;
+  std::unordered_set<int> LGen;
   StabChain<Telt> Sptr = S;
-  while(true) {
-    if (Sptr == nullptr)
-      break;
-    for (auto & eIdx : Sptr->genlabels)
-      LIdx.insert(eIdx);
+  while(Sptr != nullptr)
+    for (auto & eIdx : Sptr->genlabels) {
+      Telt eGen = S->comm->labels[eIdx];
+      LGen.insert(eGen);
+    }
     Sptr = Sptr->stabilizer;
   }
-  auto IsMoved=[&](int const& ePt) -> bool {
-    for (auto & eIdx : LIdx) {
-      if (S->comm->labels[eIdx].at(ePt) != ePt)
+  auto IsMoved=[&](Tidx const& ePt) -> bool {
+    for (auto & eGen : LGen)
+      if (eGen.at(ePt) != ePt)
 	return true;
-    }
     return false;
   };
-  std::vector<int> LMoved;
-  int n=S->comm->n;
-  for (int i=0; i<n; i++)
+  std::vector<Tidx> LMoved;
+  Tidx n=S->comm->n;
+  for (Tidx i=0; i<n; i++)
     if (IsMoved(i))
       LMoved.push_back(i);
   return LMoved;
@@ -927,23 +927,24 @@ bool IsTrivial(StabChain<Telt> const& G)
 
 
 template<typename Telt>
-int LargestMovedPoint(std::vector<Telt> const& LGen)
+typename Telt::Tidx LargestMovedPoint(std::vector<Telt> const& LGen)
 {
   if (LGen.size() == 0)
     return -1;
-  int n=LGen[0].size();
-  std::vector<int> Status(n, 1);
+  using Tidx = typename Telt::Tidx;
+  Tidx n=LGen[0].size();
+  Face Status(n);
   for (auto & eGen : LGen) {
-    for (int u=0; u<n; u++) {
-      int v=eGen.at(u);
+    for (Tidx u=0; u<n; u++) {
+      Tidx v=eGen.at(u);
       if (u != v)
-	Status[u]=0;
+	Status[u] = 1;
     }
   }
-  int eMov=0;
-  for (int u=0; u<n; u++)
-    if (Status[u] == 0)
-      eMov=u;
+  Tidx eMov=0;
+  for (Tidx u=0; u<n; u++)
+    if (Status[u] == 1)
+      eMov = u;
   eMov++;
   return eMov;
 }
@@ -1257,6 +1258,7 @@ void ChooseNextBasePoint(StabChain<Telt> & S, std::vector<int> const& base, std:
 template<typename Telt, typename Tint>
 void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, StabChainOptions<Tint> const& options)
 {
+  using Tidx = typename Telt::Tidx;
 #ifdef DEBUG_STABCHAIN
   std::cerr << "CPP Begin StabChainStrong : newgens=" << GapStringTVector(newgens) << "\n";
   std::cerr << "CPP StabChainStrong 1: genlabels=" << GapStringIntVector(S->genlabels) << "\n";
@@ -1291,7 +1293,7 @@ void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, Stab
   }
 
   // # Compute the Schreier generators (seems to work better backwards).
-  std::vector<int> pnts = ClosedInterval(0, S->orbit.size());
+  std::vector<Tidx> pnts = ClosedInterval<Tidx>(0, S->orbit.size());
   if (S->IsBoundCycle)
     pnts = ListBlist(pnts, S->cycles);
 #ifdef DEBUG_STABCHAIN
@@ -1316,7 +1318,7 @@ void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, Stab
 #ifdef DEBUG_STABCHAIN
     std::cerr << "CPP StabChainStrong gen1=" << (gen1+1) << " rep=" << rep << "\n";
 #endif
-    for (int & j : ClosedInterval(gen1, S->genlabels.size())) {
+    for (Tidx & j : ClosedInterval<Tidx>(gen1, S->genlabels.size())) {
       Telt g = S->comm->labels[ S->genlabels[j] ];
 #ifdef DEBUG_STABCHAIN
       std::cerr << "CPP StabChainStrong   j=" << (j+1) << " g=" << g << "\n";
@@ -1351,8 +1353,9 @@ void ClosureGroup_options(StabChain<Telt> & S, Telt const& g, StabChainOptions<T
 template<typename Telt, typename Tint>
 void ClosureGroup(StabChain<Telt> & S, Telt const& g)
 {
+  using Tidx = typename Telt::Tidx;
   int n = S->comm->n;
-  StabChainOptions<Tint> options = GetStandardOptions<Tint>(n);
+  StabChainOptions<Tint,Tidx> options = GetStandardOptions<Tint,Tidx>(n);
   ClosureGroup_options(S, g, options);
 }
 
@@ -1988,7 +1991,7 @@ StabChain<Tret> HomomorphismMapping(StabChain<Telt> const& Stot, std::function<T
   auto fVector =[&](std::vector<Telt> const& V) -> std::vector<Tret> {
     std::vector<Tret> Vret;
     for (auto & eElt : V)
-      Vret.push_back(f(eElt));
+      Vret.emplace_back(f(eElt));
     return Vret;
   };
   std::vector<Tret> labelsMap = fVector(Stot->comm->labels);

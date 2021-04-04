@@ -110,9 +110,10 @@ StabChain<Telt> MinimalStabChain(std::vector<Telt> const& LGen, int const& n)
 #ifdef DEBUG_STABCHAINMAIN
   std::cerr << "CPP Beginning of MinimalStabChain\n";
 #endif
-  StabChainOptions<Tint> options = GetStandardOptions<Tint>(n);
-  int largMov=LargestMovedPoint(LGen);
-  options.base = ClosedInterval(0, largMov);
+  using Tidx = typename Telt::Tidx;
+  StabChainOptions<Tint,Tidx> options = GetStandardOptions<Tint,Tidx>(n);
+  Tidx largMov=LargestMovedPoint(LGen);
+  options.base = ClosedInterval<Tidx>(0, largMov);
 #ifdef DEBUG_STABCHAINMAIN
   std::cerr << "CPP Before StabChainOp_listgen\n";
 #endif

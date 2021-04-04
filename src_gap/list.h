@@ -22,16 +22,18 @@ std::vector<T> Reversed(std::vector<T> const& eList)
 
 
 
-std::vector<int> ClosedInterval(int const& begin, int const& end)
+template<typename Tidx>
+std::vector<Tidx> ClosedInterval(Tidx const& begin, Tidx const& end)
 {
-  std::vector<int> clInt;
-  for (int u=begin; u<end; u++)
+  std::vector<Tidx> clInt;
+  for (Tidx u=begin; u<end; u++)
     clInt.push_back(u);
   return clInt;
 }
 
 
-Face BlistList(std::vector<int> const& list, std::vector<int> const& sub)
+template<typename Tidx>
+Face BlistList(std::vector<Tidx> const& list, std::vector<Tidx> const& sub)
 {
   int len=list.size();
   Face ret(len);
