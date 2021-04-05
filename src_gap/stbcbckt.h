@@ -1892,6 +1892,8 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
   return PartitionBacktrack<Telt,Tint>( G, Pr, repr, rbase, data, L, R );
 }
 
+
+
 template<typename Telt,typename Tint>
 StabChain<Telt> Kernel_Stabilizer_OnSets(StabChain<Telt> const& G, Face const& Phi)
 {
@@ -1899,6 +1901,12 @@ StabChain<Telt> Kernel_Stabilizer_OnSets(StabChain<Telt> const& G, Face const& P
   std::cerr << "CPP Beginning of Stabilizer_OnSets\n";
 #endif
   size_t n = G->comm->n;
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+  if (Phi.size() != n) {
+    std::cerr << "We should have Phi of size equal to n\n";
+    throw PermutalibException{1};
+  }
+#endif
   bool repr=false;
   if (2 * Phi.count() > n) {
     Face PhiC(n);
@@ -1911,13 +1919,21 @@ StabChain<Telt> Kernel_Stabilizer_OnSets(StabChain<Telt> const& G, Face const& P
 }
 
 
+
 template<typename Telt,typename Tint>
-StabChain<Telt> Kernel_Stabilizer_OnPoints(StabChain<Telt> const& G, int const& x)
+StabChain<Telt> Kernel_Stabilizer_OnPoints(StabChain<Telt> const& G, typename Telt::Tidx const& x)
 {
+  using Tidx=typename Telt::Tidx;
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Beginning of Stabilizer_OnSets\n";
 #endif
-  size_t n = G->comm->n;
+  Tidx n = G->comm->n;
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+  if (x >= n) {
+    std::cerr << "We should have x < n\n";
+    throw PermutalibException{1};
+  }
+#endif
   Face Phi(n);
   Phi[x]=1;
   bool repr=false;
@@ -1926,12 +1942,18 @@ StabChain<Telt> Kernel_Stabilizer_OnPoints(StabChain<Telt> const& G, int const& 
 
 
 
-
 template<typename Telt,typename Tint>
 std::pair<bool,Telt> Kernel_RepresentativeAction_OnSets(StabChain<Telt> const& G, Face const& f1, Face const& f2)
 {
+  size_t n = G->comm->n;
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Beginning of RepresentativeAction_OnSets\n";
+#endif
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+  if (f1.size() != n || f2.size() != n) {
+    std::cerr << "We should have f1 and f2 of size equal to n\n";
+    throw PermutalibException{1};
+  }
 #endif
   if (f1.count() != f2.count())
     return {false, {}};
@@ -1942,7 +1964,6 @@ std::pair<bool,Telt> Kernel_RepresentativeAction_OnSets(StabChain<Telt> const& G
       return {false, {}};
     return {true, eRec.res};
   };
-  size_t n = G->comm->n;
   bool repr=true;
   // Put the false for debugging.
   if (2 * f1.count() > n && false) {
@@ -1960,9 +1981,16 @@ std::pair<bool,Telt> Kernel_RepresentativeAction_OnSets(StabChain<Telt> const& G
 }
 
 template<typename Telt,typename Tint>
-std::pair<bool,Telt> Kernel_RepresentativeAction_OnPoints(StabChain<Telt> const& G, int const& x1, int const& x2)
+std::pair<bool,Telt> Kernel_RepresentativeAction_OnPoints(StabChain<Telt> const& G, typename Telt::Tidx const& x1, typename Telt::Tidx const& x2)
 {
-  size_t n = G->comm->n;
+  using Tidx=typename Telt::Tidx;
+  Tidx n = G->comm->n;
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+  if (x1 >= n || x2 >= n) {
+    std::cerr << "We should have x1 <n && x2 < n. x1=" << x1 << " x2=" << x2 << " n=" << n << "\n";
+    throw PermutalibException{1};
+  }
+#endif
   bool repr=true;
   Face f1(n), f2(n);
   f1[x1] = 1;
