@@ -63,11 +63,12 @@ boost::dynamic_bitset<>::size_type PositionNthTrueBlist(Face const& blist, int c
 
 
 
-std::vector<int> ListBlist(std::vector<int> const& list, std::vector<int8_t> const& blist)
+template<typename Tidx>
+std::vector<Tidx> ListBlist(std::vector<Tidx> const& list, std::vector<int8_t> const& blist)
 {
-  std::vector<int> ret;
-  int len=list.size();
-  for (int i=0; i<len; i++) {
+  std::vector<Tidx> ret;
+  Tidx len=list.size();
+  for (Tidx i=0; i<len; i++) {
     if (blist[i] == 1)
       ret.push_back(list[i]);
   }

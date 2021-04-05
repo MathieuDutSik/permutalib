@@ -6,6 +6,8 @@
 #include <string>
 #include <iostream>
 #include "exception.h"
+#include "Face_basic.h"
+#include "hash_fct.h"
 
 namespace permutalib {
 
@@ -189,10 +191,15 @@ public:
   {
     return ListRev[i];
   }
+  const Tidx* getPtr() const
+  {
+    return ListVal.data();
+  }
   std::vector<Tidx> getListVal() const
   {
     return ListVal;
   }
+  
   std::vector<Tidx> getListRev() const
   {
     return ListRev;
@@ -383,24 +390,24 @@ DoubleSidedPerm<Tidx> Inverse(DoubleSidedPerm<Tidx> const& ePerm)
 template<typename Tidx>
 std::string GapStyleStringShift(DoubleSidedPerm<Tidx> const& ePerm, int const& eShift)
 {
-  int n=ePerm.size();
-  std::vector<int> ListStat(n,1);
+  Tidx n=ePerm.size();
+  Face ListStat(n);
   std::string eRet;
 
-  for (int i=0; i<n; i++) {
-    if (ListStat[i] == 1) {
-      int eFirst=i;
-      int eCurr=i;
+  for (Tidx i=0; i<n; i++) {
+    if (ListStat[i] == 0) {
+      Tidx eFirst=i;
+      Tidx eCurr=i;
       std::string ePart = "(";
       bool IsFirst=true;
-      int len=0;
+      Tidx len=0;
       while(true) {
 	if (!IsFirst)
 	  ePart += ",";
 	IsFirst=false;
 	ePart += std::to_string(eCurr + eShift);
-	ListStat[eCurr]=0;
-	int eNext = ePerm.at(eCurr);
+	ListStat[eCurr] = 1;
+	Tidx eNext = ePerm.at(eCurr);
 	len++;
 	if (eNext == eFirst)
 	  break;
@@ -532,6 +539,10 @@ public:
       if (ListVal[j] == i)
         return j;
     return -1;
+  }
+  const Tidx* getPtr() const
+  {
+    return ListVal.data();
   }
   std::vector<Tidx> getListVal() const
   {
@@ -717,6 +728,35 @@ SingleSidedPerm<Tidx> Inverse(SingleSidedPerm<Tidx> const& ePerm)
 
 
 
+
+
+}
+
+namespace std {
+  template<typename Tidx>
+  struct hash<permutalib::SingleSidedPerm<Tidx>>
+  {
+    std::size_t operator()(const permutalib::SingleSidedPerm<Tidx> & e_val) const
+    {
+      uint32_t seed = 0x1b873540;
+      const Tidx* ptr_tidx = e_val.getPtr();
+      const uint8_t* ptr_i = (const uint8_t*)ptr_tidx;
+      size_t len = sizeof(Tidx) * e_val.size();
+      return permutalib::murmur3_32(ptr_i, len, seed);
+    }
+  };
+  template<typename Tidx>
+  struct hash<permutalib::DoubleSidedPerm<Tidx>>
+  {
+    std::size_t operator()(const permutalib::DoubleSidedPerm<Tidx> & e_val) const
+    {
+      uint32_t seed = 0x1b873540;
+      const Tidx* ptr_tidx = e_val.getPtr();
+      const uint8_t* ptr_i = (const uint8_t*)ptr_tidx;
+      size_t len = sizeof(Tidx) * e_val.size();
+      return permutalib::murmur3_32(ptr_i, len, seed);
+    }
+  };
 
 }
 

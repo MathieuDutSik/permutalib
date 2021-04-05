@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
       Tgroup eG(LGen, n);
       //
       for (int iter=0; iter<50; iter++) {
-        Face eFace(n);
+        permutalib::Face eFace(n);
         for (int i=0; i<n; i++) {
           int eVal = rand() % 2;
           eFace[i] = eVal;
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
         //        std::cerr << "  |eFace|=" << eFace.count() << " / " << eFace.size() << "\n";
         //
         if (opt == "canonical") {
-          Face set_can = eG.CanonicalImage(eFace);
+          permutalib::Face set_can = eG.CanonicalImage(eFace);
           siz_control += set_can.count();
         }
         if (opt == "stabilizer") {

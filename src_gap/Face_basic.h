@@ -8,11 +8,6 @@
 #include <bitset>
 #include <boost/dynamic_bitset.hpp>
 
-typedef boost::dynamic_bitset<> Face;
-
-#include <bitset>
-#include <boost/dynamic_bitset.hpp>
-
 namespace permutalib {
 
 

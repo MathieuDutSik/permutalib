@@ -148,7 +148,7 @@ Partition<Tidx> GetPartition(std::vector<std::vector<Tidx>> const& list)
     LStr.push_back(GapStringIntVector(eList));
   std::cerr << "CPP list=" << GapStringTVector(LStr) << "\n";
 #endif
-  std::vector<int> points;
+  std::vector<Tidx> points;
   Tidx Max_NbPoint = 0;
   bool ChangeVal = false;
   for (auto & eList : list)
@@ -165,7 +165,7 @@ Partition<Tidx> GetPartition(std::vector<std::vector<Tidx>> const& list)
   Tidx nbPart=list.size();
   std::vector<Tidx> firsts(nbPart);
   std::vector<Tidx> lengths(nbPart);
-  std::vector<int> cellno(nbPoint, -1);
+  std::vector<Tidx> cellno(nbPoint, std::numeric_limits<Tidx>::max());
   int i=0;
   for (int iPart=0; iPart<nbPart; iPart++) {
     int len=list[iPart].size();
