@@ -42,11 +42,11 @@ InfoPseudoRandom RANDOM_SEED(int const& n)
   return {R_228, R_N, R_X};
 }
  
-InfoPseudoRandom *Rglobal = NULL;
+InfoPseudoRandom *Rglobal = nullptr;
 
 InfoPseudoRandom* GetPseudoRandom()
 {
-  if (Rglobal == NULL) {
+  if (Rglobal == nullptr) {
     Rglobal = new InfoPseudoRandom;
     int n=20;
     *Rglobal = RANDOM_SEED(n);
