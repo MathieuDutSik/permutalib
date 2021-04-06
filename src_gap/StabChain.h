@@ -1081,7 +1081,9 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
   }
 #endif
   int nbLabel=S->comm->labels.size();
-  std::vector<int> ListAtt(nbLabel, 1);
+  std::vector<int> ListAtt(nbLabel);
+  for (int i=0; i<nbLabel; i++)
+    ListAtt[i] = i;
   Face old=BlistList(ListAtt, S->genlabels);
   old[0]=true;
   Face ald=old;

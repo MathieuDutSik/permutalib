@@ -36,9 +36,15 @@ template<typename Tidx>
 Face BlistList(std::vector<Tidx> const& list, std::vector<Tidx> const& sub)
 {
   int len=list.size();
+#ifdef SYNCHRONIZED_DEBUG_GAP478
+  std::cerr << "DEBUG list=" << GapStringTVectorB(list) << "\n";
+  std::cerr << "DEBUG sub=" << GapStringTVectorB(sub) << "\n";
+#endif
   Face ret(len);
   for (auto & eVal : sub) {
+    //    std::cerr << "eVal=" << eVal << "\n";
     int pos=PositionVect(list, eVal);
+    //    std::cerr << "pos=" << pos << "\n";
     ret[pos]=true;
   }
   return ret;

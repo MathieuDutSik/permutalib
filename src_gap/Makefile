@@ -15,14 +15,15 @@ OBJECTS		= $(PROGRAM:%=%.o)
 #CC		= g++ -I $(BOOST_INCDIR)    -std=c++11 -Wall -g -O2
 #CC		= g++ -std=c++14 -Wall -g -O2 -fsanitize=address -fsanitize=undefined -fstack-protector-all
 #CC		= g++ -std=c++14 -Wall -g -O2 -fsanitize=address -fsanitize=undefined -fsanitize=bool -fstack-protector-all
-#CC		= g++ -std=c++17 -Wall -g -O2 -fsanitize=address -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fstack-protector-all
-CC		= g++ -std=c++17 -Wall -g -O2
+CC		= g++ -std=c++17 -Wall -g -O2 -fsanitize=address -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fstack-protector-all
+#CC		= g++ -std=c++17 -Wall -g -O2
 #CC		= clang++ -std=c++17 -Weverything
 
 NOLINKFLAG 	= -c
 OUTPUTFLAG 	= -o
 
 CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK
+#CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK -DSYNCHRONIZED_DEBUG_GAP478
 
 #CFLAGS 		= -I$(BOOST_INCDIR) -I$(GMP_INCDIR) 
 CFLAGS 		= -I$(BOOST_INCDIR)

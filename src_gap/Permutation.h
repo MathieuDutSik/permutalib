@@ -433,7 +433,7 @@ std::string GapStyleString(DoubleSidedPerm<Tidx> const& ePerm)
 template<typename Tidx>
 std::ostream& operator<<(std::ostream& os, DoubleSidedPerm<Tidx> const& ePerm)
 {
-  os << GapStyleStringShift(ePerm,1);
+  os << GapStyleStringShift(ePerm, 1);
   return os;
 }
 
@@ -726,11 +726,68 @@ SingleSidedPerm<Tidx> Inverse(SingleSidedPerm<Tidx> const& ePerm)
 
 
 
+template<typename Tidx>
+std::string GapStyleStringShift(SingleSidedPerm<Tidx> const& ePerm, int const& eShift)
+{
+  Tidx n=ePerm.size();
+  Face ListStat(n);
+  std::string eRet;
+
+  for (Tidx i=0; i<n; i++) {
+    if (ListStat[i] == 0) {
+      Tidx eFirst=i;
+      Tidx eCurr=i;
+      std::string ePart = "(";
+      bool IsFirst=true;
+      Tidx len=0;
+      while(true) {
+	if (!IsFirst)
+	  ePart += ",";
+	IsFirst=false;
+	ePart += std::to_string(eCurr + eShift);
+	ListStat[eCurr] = 1;
+	Tidx eNext = ePerm.at(eCurr);
+	len++;
+	if (eNext == eFirst)
+	  break;
+	eCurr = eNext;
+      }
+      ePart += ")";
+      if (len > 1)
+	eRet += ePart;
+    }
+  }
+  if (eRet.size() > 0)
+    return eRet;
+  return "()";
+}
+
+template<typename Tidx>
+std::string GapStyleString(SingleSidedPerm<Tidx> const& ePerm)
+{
+  return GapStyleStringShift(ePerm, 1);
+}
+
+
+template<typename Tidx>
+std::ostream& operator<<(std::ostream& os, SingleSidedPerm<Tidx> const& ePerm)
+{
+  os << GapStyleStringShift(ePerm, 1);
+  return os;
+}
+
+
 
 
 
 
 }
+
+
+
+
+
+
 
 namespace std {
   template<typename Tidx>

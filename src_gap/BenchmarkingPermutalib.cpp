@@ -13,13 +13,17 @@ int main(int argc, char *argv[])
     using Telt = permutalib::SingleSidedPerm<Tidx>;
     using Tint = mpz_class;
     using Tgroup = permutalib::Group<Telt,Tint>;
-    if (argc != 3 && argc != 2) {
+    if (argc != 3) {
       std::cerr << "We should have argc = 2\n";
       std::cerr << "BenchmarkingPermutalib [EXMP] [opt]\n";
       throw PermutalibException{1};
     }
     std::string InputFile = argv[1];
     std::string opt = argv[2];
+    if (opt != "canonical" && opt != "stabilizer") {
+      std::cerr << "We should have opt=canonical or stabilizer\n";
+      throw PermutalibException{1};
+    }
     //
     std::ifstream is(InputFile);
     int siz_control = 0;

@@ -98,7 +98,7 @@ void CheckConsistencyPartition(std::string const& str, Partition<Tidx> const& P)
   std::vector<Tidx> MeasuredLength(nbPart,0);
   for (Tidx iPoint=0; iPoint<nbPoint; iPoint++) {
     Tidx iPart=P.cellno[iPoint];
-    if (iPart >= nbPart) {
+    if ((iPart >= nbPart) && (iPart != std::numeric_limits<Tidx>::max())) {
       std::cerr << "3: Error, iPart=" << iPart << " but nbPart=" << nbPart << "\n";
       nbError++;
     }
