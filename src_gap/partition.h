@@ -283,7 +283,7 @@ Tidx SplitCell_Kernel(Partition<Tidx> & P, Tidx const& i, std::function<bool(Tid
   Tidx l=b-1;
 
   Tidx maxmov;
-  if (out >= 0)
+  if (out != std::numeric_limits<Tidx>::max() )
     maxmov = out;
   else
     maxmov = P.lengths[i]-1;
@@ -553,15 +553,18 @@ std::vector<std::vector<typename Telt::Tidx>> OrbitsPermsB(std::vector<Telt> con
   std::cerr << "DEBUG OrbitsPermB beginning\n";
 #endif
   Tidx max=LargestMovedPoint(gens);
-  Face dom(max+1);
+  Tidx maxP1 = 0;
+  if (max != std::numeric_limits<Tidx>::max())
+    maxP1 = max + 1;
+  Face dom(maxP1);
   for (auto & eVal : Omega)
-    if (eVal <= max)
+    if (eVal < maxP1)
       dom[eVal] = 1;
 #ifdef DEBUG_PARTITION
   std::cerr << "DEBUG dom built\n";
 #endif
-  Face newF(max+1);
-  for (Tidx i=0; i<=max; i++)
+  Face newF(maxP1);
+  for (Tidx i=0; i<maxP1; i++)
     newF[i] = 1;
 #ifdef DEBUG_PARTITION
   std::cerr << "DEBUG newF built\n";
@@ -598,7 +601,7 @@ std::vector<std::vector<typename Telt::Tidx>> OrbitsPermsB(std::vector<Telt> con
     fst=dom.find_first();
   }
   for (auto & pnt : Omega)
-    if (pnt > max)
+    if (pnt >= maxP1)
       orbs.push_back({pnt});
   return orbs;
 }

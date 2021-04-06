@@ -45,23 +45,8 @@ StabChainPlusLev<Telt> StructuralCopy(StabChainPlusLev<Telt> const& S)
 }
 
 
-std::string STRING_VectInt(std::vector<int> const& V)
-{
-  if (V.size() == 0)
-    return "[  ]";
-  std::string str = "[";
-  for (size_t i=0; i<V.size(); i++) {
-    if (i>0)
-      str += ",";
-    str += " " + std::to_string(V[i]);
-  }
-  str += " ]";
-  return str;
-}
-
-
-  // The ExtendedT in gap seems to be passing by value for img entries that gets
-  // modified
+// The ExtendedT in gap seems to be passing by value for img entries that gets
+// modified
 template<typename Telt>
 permPlusBool<Telt> ExtendedT(Telt const& t, typename Telt::Tidx const& pnt, typename Telt::Tidx img, typename Telt::Tidx const& simg, StabChainPlusLev<Telt> const& S)
 {
@@ -114,11 +99,13 @@ bool IsBool(StabChainPlusLev<Telt> const& S)
   return false;
 }
 
+
 template<typename Telt>
 int BasePoint(StabChainPlusLev<Telt> const& S)
 {
   return BasePoint(S.Stot);
 }
+
 
 template<typename Tidx>
 struct singStrat {
@@ -131,7 +118,7 @@ struct singStrat {
 template<typename Tidx>
 struct Refinement {
 public:
-  Refinement(int const& val1, int const& val2) {
+  Refinement(Tidx const& val1, Tidx const& val2) {
     nature = 0;
     inputProcessfix = {val1, val2};
   }
@@ -140,7 +127,7 @@ public:
     inputIntersection = {ePart, strat};
   }
   int nature; // 0 for PROCESSFIX, 1 for INTERSECTION
-  std::pair<int,int> inputProcessfix;
+  std::pair<Tidx,Tidx> inputProcessfix;
   std::pair<Partition<Tidx>,std::vector<singStrat<Tidx>>> inputIntersection;
 };
 
@@ -595,7 +582,7 @@ std::vector<singStrat<typename Telt::Tidx>> StratMeetPartition(rbaseType<Telt> &
     }
     for (auto & pVal : splits) {
       // Last argument true means that the cell will split.
-      Tidx i = SplitCell_Partition(P, pVal, S, s, g, -1);
+      Tidx i = SplitCell_Partition(P, pVal, S, s, g, std::numeric_limits<Tidx>::max());
 #ifdef DEBUG_STBCBCKT
       std::cerr << "CPP g=" << g << " i=" << i << "\n";
 #endif
@@ -702,7 +689,7 @@ void RegisterRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt> & rb
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP Matching P.lengths test\n";
 #endif
-    int pnt = FixpointCellNo(P, k);
+    Tidx pnt = FixpointCellNo(P, k);
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP Section P.lengths after FixpointCellNo pnt=" << int(pnt+1) << "\n";
     PrintRBaseLevel(rbase, "CPP RegisterRBasePoint 2.1");
@@ -997,26 +984,26 @@ struct ResultPBT {
 
 
 template<typename Telt>
-Telt MappingPermListList(int const& n, std::vector<typename Telt::Tidx> const& src, std::vector<typename Telt::Tidx> const& dst)
+Telt MappingPermListList(typename Telt::Tidx const& n, std::vector<typename Telt::Tidx> const& src, std::vector<typename Telt::Tidx> const& dst)
 {
   using Tidx = typename Telt::Tidx;
   std::vector<Tidx> ListImage(n);
   Face StatusSrc(n);
   Face StatusDst(n);
-  for (int i=0; i<n; i++) {
+  for (Tidx i=0; i<n; i++) {
     StatusSrc[i]=1;
     StatusDst[i]=1;
   }
-  int len = src.size();
-  for (int i=0; i<len; i++) {
+  Tidx len = src.size();
+  for (Tidx i=0; i<len; i++) {
     ListImage[src[i]] = dst[i];
     StatusSrc[src[i]] = 0;
     StatusDst[dst[i]] = 0;
   }
-  int sizRemain = n - len;
+  Tidx sizRemain = n - len;
   boost::dynamic_bitset<>::size_type posSrc=StatusSrc.find_first();
   boost::dynamic_bitset<>::size_type posDst=StatusDst.find_first();
-  for (int u=0; u<sizRemain; u++) {
+  for (Tidx u=0; u<sizRemain; u++) {
     ListImage[posSrc] = posDst;
     posSrc=StatusSrc.find_next(posSrc);
     posDst=StatusDst.find_next(posDst);
@@ -1073,7 +1060,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   std::vector<Face> orB; // backup of <orb>.
   int nrback;
   std::vector<Face> orb;
-  std::vector<std::vector<int>> org; // intersected (mapped) basic orbits of <G>
+  std::vector<std::vector<Tidx>> org; // intersected (mapped) basic orbits of <G>
   Tplusinfinity<int> blen(true, 0);
   int dd, branch; // branch is level where $Lstab\ne Rstab$ starts
   std::vector<Tidx> range;    // range for construction of <orb>
@@ -1220,7 +1207,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 #ifdef DEBUG_STBCBCKT
 	std::cerr << "CPP After Fixcells insert\n";
 #endif
-	std::vector<int> eNewF(range.size(), 0);
+	std::vector<Tidx> eNewF(range.size(), 0);
 	org.emplace_back(eNewF);
 	if (repr) {
 	  // In  the representative  case,  change  the   stabilizer
@@ -1457,8 +1444,8 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 #endif
 	// Undo the  changes made to  <image.partition>, <image.level>
 	// and <image.perm>.
-        int nbCell=NumberCells(image.partition);
-	for (int i=undoto+1; i<=nbCell; i++) {
+        Tidx nbCell=NumberCells(image.partition);
+	for (Tidx i=undoto+1; i<=nbCell; i++) {
 #ifdef DEBUG_STBCBCKT
           std::cerr << "CPP Before UndoRefinement cellno=" << GapStringIntVector(image.partition.cellno) << " i=" << i << "\n";
 #endif

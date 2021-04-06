@@ -16,8 +16,9 @@ namespace permutalib {
 template<typename Telt, typename Tint>
 StabChain<Telt> StabChainOp_listgen(std::vector<Telt> const& Lgen, StabChainOptions<Tint, typename Telt::Tidx> const& options)
 {
+  using Tidx=typename Telt::Tidx;
 #ifdef DEBUG_STABCHAINMAIN
-  int degree = LargestMovedPoint( Lgen );
+  Tidx degree = LargestMovedPoint( Lgen );
   std::cerr << "CPP Beginning of StabChainOp_listgen\n";
   std::cerr << "CPP degree=" << degree << " base = " << GapStringIntVector(options.base) << "\n";
   //  if (degree > 100) {
@@ -26,7 +27,7 @@ StabChain<Telt> StabChainOp_listgen(std::vector<Telt> const& Lgen, StabChainOpti
   //  }
   std::cerr << "CPP SEARCH : Doing the ordinary Schreier Sims\n";
 #endif
-  int n=options.n;
+  Tidx n=options.n;
   StabChain<Telt> S = EmptyStabChain<Telt>(n);
   if (!IsTrivial_ListGen(Lgen)) {
     S->IsBoundCycle = true;
@@ -64,8 +65,7 @@ std::pair<bool, StabChain<Telt>> StabChainOp_stabchain(StabChain<Telt> const& G,
     if (!ChangeStabChain(S, options.base, options.reduced)) {
       return {false, {}};
     }
-  }
-  else {
+  } else {
     if (options.reduced) {
       ReduceStabChain(S);
     }
@@ -80,9 +80,7 @@ StabChain<Telt> StabChainOp_stabchain_nofalse(StabChain<Telt> const& G, StabChai
   if (IsTrivial(G)) {
     return StabChainOp_trivial_group(G, options);
   }
-  //  std::cerr << "CPP Before call to StabChainOp_stabchain\n";
   std::pair<bool, StabChain<Telt>> eRec = StabChainOp_stabchain(G, options);
-  //  std::cerr << "CPP After call to StabChainOp_stabchain\n";
   if (!eRec.first) {
 #ifdef DEBUG_STABCHAINMAIN
     std::cerr << "CPP The nofalse has not been matched\n";

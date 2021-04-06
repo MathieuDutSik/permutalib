@@ -563,10 +563,11 @@ StabChain<Telt> EmptyStabChainPlusCommonPlusNode(std::shared_ptr<CommonStabInfo<
 template<typename Telt>
 typename Telt::Tidx BasePoint(StabChain<Telt> const& S)
 {
+  using Tidx=typename Telt::Tidx;
   if (S == nullptr)
-    return -1;
+    return std::numeric_limits<Tidx>::max();
   if (S->orbit.size() == 0)
-    return -1;
+    return std::numeric_limits<Tidx>::max();
   return S->orbit[0];
 }
 
@@ -921,9 +922,9 @@ bool IsTrivial(StabChain<Telt> const& G)
 template<typename Telt>
 typename Telt::Tidx LargestMovedPoint(std::vector<Telt> const& LGen)
 {
-  if (LGen.size() == 0)
-    return -1;
   using Tidx = typename Telt::Tidx;
+  if (LGen.size() == 0)
+    return std::numeric_limits<Tidx>::max();
   Tidx n=LGen[0].size();
   Face Status(n);
   for (auto & eGen : LGen) {

@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     int nGroup;
     is >> nGroup;
     for (int iGroup=0; iGroup<nGroup; iGroup++) {
-      //      std::cerr << "iGroup=" << iGroup << " / " << nGroup << "\n";
+      std::cerr << "iGroup=" << iGroup << " / " << nGroup << "\n";
       int nbGen, n;
       is >> nbGen;
       is >> n;
@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
           int eVal = rand() % 2;
           eFace[i] = eVal;
         }
-        //        std::cerr << "  |eFace|=" << eFace.count() << " / " << eFace.size() << "\n";
+        //        std::cerr << "  iter=" << iter << " |eFace|=" << eFace.count() << " / " << eFace.size() << "\n";
         //
         if (opt == "canonical") {
           permutalib::Face set_can = eG.CanonicalImage(eFace);
