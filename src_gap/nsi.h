@@ -291,9 +291,13 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::
   using NodePtr = std::shared_ptr<Node>;
   std::vector<NodePtr> ListPtr;
 
-  Tidx n = std::max(LargestMovedPoint(StrongGeneratorsStabChain(g)), set[set.size()-1]);
+  Tidx n = set[set.size()-1] + 1;
+  Tidx n_largest = LargestMovedPoint(StrongGeneratorsStabChain(g));
+  if (n_largest > n)
+    n = n_largest;
 #ifdef DEBUG_NSI
-  std::cerr << "CPP n=" << Tidx(n) << "\n";
+  std::cerr << "CPP n=" << int(n) << "\n";
+  std::cerr << "DEBUG MATCH set=" << GapStringIntVector(set) << "\n";
 #endif
   StabChain<Telt> s = CopyStabChain(g);
   StabChain<Telt> l = Action<Telt,Tint>(k, set);
@@ -309,7 +313,8 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::
   root_v.selectedbaselength = max_val_type;
   root_v.IsBoundChildren = false;
   NodePtr root = std::make_shared<Node>(root_v);
-  ListPtr.push_back(root);
+  // no need to put root in the list of nodes to be deleted as the setting of all to nullptr eventually kills it.
+  //  ListPtr.push_back(root);
 
   // Node exploration functions
   auto leftmost_node =[&](Tidx const& depth) -> NodePtr {
@@ -378,8 +383,7 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::
       return;
     std::vector<NodePtr> bad;
 
-    std::vector<Tidx> range= ClosedInterval<Tidx>(0,m);
-    Face seen = BlistList(range,{});
+    Face seen(m);
     Tidx x;
     for (auto & c : node->children) {
       if (c->selectedbaselength != max_val_type) {
@@ -444,15 +448,28 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::
     std::cerr << "CPP Beginning of simpleOrbitReps\n";
 #endif
     Tidx m = set.size();
-    Tidx n = set[m-1];
-    Face b = BlistList(ClosedInterval<Tidx>(0,n+1), set); // Check the n+1 here
-    Tidx seed = set[0];
+    Tidx n = set[m-1] + 1;
+    Face b(n);
+#ifdef DEBUG_NSI
+    std::cerr << "DEBUG n=" << int(n) << "\n";
+#endif
+    for (auto & eVal : set) {
+#ifdef DEBUG_NSI
+      std::cerr << "DEBUG eVal=" << int(eVal) << " n=" << int(n) << "\n";
+#endif
+      b[eVal] = 1;
+    }
+    boost::dynamic_bitset<>::size_type seed=b.find_first();
+    Tidx seed_tidx = Tidx(seed);
     std::vector<Tidx> reps;
     std::vector<Telt> gens = Kernel_GeneratorsOfGroup(gp);
-    while (seed != -1 && seed <= n) {
+    while (seed != boost::dynamic_bitset<>::npos && seed_tidx < n) {
+#ifdef DEBUG_NSI
+      std::cerr << "DEBUG seed=" << int(seed) << " n=" << int(n) << "\n";
+#endif
       b[seed]=0;
-      std::vector<Tidx> q = {seed};
-      reps.push_back(seed);
+      std::vector<Tidx> q = {seed_tidx};
+      reps.push_back(seed_tidx);
       size_t pos=0;
       while(true) {
         size_t idx, qsiz=q.size();
@@ -461,6 +478,9 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::
           for (auto & gen : gens) {
             Tidx im = PowAct(pt, gen);
             if (b[im] == 1) {
+#ifdef DEBUG_NSI
+              std::cerr << "DEBUG im=" << int(im) << " n=" << int(n) << "\n";
+#endif
               b[im] = 0;
               q.emplace_back(im);
             }
@@ -471,7 +491,9 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::
         pos = idx;
       }
       seed = b.find_next(seed);
+      seed_tidx = Tidx(seed);
     }
+    
     return reps;
   };
   // We need to break all the cycles in order to the memory free to happen correctly.

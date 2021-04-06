@@ -924,7 +924,7 @@ typename Telt::Tidx LargestMovedPoint(std::vector<Telt> const& LGen)
 {
   using Tidx = typename Telt::Tidx;
   if (LGen.size() == 0)
-    return std::numeric_limits<Tidx>::max();
+    return 0;
   Tidx n=LGen[0].size();
   Face Status(n);
   for (auto & eGen : LGen) {

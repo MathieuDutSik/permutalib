@@ -40,14 +40,14 @@ int main(int argc, char *argv[])
     //
     std::cerr << "CPP |eG|=" << eG.size() << "\n";
     //
-    Face f1(n);
+    permutalib::Face f1(n);
     for (int i=0; i<n; i++) {
       int eVal;
       is >> eVal;
       f1[i] = eVal;
     }
     //
-    Face f2(n);
+    permutalib::Face f2(n);
     for (int i=0; i<n; i++) {
       int eVal;
       is >> eVal;

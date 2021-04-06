@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
     //
     std::cerr << "CPP |eG|=" << eG.size() << "\n";
     //
-    Face eFace(n);
+    permutalib::Face eFace(n);
     for (int i=0; i<n; i++) {
       int eVal;
       is >> eVal;

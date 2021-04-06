@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 {
   try {
     using Tidx = int16_t;
-    using Telt = permutalib::DoubleSidedPerm<Tidx>;
+    using Telt = permutalib::SingleSidedPerm<Tidx>;
     using Tint = mpz_class;
     if (argc != 3) {
       std::cerr << "We should have argc = 2\n";
@@ -36,22 +36,21 @@ int main(int argc, char *argv[])
     }
     std::cerr.setf(std::ios::boolalpha);
     //
-    std::cerr << "CPP Before call to MinimalStabChain\n";
-    //    permutalib::StabChain<Telt> eG = permutalib::MinimalStabChain<Telt,Tint>(LGen, n);
+    //    std::cerr << "CPP Before call to MinimalStabChain\n";
     permutalib::Group<Telt,Tint> eG = permutalib::Group<Telt,Tint>(LGen, n);
-    std::cerr << "CPP After call to MinimalStabChain\n";
+    //    std::cerr << "CPP After call to MinimalStabChain\n";
     //    std::cerr << "CPP eG=" << eG << "\n";
     //
     std::cerr << "CPP |eG|=" << eG.size() << "\n";
     //
-    Face f1(n);
+    permutalib::Face f1(n);
     for (int i=0; i<n; i++) {
       int eVal;
       is >> eVal;
       f1[i] = eVal;
     }
     //
-    Face f2(n);
+    permutalib::Face f2(n);
     for (int i=0; i<n; i++) {
       int eVal;
       is >> eVal;

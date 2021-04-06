@@ -258,12 +258,19 @@ TestSpecificGroup:=function(method, size_opt, nbMov, eGRP)
     do
         if size_opt=1 then
             sizSet:=1;
-        else
+        fi;
+        if size_opt=2 then
             if nbMov<4 then
                 sizSet:=2;
             else
                 sizSet:=Random([2..nbMov-2]);
             fi;
+        fi;
+        if size_opt=3 then # We want the size to be at most nMov / 2
+            if nbMov<4 then
+                return;
+            fi;
+            sizSet:=Random([2..Int(nbMov/2)]);
         fi;
         if method="stabilizer" then
             for i in [1..5]
@@ -340,8 +347,9 @@ WriteAllGroupsInFile:=function(eFile)
 end;
 
 
-#TestAllGroups("stabilizer", 1);
-#TestAllGroups("equivalence", 1);
-#TestAllGroups("canonical", 2);
-WriteAllGroupsInFile("AllFileTest");
+#TestAllGroups("stabilizer", 2);
+#TestAllGroups("equivalence", 2);
+TestAllGroups("canonical", 3);
+
+#WriteAllGroupsInFile("AllFileTest");
 

@@ -7,8 +7,8 @@
 int main(int argc, char *argv[])
 {
   try {
-    using Tidx = int16_t;
-    //    using Tidx = uint8_t;
+    //    using Tidx = int16_t;
+    using Tidx = uint8_t;
     //using Telt = permutalib::DoubleSidedPerm<Tidx>;
     using Telt = permutalib::SingleSidedPerm<Tidx>;
     using Tint = mpz_class;
@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     int nGroup;
     is >> nGroup;
     for (int iGroup=0; iGroup<nGroup; iGroup++) {
-      std::cerr << "iGroup=" << iGroup << " / " << nGroup << "\n";
+      //      std::cerr << "iGroup=" << iGroup << " / " << nGroup << "\n";
       int nbGen, n;
       is >> nbGen;
       is >> n;
