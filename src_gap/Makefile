@@ -5,7 +5,8 @@
 #PROGRAM	= TestRepresentativeActionOnSet
 #PROGRAM	= TestSymmetricGroup
 #PROGRAM	= GapCanonicalImage
-PROGRAM	= BenchmarkingPermutalib
+#PROGRAM	= BenchmarkingPermutalib
+PROGRAM	= BenchmarkingPermutalib GapCanonicalImage
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

@@ -161,7 +161,7 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::
   Tidx max_val_type = std::numeric_limits<Tidx>::max();
 
 
-  auto calculateBestOrbit=[&](std::vector<Tidx> const& orbmins, std::vector<Tidx> const& orbitCounts, std::vector<Tidx> const& orbsizes) -> Tidx {
+  auto calculateBestOrbit=[&](PreAllocatedVector<Tidx> const& orbmins, std::vector<Tidx> const& orbitCounts, PreAllocatedVector<Tidx> const& orbsizes) -> Tidx {
 #ifdef DEBUG_NSI
     std::cerr << "CPP Beginning of calculateBestOrbit\n";
 #endif
@@ -368,13 +368,16 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::
         delete_node(enode);
     }
   };
+  /*
   auto delete_nodes=[&](std::vector<NodePtr> & nodes) {
     for (auto & e_node : nodes)
       delete_node(e_node);
   };
-
+  */
+  
   // Filter nodes by stabilizer group,
   // Updates the stabilizer group of the node,
+  /*
   std::function<void(NodePtr &)> clean_subtree =[&](NodePtr & node) -> void {
 #ifdef DEBUG_NSI
     std::cerr << "CPP Beginning of clean_subtree\n";
@@ -425,7 +428,7 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::
     }
     delete_nodes(bad);
   };
-
+  */
   //Add a new stabilizer element, mapping node1 to node2, and then call
   // clean_subtree to remove any new subtrees.
   // unused in this specific code.
@@ -443,13 +446,16 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::
 
   // Given a group 'gp' and a set 'set', find orbit representatives
   // of 'set' in 'gp' simply.
+  PreAllocatedVector<Tidx> q_sor(n);
+  Face b_sor(n);
   auto simpleOrbitReps=[&](StabChain<Telt> const& gp, std::vector<Tidx> const& set) -> std::vector<Tidx> {
 #ifdef DEBUG_NSI
     std::cerr << "CPP Beginning of simpleOrbitReps\n";
 #endif
     Tidx m = set.size();
     Tidx n = set[m-1] + 1;
-    Face b(n);
+    for (Tidx i=0; i<n; i++)
+      b_sor[i] = 0;
 #ifdef DEBUG_NSI
     std::cerr << "DEBUG n=" << int(n) << "\n";
 #endif
@@ -457,9 +463,9 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::
 #ifdef DEBUG_NSI
       std::cerr << "DEBUG eVal=" << int(eVal) << " n=" << int(n) << "\n";
 #endif
-      b[eVal] = 1;
+      b_sor[eVal] = 1;
     }
-    boost::dynamic_bitset<>::size_type seed=b.find_first();
+    boost::dynamic_bitset<>::size_type seed=b_sor.find_first();
     Tidx seed_tidx = Tidx(seed);
     std::vector<Tidx> reps;
     std::vector<Telt> gens = Kernel_GeneratorsOfGroup(gp);
@@ -467,34 +473,44 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::
 #ifdef DEBUG_NSI
       std::cerr << "DEBUG seed=" << int(seed) << " n=" << int(n) << "\n";
 #endif
-      b[seed]=0;
-      std::vector<Tidx> q = {seed_tidx};
+      b_sor[seed]=0;
+      q_sor.clear();
+      q_sor.push_back(seed_tidx);
       reps.push_back(seed_tidx);
       size_t pos=0;
       while(true) {
-        size_t idx, qsiz=q.size();
+        size_t idx, qsiz=q_sor.size();
         for (idx=pos; idx<qsiz; idx++) {
-          Tidx pt = q[idx];
+          Tidx pt = q_sor[idx];
           for (auto & gen : gens) {
             Tidx im = PowAct(pt, gen);
-            if (b[im] == 1) {
+            if (b_sor[im] == 1) {
 #ifdef DEBUG_NSI
               std::cerr << "DEBUG im=" << int(im) << " n=" << int(n) << "\n";
 #endif
-              b[im] = 0;
-              q.emplace_back(im);
+              b_sor[im] = 0;
+              q_sor.push_back(im);
             }
           }
         }
-        if (idx == q.size())
+        if (idx == q_sor.size())
           break;
         pos = idx;
       }
-      seed = b.find_next(seed);
+      seed = b_sor.find_next(seed);
       seed_tidx = Tidx(seed);
     }
-    
     return reps;
+  };
+  auto DifferenceVect_local=[](Tidx const& m, std::vector<Tidx> const& LIdx) -> std::vector<Tidx> {
+     Face b(m);
+     for (auto & eVal : LIdx)
+       b[eVal] = 1;
+     std::vector<Tidx> cands;
+     for (Tidx i=0; i<m; i++)
+       if (b[i] == 0)
+         cands.push_back(i);
+     return cands;
   };
   // We need to break all the cycles in order to the memory free to happen correctly.
   // We use a hack in order to get that behavior: A vector of all the nodes, then
@@ -513,14 +529,19 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::
     return {};
   }
   Tidx depth;
+  PreAllocatedVector<Tidx> orbmins(n);
+  PreAllocatedVector<Tidx> orbsizes(n);
+  PreAllocatedVector<Tidx> q(n);
+  std::vector<Tidx> orbnums(n,max_val_type);
   for (depth=0; depth<m; depth++) {
 #ifdef DEBUG_NSI
     std::cerr << "CPP depth=" << int(depth+1) << "\n";
 #endif
     std::vector<Telt> gens = GetListGenerators(s);
-    std::vector<Tidx> orbnums(n,max_val_type);
-    std::vector<Tidx> orbmins;
-    std::vector<Tidx> orbsizes;
+    for (Tidx i=0; i<n; i++)
+      orbnums[i] = max_val_type;
+    orbmins.clear();
+    orbsizes.clear();
     Tidx upb = initial_upb;
     // Make orbit of x, updating orbnums, orbmins and orbsizes as approriate.
     auto make_orbit=[&](Tidx const& x) -> Tidx {
@@ -537,7 +558,8 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::
 #ifdef DEBUG_NSI
       std::cerr << "CPP After check\n";
 #endif
-      std::vector<Tidx> q = {x};
+      q.clear();
+      q.push_back(x);
       Tidx rep = x;
       Tidx num = orbmins.size();
       orbnums[x] = num;
@@ -585,7 +607,7 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::
 #ifdef DEBUG_NSI
       std::cerr << "CPP m=" << m << " node.selected=" << GapStringIntVector(node->selected) << "\n";
 #endif
-      std::vector<Tidx> cands = DifferenceVect(ClosedInterval<Tidx>(0, m), node->selected);
+      std::vector<Tidx> cands = DifferenceVect_local(m, node->selected);
 #ifdef DEBUG_NSI
       std::cerr << "CPP 1 : cands=" << GapStringIntVector(cands) << "\n";
 #endif
@@ -630,7 +652,7 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::
     std::vector<Tidx> globalOrbitCounts(orbmins.size(), 0);
     node = leftmost_node(depth);
     while (node != nullptr) {
-      std::vector<Tidx> cands = DifferenceVect(ClosedInterval<Tidx>(0, m), node->selected);
+      std::vector<Tidx> cands = DifferenceVect_local(m, node->selected);
 #ifdef DEBUG_NSI
       std::cerr << "CPP 2 : cands=" << GapStringIntVector(cands) << "\n";
 #endif
@@ -673,7 +695,7 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::
 
     node = leftmost_node(depth);
     while (node != nullptr) {
-      std::vector<Tidx> cands = DifferenceVect(ClosedInterval<Tidx>(0,m), node->selected);
+      std::vector<Tidx> cands = DifferenceVect_local(m, node->selected);
 #ifdef DEBUG_NSI
       std::cerr << "CPP 3 : cands=" << GapStringIntVector(cands) << "\n";
 #endif

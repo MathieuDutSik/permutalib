@@ -62,6 +62,46 @@ struct CollectedResult {
   std::vector<int> LMult;
 };
 
+
+
+
+template<typename T>
+struct PreAllocatedVector {
+  PreAllocatedVector(size_t n)
+  {
+    V = std::vector<T>(n);
+    pos = 0;
+  }
+  size_t size() const
+  {
+    return pos;
+  }
+  void push_back(T val)
+  {
+    V[pos] = val;
+    pos++;
+  }
+  void clear()
+  {
+    pos = 0;
+  }
+  T& operator[](size_t idx)
+  {
+    return V[idx];
+  }
+  T const& operator[](size_t idx) const
+  {
+    return V[idx];
+  }
+
+private:
+  std::vector<T> V;
+  size_t pos;
+};
+
+
+
+
 template<typename T>
 CollectedResult<T> Collected(std::vector<T> const& eVect)
 {
