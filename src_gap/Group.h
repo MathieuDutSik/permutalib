@@ -73,7 +73,7 @@ public:
     return S->comm->n;
   }
   // operation
-  Group<Telt,Tint> ConjugateGroup(Telt const& x)
+  Group<Telt,Tint> GroupConjugate(Telt const& x) const
   {
     std::vector<Telt> LGen;
     Telt xInv =~x;
@@ -81,7 +81,7 @@ public:
       Telt eGenCj = xInv * eGen * x;
       LGen.emplace_back(eGenCj);
     }
-    return Group(LGen, S->comm->n);
+    return Group<Telt,Tint>(LGen, S->comm->n);
   }
   // Action on points or sets
   Group<Telt,Tint> Stabilizer_OnPoints(int const& x) const
