@@ -31,9 +31,11 @@ Telt RandomElement(std::vector<Telt> const& LGen, int const& n)
 template<typename Telt_inp, typename Tint_inp>
 struct Group {
 public:
+  // dependent types
   using Telt = Telt_inp;
   using Tidx = typename Telt::Tidx;
   using Tint = Tint_inp;
+  // constructors
   Group(StabChain<Telt> const& _S) : S(_S), size_tint(Order<Telt,Tint>(_S))
   {
   }
@@ -57,6 +59,31 @@ public:
   Group() : Group(0)
   {
   }
+  // Basic getters
+  std::vector<Telt> GeneratorsOfGroup() const
+  {
+    return Kernel_GeneratorsOfGroup(S);
+  }
+  Tint size() const
+  {
+    return size_tint;
+  }
+  Tidx n_act() const
+  {
+    return S->comm->n;
+  }
+  // operation
+  Group<Telt,Tint> ConjugateGroup(Telt const& x)
+  {
+    std::vector<Telt> LGen;
+    Telt xInv =~x;
+    for (auto & eGen : Kernel_GeneratorsOfGroup(S)) {
+      Telt eGenCj = xInv * eGen * x;
+      LGen.emplace_back(eGenCj);
+    }
+    return Group(LGen, S->comm->n);
+  }
+  // Action on points or sets
   Group<Telt,Tint> Stabilizer_OnPoints(int const& x) const
   {
     return Group(Kernel_Stabilizer_OnPoints<Telt,Tint>(S, x));
@@ -73,21 +100,9 @@ public:
   {
     return Kernel_RepresentativeAction_OnSets<Telt,Tint>(S, f1, f2);
   }
-  std::vector<Telt> GeneratorsOfGroup() const
-  {
-    return Kernel_GeneratorsOfGroup(S);
-  }
   Face CanonicalImage(Face const& f) const
   {
     return Kernel_CanonicalImage<Telt,Tint>(S, f);
-  }
-  Tint size() const
-  {
-    return size_tint;
-  }
-  Tidx n_act() const
-  {
-    return S->comm->n;
   }
   Telt rand() const
   {
