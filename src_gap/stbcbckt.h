@@ -1953,7 +1953,7 @@ std::pair<bool,Telt> Kernel_RepresentativeAction_OnSets(StabChain<Telt> const& G
   };
   bool repr=true;
   // Put the false for debugging.
-  if (2 * f1.count() > n && false) {
+  if (2 * f1.count() > n) {
     Face f1C(n), f2C(n);
     for (size_t i=0; i<n; i++) {
       f1C[i] = 1 - f1[i];
