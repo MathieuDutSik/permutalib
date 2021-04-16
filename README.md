@@ -61,7 +61,16 @@ std::vector<Telt> ListGen;
 permutalib::Group<Telt,Tint> eG(ListGen, n);
 ```
 
+* The subset of 0..n-1 is built using the boost dynamic bitset (https://www.boost.org/doc/libs/1_36_0/libs/dynamic_bitset/dynamic_bitset.html). The corresponding code is:
 
+```cpp
+permutalib::Face subset1, subset1;
+permutalib::Group<Telt,Tint> stab = eG.Stabilizer_OnSets(subset1);
+std::pair<bool, Telt> test = eG.RepresentativeAction_OnSets(subset1, subset2);
+Face subset1_can = eG.CanonicalImage(subset1);
+```
+
+* See Group.h for the full functionality and the examples.
 
 
 
