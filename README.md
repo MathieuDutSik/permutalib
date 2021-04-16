@@ -6,6 +6,66 @@ The goal is to have permutation groups and the partition
 backtrack.
 
 
+
+Downloading code
+----------------
+
+Full source code to be downloaded is from
+
+```sh
+$ git clone git@github.com:MathieuDutSik/permutalib.git --recursive
+```
+
+or
+
+```sh
+$ git clone http://github.com/MathieuDutSik/permutalib.git --recursive
+```
+
+
+
+
+
+
+Usage
+-----
+
+* The first step is to choose the data type for the permutation. For example:
+
+```cpp
+using Tidx = int16_t;
+using Telt = permutalib::SingleSidedPerm<Tidx>;
+```
+
+The number of elements on which the group can act is 2^16 - 1.
+
+* The permutation element is build as
+
+```cpp
+std::vector<Tidx> eList(10);
+Telt eElt(eList);
+```
+
+* The second step is to choose an integer type. For example:
+
+```cpp
+using Tint = mpz_class;
+```
+
+This integer type is used for computing order of groups. Since the size can grow pretty large (The symmetric group has n! elements) an arbitrary large integer type is needed.
+
+* The permutation group is built as
+
+```cpp
+std::vector<Telt> ListGen;
+permutalib::Group<Telt,Tint> eG(ListGen, n);
+```
+
+
+
+
+
+
 Rationale
 ---------
 
@@ -36,8 +96,9 @@ code because the code is thread safe. There is no global variable
 used.
 
 
+
 Design choices
------------------------
+--------------
 
 There are some differences that we have decided to do with
 the existing GAP code:
@@ -48,24 +109,14 @@ the existing GAP code:
   * The permutalib code uses just a single type for the permutation.
 
 
-Downloading code
-----------------
-
-Full source code to be downloaded is from
-
-git clone git@github.com:MathieuDutSik/permutalib.git --recursive
-
-or
-
-git clone http://github.com/MathieuDutSik/permutalib.git --recursive
-
-
 
 Licensing
 ---------
 
 The GPLv2 licensing is available from the GAP.
 The LGPL licensing is available so that the library can be used in other programs.
+
+
 
 Contact information
 -------------------
