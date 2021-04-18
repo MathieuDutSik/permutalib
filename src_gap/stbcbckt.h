@@ -1029,8 +1029,8 @@ std::string GetStringGAP(Face const& f)
   return str;
 }
 
-template<typename Telt>
-imageType<Telt> BuildInitialImage(bool const&repr, rbaseType<Telt> & rbase, dataType<typename Telt::Tidx> & data)
+template<typename Telt, bool repr>
+imageType<Telt> BuildInitialImage(rbaseType<Telt> & rbase, dataType<typename Telt::Tidx> & data)
 {
   if (repr) {
     return imageType<Telt>(data.P);
@@ -1040,8 +1040,8 @@ imageType<Telt> BuildInitialImage(bool const&repr, rbaseType<Telt> & rbase, data
 };
 
 
-template<typename Telt, typename Tint>
-ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(Telt const&)> const& Pr, bool const& repr, rbaseType<Telt> & rbase, dataType<typename Telt::Tidx> & data, StabChain<Telt> & L, StabChain<Telt> & R)
+template<typename Telt, typename Tint, bool repr>
+ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(Telt const&)> const& Pr, rbaseType<Telt> & rbase, dataType<typename Telt::Tidx> & data, StabChain<Telt> & L, StabChain<Telt> & R)
 {
   using Tidx=typename Telt::Tidx;
   Tidx n=G->comm->n;
@@ -1056,7 +1056,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   std::cerr << "CPP INIT sgs(L)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(L))) << "\n";
   std::cerr << "CPP INIT sgs(R)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(R))) << "\n";
 #endif
-  imageType<Telt> image = BuildInitialImage(repr, rbase, data);
+  imageType<Telt> image = BuildInitialImage<Telt,repr>(rbase, data);
   std::vector<Face> orB; // backup of <orb>.
   int nrback;
   std::vector<Face> orb;
@@ -1782,8 +1782,8 @@ Face OnSets(Face const& f, Telt const& g)
 }
 
 
-template<typename Telt, typename Tint>
-ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, Face const& Phi, Face const& Psi)
+template<typename Telt, typename Tint, bool repr>
+ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, Face const& Phi, Face const& Psi)
 {
   using Tidx=typename Telt::Tidx;
 #ifdef DEBUG_STBCBCKT
@@ -1876,7 +1876,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, bool const& repr, F
   std::cerr << "CPP Before call to PartitionBacktrack\n";
 #endif
   dataType<Tidx> data(Q);
-  return PartitionBacktrack<Telt,Tint>( G, Pr, repr, rbase, data, L, R );
+  return PartitionBacktrack<Telt,Tint,repr>( G, Pr, rbase, data, L, R );
 }
 
 
@@ -1894,14 +1894,13 @@ StabChain<Telt> Kernel_Stabilizer_OnSets(StabChain<Telt> const& G, Face const& P
     throw PermutalibException{1};
   }
 #endif
-  bool repr=false;
   if (2 * Phi.count() > n) {
     Face PhiC(n);
     for (size_t i=0; i<n; i++)
       PhiC[i] = 1 - Phi[i];
-    return RepOpSetsPermGroup<Telt,Tint>(G, repr, PhiC, PhiC).stab;
+    return RepOpSetsPermGroup<Telt,Tint,false>(G, PhiC, PhiC).stab;
   } else {
-    return RepOpSetsPermGroup<Telt,Tint>(G, repr, Phi, Phi).stab;
+    return RepOpSetsPermGroup<Telt,Tint,false>(G, Phi, Phi).stab;
   }
 }
 
@@ -1923,8 +1922,7 @@ StabChain<Telt> Kernel_Stabilizer_OnPoints(StabChain<Telt> const& G, typename Te
 #endif
   Face Phi(n);
   Phi[x]=1;
-  bool repr=false;
-  return RepOpSetsPermGroup<Telt,Tint>(G, repr, Phi, Phi).stab;
+  return RepOpSetsPermGroup<Telt,Tint,false>(G, Phi, Phi).stab;
 }
 
 
@@ -1951,7 +1949,6 @@ std::pair<bool,Telt> Kernel_RepresentativeAction_OnSets(StabChain<Telt> const& G
       return {false, {}};
     return {true, eRec.res};
   };
-  bool repr=true;
   // Put the false for debugging.
   if (2 * f1.count() > n) {
     Face f1C(n), f2C(n);
@@ -1959,10 +1956,10 @@ std::pair<bool,Telt> Kernel_RepresentativeAction_OnSets(StabChain<Telt> const& G
       f1C[i] = 1 - f1[i];
       f2C[i] = 1 - f2[i];
     }
-    ResultPBT<Telt> eRec = RepOpSetsPermGroup<Telt,Tint>(G, repr, f1C, f2C);
+    ResultPBT<Telt> eRec = RepOpSetsPermGroup<Telt,Tint,true>(G, f1C, f2C);
     return Process_ResultPBT(eRec);
   } else {
-    ResultPBT<Telt> eRec = RepOpSetsPermGroup<Telt,Tint>(G, repr, f1, f2);
+    ResultPBT<Telt> eRec = RepOpSetsPermGroup<Telt,Tint,true>(G, f1, f2);
     return Process_ResultPBT(eRec);
   }
 }
@@ -1978,11 +1975,10 @@ std::pair<bool,Telt> Kernel_RepresentativeAction_OnPoints(StabChain<Telt> const&
     throw PermutalibException{1};
   }
 #endif
-  bool repr=true;
   Face f1(n), f2(n);
   f1[x1] = 1;
   f2[x2] = 1;
-  ResultPBT<Telt> eRec = RepOpSetsPermGroup<Telt,Tint>(G, repr, f1, f2);
+  ResultPBT<Telt> eRec = RepOpSetsPermGroup<Telt,Tint,true>(G, f1, f2);
   if (eRec.nature == int_fail)
     return {false, {}};
   return {true, eRec.res};
