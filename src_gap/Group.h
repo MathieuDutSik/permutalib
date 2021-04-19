@@ -68,6 +68,10 @@ public:
   {
     return size_tint;
   }
+  std::unordered_map<Tidx, int> factor_size() const
+  {
+    return FactorsSizeStabChain(S);
+  }
   Tidx n_act() const
   {
     return S->comm->n;
@@ -84,11 +88,11 @@ public:
     return Group<Telt,Tint>(LGen, S->comm->n);
   }
   // Action on points or sets
-  Group<Telt,Tint> Stabilizer_OnPoints(int const& x) const
+  Group<Telt,Tint> Stabilizer_OnPoints(Tidx const& x) const
   {
     return Group(Kernel_Stabilizer_OnPoints<Telt,Tint>(S, x));
   }
-  std::pair<bool,Telt> RepresentativeAction_OnPoints(int const& x1, int const& x2) const
+  std::pair<bool,Telt> RepresentativeAction_OnPoints(Tidx const& x1, Tidx const& x2) const
   {
     return Kernel_RepresentativeAction_OnPoints<Telt,Tint>(S, x1, x2);
   }

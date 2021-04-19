@@ -32,6 +32,7 @@
 #include <memory>
 
 #include "GapPrint.h"
+#include "factorize.h"
 #include "PermGroup.h"
 #include "list.h"
 #include "COMB_Vectors.h"
@@ -154,7 +155,7 @@ int GetLabelIndex_const(std::vector<Telt> const& labels, Telt const& u)
 
 template<typename Telt>
 struct CommonStabInfo {
-  int n;
+  typename Telt::Tidx n;
   Telt identity;
   std::vector<Telt> labels;
 };
@@ -196,7 +197,7 @@ bool IsIdenticalObj(StabChain<Telt> const& S1, StabChain<Telt> const& S2)
 
 
 template<typename Telt>
-StabChain<Telt> StabChainGenerators(std::vector<Telt> const& generators, int const& n, Telt const& id)
+StabChain<Telt> StabChainGenerators(std::vector<Telt> const& generators, typename Telt::Tidx const& n, Telt const& id)
 {
   std::shared_ptr<CommonStabInfo<Telt>> comm = std::make_shared<CommonStabInfo<Telt>>(CommonStabInfo<Telt>({n, id, generators}));
   //
@@ -724,6 +725,29 @@ Tint SizeStabChain(StabChain<Telt> const& S)
   }
   return size;
 }
+
+template<typename Telt>
+std::unordered_map<typename Telt::Tidx, int> FactorsSizeStabChain(StabChain<Telt> const& S)
+{
+  using Tidx = typename Telt::Tidx;
+  std::unordered_map<Tidx, int> ListPrimes;
+  StabChain<Telt> Sptr = S;
+  while(true) {
+    if (Sptr == nullptr)
+      break;
+    Tidx siz=Sptr->orbit.size();
+    if (siz == 0)
+      break;
+    std::vector<Tidx> V = factorize(siz);
+    for (auto & eVal : V)
+      ListPrimes[eVal]++;
+    Sptr = Sptr->stabilizer;
+  }
+  return ListPrimes;
+}
+
+
+
 
 template<typename Telt>
 std::vector<Telt> StrongGeneratorsStabChain(StabChain<Telt> const& S)
@@ -1990,8 +2014,9 @@ Telt MinimalElementCosetStabChain(StabChain<Telt> const& Stot, Telt const& g)
 template<typename Telt, typename Tret>
 StabChain<Tret> HomomorphismMapping(StabChain<Telt> const& Stot, std::function<Tret(Telt const&)> const& f)
 {
+  using Tidx = typename Telt::Tidx;
   Tret idMap = f(Stot->comm->identity);
-  int nMap=idMap.size();
+  Tidx nMap=idMap.size();
   auto fVector =[&](std::vector<Telt> const& V) -> std::vector<Tret> {
     std::vector<Tret> Vret;
     for (auto & eElt : V)
