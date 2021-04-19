@@ -6,7 +6,8 @@
 #PROGRAM	= TestSymmetricGroup
 #PROGRAM	= GapCanonicalImage
 #PROGRAM	= BenchmarkingPermutalib
-PROGRAM	= BenchmarkingPermutalib GapCanonicalImage
+#PROGRAM	= BenchmarkingPermutalib GapCanonicalImage
+PROGRAM	= Factorize
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
