@@ -68,7 +68,7 @@ public:
   {
     return size_tint;
   }
-  std::unordered_map<Tidx, int> factor_size() const
+  std::map<Tidx, int> factor_size() const
   {
     return FactorsSizeStabChain(S);
   }

@@ -727,10 +727,10 @@ Tint SizeStabChain(StabChain<Telt> const& S)
 }
 
 template<typename Telt>
-std::unordered_map<typename Telt::Tidx, int> FactorsSizeStabChain(StabChain<Telt> const& S)
+std::map<typename Telt::Tidx, int> FactorsSizeStabChain(StabChain<Telt> const& S)
 {
   using Tidx = typename Telt::Tidx;
-  std::unordered_map<Tidx, int> ListPrimes;
+  std::map<Tidx, int> MapPrimeMult;
   StabChain<Telt> Sptr = S;
   while(true) {
     if (Sptr == nullptr)
@@ -740,10 +740,10 @@ std::unordered_map<typename Telt::Tidx, int> FactorsSizeStabChain(StabChain<Telt
       break;
     std::vector<Tidx> V = factorize(siz);
     for (auto & eVal : V)
-      ListPrimes[eVal]++;
+      MapPrimeMult[eVal]++;
     Sptr = Sptr->stabilizer;
   }
-  return ListPrimes;
+  return MapPrimeMult;
 }
 
 
