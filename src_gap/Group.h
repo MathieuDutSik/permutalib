@@ -5,6 +5,7 @@
 #include "StabChainMain.h"
 #include "stbcbckt.h"
 #include "nsi.h"
+#include <map>
 
 
 namespace permutalib {
