@@ -340,9 +340,7 @@ int GetStabilizerDepth(StabChain<Telt> const& S1)
 {
   StabChain<Telt> S2 = S1;
   int dep = 0;
-  while(true) {
-    if (S2 == nullptr)
-      break;
+  while (S2 != nullptr) {
     dep++;
     S2 = S2->stabilizer;
   }
@@ -400,9 +398,7 @@ std::ostream& operator<<(std::ostream& os, StabChain<Telt> const& Stot)
   os << " ]\n";
   int iLev=0;
   StabChain<Telt> Sptr = Stot;
-  while(true) {
-    if (Sptr == nullptr)
-      break;
+  while (Sptr!= nullptr) {
     os << "CPP iLev=" << iLev << "\n";
     os << "CPP  orbit =";
     for (auto & eVal : Sptr->orbit) {
@@ -455,9 +451,7 @@ StabChain<Telt> StructuralCopy(StabChain<Telt> const& S)
   };
   StabChain<Telt> Sptr = S;
   std::vector<std::shared_ptr<StabLevel<Telt>>> ListPtr;
-  while(true) {
-    if (Sptr == nullptr)
-      break;
+  while (Sptr != nullptr) {
     ListPtr.push_back(Sptr);
     Sptr = Sptr->stabilizer;
   }
@@ -697,9 +691,7 @@ std::vector<typename Telt::Tidx> BaseStabChain(StabChain<Telt> const& S)
   using Tidx=typename Telt::Tidx;
   StabChain<Telt> Sptr = S;
   std::vector<Tidx> base;
-  while(true) {
-    if (Sptr == nullptr)
-      break;
+  while (Sptr != nullptr) {
     base.push_back(Sptr->orbit[0]);
     Sptr = Sptr->stabilizer;
   }
@@ -713,9 +705,7 @@ Tint SizeStabChain(StabChain<Telt> const& S)
 {
   Tint size=1;
   StabChain<Telt> Sptr = S;
-  while(true) {
-    if (Sptr == nullptr)
-      break;
+  while (Sptr != nullptr) {
     size_t siz=Sptr->orbit.size();
     if (siz == 0)
       break;
@@ -732,9 +722,7 @@ std::map<typename Telt::Tidx, int> FactorsSizeStabChain(StabChain<Telt> const& S
   using Tidx = typename Telt::Tidx;
   std::map<Tidx, int> MapPrimeMult;
   StabChain<Telt> Sptr = S;
-  while(true) {
-    if (Sptr == nullptr)
-      break;
+  while (Sptr != nullptr) {
     Tidx siz=Sptr->orbit.size();
     if (siz == 0)
       break;
@@ -801,9 +789,7 @@ Telt LargestElementStabChain(StabChain<Telt> const& S)
   using Tidx=typename Telt::Tidx;
   StabChain<Telt> Sptr = S;
   Telt rep=Sptr->identity;
-  while(true) {
-    if (Sptr == nullptr)
-      break;
+  while (Sptr != nullptr) {
     if (Sptr->genlabels.size() == 0)
       break;
     Tidx pnt=Sptr->orbit[0];
@@ -1050,7 +1036,7 @@ StabChain<Telt> StabChainBaseStrongGenerators(std::vector<int> const& base, std:
 #endif
   Tidx n=sgs[0].size();
   StabChain<Telt> S = EmptyStabChain<Telt>(n);
-  size_t nbGen=sgs.size();
+  size_t nbGen = sgs.size();
   Face status(nbGen);
   for (size_t i=0; i<nbGen; i++)
     status[i] = 1;
@@ -1058,7 +1044,7 @@ StabChain<Telt> StabChainBaseStrongGenerators(std::vector<int> const& base, std:
   for (size_t iBas=0; iBas<basSiz; iBas++) {
     Tidx pnt=base[iBas];
     std::vector<Telt> sgsFilt;
-    for (int i=0; i<nbGen; i++)
+    for (size_t i=0; i<nbGen; i++)
       if (status[i] == 1)
 	sgsFilt.push_back(sgs[i]);
     InsertTrivialStabilizer(S, pnt);
@@ -1066,9 +1052,9 @@ StabChain<Telt> StabChainBaseStrongGenerators(std::vector<int> const& base, std:
     std::cerr << "CPP Before call to AddGeneratorsExtendSchreierTree from StabChainStrongGenerators\n";
 #endif
     AddGeneratorsExtendSchreierTree(S, iBas, sgsFilt);
-    for (int i=0; i<nbGen; i++)
-      if (status[i] == 1 && PowAct(pnt, sgs[i]) != pnt)
-	status[i]=0;
+    for (size_t iGen=0; iGen<nbGen; iGen++)
+      if (status[iGen] == 1 && PowAct(pnt, sgs[iGen]) != pnt)
+	status[iGen] = 0;
   }
   return S;
 }
@@ -1099,7 +1085,7 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
   //  std::cerr << "CPP AGEST 1: genlabels=" << GapStringIntVector(S->genlabels) << "\n";
   StabChain<Telt> Swrite = S;
   int idxwrt=0;
-  while(Swrite != nullptr) {
+  while (Swrite != nullptr) {
     //    std::cerr << "DEBUG idxwrt=" << idxwrt << " |labels|=" << S->comm->labels.size() << "\n";
     idxwrt++;
     Swrite = Swrite->stabilizer;
@@ -1265,7 +1251,7 @@ void ChooseNextBasePoint(StabChain<Telt> & S, std::vector<typename Telt::Tidx> c
     if (S->stabilizer->IsBoundCycle) {
       std::vector<int8_t> eFace = {0};
       S->cycles = eFace;
-      S->IsBoundCycle=true;
+      S->IsBoundCycle = true;
 #ifdef DEBUG_STABCHAIN
       std::cerr << "CPP   Initializing cycles\n";
 #endif
@@ -1678,9 +1664,7 @@ void ConjugateStabChain_Element(StabChain<Telt> & Stot, Telt const& cnj)
     return cnj.at(x);
   };
   auto cond=[](StabChain<Telt> const& S) -> bool {
-    if (S->stabilizer == nullptr)
-      return false;
-    return true;
+    return S->stabilizer != nullptr;
   };
   (void)ConjugateStabChain(Stot, Stot, hom, map, cond);
 }
@@ -1983,9 +1967,7 @@ Telt MinimalElementCosetStabChain(StabChain<Telt> const& Stot, Telt const& g)
   using Tidx=typename Telt::Tidx;
   Telt gRet=g;
   StabChain<Telt> Sptr = Stot;
-  while(true) {
-    if (Sptr == nullptr)
-      break;
+  while (Sptr != nullptr) {
     if (Sptr->genlabels.size() == 0)
       return gRet;
     Tidx pMin=std::numeric_limits<Tidx>::max();
@@ -2030,9 +2012,7 @@ StabChain<Tret> HomomorphismMapping(StabChain<Telt> const& Stot, std::function<T
   StabChain<Tret> Swork = nullptr;
   StabChain<Tret> Sreturn = nullptr;
 
-  while(true) {
-    if (Sptr == nullptr)
-      break;
+  while (Sptr != nullptr) {
     Swork = std::make_shared<StabLevel<Telt>>(StabLevel<Telt>({Sptr->transversal, Sptr->orbit, Sptr->genlabels, Sptr->cycles, Sptr->IsBoundCycle, fVector(Sptr->treegen), fVector(Sptr->treegeninv), fVector(Sptr->aux), Sptr->treedepth, Sptr->diam, comm, nullptr}));
     if (Sreturn == nullptr)
       Sreturn = Swork;
