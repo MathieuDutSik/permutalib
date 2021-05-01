@@ -21,8 +21,19 @@ int main(int argc, char *argv[])
     }
     std::string InputFile = argv[1];
     std::string opt = argv[2];
-    if (opt != "canonical" && opt != "stabilizer") {
-      std::cerr << "We should have opt=canonical or stabilizer\n";
+    std::vector<std::string> ListOpts={"canonical", "stabilizer", "pointstabilizer", "pointrepresentative"};
+    bool IsMatch=false;
+    for (auto & e_opt : ListOpts) {
+      if (e_opt == opt)
+        IsMatch=true;
+    }
+    if (!IsMatch) {
+      std::cerr << "opt=" << opt << "\n";
+      std::cerr << "ListOpts =";
+      for (auto& e_opt : ListOpts)
+        std::cerr << " " << e_opt;
+      std::cerr << "\n";
+      std::cerr << "Please select an option that is allowed\n";
       throw PermutalibException{1};
     }
     long n_iter = 50;
@@ -56,20 +67,34 @@ int main(int argc, char *argv[])
       }
       Tgroup eG(LGen, n);
       //
-      for (long iter=0; iter<n_iter; iter++) {
-        permutalib::Face eFace(n);
-        for (int i=0; i<n; i++) {
-          int eVal = rand() % 2;
-          eFace[i] = eVal;
-        }
-        //        std::cerr << "  iter=" << iter << " |eFace|=" << eFace.count() << " / " << eFace.size() << "\n";
-        //
-        if (opt == "canonical") {
+      if (opt == "canonical") {
+        for (long iter=0; iter<n_iter; iter++) {
+          permutalib::Face eFace(n);
+          for (int i=0; i<n; i++) {
+            int eVal = rand() % 2;
+            eFace[i] = eVal;
+          }
           permutalib::Face set_can = eG.CanonicalImage(eFace);
           siz_control += set_can.count();
         }
-        if (opt == "stabilizer") {
+      }
+      //
+      if (opt == "stabilizer") {
+        for (long iter=0; iter<n_iter; iter++) {
+          permutalib::Face eFace(n);
+          for (int i=0; i<n; i++) {
+            int eVal = rand() % 2;
+            eFace[i] = eVal;
+          }
           Tgroup eG2 = eG.Stabilizer_OnSets(eFace);
+          siz_control += eG2.n_act();
+        }
+      }
+      //
+      if (opt == "pointstabilizer") {
+        for (long iter=0; iter<n_iter; iter++) {
+          Tidx pos = rand() % n;
+          Tgroup eG2 = eG.Stabilizer_OnPoints(pos);
           siz_control += eG2.n_act();
         }
       }
