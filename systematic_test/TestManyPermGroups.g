@@ -349,7 +349,7 @@ end;
 
 #TestAllGroups("stabilizer", 2);
 #TestAllGroups("equivalence", 2);
-TestAllGroups("canonical", 3);
+#TestAllGroups("canonical", 3);
 
-#WriteAllGroupsInFile("AllFileTest");
+WriteAllGroupsInFile("AllFileTest");
 

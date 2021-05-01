@@ -13,9 +13,10 @@ int main(int argc, char *argv[])
     using Telt = permutalib::SingleSidedPerm<Tidx>;
     using Tint = mpz_class;
     using Tgroup = permutalib::Group<Telt,Tint>;
-    if (argc != 3) {
+    if (argc != 3 && argc != 4) {
       std::cerr << "We should have argc = 2\n";
       std::cerr << "BenchmarkingPermutalib [EXMP] [opt]\n";
+      std::cerr << "BenchmarkingPermutalib [EXMP] [opt] [n_iter]\n";
       throw PermutalibException{1};
     }
     std::string InputFile = argv[1];
@@ -23,6 +24,13 @@ int main(int argc, char *argv[])
     if (opt != "canonical" && opt != "stabilizer") {
       std::cerr << "We should have opt=canonical or stabilizer\n";
       throw PermutalibException{1};
+    }
+    long n_iter = 50;
+    if (argc == 4) {
+      sscanf(argv[3], "%ld", &n_iter);
+      std::cerr << "Using input value n_iter=" << n_iter << "\n";
+    } else {
+      std::cerr << "Using default value of 50 on n_iter\n";
     }
     //
     std::ifstream is(InputFile);
@@ -34,6 +42,7 @@ int main(int argc, char *argv[])
       int nbGen, n;
       is >> nbGen;
       is >> n;
+      std::cerr << "iGroup=" << iGroup << " n=" << n << " nbGen=" << nbGen << "\n";
       std::vector<Telt> LGen(nbGen);
       for (int iGen=0; iGen<nbGen; iGen++) {
         std::vector<Tidx> ePermV(n);
@@ -47,7 +56,7 @@ int main(int argc, char *argv[])
       }
       Tgroup eG(LGen, n);
       //
-      for (int iter=0; iter<50; iter++) {
+      for (long iter=0; iter<n_iter; iter++) {
         permutalib::Face eFace(n);
         for (int i=0; i<n; i++) {
           int eVal = rand() % 2;
