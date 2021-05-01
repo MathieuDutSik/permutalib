@@ -98,6 +98,15 @@ int main(int argc, char *argv[])
           siz_control += eG2.n_act();
         }
       }
+      //
+      if (opt == "pointrepresentative") {
+        for (long iter=0; iter<n_iter; iter++) {
+          Tidx pos1 = rand() % n;
+          Tidx pos2 = rand() % n;
+          std::pair<bool,Telt> eP = eG.RepresentativeAction_OnPoints(pos1, pos2);
+          siz_control += int(eP.first);
+        }
+      }
     }
     //
     std::cerr << "CPP Normal completion of the program\n";
