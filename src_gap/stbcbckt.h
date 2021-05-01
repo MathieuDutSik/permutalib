@@ -21,7 +21,6 @@
 #ifdef SYNCHRONIZED_DEBUG_GAP478
 # define DEBUG_STBCBCKT
 #endif
-#define DEBUG_STBCBCKT
 
 namespace permutalib {
 
@@ -1882,8 +1881,6 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, Face const& Phi, Fa
 
 // Stabilizer part
 
-
-
 template<typename Telt,typename Tint>
 StabChain<Telt> Kernel_Stabilizer_OnPoints(StabChain<Telt> const& G, typename Telt::Tidx const& x)
 {
@@ -1974,7 +1971,8 @@ StabChain<Telt> Kernel_Stabilizer_OnSets(StabChain<Telt> const& G, Face const& P
 }
 
 
-
+// This code is 80% slower than the Kernel_Stabilizer_OnPoints_backtrack
+// We keep it for trace because it works fine and gives correct result.
 template<typename Telt,typename Tint>
 StabChain<Telt> Kernel_Stabilizer_OnPoints_backtrack(StabChain<Telt> const& G, typename Telt::Tidx const& x)
 {
@@ -1995,9 +1993,7 @@ StabChain<Telt> Kernel_Stabilizer_OnPoints_backtrack(StabChain<Telt> const& G, t
 }
 
 
-
-
-
+// RepresentativeAction
 
 
 template<typename Telt,typename Tint>
