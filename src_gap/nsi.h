@@ -91,10 +91,8 @@ Telt PermListList(std::vector<T> const& list1, std::vector<T> const& list2)
   }
   //
   std::vector<int> eList;
-  for (int i=0; i<siz; i++) {
-    int val = eMap[list2[i]];
-    eList[i] = val;
-  }
+  for (int i=0; i<siz; i++)
+    eList[i] = eMap[list2[i]];
   return Telt(eList);
 }
 
@@ -368,81 +366,6 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::
         delete_node(enode);
     }
   };
-  /*
-  auto delete_nodes=[&](std::vector<NodePtr> & nodes) {
-    for (auto & e_node : nodes)
-      delete_node(e_node);
-  };
-  */
-  
-  // Filter nodes by stabilizer group,
-  // Updates the stabilizer group of the node,
-  /*
-  std::function<void(NodePtr &)> clean_subtree =[&](NodePtr & node) -> void {
-#ifdef DEBUG_NSI
-    std::cerr << "CPP Beginning of clean_subtree\n";
-#endif
-    if (!node->IsBoundChildren)
-      return;
-    std::vector<NodePtr> bad;
-
-    Face seen(m);
-    Tidx x;
-    for (auto & c : node->children) {
-      if (c->selectedbaselength != max_val_type) {
-        x = c->selected[c->selectedbaselength];
-      } else {
-        x = c->selected[c->selected.size() - 1];
-      }
-      if (seen[x] == 1) {
-        bad.push_back(c);
-      } else {
-        std::vector<Tidx> q = {x};
-        std::vector<Telt> gens = Kernel_GeneratorsOfGroup(node->substab);
-        size_t olen = 1;
-        size_t pos = 0;
-        seen[x] = 1;
-        while (true) {
-          size_t idx;
-          for (idx=pos; idx<olen; idx++) {
-            Tidx pt = q[idx];
-            for (auto & gen : gens) {
-              Tidx im = PowAct(pt,gen);
-              if (seen[im] == 0) {
-                seen[im] = 1;
-                q.emplace_back(im);
-                olen++;
-              }
-            }
-          }
-          if (idx == olen)
-            break;
-          pos = idx;
-        }
-        Tint quot = Order<Telt,Tint>(node->substab) / Order<Telt,Tint>(c->substab);
-        if (Tint(olen) < quot) {
-          c->substab = Kernel_Stabilizer_OnPoints<Telt,Tint>(node->substab, x);
-          clean_subtree(c);
-        }
-      }
-    }
-    delete_nodes(bad);
-  };
-  */
-  //Add a new stabilizer element, mapping node1 to node2, and then call
-  // clean_subtree to remove any new subtrees.
-  // unused in this specific code.
-  /*
-  auto handle_new_stabilizer_element=[&](NodePtr & node1, NodePtr & node2) -> void {
-    // so node1 and node2 represnet group elements that map set to the same
-    // place in two different ways
-    Telt perm1 = PermListList<Telt,int>(node1->image, node2->image);
-    StabChain<Telt> l_copy = CopyStabChain(l);
-    ClosureGroup<Telt,Tint>(l_copy,perm1);
-    root->substab = l_copy;
-    clean_subtree(root);
-  };
-  */
 
   // Given a group 'gp' and a set 'set', find orbit representatives
   // of 'set' in 'gp' simply.
