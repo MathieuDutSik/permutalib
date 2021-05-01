@@ -21,6 +21,7 @@
 #ifdef SYNCHRONIZED_DEBUG_GAP478
 # define DEBUG_STBCBCKT
 #endif
+#define DEBUG_STBCBCKT
 
 namespace permutalib {
 
@@ -1879,30 +1880,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, Face const& Phi, Fa
   return PartitionBacktrack<Telt,Tint,repr>( G, Pr, rbase, data, L, R );
 }
 
-
-
-template<typename Telt,typename Tint>
-StabChain<Telt> Kernel_Stabilizer_OnSets(StabChain<Telt> const& G, Face const& Phi)
-{
-#ifdef DEBUG_STBCBCKT
-  std::cerr << "CPP Beginning of Stabilizer_OnSets\n";
-#endif
-  size_t n = G->comm->n;
-#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-  if (Phi.size() != n) {
-    std::cerr << "We should have Phi of size equal to n\n";
-    throw PermutalibException{1};
-  }
-#endif
-  if (2 * Phi.count() > n) {
-    Face PhiC(n);
-    for (size_t i=0; i<n; i++)
-      PhiC[i] = 1 - Phi[i];
-    return RepOpSetsPermGroup<Telt,Tint,false>(G, PhiC, PhiC).stab;
-  } else {
-    return RepOpSetsPermGroup<Telt,Tint,false>(G, Phi, Phi).stab;
-  }
-}
+// Stabilizer part
 
 
 
@@ -1920,10 +1898,105 @@ StabChain<Telt> Kernel_Stabilizer_OnPoints(StabChain<Telt> const& G, typename Te
     throw PermutalibException{1};
   }
 #endif
+  std::vector<Tidx> base{x};
+#ifdef DEBUG_STBCBCKT
+  std::cerr << "CPP x=" << int(x+1) << "\n";
+#endif
+  StabChainOptions<Tint,Tidx> options = GetStandardOptions<Tint,Tidx>(n);
+  options.base = base;
+  std::vector<Telt> Lgen = Kernel_GeneratorsOfGroup(G);
+  StabChain<Telt> K = StabChainOp_listgen(Lgen, options);
+#ifdef DEBUG_STBCBCKT
+  std::cerr << "CPP K=\n";
+  PrintStabChain(K);
+#endif
+  StabChain<Telt> Sptr = K;
+  while (true) {
+    if (Sptr == nullptr) {
+#ifdef DEBUG_STBCBCKT
+      std::cerr << "Exiting by nullptr\n";
+#endif
+      break;
+    }
+    if (Sptr->orbit.size() == 0) {
+#ifdef DEBUG_STBCBCKT
+      std::cerr << "Exiting by |orbit| = 0\n";
+#endif
+      break;
+    }
+#ifdef DEBUG_STBCBCKT
+    std::cerr << "CPP orbit[1]=" << int(Sptr->orbit[0]+1) << " x=" << int(x+1) << "\n";
+#endif
+    if (Sptr->orbit[0] != x) {
+#ifdef DEBUG_STBCBCKT
+      std::cerr << "CPP exiting by orbit[0] != x\n";
+#endif
+      break;
+    }
+    Sptr = Sptr->stabilizer;
+  }
+  return Sptr;
+}
+
+
+template<typename Telt,typename Tint>
+StabChain<Telt> Kernel_Stabilizer_OnSets(StabChain<Telt> const& G, Face const& Phi)
+{
+  using Tidx = typename Telt::Tidx;
+#ifdef DEBUG_STBCBCKT
+  std::cerr << "CPP Beginning of Stabilizer_OnSets\n";
+#endif
+  size_t n = G->comm->n;
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+  if (Phi.size() != n) {
+    std::cerr << "We should have Phi of size equal to n\n";
+    throw PermutalibException{1};
+  }
+#endif
+  if (2 * Phi.count() > n) {
+    Face PhiC(n);
+    for (size_t i=0; i<n; i++)
+      PhiC[i] = 1 - Phi[i];
+    if (PhiC.count() > 1) {
+      return RepOpSetsPermGroup<Telt,Tint,false>(G, PhiC, PhiC).stab;
+    } else {
+      Tidx x = PhiC.find_first();
+      return Kernel_Stabilizer_OnPoints<Telt,Tint>(G, x);
+    }
+  } else {
+    if (Phi.count() > 1) {
+      return RepOpSetsPermGroup<Telt,Tint,false>(G, Phi, Phi).stab;
+    } else {
+      Tidx x = Phi.find_first();
+      return Kernel_Stabilizer_OnPoints<Telt,Tint>(G, x);
+    }
+  }
+}
+
+
+
+template<typename Telt,typename Tint>
+StabChain<Telt> Kernel_Stabilizer_OnPoints_backtrack(StabChain<Telt> const& G, typename Telt::Tidx const& x)
+{
+  using Tidx=typename Telt::Tidx;
+#ifdef DEBUG_STBCBCKT
+  std::cerr << "CPP Beginning of Stabilizer_OnSets\n";
+#endif
+  Tidx n = G->comm->n;
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+  if (x >= n) {
+    std::cerr << "We should have x < n\n";
+    throw PermutalibException{1};
+  }
+#endif
   Face Phi(n);
   Phi[x]=1;
   return RepOpSetsPermGroup<Telt,Tint,false>(G, Phi, Phi).stab;
 }
+
+
+
+
 
 
 
@@ -1983,6 +2056,9 @@ std::pair<bool,Telt> Kernel_RepresentativeAction_OnPoints(StabChain<Telt> const&
     return {false, {}};
   return {true, eRec.res};
 }
+
+
+
 
 
 }

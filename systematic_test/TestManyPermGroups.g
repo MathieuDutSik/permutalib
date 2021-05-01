@@ -347,9 +347,9 @@ WriteAllGroupsInFile:=function(eFile)
 end;
 
 
-#TestAllGroups("stabilizer", 2);
+TestAllGroups("stabilizer", 1);
 #TestAllGroups("equivalence", 2);
 #TestAllGroups("canonical", 3);
 
-WriteAllGroupsInFile("AllFileTest");
+#WriteAllGroupsInFile("AllFileTest");
 

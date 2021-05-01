@@ -13,6 +13,7 @@ namespace permutalib {
 
 // The main function
 // Right now we do not implement the PCGS algorithm
+// It is adapted from "StabChainOp (group and option)"
 template<typename Telt, typename Tint>
 StabChain<Telt> StabChainOp_listgen(std::vector<Telt> const& Lgen, StabChainOptions<Tint, typename Telt::Tidx> const& options)
 {

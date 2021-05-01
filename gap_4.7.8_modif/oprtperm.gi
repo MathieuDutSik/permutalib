@@ -883,7 +883,7 @@ InstallOtherMethod( RepresentativesMinimalBlocksOp,
         [ IsGroup, IsList,
           IsList,
           IsList,
-          IsFunction ], 
+          IsFunction ],
 	  # lower ranked than perm method
 	  -1,
 function( G, D, gens, acts, act )
@@ -1275,8 +1275,8 @@ InstallTrueMethod(IsRegular,IsPermGroup and IsSemiRegular and IsTransitive);
 #M  RepresentativeAction( <G>, <d>, <e>, <act> ) . . . . . for perm groups
 ##
 InstallOtherMethod( RepresentativeActionOp, "permgrp",true, [ IsPermGroup,
-        IsObject, IsObject, IsFunction ], 
-  # the objects might be group elements: rank up	
+        IsObject, IsObject, IsFunction ],
+  # the objects might be group elements: rank up
   2*RankFilter(IsMultiplicativeElementWithInverse),
     function ( G, d, e, act )
     local   rep,                # representative, result
@@ -1397,7 +1397,7 @@ InstallOtherMethod( RepresentativeActionOp, "permgrp",true, [ IsPermGroup,
 	return fail;
       fi;
       if Length(d)=1 then
-	rep:=RepresentativeActionOp(G,d[1],e[1],OnPoints);
+	rep := RepresentativeActionOp(G,d[1],e[1],OnPoints);
       else
         rep := RepOpSetsPermGroup( G, d, e );
       fi;
@@ -1443,8 +1443,12 @@ PermGroupStabilizerOp:=function(arg)
         base := d;
     fi;
     if IsBound( base )  then
+        Print("XXXXX Before StabChainOp\n");
         K := StabChainOp( G, base );
+        Print("XXXXX After StabChainOp\n");
         S := K;
+        Print(NullMat(5));
+
         while IsBound( S.orbit )  and  S.orbit[ 1 ] in base  do
             S := S.stabilizer;
         od;
@@ -1466,7 +1470,7 @@ PermGroupStabilizerOp:=function(arg)
     # action on sets of points, use a backtrack
     elif act = OnSets  and ForAll( d, IsInt )  then
       if Length(d)=1 then
-	K:=Stabilizer(G,d[1]);
+	K := Stabilizer(G,d[1]);
       else
         K := RepOpSetsPermGroup( G, d );
       fi;
@@ -1515,7 +1519,7 @@ InstallOtherMethod( StabilizerOp, "permutation group with generators list",
           IsList,
           IsList,
           IsFunction ],
-  # the objects might be a group element: rank up	
+  # the objects might be a group element: rank up
   RankFilter(IsMultiplicativeElementWithInverse)
   # and we are better even if the group is solvable
   +RankFilter(IsSolvableGroup),
@@ -1527,7 +1531,7 @@ InstallOtherMethod( StabilizerOp, "permutation group with domain",true,
           IsList,
           IsList,
           IsFunction ],
-  # the objects might be a group element: rank up	
+  # the objects might be a group element: rank up
   RankFilter(IsMultiplicativeElementWithInverse)
   # and we are better even if the group is solvable
   +RankFilter(IsSolvableGroup),
@@ -1608,4 +1612,3 @@ end );
 #############################################################################
 ##
 #E
-

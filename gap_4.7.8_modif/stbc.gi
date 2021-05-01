@@ -205,7 +205,10 @@ InstallMethod( StabChainImmutable,"use StabChainMutable",
   true, [ IsObject ], 0, StabChainMutable );
 
 InstallMethod( StabChainMutable,"call StabChainOp", true, [ IsGroup ], 0,
-    G -> StabChainOp( G, rec(  ) ) );
+    function(G)
+    Print("GAP Call to StabChainOp (call StabChainOp)\n");
+    return StabChainOp( G, rec(  ) );
+end );
 
 InstallOtherMethod( StabChainOp,"with base", true, [ IsPermGroup,
         IsList and IsCyclotomicCollection ], 0,
@@ -225,8 +228,10 @@ InstallMethod( StabChainOp,"trivial group",
   [ IsPermGroup and IsTrivial, IsRecord ],
     function( G, options )
     local   S,  T,  pnt;
-#    Print("GAP Call to StabChainOp (trivial group)\n");
+    Print("GAP Call to StabChainOp (trivial group)\n");
 
+    Print(NullMat(67));
+    
     S := EmptyStabChain( [  ], One( G ) );
     if     IsBound( options.base )
        and (        IsBound( options.reduced )
@@ -249,9 +254,10 @@ InstallMethod( StabChainOp,"group and option",
 
     UseNonPortedMethods:=false;
 
-#    Print("GAP Call to StabChainOp (group and option)\n");
+    Print("GAP Call to StabChainOp (group and option)\n");
     # If a stabilizer chain <S> is already known, modify it.
     if HasStabChainMutable( G )  then
+        Print("GAP Begin of HaseStabChainMutable=true section\n");
         S := StructuralCopy( StabChainMutable( G ) );
         if IsBound( options.base )  then
             if not IsBound( options.reduced )  then
@@ -265,7 +271,7 @@ InstallMethod( StabChainOp,"group and option",
             Print("GAP Before ReduceStabChain\n");
             ReduceStabChain( S );
         fi;
-#        Print("GAP End of HaseStabChainMutable=true section\n");
+        Print("GAP End of HaseStabChainMutable=true section\n");
     # Otherwise construct a new GAP object <S>.
     else
         Print("GAP Case HaseStabChainMutable=false\n");
@@ -319,6 +325,7 @@ InstallMethod( StabChainOp,"group and option",
 	  fi;
         else
             degree := LargestMovedPoint( G );
+            Print("DEBUG degree=", degree, "\n");
             if degree > 100  then
 
                 # random Schreier-Sims
@@ -563,6 +570,7 @@ end);
 InstallGlobalFunction(StabChainBaseStrongGenerators,function(arg)
 local   base,sgs,one,S,  T,  pnt;
 
+    Print("DEBUG begin of StabChainBaseStrongGenerators\n");
     base:=arg[1];
     sgs:=arg[2];
     if Length(arg)=3 then
@@ -570,6 +578,7 @@ local   base,sgs,one,S,  T,  pnt;
     else
       one:= One(arg[2][1]);
     fi;
+    Print("DEBUG one=", one, " sgs=", sgs, "\n");
     S := EmptyStabChain( [  ], one );
     T := S;
     for pnt  in base  do
@@ -578,6 +587,7 @@ local   base,sgs,one,S,  T,  pnt;
         sgs := Filtered( sgs, g -> pnt ^ g = pnt );
         T := T.stabilizer;
     od;
+    Print("DEBUG exiting of StabChainBaseStrongGenerators\n");
     return S;
 end);
 
