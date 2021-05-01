@@ -228,12 +228,6 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::
     };
     auto selector=[&](Tidx const& jdx) -> typeCnt {
       return {orbsizes[jdx], orbitCounts[jdx]};
-      /*
-      if (orbsizes[i] == 1) {
-        return - std::pow(2.0, 32.0) + orbitCounts[i];
-      } else {
-        return (log(double(orbitCounts[i]))/log(2.0)) / double(orbsizes[i]);
-      }*/
     };
     Tidx index = 0;
     typeCnt result_0 = selector(0);
@@ -440,7 +434,7 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::
   // set the pointer to zero and so all cycles eliminated.
   // Maybe we could do better, but the hack should be adequate.
   auto free_all_nodes=[&]() -> void {
-                        //    std::cerr << "|ListPtr|=" << ListPtr.size() << "\n";
+    //    std::cerr << "|ListPtr|=" << ListPtr.size() << "\n";
     for (auto & e_node : ListPtr) {
       e_node->prev=nullptr;
       e_node->next=nullptr;
