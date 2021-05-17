@@ -1224,10 +1224,19 @@ void ChooseNextBasePoint(StabChain<Telt> & S, std::vector<typename Telt::Tidx> c
     i++;
   }
   Tidx pnt;
-  if (i < len)
+  if (i < len) {
     pnt = base[i];
-  else
+  } else {
     pnt = SmallestMovedPoint(newgens);
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+    if (pnt == std::numeric_limits<Tidx>::max()) {
+      std::cerr << "The SmallestMovePoint return the maximum value\n";
+      std::cerr << "It likely means that there is no smallest moved points.\n";
+      std::cerr << "Please debug\n";
+      throw TerminalException{1};
+    }
+#endif
+  }
   Tidx bpt;
   int pos;
   if (S->orbit.size() > 0) {
@@ -1275,7 +1284,7 @@ void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, Stab
 #endif
 
   Tidx pnt = S->orbit[0];
-  int len = S->orbit.size();
+  Tidx len = S->orbit.size();
   int old = S->genlabels.size();
 #ifdef DEBUG_STABCHAIN
   std::cerr << "CPP Before AddGeneratorsExtendSchreierTree\n";
@@ -1320,7 +1329,7 @@ void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, Stab
 #endif
     Telt rep=InverseRepresentative(S, p);
     if (i < len)
-      gen1=old;
+      gen1 = old;
 #ifdef DEBUG_STABCHAIN
     std::cerr << "CPP StabChainStrong gen1=" << int(gen1+1) << " rep=" << rep << "\n";
 #endif
@@ -1334,9 +1343,8 @@ void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, Stab
 #ifdef DEBUG_STABCHAIN
 	std::cerr << "CPP sch=" << sch << " g=" << g << " rep=" << rep << "\n";
 #endif
-	if (!sch.isIdentity()) {
+	if (!sch.isIdentity())
 	  StabChainStrong(S->stabilizer, {sch}, options);
-	}
       }
     }
   }

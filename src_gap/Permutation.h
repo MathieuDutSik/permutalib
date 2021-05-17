@@ -535,7 +535,7 @@ public:
   }
   Tidx atRev(Tidx const& i) const
   {
-    for (int j=0; j<siz; j++)
+    for (Tidx j=0; j<siz; j++)
       if (ListVal[j] == i)
         return j;
     return -1;
@@ -569,7 +569,7 @@ bool operator==(SingleSidedPerm<Tidx> const& v1, SingleSidedPerm<Tidx> const& v2
   Tidx siz=v1.size();
   if (siz != v2.size() )
     return false;
-  for (int i=0; i<siz; i++)
+  for (Tidx i=0; i<siz; i++)
     if (v1.at(i) != v2.at(i))
       return false;
   return true;
@@ -579,10 +579,10 @@ bool operator==(SingleSidedPerm<Tidx> const& v1, SingleSidedPerm<Tidx> const& v2
 template<typename Tidx>
 bool operator!=(SingleSidedPerm<Tidx> const& v1, SingleSidedPerm<Tidx> const& v2)
 {
-  int siz=v1.size();
+  Tidx siz=v1.size();
   if (siz != v2.size() )
     return true;
-  for (int i=0; i<siz; i++)
+  for (Tidx i=0; i<siz; i++)
     if (v1.at(i) != v2.at(i))
       return true;
   return false;
@@ -592,12 +592,12 @@ bool operator!=(SingleSidedPerm<Tidx> const& v1, SingleSidedPerm<Tidx> const& v2
 template<typename Tidx>
 bool operator<(SingleSidedPerm<Tidx> const& v1, SingleSidedPerm<Tidx> const& v2)
 {
-  int siz1=v1.size();
-  int siz2=v2.size();
+  Tidx siz1=v1.size();
+  Tidx siz2=v2.size();
   if (siz1 != siz2)
     return siz1<siz2;
-  int siz=siz1;
-  for (int i=0; i<siz; i++) {
+  Tidx siz=siz1;
+  for (Tidx i=0; i<siz; i++) {
     if (v1.at(i) != v2.at(i))
       return v1.at(i) < v2.at(i);
   }
@@ -607,10 +607,10 @@ bool operator<(SingleSidedPerm<Tidx> const& v1, SingleSidedPerm<Tidx> const& v2)
 template<typename Tidx>
 SingleSidedPerm<Tidx> operator~(SingleSidedPerm<Tidx> const& ePerm)
 {
-  int siz = ePerm.size();
+  Tidx siz = ePerm.size();
   std::vector<Tidx> LVal = ePerm.getListVal();
   std::vector<Tidx> v(siz);
-  for (int i=0; i<siz; i++)
+  for (Tidx i=0; i<siz; i++)
     v[LVal[i]] = i;
   return SingleSidedPerm<Tidx>(v);
 }
@@ -625,7 +625,7 @@ SingleSidedPerm<Tidx> operator~(SingleSidedPerm<Tidx> const& ePerm)
 template<typename Tidx>
 SingleSidedPerm<Tidx> operator*(SingleSidedPerm<Tidx> const& v1, SingleSidedPerm<Tidx> const& v2)
 {
-  int siz=v1.size();
+  Tidx siz=v1.size();
 #ifdef DEBUG
   if (siz != v2.size() ) {
     std::cerr << "Error in the DoubleSidedPerm product\n";
@@ -633,9 +633,9 @@ SingleSidedPerm<Tidx> operator*(SingleSidedPerm<Tidx> const& v1, SingleSidedPerm
   }
 #endif
   std::vector<Tidx> vVal(siz);
-  for (int i=0; i<siz; i++) {
-    int j=v1.at(i);
-    int k=v2.at(j);
+  for (Tidx i=0; i<siz; i++) {
+    Tidx j=v1.at(i);
+    Tidx k=v2.at(j);
     vVal[i]=k;
   }
   return SingleSidedPerm<Tidx>(vVal);
@@ -646,7 +646,7 @@ SingleSidedPerm<Tidx> operator*(SingleSidedPerm<Tidx> const& v1, SingleSidedPerm
 template<typename Tidx>
 SingleSidedPerm<Tidx> Conjugation(SingleSidedPerm<Tidx> const& v1, SingleSidedPerm<Tidx> const& v2)
 {
-  int siz=v1.size();
+  Tidx siz=v1.size();
 #ifdef DEBUG
   if (siz != v2.size() ) {
     std::cerr << "Error in the DoubleSidedPerm conjugation\n";
@@ -654,10 +654,10 @@ SingleSidedPerm<Tidx> Conjugation(SingleSidedPerm<Tidx> const& v1, SingleSidedPe
   }
 #endif
   std::vector<Tidx> v(siz);
-  for (int i=0; i<siz; i++) {
-    int j=v1[i];
-    int i2=v2[i];
-    int j2=v2[j];
+  for (Tidx i=0; i<siz; i++) {
+    Tidx j=v1[i];
+    Tidx i2=v2[i];
+    Tidx j2=v2[j];
     v[i2]=j2;
   }
   return SingleSidedPerm<Tidx>(v);
@@ -684,11 +684,11 @@ Tidx SlashAct(Tidx const& i, SingleSidedPerm<Tidx> const& g)
 template<typename Tidx>
 SingleSidedPerm<Tidx> LeftQuotient(SingleSidedPerm<Tidx> const& a, SingleSidedPerm<Tidx> const& b)
 {
-  int siz=a.size();
+  Tidx siz=a.size();
   std::vector<Tidx> ListVal(siz);
-  for (int i=0; i<siz; i++) {
-    int i1=a.atRev(i);
-    int j1=b.at(i1);
+  for (Tidx i=0; i<siz; i++) {
+    Tidx i1=a.atRev(i);
+    Tidx j1=b.at(i1);
     ListVal[i]=j1;
   }
   return SingleSidedPerm<Tidx>(ListVal);
@@ -697,17 +697,17 @@ SingleSidedPerm<Tidx> LeftQuotient(SingleSidedPerm<Tidx> const& a, SingleSidedPe
 
 
 template<typename Tidx>
-SingleSidedPerm<Tidx> SCRandomPerm(int const& d)
+SingleSidedPerm<Tidx> SCRandomPerm(Tidx const& d)
 {
   std::vector<Tidx> rnd(d);
-  for (int i=0; i<d; i++)
+  for (Tidx i=0; i<d; i++)
     rnd[i]=i;
-  for (int i=0; i<d; i++) {
-    int idx=d-i;
-    int res=d-i;
-    int k=rand() % res;
+  for (Tidx i=0; i<d; i++) {
+    Tidx idx=d-i;
+    Tidx res=d-i;
+    Tidx k=rand() % res;
     if (k != idx) {
-      int tmp=rnd[idx];
+      Tidx tmp=rnd[idx];
       rnd[idx]=rnd[k];
       rnd[k]=tmp;
     }

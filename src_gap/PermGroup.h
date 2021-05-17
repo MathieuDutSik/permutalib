@@ -7,12 +7,13 @@
 namespace permutalib {
 
 template<typename Telt>
-int SmallestMovedPoint(std::vector<Telt> const& LGen)
+typename Telt::Tidx SmallestMovedPoint(std::vector<Telt> const& LGen)
 {
+  using Tidx = typename Telt::Tidx;
   if (LGen.size() == 0)
     return -1;
-  int n=LGen[0].size();
-  for (int u=0; u<n; u++) {
+  Tidx n=LGen[0].size();
+  for (Tidx u=0; u<n; u++) {
     bool IsOK=false;
     for (auto & eGen : LGen)
       if (eGen.at(u) != u)
@@ -20,7 +21,7 @@ int SmallestMovedPoint(std::vector<Telt> const& LGen)
     if (IsOK)
       return u;
   }
-  return -1;
+  return std::numeric_limits<Tidx>::max();
 }
 
 
@@ -91,15 +92,16 @@ std::vector<std::vector<int>> OrbitsPerms(std::vector<Telt> const& gens, int con
 }
 
 template<typename Telt>
-int SmallestMovedPointsPerms(std::vector<Telt> const& gens)
+typename Telt::Tidx SmallestMovedPointsPerms(std::vector<Telt> const& gens)
 {
-  int siz=0;
-  for (int i=0; i<siz; i++) {
+  using Tidx=typename Telt::Tidx;
+  Tidx siz=0;
+  for (Tidx i=0; i<siz; i++) {
     for (auto & eGen : gens)
       if (PowAct(i, eGen) != i)
 	return i;
   }
-  return -1;
+  return std::numeric_limits<Tidx>::max();
 }
 
 
