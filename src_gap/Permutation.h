@@ -524,7 +524,7 @@ public:
   //
   bool isIdentity() const
   {
-    for (int i=0; i<siz; i++)
+    for (Tidx i=0; i<siz; i++)
       if (ListVal[i] != i)
 	return false;
     return true;
@@ -566,7 +566,7 @@ private:
 template<typename Tidx>
 bool operator==(SingleSidedPerm<Tidx> const& v1, SingleSidedPerm<Tidx> const& v2)
 {
-  int siz=v1.size();
+  Tidx siz=v1.size();
   if (siz != v2.size() )
     return false;
   for (int i=0; i<siz; i++)
