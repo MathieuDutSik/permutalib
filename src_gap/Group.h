@@ -13,7 +13,7 @@ namespace permutalib {
 
 
 template<typename Telt>
-Telt RandomElement(std::vector<Telt> const& LGen, int const& n)
+Telt RandomElement(const std::vector<Telt>& LGen, const int& n)
 {
   int len = rand() % 100;
   size_t n_gen = LGen.size();
@@ -37,10 +37,10 @@ public:
   using Tidx = typename Telt::Tidx;
   using Tint = Tint_inp;
   // constructors
-  Group(StabChain<Telt> const& _S) : S(_S), size_tint(Order<Telt,Tint>(_S))
+  Group(const StabChain<Telt>& _S) : S(_S), size_tint(Order<Telt,Tint>(_S))
   {
   }
-  Group(std::vector<Telt> const& LGen, int const& n)
+  Group(const std::vector<Telt>& LGen, const int& n)
   {
 #ifdef DEBUG_STABCHAINMAIN
     std::cerr << "CPP Beginning of MinimalStabChain\n";
@@ -54,7 +54,7 @@ public:
     UnbindCycles(S);
     size_tint = Order<Telt,Tint>(S);
   }
-  Group(Tidx const& n) : Group({}, n)
+  Group(const Tidx& n) : Group({}, n)
   {
   }
   Group() : Group(0)
@@ -78,7 +78,7 @@ public:
     return S->comm->n;
   }
   // operation
-  Group<Telt,Tint> GroupConjugate(Telt const& x) const
+  Group<Telt,Tint> GroupConjugate(const Telt& x) const
   {
     std::vector<Telt> LGen;
     Telt xInv =~x;
@@ -89,23 +89,27 @@ public:
     return Group<Telt,Tint>(LGen, S->comm->n);
   }
   // Action on points or sets
-  Group<Telt,Tint> Stabilizer_OnPoints(Tidx const& x) const
+  Group<Telt,Tint> Stabilizer_OnPoints(const Tidx& x) const
   {
     return Group(Kernel_Stabilizer_OnPoints<Telt,Tint>(S, x));
   }
-  std::pair<bool,Telt> RepresentativeAction_OnPoints(Tidx const& x1, Tidx const& x2) const
+  std::pair<bool,Telt> RepresentativeAction_OnPoints(const Tidx& x1, const Tidx& x2) const
   {
     return Kernel_RepresentativeAction_OnPoints<Telt,Tint>(S, x1, x2);
   }
-  Group<Telt,Tint> Stabilizer_OnSets(Face const& f) const
+  Group<Telt,Tint> Stabilizer_OnSets(const Face& f) const
   {
     return Group(Kernel_Stabilizer_OnSets<Telt,Tint>(S, f));
   }
-  std::pair<bool,Telt> RepresentativeAction_OnSets(Face const& f1, Face const& f2) const
+  std::pair<bool,Telt> RepresentativeAction_OnSets(const Face& f1, const Face& f2) const
   {
     return Kernel_RepresentativeAction_OnSets<Telt,Tint>(S, f1, f2);
   }
-  Face CanonicalImage(Face const& f) const
+  bool operator==(const Group& g) const
+  {
+    return EqualityTest(S, g.S);
+  }
+  Face CanonicalImage(const Face& f) const
   {
     return Kernel_CanonicalImage<Telt,Tint>(S, f);
   }

@@ -685,6 +685,32 @@ Telt SiftedPermutation(StabChain<Telt> const& S, Telt const& g)
 }
 
 
+// Testing that S1 is a subset of S2
+template<typename Telt>
+bool InclusionTest(const StabChain<Telt>& S1, const StabChain<Telt>& S2)
+{
+  for (auto & eGen : Kernel_GeneratorsOfGroup(S1)) {
+    Telt res = SiftedPermutation(S2, eGen);
+    if (!res.isIdentity())
+      return false;
+  }
+  return true;
+}
+
+
+template<typename Telt>
+bool EqualityTest(const StabChain<Telt>& S1, const StabChain<Telt>& S2)
+{
+  if (!InclusionTest(S1,S2))
+    return false;
+  if (!InclusionTest(S2,S1))
+    return false;
+  return true;
+}
+
+
+
+
 template<typename Telt>
 std::vector<typename Telt::Tidx> BaseStabChain(StabChain<Telt> const& S)
 {
@@ -1233,7 +1259,7 @@ void ChooseNextBasePoint(StabChain<Telt> & S, std::vector<typename Telt::Tidx> c
       std::cerr << "The SmallestMovePoint return the maximum value\n";
       std::cerr << "It likely means that there is no smallest moved points.\n";
       std::cerr << "Please debug\n";
-      throw TerminalException{1};
+      throw PermutalibException{1};
     }
 #endif
   }
