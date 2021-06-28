@@ -472,6 +472,7 @@ bool IsTrivialRBase(rbaseType<Telt> const& rbase)
 template<typename Telt>
 rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& IsId, std::vector<typename Telt::Tidx> const& Omega, Partition<typename Telt::Tidx> const& P)
 {
+  using Tidx = typename Telt::Tidx;
   rbaseType<Telt> rbase;
   rbase.domain = Omega;
   rbase.base = {};
@@ -480,7 +481,7 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
   rbase.partition = P;
   rbase.lev = {};
   if (G.size() == 2) {
-    int n = GetNumberPoint(P);
+    Tidx n = GetNumberPoint(P);
     if (IsId) {
       rbase.level2.status = int_true;
       rbase.level2.Stot = EmptyStabChain<Telt>(n);
@@ -625,7 +626,7 @@ std::vector<singStrat<typename Telt::Tidx>> StratMeetPartition(rbaseType<Telt> &
 }
 
 template<typename Telt>
-void AddRefinement(rbaseType<Telt> & rbase, int const& pos, Refinement<typename Telt::Tidx> const& eRfm)
+void AddRefinement(rbaseType<Telt> & rbase, size_t const& pos, Refinement<typename Telt::Tidx> const& eRfm)
 {
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP beginning of AddRefinement\n";
@@ -679,7 +680,7 @@ void RegisterRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt> & rb
   PrintRBaseLevel(rbase, "CPP RegisterRBasePoint 2");
 #endif
   rbase.where.push_back(k);
-  int len=rbase.rfm.size();
+  size_t len=rbase.rfm.size();
   rbase.rfm.push_back({});
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Before P.lengths test k=" << int(k+1) << " len=" << rbase.rfm.size() << "\n";
@@ -1077,7 +1078,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     permPlusBool<Telt> oldprm, oldprm2;
     Tidx a;                // current R-base point
     permPlusBool<Telt> t; // group element constructed, to be handed upwards
-    int m;                // initial number of candidates in <orb>
+    size_t m;                // initial number of candidates in <orb>
     boost::dynamic_bitset<>::size_type max;              // maximal number of candidates still needed
     boost::dynamic_bitset<>::size_type b;        // image of base point currently being considered
 
@@ -1369,7 +1370,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 
     // Only the early points of the orbit have to be considered.
     m = SizeBlist(orB[d] );
-    if (m < int(L_list[d]->orbit.size()) ) {
+    if (m < L_list[d]->orbit.size() ) {
 #ifdef DEBUG_STBCBCKT
       std::cerr << "CPP PBEnumerate, EXIT 6\n";
 #endif
@@ -1387,7 +1388,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 #ifdef DEBUG_STBCBCKT
       std::cerr << "CPP Before test m=" << m << " Length(L[d].orbit)=" << L_list[d]->orbit.size() << "\n";
 #endif
-      if (m < int(L_list[d]->orbit.size()) ) {
+      if (m < L_list[d]->orbit.size() ) {
 #ifdef DEBUG_STBCBCKT
 	std::cerr << "CPP PBEnumerate, EXIT 7\n";
 #endif
@@ -1628,7 +1629,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 #endif
               AddGeneratorsExtendSchreierTree(L_list[dd], {t.val});
             }
-	    if (m < int(L_list[d]->orbit.size())) {
+	    if (m < L_list[d]->orbit.size()) {
 #ifdef DEBUG_STBCBCKT
 	      std::cerr << "CPP PBEnumerate, EXIT 9\n";
 #endif
@@ -1958,14 +1959,14 @@ StabChain<Telt> Kernel_Stabilizer_OnSets(StabChain<Telt> const& G, Face const& P
     if (PhiC.count() > 1) {
       return RepOpSetsPermGroup<Telt,Tint,false>(G, PhiC, PhiC).stab;
     } else {
-      Tidx x = PhiC.find_first();
+      Tidx x = Tidx(PhiC.find_first());
       return Kernel_Stabilizer_OnPoints<Telt,Tint>(G, x);
     }
   } else {
     if (Phi.count() > 1) {
       return RepOpSetsPermGroup<Telt,Tint,false>(G, Phi, Phi).stab;
     } else {
-      Tidx x = Phi.find_first();
+      Tidx x = Tidx(Phi.find_first());
       return Kernel_Stabilizer_OnPoints<Telt,Tint>(G, x);
     }
   }

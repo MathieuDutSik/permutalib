@@ -285,7 +285,8 @@ DoubleSidedPerm<Tidx> operator*(DoubleSidedPerm<Tidx> const& v1, DoubleSidedPerm
   }
 #endif
   std::vector<Tidx> vVal(siz), vRev(siz);
-  for (size_t i=0; i<siz; i++) {
+  Tidx siz_idx = Tidx(siz);
+  for (Tidx i=0; i<siz_idx; i++) {
     Tidx j=v1.at(i);
     Tidx k=v2.at(j);
     vVal[i]=k;
@@ -342,7 +343,8 @@ DoubleSidedPerm<Tidx> LeftQuotient(DoubleSidedPerm<Tidx> const& a, DoubleSidedPe
 {
   size_t siz=a.size();
   std::vector<Tidx> ListVal(siz), ListRev(siz);
-  for (size_t i=0; i<siz; i++) {
+  Tidx siz_idx = Tidx(siz);
+  for (Tidx i=0; i<siz_idx; i++) {
     Tidx i1=a.atRev(i);
     Tidx j1=b.at(i1);
     ListVal[i]=j1;

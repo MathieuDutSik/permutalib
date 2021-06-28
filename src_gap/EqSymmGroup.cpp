@@ -14,23 +14,24 @@ int main(int argc, char *argv[])
       std::cerr << "TestSymmetricGroup [n]\n";
       throw PermutalibException{1};
     }
-    int n;
-    (void)sscanf(argv[1], "%d", &n);
+    int n_pre;
+    (void)sscanf(argv[1], "%d", &n_pre);
+    size_t n = size_t(n_pre);
     //
     // First set of generators
     //
     std::vector<Tidx> ePermV1(n);
-    for (int i=0; i<n; i++) {
-      int iNext=i+1;
+    for (size_t i=0; i<n; i++) {
+      size_t iNext=i+1;
       if (iNext == n)
 	iNext=0;
-      ePermV1[i] = iNext;
+      ePermV1[i] = Tidx(iNext);
     }
     Telt ePerm1(ePermV1);
     //
     std::vector<Tidx> ePermV2(n);
-    for (int i=0; i<n; i++)
-      ePermV2[i] = i;
+    for (size_t i=0; i<n; i++)
+      ePermV2[i] = Tidx(i);
     ePermV2[1]=0;
     ePermV2[0]=1;
     Telt ePerm2(ePermV2);
@@ -43,10 +44,10 @@ int main(int argc, char *argv[])
     std::vector<Telt> LGen_B;
     for (size_t i=0; i<n-1; i++) {
       std::vector<Tidx> ePerm(n);
-      for (int j=0; j<n; j++)
-        ePerm[j] = j;
-      ePerm[i] = i+1;
-      ePerm[i+1] = i;
+      for (size_t j=0; j<n; j++)
+        ePerm[j] = Tidx(j);
+      ePerm[i] = Tidx(i+1);
+      ePerm[i+1] = Tidx(i);
       Telt eElt(ePerm);
       LGen_B.push_back(eElt);
     }

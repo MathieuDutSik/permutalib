@@ -82,7 +82,7 @@ std::vector<Tidx> ListBlist(std::vector<Tidx> const& list, std::vector<int8_t> c
   return ret;
 }
 
-int SizeBlist(Face const& blist)
+size_t SizeBlist(Face const& blist)
 {
   return blist.count();
 }

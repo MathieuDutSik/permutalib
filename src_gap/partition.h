@@ -93,8 +93,8 @@ void CheckConsistencyPartition(std::string const& str, Partition<Tidx> const& P)
     std::cerr << "2: P.firsts and P.lengths have different lengths\n";
     nbError++;
   }
-  Tidx nbPoint=P.cellno.size();
-  Tidx nbPart=P.lengths.size();
+  Tidx nbPoint=Tidx(P.cellno.size());
+  Tidx nbPart=Tidx(P.lengths.size());
   std::vector<Tidx> MeasuredLength(nbPart,0);
   for (Tidx iPoint=0; iPoint<nbPoint; iPoint++) {
     Tidx iPart=P.cellno[iPoint];
@@ -162,13 +162,13 @@ Partition<Tidx> GetPartition(std::vector<std::vector<Tidx>> const& list)
   if (ChangeVal)
     Max_NbPoint++;
   Tidx nbPoint=Max_NbPoint;
-  Tidx nbPart=list.size();
+  Tidx nbPart=Tidx(list.size());
   std::vector<Tidx> firsts(nbPart);
   std::vector<Tidx> lengths(nbPart);
   std::vector<Tidx> cellno(nbPoint, std::numeric_limits<Tidx>::max());
-  int i=0;
-  for (int iPart=0; iPart<nbPart; iPart++) {
-    int len=list[iPart].size();
+  Tidx i=0;
+  for (Tidx iPart=0; iPart<nbPart; iPart++) {
+    Tidx len=Tidx(list[iPart].size());
     firsts[iPart]=i;
     lengths[iPart]=len;
     i += len;
@@ -190,7 +190,7 @@ Partition<Tidx> GetPartition(std::vector<std::vector<Tidx>> const& list)
 template<typename Tidx>
 Tidx GetNumberPoint(Partition<Tidx> const& ePartition)
 {
-  Tidx nbPoint = ePartition.points.size();
+  Tidx nbPoint = Tidx(ePartition.points.size());
   return nbPoint;
 }
 
@@ -198,7 +198,7 @@ Tidx GetNumberPoint(Partition<Tidx> const& ePartition)
 template<typename Tidx>
 Tidx NumberCells(Partition<Tidx> const& ePartition)
 {
-  Tidx nbPart=ePartition.firsts.size();
+  Tidx nbPart=Tidx(ePartition.firsts.size());
   return nbPart;
 }
 
@@ -255,7 +255,7 @@ template<typename Tidx>
 std::vector<Tidx> Fixcells(Partition<Tidx> const& ePartition)
 {
   std::vector<Tidx> fix;
-  Tidx nbPart=ePartition.firsts.size();
+  Tidx nbPart=Tidx(ePartition.firsts.size());
   for (Tidx iPart=0; iPart<nbPart; iPart++) {
     if (ePartition.lengths[iPart] == 1) {
       Tidx eFirst=ePartition.firsts[iPart];

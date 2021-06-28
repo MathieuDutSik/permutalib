@@ -48,8 +48,8 @@ std::string GapStringIntVector(std::vector<Tidx> const& f)
 {
   std::string str;
   str += "[ ";
-  Tidx len=f.size();
-  for (Tidx i=0; i<len; i++) {
+  size_t len=f.size();
+  for (size_t i=0; i<len; i++) {
     if (i>0)
       str += ", ";
     str += std::to_string(f[i]+1);

@@ -1244,7 +1244,7 @@ void ChooseNextBasePoint(StabChain<Telt> & S, std::vector<typename Telt::Tidx> c
   while(true) {
     if (i == len)
       break;
-    int eBas=base[i];
+    Tidx eBas=base[i];
     if (!IsFullyStable(eBas))
       break;
     i++;
@@ -1275,7 +1275,7 @@ void ChooseNextBasePoint(StabChain<Telt> & S, std::vector<typename Telt::Tidx> c
 #ifdef DEBUG_STABCHAIN
   std::cerr << "CPP pnt=" << PosFail_to_string(pnt) << " bpt=" << ConstrainedIntInfinity_to_string(bpt, S->comm->n) << " pos=" << PosFail_to_string(pos) << "\n";
 #endif
-  if ((pos != -1 && i < pos) || (pos == -1 && i<int(base.size())) || (pos == -1 && pnt < bpt)) {
+  if ((pos != -1 && i < pos) || (pos == -1 && i < base.size()) || (pos == -1 && pnt < bpt)) {
 #ifdef DEBUG_STABCHAIN
     std::cerr << "CPP matching test\n";
 #endif
@@ -1970,9 +1970,9 @@ bool TestEqualityStabChain(StabChain<Telt> const& L, StabChain<Telt> const& R)
 
 template<typename Telt>
 void SetStabChainFromLevel(std::vector<StabChain<Telt>> & R_list, std::vector<StabChain<Telt>> const& L_list,
-                           int const& levbegin, int const& levend)
+                           size_t const& levbegin, size_t const& levend)
 {
-  for (int iLev=levbegin; iLev<levend; iLev++)
+  for (size_t iLev=levbegin; iLev<levend; iLev++)
     R_list[iLev] = StructuralCopy(L_list[iLev]);
 }
 
