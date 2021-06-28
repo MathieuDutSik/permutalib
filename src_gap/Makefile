@@ -1,4 +1,4 @@
-PROGRAM	= GapRepresentativeActionOnSet GapStabilizerOnSet TestStabilizerOnSet TestRepresentativeActionOnSet GapEquivalenceOnSet GapCanonicalImage BenchmarkingPermutalib Factorize
+#PROGRAM	= GapRepresentativeActionOnSet GapStabilizerOnSet TestStabilizerOnSet TestRepresentativeActionOnSet GapEquivalenceOnSet GapCanonicalImage BenchmarkingPermutalib Factorize
 #PROGRAM	= EqSymmGroup
 #PROGRAM	= TestStabilizerOnSet
 #PROGRAM	= GapStabilizerOnSet
@@ -8,7 +8,7 @@ PROGRAM	= GapRepresentativeActionOnSet GapStabilizerOnSet TestStabilizerOnSet Te
 #PROGRAM	= GapCanonicalImage
 #PROGRAM	= BenchmarkingPermutalib
 #PROGRAM	= BenchmarkingPermutalib GapCanonicalImage
-#PROGRAM	= Factorize
+PROGRAM	= Factorize
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

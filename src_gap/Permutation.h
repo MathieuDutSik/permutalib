@@ -478,7 +478,7 @@ public:
   SingleSidedPerm(std::vector<Tidx> const& v)
   {
     ListVal=v;
-    siz=v.size();
+    siz=Tidx(v.size());
   }
   SingleSidedPerm(std::vector<Tidx> const& v1, std::vector<Tidx> const& v2)
   {

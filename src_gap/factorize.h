@@ -10,7 +10,7 @@ namespace permutalib {
   template<typename T>
   T gcd(T a, T b)
   {
-    int remainder;
+    T remainder;
     while (b != 0) {
       remainder = a % b;
       a = b;
@@ -22,7 +22,7 @@ namespace permutalib {
   template<typename T>
   std::pair<bool, T> rho_pollard_factorize(T const& number)
   {
-    int loop = 1, count;
+    T count;
     T x_fixed = 2, x = 2, size = 2, factor, diff;
     do {
       count = size;
@@ -35,7 +35,6 @@ namespace permutalib {
       } while (--count && (factor == 1));
       size *= 2;
       x_fixed = x;
-      loop = loop + 1;
     } while (factor == 1);
     if (factor == number) {
       return {false, -1};

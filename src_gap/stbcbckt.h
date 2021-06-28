@@ -1770,11 +1770,12 @@ Face Difference_face(Face const& Phi, std::vector<Tidx> const& Omega)
 template<typename Telt>
 Face OnSets(Face const& f, Telt const& g)
 {
-  int n=f.size();
+  using Tidx=typename Telt::Tidx;
+  size_t n=f.size();
   Face fRet(n);
   boost::dynamic_bitset<>::size_type b = f.find_first();
   while (b != boost::dynamic_bitset<>::npos) {
-    int eImg=g.at(b);
+    Tidx eImg=g.at(b);
     fRet[eImg]=1;
     b = f.find_next(b);
   }
@@ -1866,7 +1867,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, Face const& Phi, Fa
   std::vector<int> Phi_vect = FaceToVector(Phi);
   std::function<bool(Telt const&)> Pr=[&](Telt const& gen) -> bool {
     for (auto & i : Phi_vect) {
-      int iImg=gen.at(i);
+      Tidx iImg=gen.at(i);
       if (Psi[iImg] == 0)
 	return false;
     }

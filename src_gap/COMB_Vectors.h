@@ -149,8 +149,8 @@ std::vector<T> Filtered(std::vector<T> const& V, UnaryPredicate const& f)
 template<typename T, class UnaryPredicate>
 int PositionProperty(std::vector<T> const& V, UnaryPredicate const& f)
 {
-  int len=V.size();
-  for (int i=0; i<len; i++)
+  size_t len=V.size();
+  for (size_t i=0; i<len; i++)
     if (f(V[i]))
       return i;
   return -1;
@@ -185,18 +185,19 @@ std::vector<T> DifferenceVect(std::vector<T> const& V1, std::vector<T> const& V2
 template<typename T>
 bool IsSubset(std::vector<T> const& S1, std::vector<T> const& S2)
 {
-  for (auto & eVal : S2) {
-    int pos=PositionVect(S1, eVal);
-    if (pos == -1)
+  std::unordered_set<T> eSet;
+  for (auto & eVal : S1)
+    eSet.insert(eVal);
+  for (auto & eVal : S2)
+    if (eSet.count(eVal) == 0)
       return false;
-  }
   return true;
 }
 
 template<typename T>
 std::vector<T> VectorAsSet(std::vector<T> const& V)
 {
-  std::unordered_set<T> eSet;
+  std::set<T> eSet;
   for (auto & eVal : V)
     eSet.insert(eVal);
   std::vector<T> eV;
