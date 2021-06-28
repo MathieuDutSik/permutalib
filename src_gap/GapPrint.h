@@ -23,8 +23,8 @@ std::string GapStringTVector(std::vector<T> const& f)
 {
   std::ostringstream os;
   os << "[ ";
-  int len=f.size();
-  for (int i=0; i<len; i++) {
+  size_t len=f.size();
+  for (size_t i=0; i<len; i++) {
     if (i>0)
       os << ", ";
     os << f[i];
@@ -81,8 +81,8 @@ std::string GapStringBoolVector(Face const& f)
 {
   std::string str;
   str += "[ ";
-  int len=f.size();
-  for (int i=0; i<len; i++) {
+  size_t len=f.size();
+  for (size_t i=0; i<len; i++) {
     if (i>0)
       str += ", ";
     if (f[i])
@@ -98,8 +98,8 @@ std::string GapStringBoolVector(Face const& f)
 std::string GapStringSetBoolVector(Face const& f)
 {
   std::vector<int> eS;
-  int len=f.size();
-  for (int i=0; i<len; i++)
+  size_t len=f.size();
+  for (size_t i=0; i<len; i++)
     if (f[i])
       eS.push_back(i);
   return GapStringIntVector(eS);
@@ -123,8 +123,8 @@ std::string GapStringBoolVectorB(std::vector<int8_t> const& f)
 {
   std::string str;
   str += "[ ";
-  int len=f.size();
-  for (int i=0; i<len; i++) {
+  size_t len=f.size();
+  for (size_t i=0; i<len; i++) {
     if (i>0)
       str += ", ";
     if (f[i] == 1)

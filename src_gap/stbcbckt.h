@@ -1016,8 +1016,8 @@ Telt MappingPermListList(typename Telt::Tidx const& n, std::vector<typename Telt
 std::string GetStringGAP(Face const& f)
 {
   std::string str = "[ ";
-  int len=f.size();
-  for (int i=0; i<len; i++) {
+  size_t len=f.size();
+  for (size_t i=0; i<len; i++) {
     if (i>0)
       str += ", ";
     if (f[i])

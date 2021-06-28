@@ -125,14 +125,14 @@ public:
   DoubleSidedPerm(std::vector<Tidx> const& v)
   {
     ListVal = v;
-    siz=v.size();
+    siz=Tidx(v.size());
     ListRev.resize(siz);
     for (Tidx i=0; i<siz; i++)
       ListRev[v[i]]=i;
   }
   DoubleSidedPerm(std::vector<Tidx> const& v1, std::vector<Tidx> const& v2)
   {
-    siz=v1.size();
+    siz=Tidx(v1.size());
     ListVal=v1;
     ListRev=v2;
   }
@@ -174,7 +174,7 @@ public:
   {
   }
   //
-  // The destructor
+  // The functionality
   //
   bool isIdentity() const
   {
@@ -199,7 +199,6 @@ public:
   {
     return ListVal;
   }
-  
   std::vector<Tidx> getListRev() const
   {
     return ListRev;

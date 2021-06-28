@@ -525,7 +525,7 @@ StabChain<Telt> EmptyStabChain(typename Telt::Tidx const& n)
 
 
 template<typename Telt>
-StabChain<Telt> EmptyStabChainPlusNode(int const& n, typename Telt::Tidx const& bas)
+StabChain<Telt> EmptyStabChainPlusNode(typename Telt::Tidx const& n, typename Telt::Tidx const& bas)
 {
   StabChain<Telt> S = EmptyStabChain<Telt>(n);
   InitializeSchreierTree(S, bas);
@@ -877,7 +877,7 @@ std::vector<Telt> ElementsStabChain(StabChain<Telt> const& Stot)
 // is base is empty then this just replaces the IsBound(options.base)
 template<typename Tint, typename Tidx>
 struct StabChainOptions {
-  int n;
+  Tidx n;
   std::vector<Tidx> base;
   std::vector<Tidx> knownBase;
   int random;
@@ -1114,9 +1114,9 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
     Swrite = Swrite->stabilizer;
   }
 #endif
-  int nbLabel=S->comm->labels.size();
+  size_t nbLabel=S->comm->labels.size();
   std::vector<int> ListAtt(nbLabel);
-  for (int i=0; i<nbLabel; i++)
+  for (size_t i=0; i<nbLabel; i++)
     ListAtt[i] = i;
   Face old=BlistList(ListAtt, S->genlabels);
   old[0]=true;
@@ -1239,8 +1239,8 @@ void ChooseNextBasePoint(StabChain<Telt> & S, std::vector<typename Telt::Tidx> c
     }
     return true;
   };
-  int i = 0;
-  int len=base.size();
+  size_t i = 0;
+  size_t len=base.size();
   while(true) {
     if (i == len)
       break;

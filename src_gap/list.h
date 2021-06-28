@@ -11,10 +11,10 @@ namespace permutalib {
 template<typename T>
 std::vector<T> Reversed(std::vector<T> const& eList)
 {
-  int len=eList.size();
+  size_t len=eList.size();
   std::vector<T> retList(len);
-  for (int u=0; u<len; u++) {
-    int pos=len - 1 - u;
+  for (size_t u=0; u<len; u++) {
+    size_t pos=len - 1 - u;
     retList[pos] = eList[u];
   }
   return retList;
@@ -25,9 +25,10 @@ std::vector<T> Reversed(std::vector<T> const& eList)
 template<typename Tidx>
 std::vector<Tidx> ClosedInterval(Tidx const& begin, Tidx const& end)
 {
-  std::vector<Tidx> clInt;
-  for (Tidx u=begin; u<end; u++)
-    clInt.push_back(u);
+  size_t len = end - begin;
+  std::vector<Tidx> clInt(len);
+  for (size_t u=0; u<len; u++)
+    clInt[u] = Tidx(u + begin);
   return clInt;
 }
 
@@ -35,7 +36,7 @@ std::vector<Tidx> ClosedInterval(Tidx const& begin, Tidx const& end)
 template<typename Tidx>
 Face BlistList(std::vector<Tidx> const& list, std::vector<Tidx> const& sub)
 {
-  int len=list.size();
+  size_t len=list.size();
 #ifdef SYNCHRONIZED_DEBUG_GAP478
   std::cerr << "DEBUG list=" << GapStringTVectorB(list) << "\n";
   std::cerr << "DEBUG sub=" << GapStringTVectorB(sub) << "\n";
@@ -88,8 +89,8 @@ int SizeBlist(Face const& blist)
 
 bool IsSubsetBlist(Face const& a, Face const& b)
 {
-  int siz=a.size();
-  for (int i=0; i<siz; i++) {
+  size_t siz=a.size();
+  for (size_t i=0; i<siz; i++) {
     if (b[i] == 1 && a[i] == 0)
       return false;
   }
@@ -100,8 +101,8 @@ bool IsSubsetBlist(Face const& a, Face const& b)
 
 void UniteBlist(Face & a, Face const& b)
 {
-  int siz=a.size();
-  for (int i=0; i<siz; i++) {
+  size_t siz=a.size();
+  for (size_t i=0; i<siz; i++) {
     if (b[i] == 1)
       a[i]=1;
   }
@@ -111,8 +112,8 @@ void UniteBlist(Face & a, Face const& b)
 
 void IntersectBlist(Face & a, Face const& b)
 {
-  int siz=a.size();
-  for (int i=0; i<siz; i++) {
+  size_t siz=a.size();
+  for (size_t i=0; i<siz; i++) {
     int val=0;
     if (a[i] == 1 && b[i] == 1)
       val=1;
@@ -123,8 +124,8 @@ void IntersectBlist(Face & a, Face const& b)
 
 void SubtractBlist(Face & a, Face const& b)
 {
-  int siz=a.size();
-  for (int i=0; i<siz; i++) {
+  size_t siz=a.size();
+  for (size_t i=0; i<siz; i++) {
     if (b[i] == 1)
       a[i]=0;
   }

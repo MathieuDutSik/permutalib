@@ -19,10 +19,10 @@ GraphSparseImmutable(int const& _nbVert, std::vector<int> const& _ListStart, std
   GraphSparseImmutable(std::vector<int> const& ListEdge, int const& _nbVert) : nbVert(_nbVert)
   {
     HasVertexColor=false;
-    int nbEdge=ListEdge.size()/2;
+    size_t nbEdge=ListEdge.size()/2;
     std::vector<int> ListDeg(nbVert,0);
-    for (int iEdge=0; iEdge<nbEdge; iEdge++)
-      for (int i=0; i<2; i++) {
+    for (size_t iEdge=0; iEdge<nbEdge; iEdge++)
+      for (size_t i=0; i<2; i++) {
 	int eVert=ListEdge[2*iEdge+i];
 	ListDeg[eVert]++;
       }
@@ -35,9 +35,9 @@ GraphSparseImmutable(int const& _nbVert, std::vector<int> const& _ListStart, std
     }
     std::vector<int> ListPos(nbVert,0);
     ListListAdj.resize(nbAdj,0);
-    for (int iEdge=0; iEdge<nbEdge; iEdge++)
-      for (int i=0; i<2; i++) {
-	int j=1-i;
+    for (size_t iEdge=0; iEdge<nbEdge; iEdge++)
+      for (size_t i=0; i<2; i++) {
+	size_t j=1-i;
 	int eVert=ListEdge[2*iEdge+i];
 	int fVert=ListEdge[2*iEdge+j];
 	int eStart=ListStart[eVert];

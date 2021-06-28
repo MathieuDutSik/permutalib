@@ -15,10 +15,10 @@ typedef boost::dynamic_bitset<> Face;
 
 std::vector<int> FaceToVector(Face const& eSet)
 {
-  int nbVert=eSet.count();
+  size_t nbVert=eSet.count();
   std::vector<int> eList(nbVert);
-  int aRow=eSet.find_first();
-  for (int i=0; i<nbVert; i++) {
+  size_t aRow=eSet.find_first();
+  for (size_t i=0; i<nbVert; i++) {
     eList[i]=aRow;
     aRow=eSet.find_next(aRow);
   }
@@ -46,8 +46,8 @@ Face ReadFace(std::istream & is)
 // We require x and y to be of the same size
 bool operator<(Face const& x, Face const& y)
 {
-  int len=x.size();
-  for (int i=0; i<len; i++) {
+  size_t len=x.size();
+  for (size_t i=0; i<len; i++) {
     if (x[i] == 0 && y[i] == 1)
       return true;
     if (x[i] == 1 && y[i] == 0)
