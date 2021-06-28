@@ -277,7 +277,7 @@ DoubleSidedPerm<Tidx> operator~(DoubleSidedPerm<Tidx> const& ePerm)
 template<typename Tidx>
 DoubleSidedPerm<Tidx> operator*(DoubleSidedPerm<Tidx> const& v1, DoubleSidedPerm<Tidx> const& v2)
 {
-  int siz=v1.size();
+  size_t siz=v1.size();
 #ifdef DEBUG
   if (siz != v2.size() ) {
     std::cerr << "Error in the DoubleSidedPerm product\n";
@@ -285,13 +285,13 @@ DoubleSidedPerm<Tidx> operator*(DoubleSidedPerm<Tidx> const& v1, DoubleSidedPerm
   }
 #endif
   std::vector<Tidx> vVal(siz), vRev(siz);
-  for (int i=0; i<siz; i++) {
-    int j=v1.at(i);
-    int k=v2.at(j);
+  for (size_t i=0; i<siz; i++) {
+    Tidx j=v1.at(i);
+    Tidx k=v2.at(j);
     vVal[i]=k;
     //
-    int j2=v2.atRev(i);
-    int k2=v1.atRev(j2);
+    Tidx j2=v2.atRev(i);
+    Tidx k2=v1.atRev(j2);
     vRev[i]=k2;
   }
   return DoubleSidedPerm<Tidx>(vVal, vRev);
@@ -302,7 +302,7 @@ DoubleSidedPerm<Tidx> operator*(DoubleSidedPerm<Tidx> const& v1, DoubleSidedPerm
 template<typename Tidx>
 DoubleSidedPerm<Tidx> Conjugation(DoubleSidedPerm<Tidx> const& v1, DoubleSidedPerm<Tidx> const& v2)
 {
-  int siz=v1.size();
+  size_t siz=v1.size();
 #ifdef DEBUG
   if (siz != v2.size() ) {
     std::cerr << "Error in the DoubleSidedPerm conjugation\n";
@@ -310,7 +310,7 @@ DoubleSidedPerm<Tidx> Conjugation(DoubleSidedPerm<Tidx> const& v1, DoubleSidedPe
   }
 #endif
   std::vector<Tidx> v(siz);
-  for (int i=0; i<siz; i++) {
+  for (size_t i=0; i<siz; i++) {
     int j=v1[i];
     int i2=v2[i];
     int j2=v2[j];
@@ -340,14 +340,14 @@ Tidx SlashAct(Tidx const& i, DoubleSidedPerm<Tidx> const& g)
 template<typename Tidx>
 DoubleSidedPerm<Tidx> LeftQuotient(DoubleSidedPerm<Tidx> const& a, DoubleSidedPerm<Tidx> const& b)
 {
-  int siz=a.size();
+  size_t siz=a.size();
   std::vector<Tidx> ListVal(siz), ListRev(siz);
-  for (int i=0; i<siz; i++) {
-    int i1=a.atRev(i);
-    int j1=b.at(i1);
+  for (size_t i=0; i<siz; i++) {
+    Tidx i1=a.atRev(i);
+    Tidx j1=b.at(i1);
     ListVal[i]=j1;
-    int i2=b.atRev(i);
-    int j2=a.at(i2);
+    Tidx i2=b.atRev(i);
+    Tidx j2=a.at(i2);
     ListRev[i]=j2;
   }
   return DoubleSidedPerm<Tidx>(ListVal, ListRev);
