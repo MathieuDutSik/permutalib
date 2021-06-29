@@ -38,7 +38,7 @@ namespace permutalib {
     // we use. Swaps only apply when the memory is copied in a chunk.
     h ^= murmur_32_scramble(k);
     /* Finalize. */
-    h ^= len;
+    h ^= uint32_t(len);
     h ^= h >> 16;
     h *= 0x85ebca6b;
     h ^= h >> 13;
