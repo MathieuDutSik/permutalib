@@ -1334,7 +1334,7 @@ void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, Stab
   }
 
   // # Compute the Schreier generators (seems to work better backwards).
-  std::vector<Tidx> pnts = ClosedInterval<Tidx>(0, S->orbit.size());
+  std::vector<Tidx> pnts = ClosedInterval<Tidx>(0, Tidx(S->orbit.size()));
   if (S->IsBoundCycle)
     pnts = ListBlist(pnts, S->cycles);
 #ifdef DEBUG_STABCHAIN
@@ -1359,7 +1359,7 @@ void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, Stab
 #ifdef DEBUG_STABCHAIN
     std::cerr << "CPP StabChainStrong gen1=" << int(gen1+1) << " rep=" << rep << "\n";
 #endif
-    for (Tidx & j : ClosedInterval<Tidx>(gen1, S->genlabels.size())) {
+    for (Tidx & j : ClosedInterval<Tidx>(gen1, Tidx(S->genlabels.size()))) {
       Telt g = S->comm->labels[ S->genlabels[j] ];
 #ifdef DEBUG_STABCHAIN
       std::cerr << "CPP StabChainStrong   j=" << int(j+1) << " g=" << g << "\n";

@@ -60,7 +60,7 @@ std::pair<std::vector<std::vector<size_t>>,std::vector<Face>> Blocks_Kernel(std:
     }
     return false;
   };
-  int sizOrb=SeedOrbit.size();
+  size_t sizOrb=SeedOrbit.size();
   std::vector<size_t> ListEdge;
   for (size_t u=0; u<sizOrb; u++)
     for (size_t v=u+1; v<sizOrb; v++) {
@@ -109,10 +109,10 @@ std::vector<std::vector<int>> Blocks_from_seed(std::vector<Telt> const& ListGen,
 template<typename Telt>
 std::vector<std::vector<int>> Blocks_without_seed(std::vector<Telt> const& ListGen, std::vector<int> const& Omega)
 {
-  int n=Omega.size();
-  int nbTotalEdge=n * (n-1) / 2;
+  size_t n=Omega.size();
+  size_t nbTotalEdge=n * (n-1) / 2;
   Face UsedEdge(nbTotalEdge);
-  int ThePos=0;
+  size_t ThePos=0;
   auto UpdatePosition=[&]() -> bool {
     while(true) {
       if (UsedEdge[ThePos] == 0)
