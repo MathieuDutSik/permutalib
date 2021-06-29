@@ -17,13 +17,14 @@ int main(int argc, char *argv[])
       throw PermutalibException{1};
     }
     std::ifstream is(argv[1]);
-    int nbGen, n;
+    int nbGen;
+    Tidx n;
     is >> nbGen;
     is >> n;
     std::vector<Telt> LGen(nbGen);
     for (int iGen=0; iGen<nbGen; iGen++) {
       std::vector<Tidx> ePermV(n);
-      for (int i=0; i<n; i++) {
+      for (Tidx i=0; i<n; i++) {
 	Tidx eVal;
 	is >> eVal;
 	ePermV[i]=eVal;
@@ -43,7 +44,7 @@ int main(int argc, char *argv[])
     std::cerr << "CPP |eG|=" << eG.size() << "\n";
     //
     permutalib::Face eFace(n);
-    for (int i=0; i<n; i++) {
+    for (Tidx i=0; i<n; i++) {
       int eVal;
       is >> eVal;
       eFace[i] = eVal;

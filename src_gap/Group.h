@@ -40,7 +40,7 @@ public:
   Group(const StabChain<Telt>& _S) : S(_S), size_tint(Order<Telt,Tint>(_S))
   {
   }
-  Group(const std::vector<Telt>& LGen, const int& n)
+  Group(const std::vector<Telt>& LGen, const Tidx& n)
   {
 #ifdef DEBUG_STABCHAINMAIN
     std::cerr << "CPP Beginning of MinimalStabChain\n";

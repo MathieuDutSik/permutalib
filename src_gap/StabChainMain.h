@@ -104,7 +104,7 @@ Tint Order(StabChain<Telt> const& G)
 
 
 template<typename Telt, typename Tint>
-StabChain<Telt> MinimalStabChain(std::vector<Telt> const& LGen, int const& n)
+StabChain<Telt> MinimalStabChain(std::vector<Telt> const& LGen, typename Telt::Tidx const& n)
 {
 #ifdef DEBUG_STABCHAINMAIN
   std::cerr << "CPP Beginning of MinimalStabChain\n";

@@ -570,13 +570,13 @@ std::vector<singStrat<typename Telt::Tidx>> StratMeetPartition(rbaseType<Telt> &
     // now split with cell number s of S.
     std::vector<Tidx> p=Cell(S, s);
 
-    std::vector<int> p2;
+    std::vector<Tidx> p2;
     for (auto & eVal : p)
       p2.push_back(cellsP[eVal]);
     //    PrintVectDebug("p2", p2);
-    CollectedResult<int> p3=Collected(p2);
+    CollectedResult<Tidx> p3=Collected(p2);
     std::vector<Tidx> splits;
-    for (int h=0; h<int(p3.LVal.size()); h++) {
+    for (size_t h=0; h<p3.LVal.size(); h++) {
       // a cell will split iff it contains more points than are in the s-cell
       if (P.lengths[p3.LVal[h]] > p3.LMult[h])
         splits.push_back(p3.LVal[h]);
@@ -1793,7 +1793,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, Face const& Phi, Fa
   std::cerr << "CPP Beginning of RepOpSetsPermGroup\n";
   PrintStabChain(G);
 #endif
-  int n=G->comm->n;
+  Tidx n=G->comm->n;
   std::vector<Tidx> Omega = MovedPoints(G);
   //  int n_phi = Phi.size();
   //  std::cerr << "n_phi=" << n_phi << " n=" << n << "\n";

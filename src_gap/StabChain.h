@@ -888,7 +888,7 @@ struct StabChainOptions {
 
 
 template<typename Tint, typename Tidx>
-StabChainOptions<Tint,Tidx> GetStandardOptions(int const& n)
+StabChainOptions<Tint,Tidx> GetStandardOptions(Tidx const& n)
 {
   std::vector<Tidx> base;
   std::vector<Tidx> knownBase;
@@ -1134,7 +1134,7 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
       S->comm->labels.push_back(gen);
       old.push_back(false);
       ald.push_back(true);
-      int posG=S->comm->labels.size() - 1;
+      int posG=int(S->comm->labels.size()) - 1;
 #ifdef DEBUG_ADD_GEN_SCH
       std::cerr << "CPP AGEST  genlabels insert 1:\n";
 #endif
