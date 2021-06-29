@@ -646,7 +646,7 @@ void AddRefinement(rbaseType<Telt> & rbase, size_t const& pos, Refinement<typena
 
 
 template<typename Telt>
-void RegisterRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt> & rbase, int const& pnt, Telt const& TheId)
+void RegisterRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt> & rbase, typename Telt::Tidx const& pnt, Telt const& TheId)
 {
   using Tidx=typename Telt::Tidx;
   if (rbase.level2.status != int_true && rbase.level2.status != int_false) {
@@ -789,7 +789,7 @@ void NextRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt> & rbase,
       k++;
     }
   }
-  int p = P.points[ P.firsts[ order[k] ] + l ];
+  Tidx p = P.points[ P.firsts[ order[k] ] + l ];
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP p=" << int(p+1) << "\n";
   NicePrintPartition("CPP Before RegisterRBasePoint P", P);

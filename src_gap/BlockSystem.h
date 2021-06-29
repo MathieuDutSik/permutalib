@@ -39,7 +39,7 @@ std::pair<std::vector<std::vector<int>>,std::vector<Face>> Blocks_Kernel(std::ve
   std::function<Face(Face const&,Telt const&)> act=[&](Face const& x, Telt const& eElt) -> Face {
     Face eImg(n);
     int siz=x.count();
-    int ePt=x.find_first();
+    boost::dynamic_bitset<>::size_type ePt=x.find_first();
     for (int u=0; u<siz; u++) {
       int ePtImg=eElt.at(ePt);
       eImg[ePtImg]=1;
@@ -51,7 +51,7 @@ std::pair<std::vector<std::vector<int>>,std::vector<Face>> Blocks_Kernel(std::ve
   // Building the adjacency graph
   auto IsIntersecting=[&](Face const& face1, Face const& face2) -> bool {
     int siz=face1.count();
-    int ePt=face1.find_first();
+    boost::dynamic_bitset<>::size_type ePt=face1.find_first();
     for (int u=0; u<siz; u++) {
       if (face2[ePt] == 1)
 	return true;
@@ -76,7 +76,7 @@ std::pair<std::vector<std::vector<int>>,std::vector<Face>> Blocks_Kernel(std::ve
     for (auto & iElt : eConn) {
       Face eFace = SeedOrbit[iElt];
       int siz=eFace.count();
-      int ePt=eFace.find_first();
+      boost::dynamic_bitset<>::size_type ePt=eFace.find_first();
       for (int u=0; u<siz; u++) {
 	eFaceComb[ePt]=1;
 	ePt = eFace.find_next(ePt);
@@ -84,7 +84,7 @@ std::pair<std::vector<std::vector<int>>,std::vector<Face>> Blocks_Kernel(std::ve
     }
     std::vector<int> eBlock;
     int blkSiz=eFaceComb.count();
-    int ePt=eFaceComb.find_first();
+    boost::dynamic_bitset<>::size_type ePt=eFaceComb.find_first();
     for (int u=0; u<blkSiz; u++) {
       eBlock.push_back(Omega[ePt]);
       ePt = eFaceComb.find_next(ePt);

@@ -80,10 +80,10 @@ typename Telt::Tidx OnPoints(typename Telt::Tidx const& val, Telt const& g)
 }
 
 
-template<typename T, typename Tidx>
-void AssignationVectorGapStyle(std::vector<T> & eVect, Tidx const& pos, T const& val)
+template<typename T>
+void AssignationVectorGapStyle(std::vector<T> & eVect, size_t const& pos, T const& val)
 {
-  Tidx siz=eVect.size();
+  size_t siz=eVect.size();
   if (pos < siz) {
     eVect[pos] = val;
     return;

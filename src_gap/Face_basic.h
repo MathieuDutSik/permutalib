@@ -17,7 +17,7 @@ std::vector<int> FaceToVector(Face const& eSet)
 {
   size_t nbVert=eSet.count();
   std::vector<int> eList(nbVert);
-  size_t aRow=eSet.find_first();
+  boost::dynamic_bitset<>::size_type aRow=eSet.find_first();
   for (size_t i=0; i<nbVert; i++) {
     eList[i]=aRow;
     aRow=eSet.find_next(aRow);

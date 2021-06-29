@@ -407,7 +407,7 @@ Tidx IsolatePoint(Partition<Tidx> & P, Tidx const& a)
   std::cerr << "CPP Input Partition\n";
   RawPrintPartition(P);
 #endif
-  Tidx nbPart=P.firsts.size();
+  Tidx nbPart=Tidx(P.firsts.size());
   Tidx iPart=P.cellno[a];
   Tidx eFirst=P.firsts[iPart];
   Tidx len=P.lengths[iPart];
@@ -420,7 +420,7 @@ Tidx IsolatePoint(Partition<Tidx> & P, Tidx const& a)
     if (ePt == a)
       pos=j;
   }
-  int l=eFirst + len-1;
+  Tidx l=eFirst + len - Tidx(1);
   //  std::cerr << "pos=" << pos << " l=" << l << "\n";
   P.points[pos] = P.points[l];
   P.points[l]=a;
@@ -448,7 +448,7 @@ Tidx UndoRefinement(Partition<Tidx> & P)
 #ifdef CHECK_PARTITION
   CheckConsistencyPartition("Input UndoRefinement", P);
 #endif
-  Tidx nbPart=P.firsts.size();
+  Tidx nbPart=Tidx(P.firsts.size());
   Tidx pfm=P.firsts[nbPart-1];
   if (pfm == 0)
     return std::numeric_limits<Tidx>::max();
