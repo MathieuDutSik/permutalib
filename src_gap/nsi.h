@@ -84,14 +84,15 @@ struct ResultCanonicalization {
 template<typename Telt,typename T>
 Telt PermListList(std::vector<T> const& list1, std::vector<T> const& list2)
 {
+  using Tidx=typename Telt::Tidx;
   std::unordered_map<T,int> eMap;
-  int siz = list2.size();
-  for (int i=0; i<siz; i++) {
+  size_t siz = list2.size();
+  for (size_t i=0; i<siz; i++) {
     eMap[list1[i]] = i;
   }
   //
-  std::vector<int> eList;
-  for (int i=0; i<siz; i++)
+  std::vector<Tidx> eList(siz);
+  for (size_t i=0; i<siz; i++)
     eList[i] = eMap[list2[i]];
   return Telt(eList);
 }
@@ -103,8 +104,8 @@ template<typename Telt, typename Tint>
 StabChain<Telt> Action(StabChain<Telt> const& S, std::vector<typename Telt::Tidx> const& set)
 {
   using Tidx = typename Telt::Tidx;
-  int n = S->comm->n;
-  Tidx siz = set.size();
+  Tidx n = S->comm->n;
+  Tidx siz = Tidx(set.size());
   std::vector<Tidx> map_idx(n, 0);
   for (Tidx i=0; i<siz; i++)
     map_idx[set[i]] = i;
@@ -132,6 +133,14 @@ std::vector<Tidx> OnTuples(std::vector<Tidx> const& V, Telt const& g)
   for (Tidx i=0; i<len; i++)
     retV[i] = PowAct(V[i], g);
   return retV;
+}
+
+template<typename Telt, typename Tidx>
+void  OnTuples_inplace(std::vector<Tidx> & V, Telt const& g)
+{
+  size_t len = V.size();
+  for (size_t i=0; i<len; i++)
+    V[i] = PowAct(V[i], g);
 }
 
 
@@ -744,8 +753,8 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::
           std::vector<Tidx> image = node->image;
           if (image[x] != upb) {
             while (true) {
-              Telt g = s->comm->labels[s->transversal[image[x]]];
-              image = OnTuples(image, g);
+              const Telt& g = s->comm->labels[s->transversal[image[x]]];
+              OnTuples_inplace(image, g);
               if (image[x] == upb)
                 break;
             }
