@@ -74,11 +74,10 @@ template<typename Tidx>
 std::vector<Tidx> ListBlist(std::vector<Tidx> const& list, std::vector<int8_t> const& blist)
 {
   std::vector<Tidx> ret;
-  Tidx len=list.size();
-  for (Tidx i=0; i<len; i++) {
+  size_t len=list.size();
+  for (size_t i=0; i<len; i++)
     if (blist[i] == 1)
       ret.push_back(list[i]);
-  }
   return ret;
 }
 

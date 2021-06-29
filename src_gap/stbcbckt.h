@@ -988,24 +988,25 @@ template<typename Telt>
 Telt MappingPermListList(typename Telt::Tidx const& n, std::vector<typename Telt::Tidx> const& src, std::vector<typename Telt::Tidx> const& dst)
 {
   using Tidx = typename Telt::Tidx;
-  std::vector<Tidx> ListImage(n);
-  Face StatusSrc(n);
-  Face StatusDst(n);
-  for (Tidx i=0; i<n; i++) {
+  size_t n_sz = size_t(n);
+  std::vector<Tidx> ListImage(n_sz);
+  Face StatusSrc(n_sz);
+  Face StatusDst(n_sz);
+  for (size_t i=0; i<n_sz; i++) {
     StatusSrc[i]=1;
     StatusDst[i]=1;
   }
-  Tidx len = src.size();
-  for (Tidx i=0; i<len; i++) {
+  size_t len = src.size();
+  for (size_t i=0; i<len; i++) {
     ListImage[src[i]] = dst[i];
     StatusSrc[src[i]] = 0;
     StatusDst[dst[i]] = 0;
   }
-  Tidx sizRemain = n - len;
+  size_t sizRemain = n_sz - len;
   boost::dynamic_bitset<>::size_type posSrc=StatusSrc.find_first();
   boost::dynamic_bitset<>::size_type posDst=StatusDst.find_first();
-  for (Tidx u=0; u<sizRemain; u++) {
-    ListImage[posSrc] = posDst;
+  for (size_t u=0; u<sizRemain; u++) {
+    ListImage[posSrc] = Tidx(posDst);
     posSrc=StatusSrc.find_next(posSrc);
     posDst=StatusDst.find_next(posDst);
   }

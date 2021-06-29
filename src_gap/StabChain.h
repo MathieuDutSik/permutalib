@@ -1310,8 +1310,8 @@ void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, Stab
 #endif
 
   Tidx pnt = S->orbit[0];
-  Tidx len = S->orbit.size();
-  int old = S->genlabels.size();
+  Tidx len = Tidx(S->orbit.size());
+  Tidx old = Tidx(S->genlabels.size());
 #ifdef DEBUG_STABCHAIN
   std::cerr << "CPP Before AddGeneratorsExtendSchreierTree\n";
 #endif
@@ -1344,7 +1344,7 @@ void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, Stab
     std::cerr << "CPP cycles=" << GapStringBoolVectorB(S->cycles) << "\n";
   }
 #endif
-  int gen1=0;
+  Tidx gen1=0;
 #ifdef DEBUG_STABCHAIN
   std::cerr << "CPP StabChainStrong O=" << GapStringIntVector(S->orbit) << "\n";
 #endif

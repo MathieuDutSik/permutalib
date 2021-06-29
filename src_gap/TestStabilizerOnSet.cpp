@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     for (int iGen=0; iGen<nbGen; iGen++) {
       std::vector<Tidx> ePermV(n);
       for (int i=0; i<n; i++) {
-	int eVal;
+	Tidx eVal;
 	is >> eVal;
 	ePermV[i]=eVal;
       }
