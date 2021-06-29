@@ -1866,7 +1866,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, Face const& Phi, Fa
   //#ifdef DEBUG_STBCBCKT
   //  std::cerr << "CPP RepOpSetsPermGroup rbase.level2.status=" << GetIntTypeNature(rbase.level2.status) << "\n";
   //#endif
-  std::vector<int> Phi_vect = FaceToVector(Phi);
+  std::vector<Tidx> Phi_vect = FaceToVector<Tidx>(Phi);
   std::function<bool(Telt const&)> Pr=[&](Telt const& gen) -> bool {
     for (auto & i : Phi_vect) {
       Tidx iImg=gen.at(i);

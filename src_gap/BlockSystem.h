@@ -152,7 +152,7 @@ std::vector<std::vector<int>> Blocks_without_seed(std::vector<Telt> const& ListG
       return ePair.first;
     }
     for (auto & eEdgeFace : ePair.second) {
-      std::vector<int> eEdge = FaceToVector(eEdgeFace);
+      std::vector<int> eEdge = FaceToVector<int>(eEdgeFace);
       int pos=GetPosFromEdge(eEdge);
       UsedEdge[pos]=1;
     }
