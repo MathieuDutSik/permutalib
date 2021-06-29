@@ -112,10 +112,11 @@ void PrintVectDebug(std::string const& str, std::vector<T> const& V)
 template<typename T, typename Telt>
 std::vector<T> PermutedAct(std::vector<T> const& V, Telt const& g)
 {
-  int len=V.size();
+  using Tidx=typename Telt::Tidx;
+  Tidx len=Tidx(V.size());
   std::vector<T> Vret(len);
-  for (int i=0; i<len; i++) {
-    int iImg=g.at(i);
+  for (Tidx i=0; i<len; i++) {
+    Tidx iImg=g.at(i);
     Vret[iImg] = V[i];
   }
   return Vret;
@@ -123,10 +124,10 @@ std::vector<T> PermutedAct(std::vector<T> const& V, Telt const& g)
 
 
 template<typename Telt>
-int GetLabelIndex(std::vector<Telt> & labels, Telt const& u)
+size_t GetLabelIndex(std::vector<Telt> & labels, Telt const& u)
 {
-  int nbLabel=labels.size();
-  for (int iLabel=0; iLabel<nbLabel; iLabel++)
+  size_t nbLabel=labels.size();
+  for (size_t iLabel=0; iLabel<nbLabel; iLabel++)
     if (labels[iLabel] == u)
       return iLabel;
   labels.push_back(u);
@@ -134,13 +135,13 @@ int GetLabelIndex(std::vector<Telt> & labels, Telt const& u)
 }
 
 template<typename Telt>
-int GetLabelIndex_const(std::vector<Telt> const& labels, Telt const& u)
+size_t GetLabelIndex_const(std::vector<Telt> const& labels, Telt const& u)
 {
-  int nbLabel=labels.size();
-  for (int iLabel=0; iLabel<nbLabel; iLabel++)
+  size_t nbLabel=labels.size();
+  for (size_t iLabel=0; iLabel<nbLabel; iLabel++)
     if (labels[iLabel] == u)
       return iLabel;
-  return -1;
+  return std::numeric_limits<size_t>::max();
 }
 
 // The labels are put on top since they are all identical.
@@ -220,12 +221,13 @@ StabChain<Telt> StabChainGenerators(std::vector<Telt> const& generators, typenam
 template<typename Telt>
 void PrintStabChainTransversals(StabChain<Telt> const& S)
 {
+  using Tidx=typename Telt::Tidx;
   StabChain<Telt> Swork = S;
-  int n=Swork->comm->n;
-  int iLevel=0;
+  Tidx n=Swork->comm->n;
+  size_t iLevel=0;
   while (Swork != nullptr) {
     std::vector<std::optional<Telt>> V(n);
-    for (int i=0; i<n; i++) {
+    for (Tidx i=0; i<n; i++) {
       int eVal = Swork->transversal[i];
       if (eVal == -1)
         V[i] = {};
@@ -244,7 +246,7 @@ template<typename Telt>
 void PrintStabChainOrbits(StabChain<Telt> const& S)
 {
   StabChain<Telt> Swork = S;
-  int iLevel=0;
+  size_t iLevel=0;
   while (Swork != nullptr) {
     std::cerr << "CPP i=" << iLevel << " orbit=" << GapStringIntVector(Swork->orbit) << "\n";
     Swork = Swork->stabilizer;
@@ -284,12 +286,12 @@ void PrintStabChain(StabChain<Telt> const& S)
   StabChain<Telt> Sptr = S;
   Tidx n = Sptr->comm->n;
   std::cerr << "CPP Reference Partition=" << GetListStabCommPartition(ListStabChain(S)) << "\n";
-  int iLevel = 0;
+  size_t iLevel = 0;
   while (Sptr != nullptr) {
     std::cerr << "CPP iLev=" << iLevel << "\n";
     std::string strTransversal = "[ ]";
     if (Sptr->transversal.size() > 0) {
-      if (int(Sptr->transversal.size()) != n) {
+      if (Tidx(Sptr->transversal.size()) != n) {
         std::cerr << "Sptr->transversal should be of length 0 or n=" << n << "\n";
         throw PermutalibException{1};
       }
@@ -397,7 +399,7 @@ std::ostream& operator<<(std::ostream& os, StabChain<Telt> const& Stot)
     os << GapStyleString(eLabel);
   }
   os << " ]\n";
-  int iLev=0;
+  size_t iLev=0;
   StabChain<Telt> Sptr = Stot;
   while (Sptr!= nullptr) {
     os << "CPP iLev=" << iLev << "\n";
@@ -489,9 +491,9 @@ StabChain<Telt> CopyStabChain(StabChain<Telt> const& S)
 template<typename Telt>
 StabChain<Telt> RestrictedStabChain(StabChain<Telt> const& Stot, int const& eLev)
 {
-  int nbLevel=Stot.stabilizer.size();
+  size_t nbLevel=Stot.stabilizer.size();
   std::vector<StabLevel<Telt>> stabilizerRed;
-  for (int uLev=eLev; uLev<nbLevel; uLev++)
+  for (size_t uLev=eLev; uLev<nbLevel; uLev++)
     stabilizerRed.push_back(Stot.stabilizer[uLev]);
   return {Stot.n, Stot.identity, Stot.labels, stabilizerRed};
 }
@@ -622,11 +624,11 @@ Telt InverseRepresentative(StabChain<Telt> const& S, typename Telt::Tidx const& 
 #endif
   while(pntw != bpt) {
     int idx=S->transversal[pntw];
-    Telt te=S->comm->labels[idx];
+    const Telt& te=S->comm->labels[idx];
 #ifdef DEBUG_INV_REP
     std::cerr << "CPP INVREP te=" << te << "\n";
 #endif
-    pntw=PowAct(pntw, te);
+    pntw = PowAct(pntw, te);
 #ifdef DEBUG_INV_REP
     std::cerr << "CPP INVREP   pnt=" << int(pntw+1) << "\n";
 #endif
@@ -651,7 +653,7 @@ std::vector<Telt> InverseRepresentativeWord(StabChain<Telt> const& S, typename T
   Tidx pntw=pnt;
   while(pntw != bpt) {
     int idx=S->transversal[pntw];
-    Telt te=S->comm->labels[idx];
+    const Telt& te=S->comm->labels[idx];
     pntw = PowAct(pntw, te);
     word.push_back(te);
   }
@@ -663,7 +665,7 @@ template<typename Telt>
 Telt SiftedPermutation(StabChain<Telt> const& S, Telt const& g)
 {
   using Tidx=typename Telt::Tidx;
-  Telt gW=g;
+  Telt gW = g;
   StabChain<Telt> Sptr = S;
   while(true) {
     if (Sptr->stabilizer == nullptr || gW.isIdentity())
@@ -832,8 +834,8 @@ Telt LargestElementStabChain(StabChain<Telt> const& S)
       if (pnt == min)
 	break;
       int idx=Sptr->transversal[min];
-      Telt gen=Sptr->comm->labels[idx];
-      rep = LeftQuotient(gen,rep);
+      const Telt& gen=Sptr->comm->labels[idx];
+      rep = LeftQuotient(gen, rep);
       min = PowAct(min, gen);
     }
     Sptr = Sptr->stabilizer;
@@ -1360,7 +1362,7 @@ void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, Stab
     std::cerr << "CPP StabChainStrong gen1=" << int(gen1+1) << " rep=" << rep << "\n";
 #endif
     for (Tidx & j : ClosedInterval<Tidx>(gen1, Tidx(S->genlabels.size()))) {
-      Telt g = S->comm->labels[ S->genlabels[j] ];
+      const Telt& g = S->comm->labels[ S->genlabels[j] ];
 #ifdef DEBUG_STABCHAIN
       std::cerr << "CPP StabChainStrong   j=" << int(j+1) << " g=" << g << "\n";
 #endif
@@ -1931,8 +1933,8 @@ bool TestEqualityStabChain(StabChain<Telt> const& L, StabChain<Telt> const& R)
 #endif
       return false;
     }
-    int lenL=Lptr->transversal.size();
-    for (int u=0; u<lenL; u++) {
+    size_t lenL=Lptr->transversal.size();
+    for (size_t u=0; u<lenL; u++) {
       if (Lptr->transversal[u] == -1 && Rptr->transversal[u] != -1) {
 #ifdef DEBUG_EQUALITY
         std::cerr << "TestEqualityStabChain 5\n";
@@ -1948,8 +1950,8 @@ bool TestEqualityStabChain(StabChain<Telt> const& L, StabChain<Telt> const& R)
       if (Lptr->transversal[u] != -1) {
 	int idxL=Lptr->transversal[u];
 	int idxR=Rptr->transversal[u];
-	Telt permL=Lptr->comm->labels[idxL];
-	Telt permR=Rptr->comm->labels[idxR];
+	const Telt& permL=Lptr->comm->labels[idxL];
+	const Telt& permR=Rptr->comm->labels[idxR];
 	if (permL != permR) {
 #ifdef DEBUG_EQUALITY
           std::cerr << "TestEqualityStabChain 7\n";
