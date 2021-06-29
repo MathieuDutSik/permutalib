@@ -101,7 +101,7 @@ bool IsBool(StabChainPlusLev<Telt> const& S)
 
 
 template<typename Telt>
-int BasePoint(StabChainPlusLev<Telt> const& S)
+typename Telt::Tidx BasePoint(StabChainPlusLev<Telt> const& S)
 {
   return BasePoint(S.Stot);
 }
@@ -268,14 +268,14 @@ template<typename Telt>
 std::string ListOrbitOfRbaseLEV(rbaseType<Telt> const& rbase)
 {
   std::string str = "[ ";
-  int sizLev=rbase.lev.size();
-  for (int iLev=0; iLev<sizLev; iLev++) {
+  size_t sizLev=rbase.lev.size();
+  for (size_t iLev=0; iLev<sizLev; iLev++) {
     if (iLev > 0)
       str += ", ";
-    std::vector<int> eOrb=rbase.lev[iLev].Stot->orbit;
-    int len=eOrb.size();
+    const std::vector<int>& eOrb=rbase.lev[iLev].Stot->orbit;
+    size_t len=eOrb.size();
     str += "[ ";
-    for (int u=0; u<len; u++) {
+    for (size_t u=0; u<len; u++) {
       if (u>0)
 	str += ", ";
       str += std::to_string(eOrb[u]);
@@ -294,9 +294,9 @@ void PrintRBaseLevel(rbaseType<Telt> const& rbase, std::string const& str)
     std::cerr << str << " PRBL rbase.level, integer : " << rbase.level.value_int << "\n";
   } else {
     if (rbase.level.status == int_stablev) {
-      int len=rbase.lev.size();
+      size_t len=rbase.lev.size();
       std::cerr << str << " |rbase.lev|=" << len << "\n";
-      for (int eD=0; eD<len; eD++) {
+      for (size_t eD=0; eD<len; eD++) {
         PrintStabChain(rbase.lev[eD].Stot);
         std::cerr << "CPP rbase.lev[" << int(eD+1) << "]=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(rbase.lev[eD].Stot))) << "\n";
       }
@@ -762,7 +762,7 @@ template<typename Telt>
 void NextRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt> & rbase, Telt const& TheId)
 {
   using Tidx=typename Telt::Tidx;
-  std::vector<Tidx> lens = P.lengths;
+  std::vector<Tidx> lens = P.lengths; // Copy is needed as the lens is changed in the sortparallel
   std::vector<Tidx> order = ClosedInterval<Tidx>(0, NumberCells(P));
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP lens=[ ";
@@ -941,7 +941,7 @@ bool PBIsMinimal(std::vector<typename Telt::Tidx> const& range, typename Telt::T
         }
       }
     }
-    pos=siz;
+    pos = siz;
   }
   return true;
 }
@@ -968,7 +968,7 @@ void SubtractBlistOrbitStabChain(Face & blist, std::vector<Telt> const& LGen, ty
         }
       }
     }
-    pos=siz;
+    pos = siz;
   }
 }
 
@@ -1130,7 +1130,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 #endif
     // Recursion comes to an end  if all base  points have been prescribed
     // images.
-    if (d >= int(rbase.base.size())) {
+    if (d >= rbase.base.size()) {
 #ifdef DEBUG_STBCBCKT
       std::cerr << "CPP Matching d > Length(rbase.base) test\n";
 #endif
@@ -1622,7 +1622,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 #ifdef DEBUG_STBCBCKT
             PrintListStabCommPartition("CPP AddGen", L_list);
 #endif
-            for (int dd=0; dd<=d; dd++) {
+            for (size_t dd=0; dd<=d; dd++) {
 #ifdef DEBUG_STBCBCKT
               std::cerr << "CPP Before AGEST dd=" << int(dd+1) << "\n";
 #endif
@@ -1941,7 +1941,7 @@ StabChain<Telt> Kernel_Stabilizer_OnSets(StabChain<Telt> const& G, Face const& P
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Beginning of Stabilizer_OnSets\n";
 #endif
-  size_t n = G->comm->n;
+  size_t n = size_t(G->comm->n);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   if (Phi.size() != n) {
     std::cerr << "We should have Phi of size equal to n\n";
@@ -1997,7 +1997,7 @@ StabChain<Telt> Kernel_Stabilizer_OnPoints_backtrack(StabChain<Telt> const& G, t
 template<typename Telt,typename Tint>
 std::pair<bool,Telt> Kernel_RepresentativeAction_OnSets(StabChain<Telt> const& G, Face const& f1, Face const& f2)
 {
-  size_t n = G->comm->n;
+  size_t n = size_t(G->comm->n);
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Beginning of RepresentativeAction_OnSets\n";
 #endif
