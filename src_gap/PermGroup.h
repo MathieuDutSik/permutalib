@@ -26,50 +26,52 @@ typename Telt::Tidx SmallestMovedPoint(std::vector<Telt> const& LGen)
 
 
 template<typename Telt>
-std::vector<int> OrbitPerms(std::vector<Telt> const& gens, int const& n, int const& d)
+std::vector<typename Telt::Tidx> OrbitPerms(std::vector<Telt> const& gens, typename Telt::Tidx const& n, typename Telt::Tidx const& d)
 {
-  std::vector<int> orb;
+  using Tidx=typename Telt::Tidx;
+  std::vector<Tidx> orb;
   Face eFace(n);
-  auto InsertValue=[&](int const& val) -> void {
+  auto InsertValue=[&](Tidx const& val) -> void {
     orb.push_back(val);
     eFace[val]=1;
   };
   InsertValue(d);
-  int posDone=0;
+  size_t posDone=0;
   while(true) {
-    int posTot=orb.size();
+    size_t posTot=orb.size();
     if (posTot == posDone)
       break;
-    for (int u=posDone; u<posTot; u++) {
-      int pnt=orb[u];
+    for (size_t u=posDone; u<posTot; u++) {
+      Tidx pnt=orb[u];
       for (auto & eGen : gens) {
-	int img=PowAct(pnt, eGen);
+	Tidx img=PowAct(pnt, eGen);
 	if (eFace[img] == 0)
 	  InsertValue(img);
       }
     }
-    posDone=posTot;
+    posDone = posTot;
   }
   return orb;
 }
 
 
 template<typename Telt>
-std::vector<std::vector<int>> OrbitsPerms(std::vector<Telt> const& gens, int const&n, std::vector<int> const& D)
+std::vector<std::vector<typename Telt::Tidx>> OrbitsPerms(std::vector<Telt> const& gens, int const&n, std::vector<int> const& D)
 {
-  std::vector<std::vector<int>> orbs;
+  using Tidx=typename Telt::Tidx;
+  std::vector<std::vector<Tidx>> orbs;
   Face dom(n);
   for (auto & eV : D)
     dom[eV]=1;
   while(true) {
     if (dom.count() == 0)
       break;
-    std::vector<int> orb;
-    auto insert=[&](int const& eV) -> void {
+    std::vector<Tidx> orb;
+    auto insert=[&](Tidx const& eV) -> void {
       orb.push_back(eV);
       dom[eV]=0;
     };
-    int fst=dom.find_first();
+    boost::dynamic_bitset<>::size_type fst=dom.find_first();
     insert(fst);
     size_t posDone=0;
     while(true) {
@@ -77,14 +79,14 @@ std::vector<std::vector<int>> OrbitsPerms(std::vector<Telt> const& gens, int con
       if (posTot == posDone)
 	break;
       for (size_t u=posDone; u<posTot; u++) {
-	int pnt=orb[u];
+	Tidx pnt=orb[u];
 	for (auto & eGen : gens) {
-	  int img=PowAct(pnt, eGen);
+	  Tidx img=PowAct(pnt, eGen);
 	  if (dom[img] == 1)
 	    insert(img);
 	}
       }
-      posDone=posTot;
+      posDone = posTot;
     }
     orbs.push_back(orb);
   }

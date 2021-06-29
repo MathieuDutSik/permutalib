@@ -1060,11 +1060,10 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 #endif
   imageType<Telt> image = BuildInitialImage<Telt,repr>(rbase, data);
   std::vector<Face> orB; // backup of <orb>.
-  int nrback;
   std::vector<Face> orb;
   std::vector<std::vector<Tidx>> org; // intersected (mapped) basic orbits of <G>
-  Tplusinfinity<int> blen(true, 0);
-  int dd, branch; // branch is level where $Lstab\ne Rstab$ starts
+  Tplusinfinity<size_t> blen(true, 0);
+  size_t dd, branch; // branch is level where $Lstab\ne Rstab$ starts
   std::vector<Tidx> range;    // range for construction of <orb>
   Tidx lenD=rbase.domain[rbase.domain.size()-1];
   for (Tidx i=0; i<=lenD; i++)
@@ -1072,7 +1071,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   Partition<Tidx> oldcel;       // old value of <image.partition.cellno>
   std::vector<Tidx> oldcel_cellno;
   std::vector<StabChain<Telt>> L_list, R_list;
-  std::function<permPlusBool<Telt>(int const&,bool const&)> PBEnumerate = [&](int const& d, bool const & wasTriv) -> permPlusBool<Telt> {
+  std::function<permPlusBool<Telt>(int const&,bool const&)> PBEnumerate = [&](size_t const& d, bool const & wasTriv) -> permPlusBool<Telt> {
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP PBEnumerate, step 1, d=" << int(d+1) << " wasTriv=" << wasTriv << "\n";
 #endif
@@ -1589,7 +1588,6 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 #ifdef DEBUG_STBCBCKT
           std::cerr << "CPP After PBEnumerate Recursion case\n";
 #endif
-	  nrback++;
 	  image.depth = d;
 	}
 #ifdef DEBUG_STBCBCKT
@@ -1684,9 +1682,6 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 #endif
     return {int_fail, {}};
   };
-
-  nrback=0; // count the number of times we jumped up
-
   // Trivial cases first.
   if (IsTrivial(G)) {
     if (!repr)

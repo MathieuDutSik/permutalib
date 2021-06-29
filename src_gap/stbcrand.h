@@ -983,6 +983,7 @@ StabChain<Telt> StabChainRandomPermGroup(std::vector<Telt> const& gens, Telt con
 template<typename Telt>
 std::pair<bool,Telt> VerifySGS(StabChain<Telt> const& S, std::vector<int> const& missing, bool const& correct)
 {
+  using Tidx=typename Telt::Tidx;
   int n = S->comm->n;
   std::vector<StabChain<Telt>> list = ListStabChain(S);
   int len = list.size();
@@ -1031,7 +1032,7 @@ std::pair<bool,Telt> VerifySGS(StabChain<Telt> const& S, std::vector<int> const&
 	  for (auto & eIdx : temp->genlabels)
 	    longer.push_back(temp->comm->labels[eIdx]);
 	  longer.push_back(gen);
-	  std::vector<int> orbit = OrbitPerms(longer, n, temp->orbit[0]);
+	  std::vector<Tidx> orbit = OrbitPerms(longer, n, temp->orbit[0]);
 	  std::vector<std::vector<int>> blks = Blocks_from_seed(longer, orbit, set);
 	  if (blks.size() * blks.size() != orbit.size()) {
 	    result = {false, Telt(n)};
