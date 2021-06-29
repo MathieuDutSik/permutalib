@@ -168,17 +168,17 @@ std::string PosFalse_to_string(int const& pos)
 template<typename T>
 std::string GapStringMissingTVector(std::vector<std::optional<T>> const& f)
 {
-  int len=f.size();
+  size_t len=f.size();
   std::vector<bool> Vstatus(len);
-  for (int i=0; i<len; i++) {
+  for (size_t i=0; i<len; i++) {
     bool status=false;
     if (f[i])
       status=true;
     Vstatus[i] = status;
   }
-  int last_nz = 0;
-  int first_nz = -1;
-  for (int i=0; i<len; i++) {
+  size_t last_nz = 0;
+  size_t first_nz = std::numeric_limits<size_t>::max();
+  for (size_t i=0; i<len; i++) {
     if (Vstatus[i])
       last_nz = i+1;
     if (first_nz == -1) {
@@ -188,7 +188,7 @@ std::string GapStringMissingTVector(std::vector<std::optional<T>> const& f)
     }
   }
   std::ostringstream os;
-  if (first_nz == -1) {
+  if (first_nz == std::numeric_limits<size_t>::max()) {
     return "[  ]";
   }
   os << "[";

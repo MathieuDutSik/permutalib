@@ -256,14 +256,14 @@ void PrintStabChainOrbits(StabChain<Telt> const& S)
 template<typename Telt>
 std::string GetListStabCommPartition(std::vector<StabChain<Telt>> const& ListS)
 {
-  int len = ListS.size();
+  size_t len = ListS.size();
   Face Status(len);
   std::vector<std::string> ListStr;
-  for (int i=0; i<len; i++) {
+  for (size_t i=0; i<len; i++) {
     if (Status[i] == 0) {
       std::vector<int> LVal;
       auto ptr = ListS[i]->comm;
-      for (int j=0; j<len; j++) {
+      for (size_t j=0; j<len; j++) {
         if (ListS[j]->comm == ptr) {
           LVal.push_back(j);
           Status[j] = 1;

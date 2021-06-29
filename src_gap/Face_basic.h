@@ -32,10 +32,11 @@ Face ReadFace(std::istream & is)
     std::cerr << "ReadFace operation failed because stream is not valid\n";
     throw PermutalibException{1};
   }
-  int len, eVal;
+  size_t len;
+  int eVal;
   is >> len;
   Face eFace(len);
-  for (int i=0; i<len; i++) {
+  for (size_t i=0; i<len; i++) {
     is >> eVal;
     eFace[i]=eVal;
   }
