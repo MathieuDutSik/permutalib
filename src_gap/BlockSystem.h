@@ -9,7 +9,7 @@
 namespace permutalib {
 
 template<typename Telt>
-std::pair<std::vector<std::vector<int>>,std::vector<Face>> Blocks_Kernel(std::vector<Telt> const& ListGen, std::vector<int> const& Omega, std::vector<int> const& seed)
+std::pair<std::vector<std::vector<size_t>>,std::vector<Face>> Blocks_Kernel(std::vector<Telt> const& ListGen, std::vector<int> const& Omega, std::vector<int> const& seed)
 {
   using Tidx=typename Telt::Tidx;
   int nbMax=VectorMax(Omega);
@@ -61,29 +61,29 @@ std::pair<std::vector<std::vector<int>>,std::vector<Face>> Blocks_Kernel(std::ve
     return false;
   };
   int sizOrb=SeedOrbit.size();
-  std::vector<int> ListEdge;
-  for (int u=0; u<sizOrb; u++)
-    for (int v=u+1; v<sizOrb; v++) {
+  std::vector<size_t> ListEdge;
+  for (size_t u=0; u<sizOrb; u++)
+    for (size_t v=u+1; v<sizOrb; v++) {
       if (IsIntersecting(SeedOrbit[u], SeedOrbit[v])) {
 	ListEdge.push_back(u);
 	ListEdge.push_back(v);
       }
     }
   GraphSparseImmutable eGR(ListEdge, sizOrb);
-  std::vector<std::vector<int>> ListConn = ConnectedComponents_set(eGR);
-  std::vector<std::vector<int>> ListBlocks;
+  std::vector<std::vector<size_t>> ListConn = ConnectedComponents_set(eGR);
+  std::vector<std::vector<size_t>> ListBlocks;
   for (auto & eConn : ListConn) {
     Face eFaceComb(n);
     for (auto & iElt : eConn) {
       Face eFace = SeedOrbit[iElt];
-      int siz=eFace.count();
+      size_t siz=eFace.count();
       boost::dynamic_bitset<>::size_type ePt=eFace.find_first();
-      for (int u=0; u<siz; u++) {
+      for (size_t u=0; u<siz; u++) {
 	eFaceComb[ePt]=1;
 	ePt = eFace.find_next(ePt);
       }
     }
-    std::vector<int> eBlock;
+    std::vector<size_t> eBlock;
     size_t blkSiz=eFaceComb.count();
     boost::dynamic_bitset<>::size_type ePt=eFaceComb.find_first();
     for (size_t u=0; u<blkSiz; u++) {
@@ -92,7 +92,7 @@ std::pair<std::vector<std::vector<int>>,std::vector<Face>> Blocks_Kernel(std::ve
     }
     ListBlocks.push_back(eBlock);
   }
-  return {ListBlocks,SeedOrbit};
+  return {std::move(ListBlocks),std::move(SeedOrbit)};
 }
 
 

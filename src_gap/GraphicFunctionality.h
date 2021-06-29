@@ -9,39 +9,39 @@ namespace permutalib {
 struct GraphSparseImmutable {
 public:
   GraphSparseImmutable() = delete;
-GraphSparseImmutable(int const& _nbVert, std::vector<int> const& _ListStart, std::vector<int> const& _ListListAdj) : nbVert(_nbVert), ListStart(_ListStart), ListListAdj(_ListListAdj)
+GraphSparseImmutable(size_t const& _nbVert, std::vector<size_t> const& _ListStart, std::vector<size_t> const& _ListListAdj) : nbVert(_nbVert), ListStart(_ListStart), ListListAdj(_ListListAdj)
   {
     HasVertexColor=false;
   }
   ~GraphSparseImmutable()
   {
   }
-  GraphSparseImmutable(std::vector<int> const& ListEdge, int const& _nbVert) : nbVert(_nbVert)
+  GraphSparseImmutable(std::vector<size_t> const& ListEdge, size_t const& _nbVert) : nbVert(_nbVert)
   {
     HasVertexColor=false;
     size_t nbEdge=ListEdge.size()/2;
-    std::vector<int> ListDeg(nbVert,0);
+    std::vector<size_t> ListDeg(nbVert,0);
     for (size_t iEdge=0; iEdge<nbEdge; iEdge++)
       for (size_t i=0; i<2; i++) {
-	int eVert=ListEdge[2*iEdge+i];
+	size_t eVert=ListEdge[2*iEdge+i];
 	ListDeg[eVert]++;
       }
     ListStart.resize(nbVert+1,0);
-    int nbAdj=0;
-    for (int iVert=0; iVert<nbVert; iVert++) {
-      int eDeg=ListDeg[iVert];
+    size_t nbAdj=0;
+    for (size_t iVert=0; iVert<nbVert; iVert++) {
+      size_t eDeg=ListDeg[iVert];
       ListStart[iVert+1] = ListStart[iVert] + eDeg;
       nbAdj += eDeg;
     }
-    std::vector<int> ListPos(nbVert,0);
+    std::vector<size_t> ListPos(nbVert,0);
     ListListAdj.resize(nbAdj,0);
     for (size_t iEdge=0; iEdge<nbEdge; iEdge++)
       for (size_t i=0; i<2; i++) {
 	size_t j=1-i;
-	int eVert=ListEdge[2*iEdge+i];
-	int fVert=ListEdge[2*iEdge+j];
-	int eStart=ListStart[eVert];
-	int pos=ListPos[eVert];
+	size_t eVert=ListEdge[2*iEdge+i];
+	size_t fVert=ListEdge[2*iEdge+j];
+	size_t eStart=ListStart[eVert];
+	size_t pos=ListPos[eVert];
 	ListListAdj[eStart + pos]=fVert;
 	ListPos[eVert]++;
       }
@@ -64,15 +64,15 @@ GraphSparseImmutable(int const& _nbVert, std::vector<int> const& _ListStart, std
     return *this;
   }
   // lighter stuff
-  int GetNbVert() const
+  size_t GetNbVert() const
   {
     return nbVert;
   }
-  std::vector<int> GetListListAdj() const
+  std::vector<size_t> GetListListAdj() const
   {
     return ListListAdj;
   }
-  std::vector<int> GetListStart() const
+  std::vector<size_t> GetListStart() const
   {
     return ListStart;
   }
@@ -80,45 +80,44 @@ GraphSparseImmutable(int const& _nbVert, std::vector<int> const& _ListStart, std
   {
     return HasVertexColor;
   }
-  std::vector<int> GetListVertexColor() const
+  std::vector<size_t> GetListVertexColor() const
   {
     return ListVertexColor;
   }
   //
   void SetHasColor(bool const& TheVal)
   {
-    if (TheVal == HasVertexColor) {
+    if (TheVal == HasVertexColor)
       return;
-    }
     HasVertexColor=TheVal;
-    if (TheVal) 
-      ListVertexColor=std::vector<int>(nbVert);
+    if (TheVal)
+      ListVertexColor=std::vector<size_t>(nbVert);
     if (!TheVal)
       ListVertexColor.clear();
   }
-  void SetColor(int const& iVert, int const& eColor)
+  void SetColor(size_t const& iVert, size_t const& eColor)
   {
     ListVertexColor[iVert]=eColor;
   }
-  std::vector<int> Adjacency(int const& iVert) const
+  std::vector<size_t> Adjacency(size_t const& iVert) const
   {
-    int eStart=ListStart[iVert];
-    int eEnd=ListStart[iVert+1];
-    std::vector<int> TheRet;
-    for (int i=eStart; i<eEnd; i++)
+    size_t eStart=ListStart[iVert];
+    size_t eEnd=ListStart[iVert+1];
+    std::vector<size_t> TheRet;
+    for (size_t i=eStart; i<eEnd; i++)
       TheRet.push_back(ListListAdj[i]);
     return TheRet;
   }
-  bool IsAdjacent(int const& iVert, int const& jVert) const
+  bool IsAdjacent(size_t const& iVert, size_t const& jVert) const
   {
-    int eStart=ListStart[iVert];
-    int eEnd=ListStart[iVert+1];
-    for (int i=eStart; i<eEnd; i++)
+    size_t eStart=ListStart[iVert];
+    size_t eEnd=ListStart[iVert+1];
+    for (size_t i=eStart; i<eEnd; i++)
       if (ListListAdj[i] == jVert)
 	return true;
     return false;
   }
-  int GetColor(int const& iVert) const
+  int GetColor(size_t const& iVert) const
   {
     if (!HasVertexColor) {
       std::cerr << "Call to GetColor while HasVertexColor=false\n";
@@ -127,29 +126,30 @@ GraphSparseImmutable(int const& _nbVert, std::vector<int> const& _ListStart, std
     return ListVertexColor[iVert];
   }
 private:
-  int nbVert;
-  std::vector<int> ListStart;
-  std::vector<int> ListListAdj;
+  size_t nbVert;
+  std::vector<size_t> ListStart;
+  std::vector<size_t> ListListAdj;
   bool HasVertexColor;
-  std::vector<int> ListVertexColor;
+  std::vector<size_t> ListVertexColor;
 };
 
 
 
 template<typename Tgr>
-std::vector<int> ConnectedComponents_vector(Tgr const& GR)
+std::vector<size_t> ConnectedComponents_vector(Tgr const& GR)
 {
-  int nbVert=GR.GetNbVert();
-  std::vector<int> ListStatus(nbVert,-1);
-  int iStatus=0;
-  auto Assignment=[&](int const & iVert) -> void {
-    std::vector<int> TheSet{iVert};
+  size_t nbVert=GR.GetNbVert();
+  size_t miss_val = std::numeric_limits<size_t>::max();
+  std::vector<size_t> ListStatus(nbVert,miss_val);
+  size_t iStatus=0;
+  auto Assignment=[&](size_t const & iVert) -> void {
+    std::vector<size_t> TheSet{iVert};
     ListStatus[iVert]=iStatus;
     while(true) {
-      std::vector<int> NewSet;
-      for (int & eVal : TheSet) {
-        for (int & fVal : GR.Adjacency(eVal)) {
-          if (ListStatus[fVal] == -1) {
+      std::vector<size_t> NewSet;
+      for (size_t & eVal : TheSet) {
+        for (size_t & fVal : GR.Adjacency(eVal)) {
+          if (ListStatus[fVal] == miss_val) {
             ListStatus[fVal]=iStatus;
             NewSet.push_back(fVal);
           }
@@ -157,12 +157,12 @@ std::vector<int> ConnectedComponents_vector(Tgr const& GR)
       }
       if (NewSet.size() == 0)
         break;
-      TheSet=NewSet;
+      TheSet = NewSet;
     }
     iStatus++;
   };
-  for (int iVert=0; iVert<nbVert; iVert++)
-    if (ListStatus[iVert] == -1)
+  for (size_t iVert=0; iVert<nbVert; iVert++)
+    if (ListStatus[iVert] == miss_val)
       Assignment(iVert);
   return ListStatus;
 }
@@ -170,14 +170,14 @@ std::vector<int> ConnectedComponents_vector(Tgr const& GR)
 
 
 template<typename Tgr>
-std::vector<std::vector<int>> ConnectedComponents_set(Tgr const& GR)
+std::vector<std::vector<size_t>> ConnectedComponents_set(Tgr const& GR)
 {
-  int nbVert=GR.GetNbVert();
-  std::vector<int> ListStatus=ConnectedComponents_vector(GR);
-  int nbConn=VectorMax(ListStatus)+1;
-  std::vector<std::vector<int> > ListConn(nbConn);
-  for (int iVert=0; iVert<nbVert; iVert++) {
-    int iStatus=ListStatus[iVert];
+  size_t nbVert=GR.GetNbVert();
+  std::vector<size_t> ListStatus=ConnectedComponents_vector(GR);
+  size_t nbConn=VectorMax(ListStatus)+1;
+  std::vector<std::vector<size_t>> ListConn(nbConn);
+  for (size_t iVert=0; iVert<nbVert; iVert++) {
+    size_t iStatus=ListStatus[iVert];
     ListConn[iStatus].push_back(iVert);
   }
   return ListConn;

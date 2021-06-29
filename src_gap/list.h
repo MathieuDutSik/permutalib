@@ -43,9 +43,7 @@ Face BlistList(std::vector<Tidx> const& list, std::vector<Tidx> const& sub)
 #endif
   Face ret(len);
   for (auto & eVal : sub) {
-    //    std::cerr << "eVal=" << eVal << "\n";
-    int pos=PositionVect(list, eVal);
-    //    std::cerr << "pos=" << pos << "\n";
+    size_t pos=PositionVect_sz(list, eVal);
     ret[pos]=true;
   }
   return ret;

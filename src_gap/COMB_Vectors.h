@@ -19,6 +19,16 @@ int PositionVect(std::vector<T> const& V, T const& eVal)
 }
 
 template<typename T>
+size_t PositionVect_sz(std::vector<T> const& V, T const& eVal)
+{
+  size_t len=V.size();
+  for (size_t i=0; i<len; i++)
+    if (V[i] == eVal)
+      return i;
+  return std::numeric_limits<size_t>::max();
+}
+
+template<typename T>
 T VectorMax(std::vector<T> const& eVect)
 {
   T eMax=eVect[0];
