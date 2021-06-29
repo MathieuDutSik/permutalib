@@ -11,20 +11,21 @@ namespace permutalib {
 template<typename Telt>
 std::pair<std::vector<std::vector<int>>,std::vector<Face>> Blocks_Kernel(std::vector<Telt> const& ListGen, std::vector<int> const& Omega, std::vector<int> const& seed)
 {
+  using Tidx=typename Telt::Tidx;
   int nbMax=VectorMax(Omega);
-  int n=Omega.size();
-  std::vector<int> OmegaRev(nbMax, -1);
-  for (int u=0; u<n; u++) {
-    int ePt=Omega[u];
-    OmegaRev[ePt] = u;
+  size_t n=Omega.size();
+  std::vector<Tidx> OmegaRev(nbMax);
+  for (size_t u=0; u<n; u++) {
+    size_t ePt=Omega[u];
+    OmegaRev[ePt] = Tidx(u);
   }
   std::vector<Telt> ListGenRed;
   for (auto & eGen : ListGen) {
     std::vector<int> eList(n);
-    for (int u=0; u<n; u++) {
-      int ePt=Omega[u];
-      int ePtImg=eGen.at(ePt);
-      int uImg=OmegaRev[ePtImg];
+    for (size_t u=0; u<n; u++) {
+      Tidx ePt=Omega[u];
+      Tidx ePtImg=eGen.at(ePt);
+      Tidx uImg=OmegaRev[ePtImg];
       eList[u] = uImg;
     }
     Telt eGenRed(eList);
@@ -33,7 +34,7 @@ std::pair<std::vector<std::vector<int>>,std::vector<Face>> Blocks_Kernel(std::ve
   // Building the orbit
   Face eFace(n);
   for (auto & ePt : seed) {
-    int u=OmegaRev[ePt];
+    Tidx u=OmegaRev[ePt];
     eFace[u]=1;
   }
   std::function<Face(Face const&,Telt const&)> act=[&](Face const& x, Telt const& eElt) -> Face {
@@ -41,7 +42,7 @@ std::pair<std::vector<std::vector<int>>,std::vector<Face>> Blocks_Kernel(std::ve
     int siz=x.count();
     boost::dynamic_bitset<>::size_type ePt=x.find_first();
     for (int u=0; u<siz; u++) {
-      int ePtImg=eElt.at(ePt);
+      Tidx ePtImg=eElt.at(ePt);
       eImg[ePtImg]=1;
       ePt = x.find_next(ePt);
     }
@@ -83,9 +84,9 @@ std::pair<std::vector<std::vector<int>>,std::vector<Face>> Blocks_Kernel(std::ve
       }
     }
     std::vector<int> eBlock;
-    int blkSiz=eFaceComb.count();
+    size_t blkSiz=eFaceComb.count();
     boost::dynamic_bitset<>::size_type ePt=eFaceComb.find_first();
-    for (int u=0; u<blkSiz; u++) {
+    for (size_t u=0; u<blkSiz; u++) {
       eBlock.push_back(Omega[ePt]);
       ePt = eFaceComb.find_next(ePt);
     }
@@ -166,25 +167,26 @@ std::vector<std::vector<int>> Blocks_without_seed(std::vector<Telt> const& ListG
 template<typename Telt>
 std::function<Telt(Telt const&)> MapElementToSetPlusBlocks(std::vector<std::vector<int>> const& blks, int const& n)
 {
+  using Tidx=typename Telt::Tidx;
   int TheMax=0;
   for (auto & eBlock : blks)
     for (auto & ePt : eBlock)
       if (ePt > TheMax)
 	TheMax = ePt;
   std::vector<int> VectStatus(TheMax);
-  int nbBlock=blks.size();
-  for (int iBlk=0; iBlk<nbBlock; iBlk++)
+  size_t nbBlock=blks.size();
+  for (size_t iBlk=0; iBlk<nbBlock; iBlk++)
     for (auto & ePt : blks[iBlk])
       VectStatus[ePt] = iBlk;
   std::function<Telt(Telt const&)> f=[=](Telt const& u) -> Telt {
-    std::vector<int> eList(n+nbBlock);
-    for (int i=0; i<n; i++)
+    std::vector<Tidx> eList(n + nbBlock);
+    for (size_t i=0; i<n; i++)
       eList[i] = u.at(i);
-    for (int iBlk=0; iBlk<nbBlock; iBlk++) {
+    for (size_t iBlk=0; iBlk<nbBlock; iBlk++) {
       int ePt=blks[iBlk][0];
-      int ePtImg=u.at(ePt);
-      int iBlkImg=VectStatus[ePtImg];
-      eList[n+iBlk] = n+iBlkImg;
+      Tidx ePtImg=u.at(ePt);
+      size_t iBlkImg=VectStatus[ePtImg];
+      eList[n+iBlk] = Tidx(n+iBlkImg);
     }
     return Telt(eList);
   };

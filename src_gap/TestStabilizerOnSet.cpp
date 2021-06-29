@@ -7,7 +7,8 @@
 int main(int argc, char *argv[])
 {
   try {
-    using Tidx = int16_t;
+    //    using Tidx = int16_t;
+    using Tidx = uint16_t;
     using Telt = permutalib::DoubleSidedPerm<Tidx>;
     using Tint = mpz_class;
     if (argc != 2) {

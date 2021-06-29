@@ -71,12 +71,12 @@ std::vector<std::vector<int>> OrbitsPerms(std::vector<Telt> const& gens, int con
     };
     int fst=dom.find_first();
     insert(fst);
-    int posDone=0;
+    size_t posDone=0;
     while(true) {
-      int posTot=orb.size();
+      size_t posTot=orb.size();
       if (posTot == posDone)
 	break;
-      for (int u=posDone; u<posTot; u++) {
+      for (size_t u=posDone; u<posTot; u++) {
 	int pnt=orb[u];
 	for (auto & eGen : gens) {
 	  int img=PowAct(pnt, eGen);
@@ -109,11 +109,12 @@ typename Telt::Tidx SmallestMovedPointsPerms(std::vector<Telt> const& gens)
 template<typename Telt>
 std::vector<int> MovedPointsPerms(std::vector<Telt> const& gens)
 {
+  using Tidx=typename Telt::Tidx;
   if (gens.size() == 0)
     return {};
   std::vector<int> ListMoved;
-  int siz=gens[0].size();
-  for (int i=0; i<siz; i++) {
+  Tidx siz=Tidx(gens[0].size());
+  for (Tidx i=0; i<siz; i++) {
     auto IsMoved=[&](int const& ePt) -> bool {
       for (auto & eGen : gens)
 	if (PowAct(ePt, eGen) != ePt)
@@ -132,18 +133,19 @@ std::vector<int> MovedPointsPerms(std::vector<Telt> const& gens)
 template<typename Telt>
 Telt RestrictedPermNC(Telt const& x, std::vector<int> const& listRes)
 {
+  using Tidx=typename Telt::Tidx;
   int n=x.size();
-  std::vector<int> MapRev(n, -1);
-  int nbRes=listRes.size();
-  for (int iRes=0; iRes<nbRes; iRes++) {
-    int ePt=listRes[iRes];
+  std::vector<Tidx> MapRev(n);
+  size_t nbRes=listRes.size();
+  for (size_t iRes=0; iRes<nbRes; iRes++) {
+    Tidx ePt=listRes[iRes];
     MapRev[ePt] = iRes;
   }
-  std::vector<int> eList(nbRes);
-  for (int iRes=0; iRes<nbRes; iRes++) {
-    int ePt=listRes[iRes];
-    int ePtImg=x.at(ePt);
-    int iResImg=MapRev[ePtImg];
+  std::vector<Tidx> eList(nbRes);
+  for (size_t iRes=0; iRes<nbRes; iRes++) {
+    Tidx ePt=listRes[iRes];
+    Tidx ePtImg=x.at(ePt);
+    Tidx iResImg=MapRev[ePtImg];
     eList[iRes]=iResImg;
   }
   Telt eRet(eList);
@@ -154,12 +156,12 @@ template<typename Telt, typename Tobj>
 std::vector<Tobj> Orbit(std::vector<Telt> const& ListGen, Tobj const& x, std::function<Tobj(Tobj const&,Telt const&)> const& act)
 {
   std::vector<Tobj> ListObj{x};
-  std::vector<int> ListStat(0);
+  std::vector<uint8_t> ListStat(0);
   std::set<Tobj> SetObj{x};
   while(true) {
     bool IsFinished=true;
-    int len=ListObj.size();
-    for (int u=0; u<len; u++) {
+    size_t len=ListObj.size();
+    for (size_t u=0; u<len; u++) {
       if (ListStat[u] == 0) {
 	IsFinished=false;
 	ListStat[u]=1;
