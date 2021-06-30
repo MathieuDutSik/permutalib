@@ -22,7 +22,7 @@ void SCRExtend(std::vector<Telt> & labels, std::vector<int> & orb, std::vector<i
 {
   int previous=len;
   len=orb.size();
-  int nbTree=treegen.size();
+  size_t nbTree=treegen.size();
   std::vector<int> ListPosGen(nbTree);
   std::vector<int> ListPosGeninv(nbTree);
   for (int iTree=0; iTree<nbTree; iTree++) {
@@ -69,14 +69,15 @@ noticeType SCRNotice_A(std::vector<int> const& orb, std::vector<int> const& tran
 template<typename Telt>
 noticeType SCRNotice_B(std::vector<int> const& orb, std::vector<int> const& transversal, std::vector<int> const& genlistIdx, std::vector<Telt> const& labels)
 {
-  int siz1=orb.size();
-  int siz2=genlistIdx.size();
-  for (int i=0; i<siz1; i++)
+  using Tidx = typename Telt::Tidx;
+  size_t siz1=orb.size();
+  size_t siz2=genlistIdx.size();
+  for (size_t i=0; i<siz1; i++)
     for (int j=0; j<siz2; j++) {
       int posGen=genlistIdx[j];
-      int ePt=PowAct(orb[i], labels[posGen]);
+      Tidx ePt=PowAct(orb[i], labels[posGen]);
       if (transversal[ePt] == -1)
-	return {false, i, j};
+	return {false, int(i), int(j)};
     }
   return {true, -1,-1};
 }

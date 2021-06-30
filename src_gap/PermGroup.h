@@ -11,7 +11,7 @@ typename Telt::Tidx SmallestMovedPoint(std::vector<Telt> const& LGen)
 {
   using Tidx = typename Telt::Tidx;
   if (LGen.size() == 0)
-    return -1;
+    return std::numeric_limits<Tidx>::max();
   Tidx n=LGen[0].size();
   for (Tidx u=0; u<n; u++) {
     bool IsOK=false;

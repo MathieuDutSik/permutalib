@@ -18,12 +18,12 @@ int main(int argc, char *argv[])
       throw PermutalibException{1};
     }
     std::ifstream is(argv[1]);
-    int nbGen;
+    size_t nbGen;
     Tidx n;
     is >> nbGen;
     is >> n;
     std::vector<Telt> LGen(nbGen);
-    for (int iGen=0; iGen<nbGen; iGen++) {
+    for (size_t iGen=0; iGen<nbGen; iGen++) {
       std::vector<Tidx> ePermV(n);
       for (Tidx i=0; i<n; i++) {
 	Tidx eVal;

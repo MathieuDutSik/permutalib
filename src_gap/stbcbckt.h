@@ -363,7 +363,7 @@ bool ProcessFixpoint_rbase(rbaseType<Telt> & rbase, typename Telt::Tidx const& p
 
 template<typename Telt>
 struct imageType {
-  int depth;
+  size_t depth;
   Partition<typename Telt::Tidx>& partition;
   permPlusBool<Telt> perm;
   StabChainPlusLev<Telt> level;
@@ -776,13 +776,14 @@ void NextRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt> & rbase,
   SortParallel_PairList(lens, order);
 
 
-  int k = PositionProperty(lens, [](Tidx const& x) -> bool {return x != 1;});
-  int l = -1;
+  Tidx miss_val = std::numeric_limits<Tidx>::max();
+  Tidx k = PositionProperty<Tidx>(lens, [](Tidx const& x) -> bool {return x != 1;});
+  Tidx l = miss_val;
   if (rbase.level.status == int_int) {
     l = 0;
   } else {
     while (true) {
-      l = PositionProperty(ClosedInterval<Tidx>(0, lens[k]), [&](Tidx const& i) -> bool {
+      l = PositionProperty<Tidx>(ClosedInterval<Tidx>(0, lens[k]), [&](Tidx const& i) -> bool {
 	  return !IsFixedStabilizer(rbase.level.Stot, P.points[i+P.firsts[order[k]]]);});
       if (l != -1)
 	break;
@@ -1071,7 +1072,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   Partition<Tidx> oldcel;       // old value of <image.partition.cellno>
   std::vector<Tidx> oldcel_cellno;
   std::vector<StabChain<Telt>> L_list, R_list;
-  std::function<permPlusBool<Telt>(int const&,bool const&)> PBEnumerate = [&](size_t const& d, bool const & wasTriv) -> permPlusBool<Telt> {
+  std::function<permPlusBool<Telt>(size_t const&,bool const&)> PBEnumerate = [&](size_t const& d, bool const & wasTriv) -> permPlusBool<Telt> {
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP PBEnumerate, step 1, d=" << int(d+1) << " wasTriv=" << wasTriv << "\n";
 #endif
@@ -1797,7 +1798,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, Face const& Phi, Fa
 #endif
   if (repr && Phi.size() != Psi.size())
     return {int_fail, {}, {}};
-  if (IsSubset(Phi, Omega) || ForAll(Omega, [&](int const &p) -> bool {return !Phi[p];})) {
+  if (IsSubset(Phi, Omega) || ForAll(Omega, [&](Tidx const &p) -> bool {return !Phi[p];})) {
     if (repr) {
       if (Difference_face(Phi, Omega) != Difference_face(Psi, Omega))
 	return {int_fail, {}, {}};
@@ -1807,7 +1808,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, Face const& Phi, Fa
       return {int_group, G, {}};
     }
   } else {
-    if (repr && (IsSubset(Psi, Omega) || ForAll(Omega, [&](int const& p) -> bool {return !Psi[p];})))
+    if (repr && (IsSubset(Psi, Omega) || ForAll(Omega, [&](Tidx const& p) -> bool {return !Psi[p];})))
       return {int_fail, {}, {}};
   }
   auto GetPartitionFromPair=[&](Face const& Ph) -> Partition<Tidx> {

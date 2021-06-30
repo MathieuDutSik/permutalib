@@ -15,11 +15,11 @@ namespace permutalib {
 template<typename Telt>
 Telt RandomElement(const std::vector<Telt>& LGen, const int& n)
 {
-  int len = rand() % 100;
+  size_t len = rand() % 100;
   size_t n_gen = LGen.size();
   Telt eElt(n);
-  for (int iIter=0; iIter<len; iIter++) {
-    size_t pos = rand() % n_gen;
+  for (size_t iIter=0; iIter<len; iIter++) {
+    size_t pos = size_t(rand()) % n_gen;
     eElt = eElt * LGen[pos];
   }
   return eElt;

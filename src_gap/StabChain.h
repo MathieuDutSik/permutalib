@@ -489,7 +489,7 @@ StabChain<Telt> CopyStabChain(StabChain<Telt> const& S)
 
 
 template<typename Telt>
-StabChain<Telt> RestrictedStabChain(StabChain<Telt> const& Stot, int const& eLev)
+StabChain<Telt> RestrictedStabChain(StabChain<Telt> const& Stot, size_t const& eLev)
 {
   size_t nbLevel=Stot.stabilizer.size();
   std::vector<StabLevel<Telt>> stabilizerRed;

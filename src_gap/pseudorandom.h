@@ -77,7 +77,7 @@ Face Extract01vector(InfoPseudoRandom* R)
 {
   Tarith rnd=R->R_X[R->R_N-1];
   Face eFace(28);
-  for (int i=0; i<28; i++) {
+  for (size_t i=0; i<28; i++) {
     int val = rnd % 2;
     rnd=(rnd - val) /2;
     eFace[i]=val;
@@ -86,18 +86,15 @@ Face Extract01vector(InfoPseudoRandom* R)
 }
 
 
- 
 template<typename Telt>
 Telt Random(std::vector<Telt> const& V)
 {
-  int siz=V.size();
-  int pos=rand() % siz;
+  size_t siz=V.size();
+  size_t pos=rand() % siz;
   return V[pos];
 }
 
 
- 
-    
 }
 
 

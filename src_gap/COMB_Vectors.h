@@ -156,14 +156,14 @@ std::vector<T> Filtered(std::vector<T> const& V, UnaryPredicate const& f)
 }
 
 
-template<typename T, class UnaryPredicate>
-int PositionProperty(std::vector<T> const& V, UnaryPredicate const& f)
+template<typename Tidx, typename T, class UnaryPredicate>
+Tidx PositionProperty(std::vector<T> const& V, UnaryPredicate const& f)
 {
-  size_t len=V.size();
-  for (size_t i=0; i<len; i++)
+  Tidx len=Tidx(V.size());
+  for (Tidx i=0; i<len; i++)
     if (f(V[i]))
       return i;
-  return -1;
+  return std::numeric_limits<Tidx>::max();
 }
 
 template<typename T, class UnaryPredicate>

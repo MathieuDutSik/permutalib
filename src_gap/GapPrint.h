@@ -101,7 +101,7 @@ std::string GapStringSetBoolVector(Face const& f)
   size_t len=f.size();
   for (size_t i=0; i<len; i++)
     if (f[i])
-      eS.push_back(i);
+      eS.push_back(int(i));
   return GapStringIntVector(eS);
 }
 
@@ -197,7 +197,7 @@ std::string GapStringMissingTVector(std::vector<std::optional<T>> const& f)
     for (int i=0; i<first_nz; i++)
       os << ",";
   }
-  for (int i=first_nz; i<last_nz; i++) {
+  for (size_t i=first_nz; i<last_nz; i++) {
     if (i > first_nz)
       os << ",";
     if (Vstatus[i])

@@ -51,10 +51,10 @@ Face BlistList(std::vector<Tidx> const& list, std::vector<Tidx> const& sub)
 
 
 
-boost::dynamic_bitset<>::size_type PositionNthTrueBlist(Face const& blist, int const& hpos)
+boost::dynamic_bitset<>::size_type PositionNthTrueBlist(Face const& blist, size_t const& hpos)
 {
   boost::dynamic_bitset<>::size_type b=blist.find_first();
-  int epos=0;
+  size_t epos=0;
   while (true) {
     if (b == boost::dynamic_bitset<>::npos)
       return b;
