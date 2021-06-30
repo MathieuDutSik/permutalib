@@ -305,7 +305,7 @@ Tidx SplitCell_Kernel(Partition<Tidx> & P, Tidx const& i, std::function<bool(Tid
 #ifdef DEBUG_PARTITION
         std::cerr << "CPP exit 1\n";
 #endif
-        return -1;
+        return std::numeric_limits<Tidx>::max();
       }
       if (!test(b))
         break;
@@ -335,10 +335,10 @@ Tidx SplitCell_Kernel(Partition<Tidx> & P, Tidx const& i, std::function<bool(Tid
 #ifdef DEBUG_PARTITION
     std::cerr << "CPP exit 2\n";
 #endif
-    return -1;
+    return std::numeric_limits<Tidx>::max();
   }
   Tidx m=Tidx(P.firsts.size());
-  for (int idx=a; idx<=l; idx++)
+  for (Tidx idx=a; idx<=l; idx++)
     P.cellno[P.points[idx]] = m;
   P.firsts.push_back(a);
   P.lengths.push_back(l - a + 1);
@@ -413,7 +413,7 @@ Tidx IsolatePoint(Partition<Tidx> & P, Tidx const& a)
   Tidx len=P.lengths[iPart];
   //  std::cerr << "a=" << a << " iPart=" << iPart << " eFirst=" << eFirst << " len=" << len << "\n";
   if (len == 1)
-    return -1;
+    return std::numeric_limits<Tidx>::max();
   Tidx pos=0;
   for (Tidx j=eFirst; j<eFirst + len; j++) {
     Tidx ePt=P.points[j];
