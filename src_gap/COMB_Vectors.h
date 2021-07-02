@@ -8,6 +8,7 @@
 
 namespace permutalib {
 
+/*
 template<typename T>
 int PositionVect(std::vector<T> const& V, T const& eVal)
 {
@@ -17,6 +18,7 @@ int PositionVect(std::vector<T> const& V, T const& eVal)
       return i;
   return -1;
 }
+*/
 
 template<typename T, typename Tui>
 Tui PositionVect_ui(std::vector<T> const& V, T const& eVal)

@@ -142,20 +142,21 @@ Telt SCRRandomPerm(typename Telt::Tidx const& d )
 
 
 
-template<typename Telt>
-std::vector<Telt> CosetRepAsWord(std::vector<Telt> const& labels, int const& x, int const& y, std::vector<int> const& transversal)
+template<typename Telt, typename Tidx_label>
+std::vector<Telt> CosetRepAsWord(std::vector<Telt> const& labels, typename Telt::Tidx const& x, typename Telt::Tidx const& y, std::vector<Tidx_label> const& transversal)
 {
-  if (transversal[y] == -1)
+  using Tidx=typename Telt::Tidx;
+  if (transversal[y] == std::numeric_limits<Tidx_label>::max())
     return {};
-  int pnt=y;
+  Tidx pnt=y;
   std::vector<Telt> word;
   while(true) {
     if (pnt == x)
       break;
-    int pos=transversal[pnt];
+    Tidx_label pos=transversal[pnt];
     Telt eElt=labels[pos];
     word.push_back(eElt);
-    pnt=PowAct(pnt, eElt);
+    pnt = PowAct(pnt, eElt);
   }
   return word;
 }
@@ -185,9 +186,9 @@ std::vector<Telt> InverseAsWord(std::vector<Telt> const& word, std::vector<Telt>
 }
 
 template<typename Telt>
-int ImageInWord(int const& x, std::vector<Telt> const& word)
+typename Telt::Tidx ImageInWord(typename Telt::Tidx const& x, std::vector<Telt> const& word)
 {
-  int value=x;
+  typename Telt::Tidx value=x;
   for (auto & eElt : word)
     value = PowAct(value, eElt);
   return value;
@@ -197,14 +198,15 @@ int ImageInWord(int const& x, std::vector<Telt> const& word)
 template<typename Telt, typename Tidx_label>
 std::pair<std::vector<Telt>,int> SiftAsWord(StabChain<Telt,Tidx_label> const& S, std::vector<Telt> const& perm)
 {
+  using Tidx=typename Telt::Tidx;
   int index=0;
   std::vector<Telt> word = perm;
   StabChain<Telt,Tidx_label> Sptr = S;
   while (Sptr != nullptr) {
     index++;
-    int pnt=Sptr->orbit[0];
-    int y=ImageInWord(pnt,word);
-    if (Sptr->transversal[y] == -1)
+    Tidx pnt=Sptr->orbit[0];
+    Tidx y=ImageInWord(pnt, word);
+    if (Sptr->transversal[y] == std::numeric_limits<Tidx_label>::max())
       return {word, index};
     std::vector<Telt> coset=CosetRepAsWord(S->comm->labels, pnt, y, Sptr->transversal);
     for (auto & eElt : coset)
@@ -219,13 +221,14 @@ std::pair<std::vector<Telt>,int> SiftAsWord(StabChain<Telt,Tidx_label> const& S,
 template<typename Telt, typename Tidx_label>
 std::vector<Telt> RandomElmAsWord(StabChain<Telt,Tidx_label> const& S)
 {
+  using Tidx=typename Telt::Tidx;
   std::vector<Telt> word;
   StabChain<Telt,Tidx_label> Sptr = S;
   while (Sptr != nullptr) {
     size_t sizOrb=Sptr->orbit.size();
     size_t pos=RandomInteger<size_t>(sizOrb);
-    int ePt=Sptr->orbit[0];
-    int fPt=Sptr->orbit[pos];
+    Tidx ePt=Sptr->orbit[0];
+    Tidx fPt=Sptr->orbit[pos];
     std::vector<Telt> coset = CosetRepAsWord(S->comm->labels, ePt, fPt, Sptr->transversal);
     word.insert(word.end(), coset.begin(), coset.end());
     Sptr = Sptr->stabilizer;
@@ -369,7 +372,7 @@ void SCRMakeStabStrong(StabChain<Telt,Tidx_label> & S, std::vector<Telt> const& 
 	basesize[where[S->orbit[0]]]++;
       missing = DifferenceVect( missing, {firstmove});
     } else {
-      if (PositionVect(base,firstmove) < PositionVect(base,S->orbit[0])) {
+      if (PositionVect_ui<Tidx,size_t>(base,firstmove) < PositionVect_ui<Tidx,size_t>(base,S->orbit[0])) {
 	StabChain<Telt,Tidx_label> Snew = EmptyStabChain<Telt>(n);
 	Snew->transversal[firstmove]  = GetLabelIndex_const(S->comm->labels, S->comm->identity);
 	Snew->orbit = {firstmove};
@@ -853,7 +856,7 @@ StabChain<Telt,Tidx_label> StabChainRandomPermGroup(std::vector<Telt> const& gen
   std::vector<int> base;
   std::vector<int> basesize;
   std::vector<int> where;
-  std::vector<std::vector<int>> orbits;
+  std::vector<std::vector<Tidx>> orbits;
   if (correct) {
     base=Concatenation(givenbase,DifferenceVect(UsedKnownBase,givenbase));
     missing = VectorAsSet(UsedKnownBase);
@@ -862,7 +865,7 @@ StabChain<Telt,Tidx_label> StabChainRandomPermGroup(std::vector<Telt> const& gen
     for (Tidx u=0; u<degree; u++)
       TheBase[u]=u;
     base=Concatenation(givenbase, DifferenceVect(TheBase, givenbase));
-    std::vector<std::vector<int>> orbits2 = OrbitsPerms(gens, n, TheBase);
+    std::vector<std::vector<Tidx>> orbits2 = OrbitsPerms(gens, n, TheBase);
     for (auto & eOrb : orbits2)
       if (eOrb.size() > 1)
 	orbits.push_back(eOrb);
@@ -1049,7 +1052,7 @@ std::pair<bool,Telt> VerifySGS(StabChain<Telt,Tidx_label> const& S, std::vector<
 	  if (blks.size() * blks.size() != orbit.size()) {
 	    result = {false, Telt(n)};
 	  } else {
-	    int pos = PositionVect(blks, set);
+	    Tidx pos = PositionVect_ui<std::vector<int>,Tidx>(blks, set);
 	    std::function<Telt(Telt const&)> f = MapElementToSetPlusBlocks<Telt>(blks, n);
 	    temp2 = HomomorphismMapping(temp, f);
 	    newgen = f(gen);

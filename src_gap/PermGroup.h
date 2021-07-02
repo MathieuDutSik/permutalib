@@ -56,7 +56,7 @@ std::vector<typename Telt::Tidx> OrbitPerms(std::vector<Telt> const& gens, typen
 
 
 template<typename Telt>
-std::vector<std::vector<typename Telt::Tidx>> OrbitsPerms(std::vector<Telt> const& gens, typename Telt::Tidx const&n, std::vector<int> const& D)
+std::vector<std::vector<typename Telt::Tidx>> OrbitsPerms(std::vector<Telt> const& gens, typename Telt::Tidx const&n, std::vector<typename Telt::Tidx> const& D)
 {
   using Tidx=typename Telt::Tidx;
   std::vector<std::vector<Tidx>> orbs;
