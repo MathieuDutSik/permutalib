@@ -9,7 +9,7 @@ using Tarith = int;
 
 struct InfoPseudoRandom {
   Tarith R_228;
-  int R_N;
+  size_t R_N;
   std::vector<Tarith> R_X;
 };
 
@@ -25,7 +25,7 @@ Tarith GetR_228()
  
 InfoPseudoRandom RANDOM_SEED(int const& n)
 {
-  Tarith R_N=1;
+  size_t R_N=1;
   std::vector<Tarith> R_X(55);
   Tarith R_228=GetR_228();
   Tarith res= n % R_228;
@@ -55,12 +55,13 @@ InfoPseudoRandom* GetPseudoRandom()
 }
 
 
-int RandomInteger(int const& val)
+template<typename T>
+T RandomInteger(T const& val)
 {
 #ifdef TRUE_RANDOM
-  return rand() % val;
+  return T(rand()) % val;
 #else
-  return rand() % val;
+  return T(rand()) % val;
 #endif
 }
 

@@ -86,10 +86,10 @@ noticeType SCRNotice_B(std::vector<int> const& orb, std::vector<int> const& tran
 
 
 
-
-int QuoInt(int const& a, int const& b)
+template<typename T>
+T QuoInt(T const& a, T const& b)
 {
-  int res=a % b;
+  T res=a % b;
   return (a - res)/b;
 }
 
@@ -111,7 +111,7 @@ Face SCRRandomString(size_t const& n)
 {
   InfoPseudoRandom* R = GetPseudoRandom();
   Face string(n);
-  size_t k=QuoInt(n-1, 28);
+  size_t k=QuoInt<size_t>(n-1, 28);
   for (size_t i=0; i<=k; i++) {
     RandomShift(R);
     Face f=Extract01vector(R);
@@ -132,7 +132,7 @@ Telt SCRRandomPerm(typename Telt::Tidx const& d )
   std::vector<Tidx> rnd = ClosedInterval(0, Tidx(d));
   for (Tidx i=0; i<d; i++) {
     Tidx u=d+1-i;
-    Tidx k = RandomInteger(u);
+    Tidx k = RandomInteger<Tidx>(u);
     if (u != k)
       std::swap(rnd[u], rnd[k]);
   }
@@ -222,8 +222,8 @@ std::vector<Telt> RandomElmAsWord(StabChain<Telt> const& S)
   std::vector<Telt> word;
   StabChain<Telt> Sptr = S;
   while (Sptr != nullptr) {
-    int sizOrb=Sptr->orbit.size();
-    int pos=RandomInteger(sizOrb);
+    size_t sizOrb=Sptr->orbit.size();
+    size_t pos=RandomInteger<size_t>(sizOrb);
     int ePt=Sptr->orbit[0];
     int fPt=Sptr->orbit[pos];
     std::vector<Telt> coset = CosetRepAsWord(S->comm->labels, ePt, fPt, Sptr->transversal);
@@ -415,7 +415,7 @@ void SCRMakeStabStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, pa
   int m=0;
   while (m < mlimit) {
     m++;
-    int ran = RandomInteger(int(S->orbit.size()));
+    size_t ran = RandomInteger<size_t>(S->orbit.size());
     std::vector<Telt> coset = CosetRepAsWord(S->comm->labels, S->orbit[0], S->orbit[ran], S->transversal);
     coset = InverseAsWord(coset,gen,inv);
     if (!w.isIdentity()) {
@@ -450,7 +450,7 @@ void SCRMakeStabStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, pa
 	    int jlimit=std::max(param.param6, basesize[l]);
 	    while (j < jlimit) {
 	      j++;
-	      int ran=RandomInteger(int(orbits[l].size()));
+	      size_t ran=RandomInteger<size_t>(orbits[l].size());
 	      if (ImageInWord(orbits[l][ran],residue.first) != orbits[l][ran]) {
 		Telt g = Product(residue.first);
 		SCRMakeStabStrong(S->stabilizer, {g}, param, orbits, where, basesize, base, correct, missing, false);
@@ -490,7 +490,7 @@ std::vector<Telt> GetWpair(std::vector<Telt> const& Saux, int const& k, paramOpt
   if (len > 2*param.param3) {
     Telt ran1 = SCRRandomPerm<Telt>(len);
     Telt ran2 = SCRRandomPerm<Telt>(len);
-    int len2 = RandomInteger(int(QuoInt(len,2)));
+    Tidx len2 = RandomInteger<Tidx>(QuoInt(len,2));
     Face string = SCRRandomString(len+len2);
     Telt w1 = TheId;
     for (Tidx x=0; x<len; x++) {
@@ -555,7 +555,7 @@ Telt SCRStrongGenTest(StabChain<Telt> const& S, paramOpt const& param, std::vect
 		  int jlimit = std::max(param.param6, basesize[l]);
 		  while (j < jlimit) {
 		    j++;
-		    int ran = RandomInteger(int(orbits[l].size()));
+		    size_t ran = RandomInteger<size_t>(orbits[l].size());
 		    if (ImageInWord(orbits[l][ran],residue.first) != orbits[l][ran])
 		      return Product(residue.first);
 		  }
