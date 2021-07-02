@@ -771,7 +771,7 @@ std::vector<Telt> StrongGeneratorsStabChain(StabChain<Telt> const& S)
   StabChain<Telt> Sptr = S;
   std::unordered_set<Telt> sgs_set;
   while (Sptr != nullptr) {
-    std::vector<Telt> const& labels = Sptr->comm->labels;
+    const std::vector<Telt>& labels = Sptr->comm->labels;
     for (auto & pos : Sptr->genlabels)
       sgs_set.insert(labels[pos]);
     Sptr = Sptr->stabilizer;

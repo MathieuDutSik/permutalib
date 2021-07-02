@@ -123,38 +123,38 @@ std::vector<std::vector<int>> Blocks_without_seed(std::vector<Telt> const& ListG
     }
     return false;
   };
-  auto GetEdgeFromPosition=[&](int const& pos) -> std::vector<int> {
-    int posTot=pos;
-    int firstElement=0;
+  auto GetEdgeFromPosition=[&](size_t const& pos) -> std::pair<size_t,size_t> {
+    size_t posTot = pos;
+    size_t firstElement=0;
     while(true) {
-      int allowedSiz = n - 1 - firstElement;
+      size_t allowedSiz = n - 1 - firstElement;
       if (posTot < allowedSiz) {
-	int secondElement=firstElement + 1 + posTot;
+	size_t secondElement=firstElement + 1 + posTot;
 	return {firstElement,secondElement};
       }
       posTot -= allowedSiz;
       firstElement++;
     }
   };
-  auto GetPosFromEdge=[&](std::vector<int> const& eEdge) -> int {
-    int eFirst=eEdge[0];
-    int eSecond=eEdge[1];
-    int pos=0;
-    for (int u=0; u<eFirst; u++) {
-      int allowedSiz = n - 1 - eFirst;
+  auto GetPosFromEdge=[&](std::pair<size_t,size_t> const& eEdge) -> size_t {
+    size_t eFirst=eEdge.first;
+    size_t eSecond=eEdge.second;
+    size_t pos=0;
+    for (size_t u=0; u<eFirst; u++) {
+      size_t allowedSiz = n - 1 - eFirst;
       pos += allowedSiz;
     }
     return pos + eSecond - 1 - eFirst;
   };
   while(true) {
-    std::vector<int> eEdge=GetEdgeFromPosition(ThePos);
+    std::vector<size_t> eEdge=GetEdgeFromPosition(ThePos);
     std::pair<std::vector<std::vector<int>>,std::vector<Face>> ePair = Blocks_Kernel(ListGen, Omega, eEdge);
     if (ePair.first.size() > 1) {
       return ePair.first;
     }
     for (auto & eEdgeFace : ePair.second) {
-      std::vector<int> eEdge = FaceToVector<int>(eEdgeFace);
-      int pos=GetPosFromEdge(eEdge);
+      std::vector<size_t> eEdge = FaceToVector<size_t>(eEdgeFace);
+      size_t pos=GetPosFromEdge(eEdge);
       UsedEdge[pos]=1;
     }
     bool test = UpdatePosition();

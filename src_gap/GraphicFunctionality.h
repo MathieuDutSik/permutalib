@@ -117,7 +117,7 @@ GraphSparseImmutable(size_t const& _nbVert, std::vector<size_t> const& _ListStar
 	return true;
     return false;
   }
-  int GetColor(size_t const& iVert) const
+  size_t GetColor(size_t const& iVert) const
   {
     if (!HasVertexColor) {
       std::cerr << "Call to GetColor while HasVertexColor=false\n";

@@ -1773,7 +1773,7 @@ Face OnSets(Face const& f, Telt const& g)
   Face fRet(n);
   boost::dynamic_bitset<>::size_type b = f.find_first();
   while (b != boost::dynamic_bitset<>::npos) {
-    Tidx eImg=g.at(b);
+    Tidx eImg=g.at(Tidx(b));
     fRet[eImg]=1;
     b = f.find_next(b);
   }
