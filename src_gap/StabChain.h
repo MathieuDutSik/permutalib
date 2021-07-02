@@ -1617,8 +1617,8 @@ bool StabChainSwap(StabChain<Telt> & Stot)
 template<typename T>
 T LabsLims(T const& lab, std::function<T(T const&)> const& hom, std::vector<T> & labs, std::vector<T> & lims)
 {
-  int pos=PositionVect(labs, lab);
-  if (pos == -1) {
+  size_t pos=PositionVect_sz(labs, lab);
+  if (pos == std::numeric_limits<size_t>::max()) {
     labs.push_back(lab);
     T img=hom(lab);
     lims.push_back(img);
@@ -1710,9 +1710,9 @@ std::string PrintTopOrbit(StabChain<Telt> const& S)
   if (S == nullptr) {
     return "unset";
   }
-  Tidx len=S->orbit.size();
+  size_t len=S->orbit.size();
   std::string str = "[ ";
-  for (Tidx u=0; u<len; u++) {
+  for (size_t u=0; u<len; u++) {
     if (u>0)
       str += ", ";
     str += std::to_string(S->orbit[u]+1);
