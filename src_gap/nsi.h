@@ -100,8 +100,8 @@ Telt PermListList(std::vector<T> const& list1, std::vector<T> const& list2)
 
 
 
-template<typename Telt, typename Tint>
-StabChain<Telt> Action(StabChain<Telt> const& S, std::vector<typename Telt::Tidx> const& set)
+template<typename Telt, typename Tidx_label, typename Tint>
+StabChain<Telt,Tidx_label> Action(StabChain<Telt,Tidx_label> const& S, std::vector<typename Telt::Tidx> const& set)
 {
   using Tidx = typename Telt::Tidx;
   Tidx n = S->comm->n;
@@ -122,7 +122,7 @@ StabChain<Telt> Action(StabChain<Telt> const& S, std::vector<typename Telt::Tidx
     Telt ePerm = Telt(eList);
     LGen.emplace_back(ePerm);
   }
-  return FCT_Group<Telt,Tint>(LGen, siz);
+  return FCT_Group<Telt,Tidx_label,Tint>(LGen, siz);
 }
 
 template<typename Telt, typename Tidx>
@@ -156,8 +156,8 @@ std::vector<T> Set(std::vector<T> const& V)
   Modification done:
   --- skip_fnuc eliminated as it is the identity in the case that interest us.
  */
-template<typename Telt, typename Tint>
-std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::vector<typename Telt::Tidx> const& set, StabChain<Telt> const& k)
+template<typename Telt, typename Tidx_label, typename Tint>
+std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt,Tidx_label> const& g, std::vector<typename Telt::Tidx> const& set, StabChain<Telt,Tidx_label> const& k)
 {
   using Tidx = typename Telt::Tidx;
 #ifdef DEBUG_NSI
@@ -277,7 +277,7 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::
   struct Node {
     std::vector<Tidx> selected;
     std::vector<Tidx> image;
-    StabChain<Telt> substab;
+    StabChain<Telt,Tidx_label> substab;
     bool deleted;
     std::shared_ptr<Node> next;
     std::shared_ptr<Node> prev;
@@ -300,8 +300,8 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::
   std::cerr << "CPP n=" << int(n) << "\n";
   std::cerr << "DEBUG MATCH set=" << GapStringIntVector(set) << "\n";
 #endif
-  StabChain<Telt> s = CopyStabChain(g);
-  StabChain<Telt> l = Action<Telt,Tint>(k, set);
+  StabChain<Telt,Tidx_label> s = CopyStabChain(g);
+  StabChain<Telt,Tidx_label> l = Action<Telt,Tidx_label,Tint>(k, set);
   Tidx m = set.size();
   Node root_v;
   root_v.image = set;
@@ -374,7 +374,7 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::
   // of 'set' in 'gp' simply.
   PreAllocatedVector<Tidx> q_sor(n);
   Face b_sor(n);
-  auto simpleOrbitReps=[&](StabChain<Telt> const& gp, std::vector<Tidx> const& set) -> std::vector<Tidx> {
+  auto simpleOrbitReps=[&](StabChain<Telt,Tidx_label> const& gp, std::vector<Tidx> const& set) -> std::vector<Tidx> {
 #ifdef DEBUG_NSI
     std::cerr << "CPP Beginning of simpleOrbitReps\n";
 #endif
@@ -729,7 +729,7 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::
 #ifdef DEBUG_NSI
           std::cerr << "DEBUG Before Stabilize_OnPoints x=" << int(x+1) << "\n";
 #endif
-          newnode_v.substab = Kernel_Stabilizer_OnPoints<Telt,Tint>(node->substab, x);
+          newnode_v.substab = Kernel_Stabilizer_OnPoints<Telt,Tidx_label,Tint>(node->substab, x);
 #ifdef DEBUG_NSI
           std::cerr << "DEBUG After Stabilize_OnPoints\n";
 #endif
@@ -781,8 +781,8 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt> const& g, std::
 
 
 
-template<typename Telt, typename Tint>
-Face Kernel_CanonicalImage(StabChain<Telt> const& g, Face const& set)
+template<typename Telt, typename Tidx_label, typename Tint>
+Face Kernel_CanonicalImage(StabChain<Telt,Tidx_label> const& g, Face const& set)
 {
   using Tidx = typename Telt::Tidx;
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
@@ -801,8 +801,8 @@ Face Kernel_CanonicalImage(StabChain<Telt> const& g, Face const& set)
       set_i.push_back(aRow);
       aRow = set.find_next(aRow);
     }
-    StabChain<Telt> k = Kernel_Stabilizer_OnSets<Telt,Tint>(g, set);
-    std::vector<Tidx> eSetCan = NewCanonicImage<Telt,Tint>(g, set_i, k);
+    StabChain<Telt,Tidx_label> k = Kernel_Stabilizer_OnSets<Telt,Tidx_label,Tint>(g, set);
+    std::vector<Tidx> eSetCan = NewCanonicImage<Telt,Tidx_label,Tint>(g, set_i, k);
 #ifdef DEBUG_NSI
     std::cerr << "CPP eSetCan=" << GapStringIntVector(eSetCan) << "\n";
 #endif
@@ -818,8 +818,8 @@ Face Kernel_CanonicalImage(StabChain<Telt> const& g, Face const& set)
       set_i.push_back(aRow);
       aRow = setC.find_next(aRow);
     }
-    StabChain<Telt> k = Kernel_Stabilizer_OnSets<Telt,Tint>(g, setC);
-    std::vector<Tidx> eSetCan = NewCanonicImage<Telt,Tint>(g, set_i, k);
+    StabChain<Telt,Tidx_label> k = Kernel_Stabilizer_OnSets<Telt,Tidx_label,Tint>(g, setC);
+    std::vector<Tidx> eSetCan = NewCanonicImage<Telt,Tidx_label,Tint>(g, set_i, k);
     for (size_t i=0; i<set.size(); i++)
       ret[i] = 1;
     for (auto & eVal : eSetCan)

@@ -161,11 +161,11 @@ struct CommonStabInfo {
   std::vector<Telt> labels;
 };
 
-template<typename Telt>
+template<typename Telt, typename Tidx_label>
 struct StabLevel {
-  std::vector<int> transversal;
+  std::vector<Tidx_label> transversal;
   std::vector<typename Telt::Tidx> orbit;
-  std::vector<int> genlabels; // Not used in Random algorithm
+  std::vector<Tidx_label> genlabels; // Not used in Random algorithm
   std::vector<int8_t> cycles; // We need a vector because if we use a "Face" dynamic bitset then
                               // we cannot extend. On the other hand if we use a std::vector<bool>
                               // we are exposed to the problems of this
@@ -178,17 +178,17 @@ struct StabLevel {
   int diam;
   //
   std::shared_ptr<CommonStabInfo<Telt>> comm;
-  std::shared_ptr<StabLevel<Telt>> stabilizer;
+  std::shared_ptr<StabLevel<Telt,Tidx_label>> stabilizer;
 };
 
-template<typename Telt>
-using StabChain = std::shared_ptr<StabLevel<Telt>>;
+template<typename Telt, typename Tidx_label>
+using StabChain = std::shared_ptr<StabLevel<Telt,Tidx_label>>;
 // other possible entries:
 // transimages, genimages, labelimages, idimage
 
 
-template<typename Telt>
-bool IsIdenticalObj(StabChain<Telt> const& S1, StabChain<Telt> const& S2)
+template<typename Telt, typename Tidx_label>
+bool IsIdenticalObj(StabChain<Telt,Tidx_label> const& S1, StabChain<Telt,Tidx_label> const& S2)
 {
   return S1 == S2;
 }
@@ -197,15 +197,15 @@ bool IsIdenticalObj(StabChain<Telt> const& S1, StabChain<Telt> const& S2)
 
 
 
-template<typename Telt>
-StabChain<Telt> StabChainGenerators(std::vector<Telt> const& generators, typename Telt::Tidx const& n, Telt const& id)
+template<typename Telt, typename Tidx_label>
+StabChain<Telt,Tidx_label> StabChainGenerators(std::vector<Telt> const& generators, typename Telt::Tidx const& n, Telt const& id)
 {
   std::shared_ptr<CommonStabInfo<Telt>> comm = std::make_shared<CommonStabInfo<Telt>>(CommonStabInfo<Telt>({n, id, generators}));
   //
-  std::vector<int> transversal(n, -1);
+  std::vector<Tidx_label> transversal(n, std::numeric_limits<Tidx_label>::max());
   std::vector<typename Telt::Tidx> orbit;
-  std::vector<int> genlabels;
-  for (int igen=0; igen<int(generators.size()); igen++)
+  std::vector<Tidx_label> genlabels;
+  for (Tidx_label igen=0; igen<Tidx_label(generators.size()); igen++)
     genlabels.push_back(igen);
   std::vector<int8_t> cycles;
   bool IsBoundCycle = false;
@@ -214,22 +214,22 @@ StabChain<Telt> StabChainGenerators(std::vector<Telt> const& generators, typenam
   std::vector<Telt> aux;
   int treedepth = 0;
   int diam = 0;
-  return std::make_shared<StabLevel<Telt>>(StabLevel<Telt>({transversal, orbit, genlabels, cycles, IsBoundCycle, treegen, treegeninv, aux, treedepth, diam, comm, nullptr}));
+  return std::make_shared<StabLevel<Telt,Tidx_label>>(StabLevel<Telt,Tidx_label>({transversal, orbit, genlabels, cycles, IsBoundCycle, treegen, treegeninv, aux, treedepth, diam, comm, nullptr}));
 }
 
 
-template<typename Telt>
-void PrintStabChainTransversals(StabChain<Telt> const& S)
+template<typename Telt, typename Tidx_label>
+void PrintStabChainTransversals(StabChain<Telt,Tidx_label> const& S)
 {
   using Tidx=typename Telt::Tidx;
-  StabChain<Telt> Swork = S;
+  StabChain<Telt,Tidx_label> Swork = S;
   Tidx n=Swork->comm->n;
   size_t iLevel=0;
   while (Swork != nullptr) {
     std::vector<std::optional<Telt>> V(n);
     for (Tidx i=0; i<n; i++) {
-      int eVal = Swork->transversal[i];
-      if (eVal == -1)
+      Tidx_label eVal = Swork->transversal[i];
+      if (eVal == std::numeric_limits<Tidx_label>::max())
         V[i] = {};
       else
         V[i] = Swork->comm->labels[eVal];
@@ -242,10 +242,10 @@ void PrintStabChainTransversals(StabChain<Telt> const& S)
 }
 
 
-template<typename Telt>
-void PrintStabChainOrbits(StabChain<Telt> const& S)
+template<typename Telt, typename Tidx_label>
+void PrintStabChainOrbits(StabChain<Telt,Tidx_label> const& S)
 {
-  StabChain<Telt> Swork = S;
+  StabChain<Telt,Tidx_label> Swork = S;
   size_t iLevel=0;
   while (Swork != nullptr) {
     std::cerr << "CPP i=" << iLevel << " orbit=" << GapStringIntVector(Swork->orbit) << "\n";
@@ -255,8 +255,8 @@ void PrintStabChainOrbits(StabChain<Telt> const& S)
 }
 
 
-template<typename Telt>
-std::string GetListStabCommPartition(std::vector<StabChain<Telt>> const& ListS)
+template<typename Telt, typename Tidx_label>
+std::string GetListStabCommPartition(std::vector<StabChain<Telt,Tidx_label>> const& ListS)
 {
   size_t len = ListS.size();
   Face Status(len);
@@ -267,7 +267,7 @@ std::string GetListStabCommPartition(std::vector<StabChain<Telt>> const& ListS)
       auto ptr = ListS[i]->comm;
       for (size_t j=0; j<len; j++) {
         if (ListS[j]->comm == ptr) {
-          LVal.push_back(j);
+          LVal.push_back(int(j));
           Status[j] = 1;
         }
       }
@@ -279,11 +279,11 @@ std::string GetListStabCommPartition(std::vector<StabChain<Telt>> const& ListS)
 }
 
 
-template<typename Telt>
-void PrintStabChain(StabChain<Telt> const& S)
+template<typename Telt, typename Tidx_label>
+void PrintStabChain(StabChain<Telt,Tidx_label> const& S)
 {
   using Tidx=typename Telt::Tidx;
-  StabChain<Telt> Sptr = S;
+  StabChain<Telt,Tidx_label> Sptr = S;
   Tidx n = Sptr->comm->n;
   std::cerr << "CPP Reference Partition=" << GetListStabCommPartition(ListStabChain(S)) << "\n";
   size_t iLevel = 0;
@@ -297,8 +297,8 @@ void PrintStabChain(StabChain<Telt> const& S)
       }
       std::vector<std::optional<Telt>> V(n);
       for (Tidx i=0; i<n; i++) {
-        int eVal = Sptr->transversal[i];
-        if (eVal == -1)
+        Tidx_label eVal = Sptr->transversal[i];
+        if (eVal == std::numeric_limits<Tidx_label>::max())
           V[i] = {};
         else
           V[i] = Sptr->comm->labels[eVal];
@@ -319,17 +319,17 @@ void PrintStabChain(StabChain<Telt> const& S)
 }
 
 
-template<typename Telt>
-void PrintListStabCommPartition(std::string const& mesg, std::vector<StabChain<Telt>> const& ListS)
+template<typename Telt, typename Tidx_label>
+void PrintListStabCommPartition(std::string const& mesg, std::vector<StabChain<Telt,Tidx_label>> const& ListS)
 {
   std::cerr << mesg << " ListStabCommPartition=" << GetListStabCommPartition(ListS) << "\n";
 }
 
 
-template<typename Telt>
-void UnbindCycles(StabChain<Telt> const& S)
+template<typename Telt, typename Tidx_label>
+void UnbindCycles(StabChain<Telt,Tidx_label> const& S)
 {
-  StabChain<Telt> Sptr = S;
+  StabChain<Telt,Tidx_label> Sptr = S;
   while (Sptr != nullptr) {
     Sptr->cycles.clear();
     Sptr->IsBoundCycle = false;
@@ -338,10 +338,10 @@ void UnbindCycles(StabChain<Telt> const& S)
 }
 
 
-template<typename Telt>
-int GetStabilizerDepth(StabChain<Telt> const& S1)
+template<typename Telt, typename Tidx_label>
+int GetStabilizerDepth(StabChain<Telt,Tidx_label> const& S1)
 {
-  StabChain<Telt> S2 = S1;
+  StabChain<Telt,Tidx_label> S2 = S1;
   int dep = 0;
   while (S2 != nullptr) {
     dep++;
@@ -361,11 +361,11 @@ std::string perm_to_string(Telt const& eVal)
 }
 
 
-template<typename Telt>
-std::string GetStringExpressionOfStabChain(StabChain<Telt> const& eRec)
+template<typename Telt, typename Tidx_label>
+std::string GetStringExpressionOfStabChain(StabChain<Telt,Tidx_label> const& eRec)
 {
   std::string strRet="record_";
-  StabChain<Telt> eStab = eRec;
+  StabChain<Telt,Tidx_label> eStab = eRec;
   while (eStab != nullptr) {
     strRet += "orbit_[";
     for (auto & eVal : eStab->orbit)
@@ -373,7 +373,7 @@ std::string GetStringExpressionOfStabChain(StabChain<Telt> const& eRec)
     strRet += "]";
     strRet += "_transversal_";
     for (auto & eVal : eStab->transversal) {
-      if (eVal == -1)
+      if (eVal == std::numeric_limits<Tidx_label>::max())
         strRet += " " + std::to_string(eVal);
       else
         strRet += " " + perm_to_string(eStab->comm->labels[eVal]);
@@ -386,8 +386,8 @@ std::string GetStringExpressionOfStabChain(StabChain<Telt> const& eRec)
 
 
 
-template<typename Telt>
-std::ostream& operator<<(std::ostream& os, StabChain<Telt> const& Stot)
+template<typename Telt, typename Tidx_label>
+std::ostream& operator<<(std::ostream& os, StabChain<Telt,Tidx_label> const& Stot)
 {
   os << "CPP n=" << Stot->comm->n << " identity=" << GapStyleString(Stot->comm->identity) << "\n";
   os << "CPP labels=[ ";
@@ -400,7 +400,7 @@ std::ostream& operator<<(std::ostream& os, StabChain<Telt> const& Stot)
   }
   os << " ]\n";
   size_t iLev=0;
-  StabChain<Telt> Sptr = Stot;
+  StabChain<Telt,Tidx_label> Sptr = Stot;
   while (Sptr!= nullptr) {
     os << "CPP iLev=" << iLev << "\n";
     os << "CPP  orbit =";
@@ -410,7 +410,7 @@ std::ostream& operator<<(std::ostream& os, StabChain<Telt> const& Stot)
     os << "\n";
     os << "CPP  transversal =";
     for (auto & eVal : Sptr->transversal) {
-      if (eVal == -1)
+      if (eVal == std::numeric_limits<Tidx_label>::max())
 	os << " " << eVal;
       else
 	os << " " << Sptr->comm->labels[eVal];
@@ -423,19 +423,19 @@ std::ostream& operator<<(std::ostream& os, StabChain<Telt> const& Stot)
 }
 
 
-template<typename Telt>
-StabChain<Telt> ShallowCopy(StabChain<Telt> const& S)
+template<typename Telt, typename Tidx_label>
+StabChain<Telt,Tidx_label> ShallowCopy(StabChain<Telt,Tidx_label> const& S)
 {
-  StabLevel<Telt> Sret = *S;
+  StabLevel<Telt,Tidx_label> Sret = *S;
   Sret.comm = S->comm;
   Sret.stabilizer = S->stabilizer;
-  return std::make_shared<StabLevel<Telt>>(Sret);
+  return std::make_shared<StabLevel<Telt,Tidx_label>>(Sret);
 }
 
 
 
-template<typename Telt>
-StabChain<Telt> StructuralCopy(StabChain<Telt> const& S)
+template<typename Telt, typename Tidx_label>
+StabChain<Telt,Tidx_label> StructuralCopy(StabChain<Telt,Tidx_label> const& S)
 {
   if (S == nullptr)
     return nullptr;
@@ -451,17 +451,17 @@ StabChain<Telt> StructuralCopy(StabChain<Telt> const& S)
      ListLabelsImg.push_back(comm_new);
      return comm_new;
   };
-  StabChain<Telt> Sptr = S;
-  std::vector<std::shared_ptr<StabLevel<Telt>>> ListPtr;
+  StabChain<Telt,Tidx_label> Sptr = S;
+  std::vector<std::shared_ptr<StabLevel<Telt,Tidx_label>>> ListPtr;
   while (Sptr != nullptr) {
     ListPtr.push_back(Sptr);
     Sptr = Sptr->stabilizer;
   }
   size_t len = ListPtr.size();
-  StabChain<Telt> Sret = nullptr;
+  StabChain<Telt,Tidx_label> Sret = nullptr;
   for (size_t i=0; i<len; i++) {
     size_t j = len - 1 - i;
-    std::shared_ptr<StabLevel<Telt>> S2 = std::make_shared<StabLevel<Telt>>(*ListPtr[j]);
+    std::shared_ptr<StabLevel<Telt,Tidx_label>> S2 = std::make_shared<StabLevel<Telt,Tidx_label>>(*ListPtr[j]);
     S2->stabilizer = Sret;
     S2->comm = get_comm(ListPtr[j]->comm);
     Sret = S2;
@@ -480,31 +480,31 @@ StabChain<Telt> StructuralCopy(StabChain<Telt> const& S)
 }
 
 
-template<typename Telt>
-StabChain<Telt> CopyStabChain(StabChain<Telt> const& S)
+template<typename Telt, typename Tidx_label>
+StabChain<Telt,Tidx_label> CopyStabChain(StabChain<Telt,Tidx_label> const& S)
 {
   return StructuralCopy(S);
 }
 
 
 
-template<typename Telt>
-StabChain<Telt> RestrictedStabChain(StabChain<Telt> const& Stot, size_t const& eLev)
+template<typename Telt, typename Tidx_label>
+StabChain<Telt,Tidx_label> RestrictedStabChain(StabChain<Telt,Tidx_label> const& Stot, size_t const& eLev)
 {
   size_t nbLevel=Stot.stabilizer.size();
-  std::vector<StabLevel<Telt>> stabilizerRed;
+  std::vector<StabLevel<Telt,Tidx_label>> stabilizerRed;
   for (size_t uLev=eLev; uLev<nbLevel; uLev++)
     stabilizerRed.push_back(Stot.stabilizer[uLev]);
   return {Stot.n, Stot.identity, Stot.labels, stabilizerRed};
 }
 
 
-template<typename Telt>
-StabLevel<Telt> EmptyStabLevel(std::shared_ptr<CommonStabInfo<Telt>> const& comm)
+template<typename Telt, typename Tidx_label>
+StabLevel<Telt,Tidx_label> EmptyStabLevel(std::shared_ptr<CommonStabInfo<Telt>> const& comm)
 {
-  std::vector<int> transversal(comm->n, -1);
+  std::vector<Tidx_label> transversal(comm->n, std::numeric_limits<Tidx_label>::max());
   std::vector<typename Telt::Tidx> orbit;
-  std::vector<int> genlabels;
+  std::vector<Tidx_label> genlabels;
   std::vector<int8_t> cycles;
   bool IsBoundCycle = false;
   std::vector<Telt> treegen;
@@ -517,48 +517,44 @@ StabLevel<Telt> EmptyStabLevel(std::shared_ptr<CommonStabInfo<Telt>> const& comm
 
 
 
-template<typename Telt>
-StabChain<Telt> EmptyStabChain(typename Telt::Tidx const& n)
+template<typename Telt, typename Tidx_label>
+StabChain<Telt,Tidx_label> EmptyStabChain(typename Telt::Tidx const& n)
 {
   Telt id(n);
   std::shared_ptr<CommonStabInfo<Telt>> comm = std::make_shared<CommonStabInfo<Telt>>(CommonStabInfo<Telt>({n, id, {id}}));
-  return std::make_shared<StabLevel<Telt>>(EmptyStabLevel<Telt>(comm));
+  return std::make_shared<StabLevel<Telt,Tidx_label>>(EmptyStabLevel<Telt,Tidx_label>(comm));
 }
 
 
-template<typename Telt>
-StabChain<Telt> EmptyStabChainPlusNode(typename Telt::Tidx const& n, typename Telt::Tidx const& bas)
+template<typename Telt, typename Tidx_label>
+StabChain<Telt,Tidx_label> EmptyStabChainPlusNode(typename Telt::Tidx const& n, typename Telt::Tidx const& bas)
 {
-  StabChain<Telt> S = EmptyStabChain<Telt>(n);
+  StabChain<Telt,Tidx_label> S = EmptyStabChain<Telt,Tidx_label>(n);
   InitializeSchreierTree(S, bas);
   return S;
 }
 
 
-template<typename Telt>
-StabChain<Telt> EmptyStabChainPlusCommon(std::shared_ptr<CommonStabInfo<Telt>> const& comm)
+template<typename Telt, typename Tidx_label>
+StabChain<Telt,Tidx_label> EmptyStabChainPlusCommon(std::shared_ptr<CommonStabInfo<Telt>> const& comm)
 {
-  StabChain<Telt> S = std::make_shared<StabLevel<Telt>>(EmptyStabLevel<Telt>(comm));
+  StabChain<Telt,Tidx_label> S = std::make_shared<StabLevel<Telt,Tidx_label>>(EmptyStabLevel<Telt,Tidx_label>(comm));
   return S;
 }
 
 
-template<typename Telt>
-StabChain<Telt> EmptyStabChainPlusCommonPlusNode(std::shared_ptr<CommonStabInfo<Telt>> const& comm, typename Telt::Tidx const& bas)
+template<typename Telt, typename Tidx_label>
+StabChain<Telt,Tidx_label> EmptyStabChainPlusCommonPlusNode(std::shared_ptr<CommonStabInfo<Telt>> const& comm, typename Telt::Tidx const& bas)
 {
-  StabChain<Telt> S = std::make_shared<StabLevel<Telt>>(EmptyStabLevel<Telt>(comm));
+  StabChain<Telt,Tidx_label> S = std::make_shared<StabLevel<Telt,Tidx_label>>(EmptyStabLevel<Telt,Tidx_label>(comm));
   InitializeSchreierTree(S, bas);
   return S;
 }
 
 
 
-
-
-
-
-template<typename Telt>
-typename Telt::Tidx BasePoint(StabChain<Telt> const& S)
+template<typename Telt, typename Tidx_label>
+typename Telt::Tidx BasePoint(StabChain<Telt,Tidx_label> const& S)
 {
   using Tidx=typename Telt::Tidx;
   if (S == nullptr)
@@ -572,9 +568,8 @@ typename Telt::Tidx BasePoint(StabChain<Telt> const& S)
 
 
 
-// almost certainly wrong code below.
-template<typename Telt>
-void RemoveStabChain(StabChain<Telt> & Stot)
+template<typename Telt, typename Tidx_label>
+void RemoveStabChain(StabChain<Telt,Tidx_label> & Stot)
 {
   using Tidx=typename Telt::Tidx;
   Stot->stabilizer = nullptr;
@@ -593,11 +588,11 @@ void RemoveStabChain(StabChain<Telt> & Stot)
 }
 
 
-template<typename Telt>
-bool IsInBasicOrbit(StabChain<Telt> const& S, typename Telt::Tidx const& pnt)
+template<typename Telt, typename Tidx_label>
+bool IsInBasicOrbit(StabChain<Telt,Tidx_label> const& S, typename Telt::Tidx const& pnt)
 {
-  int eVal=S->transversal[pnt];
-  if (eVal == -1)
+  Tidx_label eVal=S->transversal[pnt];
+  if (eVal == std::numeric_limits<Tidx_label>::max())
     return false;
   return true;
 }
@@ -612,8 +607,8 @@ int PowAct(int const& pnt, Telt const& g)
 }
 */
 
-template<typename Telt>
-Telt InverseRepresentative(StabChain<Telt> const& S, typename Telt::Tidx const& pnt)
+template<typename Telt, typename Tidx_label>
+Telt InverseRepresentative(StabChain<Telt,Tidx_label> const& S, typename Telt::Tidx const& pnt)
 {
   using Tidx=typename Telt::Tidx;
   Tidx bpt=S->orbit[0];
@@ -623,7 +618,7 @@ Telt InverseRepresentative(StabChain<Telt> const& S, typename Telt::Tidx const& 
   std::cerr << "CPP INVREP bpt=" << int(bpt+1) << " pnt=" << int(pntw+1) << "\n";
 #endif
   while(pntw != bpt) {
-    int idx=S->transversal[pntw];
+    Tidx_label idx=S->transversal[pntw];
     const Telt& te=S->comm->labels[idx];
 #ifdef DEBUG_INV_REP
     std::cerr << "CPP INVREP te=" << te << "\n";
@@ -644,15 +639,15 @@ Telt InverseRepresentative(StabChain<Telt> const& S, typename Telt::Tidx const& 
 }
 
 
-template<typename Telt>
-std::vector<Telt> InverseRepresentativeWord(StabChain<Telt> const& S, typename Telt::Tidx const& pnt)
+template<typename Telt, typename Tidx_label>
+std::vector<Telt> InverseRepresentativeWord(StabChain<Telt,Tidx_label> const& S, typename Telt::Tidx const& pnt)
 {
   using Tidx=typename Telt::Tidx;
   Tidx bpt=S->orbit[0];
   std::vector<Telt> word;
   Tidx pntw=pnt;
   while(pntw != bpt) {
-    int idx=S->transversal[pntw];
+    Tidx_label idx=S->transversal[pntw];
     const Telt& te=S->comm->labels[idx];
     pntw = PowAct(pntw, te);
     word.push_back(te);
@@ -661,23 +656,23 @@ std::vector<Telt> InverseRepresentativeWord(StabChain<Telt> const& S, typename T
 }
 
 
-template<typename Telt>
-Telt SiftedPermutation(StabChain<Telt> const& S, Telt const& g)
+template<typename Telt, typename Tidx_label>
+Telt SiftedPermutation(StabChain<Telt,Tidx_label> const& S, Telt const& g)
 {
   using Tidx=typename Telt::Tidx;
   Telt gW = g;
-  StabChain<Telt> Sptr = S;
+  StabChain<Telt,Tidx_label> Sptr = S;
   while(true) {
     if (Sptr->stabilizer == nullptr || gW.isIdentity())
       return gW;
     Tidx bpt = Sptr->orbit[0];
     Tidx img = PowAct(bpt, gW);
-    if (Sptr->transversal[img] == -1)
+    if (Sptr->transversal[img] == std::numeric_limits<Tidx_label>::max())
       return gW;
     while(true) {
       if (img == bpt)
 	break;
-      int idx = Sptr->transversal[img];
+      Tidx_label idx = Sptr->transversal[img];
       gW = gW * Sptr->comm->labels[idx];
       img = PowAct(bpt, gW);
     }
@@ -688,8 +683,8 @@ Telt SiftedPermutation(StabChain<Telt> const& S, Telt const& g)
 
 
 // Testing that S1 is a subset of S2
-template<typename Telt>
-bool InclusionTest(const StabChain<Telt>& S1, const StabChain<Telt>& S2)
+template<typename Telt, typename Tidx_label>
+bool InclusionTest(const StabChain<Telt,Tidx_label>& S1, const StabChain<Telt,Tidx_label>& S2)
 {
   for (auto & eGen : Kernel_GeneratorsOfGroup(S1)) {
     Telt res = SiftedPermutation(S2, eGen);
@@ -700,8 +695,8 @@ bool InclusionTest(const StabChain<Telt>& S1, const StabChain<Telt>& S2)
 }
 
 
-template<typename Telt>
-bool EqualityTest(const StabChain<Telt>& S1, const StabChain<Telt>& S2)
+template<typename Telt, typename Tidx_label>
+bool EqualityTest(const StabChain<Telt,Tidx_label>& S1, const StabChain<Telt,Tidx_label>& S2)
 {
   if (!InclusionTest(S1,S2))
     return false;
@@ -713,11 +708,11 @@ bool EqualityTest(const StabChain<Telt>& S1, const StabChain<Telt>& S2)
 
 
 
-template<typename Telt>
-std::vector<typename Telt::Tidx> BaseStabChain(StabChain<Telt> const& S)
+template<typename Telt, typename Tidx_label>
+std::vector<typename Telt::Tidx> BaseStabChain(StabChain<Telt,Tidx_label> const& S)
 {
   using Tidx=typename Telt::Tidx;
-  StabChain<Telt> Sptr = S;
+  StabChain<Telt,Tidx_label> Sptr = S;
   std::vector<Tidx> base;
   while (Sptr != nullptr) {
     base.push_back(Sptr->orbit[0]);
@@ -728,30 +723,32 @@ std::vector<typename Telt::Tidx> BaseStabChain(StabChain<Telt> const& S)
 
 
 
-template<typename Telt, typename Tint>
-Tint SizeStabChain(StabChain<Telt> const& S)
+template<typename Telt, typename Tidx_label, typename Tint>
+Tint SizeStabChain(StabChain<Telt,Tidx_label> const& S)
 {
   Tint size=1;
-  StabChain<Telt> Sptr = S;
+  StabChain<Telt,Tidx_label> Sptr = S;
   while (Sptr != nullptr) {
-    size_t siz=Sptr->orbit.size();
-    if (siz == 0)
+    Tint siz_i = Tint(Sptr->orbit.size());
+    if (siz_i == 0)
       break;
-    Tint siz_i = siz;
     size *= siz_i;
     Sptr = Sptr->stabilizer;
   }
   return size;
 }
 
-template<typename Telt>
-std::map<typename Telt::Tidx, int> FactorsSizeStabChain(StabChain<Telt> const& S)
+
+
+
+template<typename Telt, typename Tidx_label>
+std::map<typename Telt::Tidx, int> FactorsSizeStabChain(StabChain<Telt,Tidx_label> const& S)
 {
   using Tidx = typename Telt::Tidx;
   std::map<Tidx, int> MapPrimeMult;
-  StabChain<Telt> Sptr = S;
+  StabChain<Telt,Tidx_label> Sptr = S;
   while (Sptr != nullptr) {
-    Tidx siz=Sptr->orbit.size();
+    Tidx siz = Tidx(Sptr->orbit.size());
     if (siz == 0)
       break;
     std::vector<Tidx> V = factorize(siz);
@@ -765,10 +762,10 @@ std::map<typename Telt::Tidx, int> FactorsSizeStabChain(StabChain<Telt> const& S
 
 
 
-template<typename Telt>
-std::vector<Telt> StrongGeneratorsStabChain(StabChain<Telt> const& S)
+template<typename Telt, typename Tidx_label>
+std::vector<Telt> StrongGeneratorsStabChain(StabChain<Telt,Tidx_label> const& S)
 {
-  StabChain<Telt> Sptr = S;
+  StabChain<Telt,Tidx_label> Sptr = S;
   std::unordered_set<Telt> sgs_set;
   while (Sptr != nullptr) {
     const std::vector<Telt>& labels = Sptr->comm->labels;
@@ -784,8 +781,8 @@ std::vector<Telt> StrongGeneratorsStabChain(StabChain<Telt> const& S)
 
 
 
-template<typename Telt>
-std::vector<Telt> GeneratorsStabChain(StabChain<Telt> const& S)
+template<typename Telt, typename Tidx_label>
+std::vector<Telt> GeneratorsStabChain(StabChain<Telt,Tidx_label> const& S)
 {
   std::vector<Telt> sgs;
   for (auto & ePos : S->genlabels) {
@@ -799,23 +796,19 @@ std::vector<Telt> GeneratorsStabChain(StabChain<Telt> const& S)
 
 
 
-
-
-template<typename Telt>
-std::vector<Telt> Kernel_GeneratorsOfGroup(StabChain<Telt> const& S)
+template<typename Telt, typename Tidx_label>
+std::vector<Telt> Kernel_GeneratorsOfGroup(StabChain<Telt,Tidx_label> const& S)
 {
   return StrongGeneratorsStabChain(S);
 }
 
 
 
-
-
-template<typename Telt>
-Telt LargestElementStabChain(StabChain<Telt> const& S)
+template<typename Telt, typename Tidx_label>
+Telt LargestElementStabChain(StabChain<Telt,Tidx_label> const& S)
 {
   using Tidx=typename Telt::Tidx;
-  StabChain<Telt> Sptr = S;
+  StabChain<Telt,Tidx_label> Sptr = S;
   Telt rep=Sptr->identity;
   while (Sptr != nullptr) {
     if (Sptr->genlabels.size() == 0)
@@ -833,7 +826,7 @@ Telt LargestElementStabChain(StabChain<Telt> const& S)
     while(true) {
       if (pnt == min)
 	break;
-      int idx=Sptr->transversal[min];
+      Tidx_label idx=Sptr->transversal[min];
       const Telt& gen=Sptr->comm->labels[idx];
       rep = LeftQuotient(gen, rep);
       min = PowAct(min, gen);
@@ -911,12 +904,12 @@ bool IsTrivial_ListGen(std::vector<Telt> const& LGen)
   return true;
 }
 
-template<typename Telt>
-std::vector<typename Telt::Tidx> MovedPoints(StabChain<Telt> const& S)
+template<typename Telt, typename Tidx_label>
+std::vector<typename Telt::Tidx> MovedPoints(StabChain<Telt,Tidx_label> const& S)
 {
   using Tidx = typename Telt::Tidx;
   std::unordered_set<Telt> LGen;
-  StabChain<Telt> Sptr = S;
+  StabChain<Telt,Tidx_label> Sptr = S;
   while (Sptr != nullptr) {
     for (auto & eIdx : Sptr->genlabels) {
       Telt eGen = S->comm->labels[eIdx];
@@ -939,10 +932,10 @@ std::vector<typename Telt::Tidx> MovedPoints(StabChain<Telt> const& S)
 }
 
 
-template<typename Telt>
-bool IsTrivial(StabChain<Telt> const& G)
+template<typename Telt, typename Tidx_label>
+bool IsTrivial(StabChain<Telt,Tidx_label> const& G)
 {
-  StabChain<Telt> Sptr = G;
+  StabChain<Telt,Tidx_label> Sptr = G;
   while (Sptr != nullptr) {
     for (auto & eIdx : Sptr->genlabels)
       if (!Sptr->comm->labels[eIdx].isIdentity())
@@ -980,22 +973,22 @@ typename Telt::Tidx LargestMovedPoint(std::vector<Telt> const& LGen)
 }
 
 
-template<typename Telt>
-void InitializeSchreierTree(StabChain<Telt> & S, typename Telt::Tidx const& pnt)
+template<typename Telt, typename Tidx_label>
+void InitializeSchreierTree(StabChain<Telt,Tidx_label> & S, typename Telt::Tidx const& pnt)
 {
   using Tidx=typename Telt::Tidx;
   Tidx n=S->comm->n;
   //
   S->orbit = {pnt};
   //
-  std::vector<int> transversal(n, -1);
+  std::vector<Tidx_label> transversal(n, std::numeric_limits<Tidx_label>::max());
   transversal[pnt] = 0;
   S->transversal = transversal;
 }
 
 
-template<typename Telt>
-void InsertTrivialStabilizer(StabChain<Telt> & Stot, typename Telt::Tidx const& pnt)
+template<typename Telt, typename Tidx_label>
+void InsertTrivialStabilizer(StabChain<Telt,Tidx_label> & Stot, typename Telt::Tidx const& pnt)
 {
 #ifdef DEBUG_STABCHAIN
   std::cerr << "CPP begin InsertTrivialStabilizer\n";
@@ -1015,16 +1008,16 @@ void InsertTrivialStabilizer(StabChain<Telt> & Stot, typename Telt::Tidx const& 
 }
 
 
-template<typename Telt, typename Tint>
-StabChain<Telt> StabChainOp_trivial_group(StabChain<Telt> const& Stot, StabChainOptions<Tint, typename Telt::Tidx> const& options)
+template<typename Telt, typename Tidx_label, typename Tint>
+StabChain<Telt,Tidx_label> StabChainOp_trivial_group(StabChain<Telt,Tidx_label> const& Stot, StabChainOptions<Tint, typename Telt::Tidx> const& options)
 {
   using Tidx = typename Telt::Tidx;
 #ifdef DEBUG
   std::cerr << "CPP Call to StabChainOp (trivial group)\n";
 #endif
-  StabChain<Telt> S = EmptyStabChain<Telt>(Stot->comm->n);
+  StabChain<Telt,Tidx_label> S = EmptyStabChain<Telt,Tidx_label>(Stot->comm->n);
   if (options.base.size() > 0 && !options.reduced) {
-    StabChain<Telt> T = S;
+    StabChain<Telt,Tidx_label> T = S;
     for (Tidx const& pnt : options.base) {
       InsertTrivialStabilizer( T, pnt );
       T = T->stabilizer;
@@ -1035,12 +1028,11 @@ StabChain<Telt> StabChainOp_trivial_group(StabChain<Telt> const& Stot, StabChain
 
 
 
-
-template<typename Telt>
-std::vector<StabChain<Telt>> ListStabChain(StabChain<Telt> const& S)
+template<typename Telt, typename Tidx_label>
+std::vector<StabChain<Telt,Tidx_label>> ListStabChain(StabChain<Telt,Tidx_label> const& S)
 {
-  std::vector<StabChain<Telt>> ListStab;
-  StabChain<Telt> Sptr = S;
+  std::vector<StabChain<Telt,Tidx_label>> ListStab;
+  StabChain<Telt,Tidx_label> Sptr = S;
   while (Sptr != nullptr) {
     ListStab.push_back(Sptr);
     Sptr = Sptr->stabilizer;
@@ -1050,9 +1042,8 @@ std::vector<StabChain<Telt>> ListStabChain(StabChain<Telt> const& S)
 
 
 
-
-template<typename Telt>
-StabChain<Telt> StabChainBaseStrongGenerators(std::vector<typename Telt::Tidx> const& base, std::vector<Telt> const& sgs)
+template<typename Telt, typename Tidx_label>
+StabChain<Telt,Tidx_label> StabChainBaseStrongGenerators(std::vector<typename Telt::Tidx> const& base, std::vector<Telt> const& sgs)
 {
   using Tidx=typename Telt::Tidx;
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
@@ -1062,7 +1053,7 @@ StabChain<Telt> StabChainBaseStrongGenerators(std::vector<typename Telt::Tidx> c
   }
 #endif
   Tidx n=sgs[0].size();
-  StabChain<Telt> S = EmptyStabChain<Telt>(n);
+  StabChain<Telt,Tidx_label> S = EmptyStabChain<Telt,Tidx_label>(n);
   size_t nbGen = sgs.size();
   Face status(nbGen);
   for (size_t i=0; i<nbGen; i++)
@@ -1101,14 +1092,14 @@ std::vector<T> SortVector(std::vector<T> const& f)
 
 
 
-template<typename Telt>
-void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> const& newgens)
+template<typename Telt, typename Tidx_label>
+void AddGeneratorsExtendSchreierTree(StabChain<Telt,Tidx_label> & S, std::vector<Telt> const& newgens)
 {
   using Tidx=typename Telt::Tidx;
 #ifdef DEBUG_ADD_GEN_SCH
   std::cerr << "CPP AGEST : Beginning of AddGeneratorsExtendSchreierTree\n";
   //  std::cerr << "CPP AGEST 1: genlabels=" << GapStringIntVector(S->genlabels) << "\n";
-  StabChain<Telt> Swrite = S;
+  StabChain<Telt,Tidx_label> Swrite = S;
   int idxwrt=0;
   while (Swrite != nullptr) {
     //    std::cerr << "DEBUG idxwrt=" << idxwrt << " |labels|=" << S->comm->labels.size() << "\n";
@@ -1116,9 +1107,9 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
     Swrite = Swrite->stabilizer;
   }
 #endif
-  size_t nbLabel=S->comm->labels.size();
-  std::vector<int> ListAtt(nbLabel);
-  for (size_t i=0; i<nbLabel; i++)
+  Tidx_label nbLabel=Tidx_label(S->comm->labels.size());
+  std::vector<Tidx_label> ListAtt(nbLabel);
+  for (Tidx_label i=0; i<nbLabel; i++)
     ListAtt[i] = i;
   Face old=BlistList(ListAtt, S->genlabels);
   old[0]=true;
@@ -1131,12 +1122,12 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
   std::cerr << "DEBUG AGEST 2: genlabels=" << GapStringIntVector(S->genlabels) << "\n";
 #endif
   for (auto & gen : newgens) {
-    int pos = PositionVect(S->comm->labels, gen);
-    if (pos == -1) {
+    Tidx_label pos = PositionVect_ui<Telt,Tidx_label>(S->comm->labels, gen);
+    if (pos == std::numeric_limits<Tidx_label>::max()) {
       S->comm->labels.push_back(gen);
       old.push_back(false);
       ald.push_back(true);
-      int posG=int(S->comm->labels.size()) - 1;
+      Tidx_label posG=Tidx_label(S->comm->labels.size()) - 1;
 #ifdef DEBUG_ADD_GEN_SCH
       std::cerr << "CPP AGEST  genlabels insert 1:\n";
 #endif
@@ -1172,14 +1163,14 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
 #ifdef DEBUG_ADD_GEN_SCH
       std::cerr << "CPP   AGEST i=" << int(i+1) << " |cycles|=" << S->cycles.size() << "\n";
 #endif
-      for (int& j : S->genlabels) {
+      for (Tidx_label& j : S->genlabels) {
 	if (i >= len || old[j] == 0) {
 	  Tidx img=SlashAct(S->orbit[i], S->comm->labels[j]);
 #ifdef DEBUG_ADD_GEN_SCH
 	  std::cerr << "CPP     AGEST img=" << int(img+1) << " g=" << S->comm->labels[j] << "\n";
           //	  std::cerr << "DEBUG |S->transversal|=" << S->transversal.size() << " img=" << img << "\n";
 #endif
-	  if (S->transversal[img] != -1) {
+	  if (S->transversal[img] != std::numeric_limits<Tidx_label>::max()) {
 #ifdef DEBUG_ADD_GEN_SCH
 	    std::cerr << "CPP       |S->cycles|=" << S->cycles.size() << " i=" << int(i+1) << "\n";
 #endif
@@ -1189,7 +1180,7 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
 	    std::cerr << "CPP       AGEST assign true\n";
 #endif
 	  } else {
-	    S->transversal[img]=j;
+	    S->transversal[img] = j;
 #ifdef DEBUG_ADD_GEN_SCH
 	    std::cerr << "CPP       AGEST S.transversal[img]=" << S->comm->labels[j] << "\n";
 #endif
@@ -1208,10 +1199,10 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
     std::cerr << "CPP AGEST No Cycles\n";
 #endif
     while (i < S->orbit.size()) {
-      for (int& j : S->genlabels) {
+      for (Tidx_label& j : S->genlabels) {
 	if (i >= len || old[j] == 0) {
 	  Tidx img=SlashAct(S->orbit[i], S->comm->labels[j]);
-	  if (S->transversal[img] == -1) {
+	  if (S->transversal[img] == std::numeric_limits<Tidx_label>::max()) {
 	    S->transversal[img] = j;
 	    S->orbit.push_back(img);
 	  }
@@ -1227,8 +1218,8 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt> & S, std::vector<Telt> cons
 
 
 
-template<typename Telt>
-void ChooseNextBasePoint(StabChain<Telt> & S, std::vector<typename Telt::Tidx> const& base, std::vector<Telt> const& newgens)
+template<typename Telt, typename Tidx_label>
+void ChooseNextBasePoint(StabChain<Telt,Tidx_label> & S, std::vector<typename Telt::Tidx> const& base, std::vector<Telt> const& newgens)
 {
   using Tidx=typename Telt::Tidx;
 #ifdef DEBUG_STABCHAIN
@@ -1270,7 +1261,7 @@ void ChooseNextBasePoint(StabChain<Telt> & S, std::vector<typename Telt::Tidx> c
   size_t miss_val = std::numeric_limits<size_t>::max();
   if (S->orbit.size() > 0) {
     bpt = S->orbit[0];
-    pos = PositionVect_sz(base, bpt);
+    pos = PositionVect_ui<Tidx,size_t>(base, bpt);
   } else {
     bpt = std::numeric_limits<Tidx>::max();
     pos = miss_val;
@@ -1299,8 +1290,8 @@ void ChooseNextBasePoint(StabChain<Telt> & S, std::vector<typename Telt::Tidx> c
 
 
 
-template<typename Telt, typename Tint>
-void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, StabChainOptions<Tint, typename Telt::Tidx> const& options)
+template<typename Telt, typename Tidx_label, typename Tint>
+void StabChainStrong(StabChain<Telt,Tidx_label> & S, std::vector<Telt> const& newgens, StabChainOptions<Tint, typename Telt::Tidx> const& options)
 {
   using Tidx = typename Telt::Tidx;
 #ifdef DEBUG_STABCHAIN
@@ -1383,8 +1374,8 @@ void StabChainStrong(StabChain<Telt> & S, std::vector<Telt> const& newgens, Stab
 }
 
 
-template<typename Telt, typename Tint>
-void ClosureGroup_options(StabChain<Telt> & S, Telt const& g, StabChainOptions<Tint, typename Telt::Tidx> const& options)
+template<typename Telt, typename Tidx_label, typename Tint>
+void ClosureGroup_options(StabChain<Telt,Tidx_label> & S, Telt const& g, StabChainOptions<Tint, typename Telt::Tidx> const& options)
 {
   Telt sch = SiftedPermutation(S, g);
   if (!sch.isIdentity())
@@ -1392,8 +1383,8 @@ void ClosureGroup_options(StabChain<Telt> & S, Telt const& g, StabChainOptions<T
 }
 
 
-template<typename Telt, typename Tint>
-void ClosureGroup(StabChain<Telt> & S, Telt const& g)
+template<typename Telt, typename Tidx_label, typename Tint>
+void ClosureGroup(StabChain<Telt,Tidx_label> & S, Telt const& g)
 {
   using Tidx = typename Telt::Tidx;
   Tidx n = S->comm->n;
@@ -1403,17 +1394,15 @@ void ClosureGroup(StabChain<Telt> & S, Telt const& g)
 
 
 
-
-
-template<typename Telt>
-bool StabChainForcePoint(StabChain<Telt> & Stot, typename Telt::Tidx const& pnt)
+template<typename Telt, typename Tidx_label>
+bool StabChainForcePoint(StabChain<Telt,Tidx_label> & Stot, typename Telt::Tidx const& pnt)
 {
 #ifdef DEBUG_STABCHAIN
   std::cerr << "CPP Beginning of StabChainForcePoint pnt=" << int(pnt+1) << "\n";
   PrintStabChain(Stot);
   std::cerr << "DEBUG |Stot->transversal|=" << Stot->transversal.size() << "\n";
 #endif
-  if (Stot->transversal.size() == 0 || Stot->transversal[pnt] == -1) {
+  if (Stot->transversal.size() == 0 || Stot->transversal[pnt] == std::numeric_limits<Tidx_label>::max()) {
 #ifdef DEBUG_STABCHAIN
     std::cerr << "CPP Matching the first test\n";
 #endif
@@ -1439,11 +1428,11 @@ bool StabChainForcePoint(StabChain<Telt> & Stot, typename Telt::Tidx const& pnt)
 }
 
 
-template<typename Telt>
-std::vector<Telt> GetListGenerators(StabChain<Telt> const& Stot)
+template<typename Telt, typename Tidx_label>
+std::vector<Telt> GetListGenerators(StabChain<Telt,Tidx_label> const& Stot)
 {
   std::vector<Telt> LGens;
-  for (auto & posGen : Stot->genlabels)
+  for (const Tidx_label & posGen : Stot->genlabels)
     LGens.push_back(Stot->comm->labels[posGen]);
   return LGens;
 }
@@ -1451,8 +1440,8 @@ std::vector<Telt> GetListGenerators(StabChain<Telt> const& Stot)
 
 
 
-template<typename Telt>
-bool StabChainSwap(StabChain<Telt> & Stot)
+template<typename Telt, typename Tidx_label>
+bool StabChainSwap(StabChain<Telt,Tidx_label> & Stot)
 {
   using Tidx=typename Telt::Tidx;
 #ifdef DEBUG_STABCHAIN
@@ -1474,13 +1463,13 @@ bool StabChainSwap(StabChain<Telt> & Stot)
 #endif
   //
   //  StabChain<Telt> Ttot = EmptyStabChainPlusNode<Telt>(n, b);
-  StabChain<Telt> Ttot = EmptyStabChainPlusCommonPlusNode(Stot->comm, b);
+  StabChain<Telt,Tidx_label> Ttot = EmptyStabChainPlusCommonPlusNode<Telt,Tidx_label>(Stot->comm, b);
   AddGeneratorsExtendSchreierTree(Ttot, LGens);
 #ifdef DEBUG_STABCHAIN
   std::cerr << "CPP StabChainSwap : after first AGEST\n";
 #endif
   //
-  StabChain<Telt> Tstab = EmptyStabChainPlusNode<Telt>(n, a);
+  StabChain<Telt,Tidx_label> Tstab = EmptyStabChainPlusNode<Telt,Tidx_label>(n, a);
   if (Stot->stabilizer != nullptr) {
     if (Stot->stabilizer->stabilizer != nullptr) {
       std::vector<Telt> LGensB = GetListGenerators(Stot->stabilizer->stabilizer);
@@ -1520,7 +1509,7 @@ bool StabChainSwap(StabChain<Telt> & Stot)
       std::cerr << "CPP ind=" << int(ind+1) << " pnt=" << int(pnt+1) << "\n";
       std::cerr << "DEBUG |Tstab->transversal|=" << Tstab->transversal.size() << " pnt=" << pnt << "\n";
 #endif
-      if (Tstab->transversal[pnt] == -1)
+      if (Tstab->transversal[pnt] == std::numeric_limits<Tidx_label>::max())
 	break;
     }
 #ifdef DEBUG_STABCHAIN
@@ -1529,14 +1518,15 @@ bool StabChainSwap(StabChain<Telt> & Stot)
     Tidx img = b;
     Tidx i = pnt;
     while (i != a) {
-      int posGen=Stot->transversal[i];
-      img = PowAct(img, Stot->comm->labels[posGen]);
-      i = PowAct(i, Stot->comm->labels[posGen]);
+      Tidx_label posGen=Stot->transversal[i];
+      const Telt& x = Stot->comm->labels[posGen];
+      img = PowAct(img, x);
+      i = PowAct(i, x);
     }
 #ifdef DEBUG_STABCHAIN
     std::cerr << "CPP i=" << int(i+1) << " img=" << int(img+1) << "\n";
 #endif
-    if (Stot->stabilizer->transversal[img] != -1) {
+    if (Stot->stabilizer->transversal[img] != std::numeric_limits<Tidx_label>::max()) {
 #ifdef DEBUG_STABCHAIN
       std::cerr << "CPP Determining gen, step 1\n";
 #endif
@@ -1545,7 +1535,7 @@ bool StabChainSwap(StabChain<Telt> & Stot)
 #ifdef DEBUG_STABCHAIN
         std::cerr << "CPP pnt^gen=" << int(PowAct(pnt, gen)+1) << "\n";
 #endif
-	int posGen=Stot->transversal[PowAct(pnt, gen)];
+	Tidx_label posGen=Stot->transversal[PowAct(pnt, gen)];
 #ifdef DEBUG_STABCHAIN
         std::cerr << "DEBUG posGen=" << posGen << "\n";
 #endif
@@ -1558,7 +1548,7 @@ bool StabChainSwap(StabChain<Telt> & Stot)
 #ifdef DEBUG_STABCHAIN
         std::cerr << "CPP b^gen=" << int(PowAct(b, gen)+1) << "\n";
 #endif
-	int posGen=Stot->stabilizer->transversal[PowAct(b, gen)];
+	Tidx_label posGen=Stot->stabilizer->transversal[PowAct(b, gen)];
 #ifdef DEBUG_STABCHAIN
         std::cerr << "DEBUG posGen=" << posGen << "\n";
 #endif
@@ -1581,7 +1571,7 @@ bool StabChainSwap(StabChain<Telt> & Stot)
   std::cerr << "CPP Tstab=\n";
   PrintStabChain(Tstab);
 #endif
-  auto MapAtLevel=[&](StabChain<Telt> & Swork, StabChain<Telt> const& insStab) -> void {
+  auto MapAtLevel=[&](StabChain<Telt,Tidx_label> & Swork, StabChain<Telt,Tidx_label> const& insStab) -> void {
     Swork->genlabels = insStab->genlabels;
     Swork->comm = insStab->comm;
     Swork->orbit = insStab->orbit;
@@ -1617,7 +1607,7 @@ bool StabChainSwap(StabChain<Telt> & Stot)
 template<typename T>
 T LabsLims(T const& lab, std::function<T(T const&)> const& hom, std::vector<T> & labs, std::vector<T> & lims)
 {
-  size_t pos=PositionVect_sz(labs, lab);
+  size_t pos=PositionVect_ui<T,size_t>(labs, lab);
   if (pos == std::numeric_limits<size_t>::max()) {
     labs.push_back(lab);
     T img=hom(lab);
@@ -1631,14 +1621,14 @@ T LabsLims(T const& lab, std::function<T(T const&)> const& hom, std::vector<T> &
 // The original ConjugateStabChain code
 // It is simplified from the original one with us being in the case
 // IsPerm(hom) and IsPerm(map).
-template<typename Telt, typename Fhom, typename Fmap, typename Fcond>
-StabChain<Telt> ConjugateStabChain(StabChain<Telt> & Stot, StabChain<Telt> & Ttot, Fhom const& hom, Fmap const& map, Fcond const& cond)
+template<typename Telt, typename Tidx_label, typename Fhom, typename Fmap, typename Fcond>
+StabChain<Telt,Tidx_label> ConjugateStabChain(StabChain<Telt,Tidx_label> & Stot, StabChain<Telt,Tidx_label> & Ttot, Fhom const& hom, Fmap const& map, Fcond const& cond)
 {
   using Tidx=typename Telt::Tidx;
   Tidx n  = Stot->comm->n;
   Telt id = Stot->comm->identity;
-  StabChain<Telt> Sptr = Stot;
-  StabChain<Telt> Tptr = Ttot;
+  StabChain<Telt,Tidx_label> Sptr = Stot;
+  StabChain<Telt,Tidx_label> Tptr = Ttot;
 
   using Tcomm=std::shared_ptr<CommonStabInfo<Telt>>;
   std::vector<Tcomm> ListLabels;
@@ -1659,7 +1649,7 @@ StabChain<Telt> ConjugateStabChain(StabChain<Telt> & Stot, StabChain<Telt> & Tto
   std::vector<int> genlabels;
   while (cond(Sptr)) {
     if (Sptr->transversal.size() > 0) {
-      std::vector<int> NewTransversal(n);
+      std::vector<Tidx_label> NewTransversal(n);
       for (Tidx i=0; i<n; i++) {
 	Tidx iImg=map(i);
 	NewTransversal[iImg] = Sptr->transversal[i];
@@ -1673,7 +1663,7 @@ StabChain<Telt> ConjugateStabChain(StabChain<Telt> & Stot, StabChain<Telt> & Tto
     // Going to the next level.
     Sptr = Sptr->stabilizer;
     if (Tptr->stabilizer == nullptr)
-      Tptr->stabilizer = EmptyStabChainPlusCommon<Telt>(Tptr->comm);
+      Tptr->stabilizer = EmptyStabChainPlusCommon<Telt,Tidx_label>(Tptr->comm);
     Tptr = Tptr->stabilizer;
   }
   //
@@ -1684,29 +1674,27 @@ StabChain<Telt> ConjugateStabChain(StabChain<Telt> & Stot, StabChain<Telt> & Tto
 
 
 
-template<typename Telt>
-void ConjugateStabChain_Element(StabChain<Telt> & Stot, Telt const& cnj)
+template<typename Telt, typename Tidx_label>
+void ConjugateStabChain_Element(StabChain<Telt,Tidx_label> & Stot, Telt const& cnj)
 {
   using Tidx=typename Telt::Tidx;
   Telt cnjInv=~cnj;
   auto hom=[&](Telt const& x) -> Telt {
-    Telt retV = cnjInv*x*cnj;
-    return retV;
+    return cnjInv*x*cnj;
   };
   auto map=[&](Tidx const& x) -> Tidx {
     return cnj.at(x);
   };
-  auto cond=[](StabChain<Telt> const& S) -> bool {
+  auto cond=[](StabChain<Telt,Tidx_label> const& S) -> bool {
     return S->stabilizer != nullptr;
   };
   (void)ConjugateStabChain(Stot, Stot, hom, map, cond);
 }
 
 
-template<typename Telt>
-std::string PrintTopOrbit(StabChain<Telt> const& S)
+template<typename Telt, typename Tidx_label>
+std::string PrintTopOrbit(StabChain<Telt,Tidx_label> const& S)
 {
-  using Tidx=typename Telt::Tidx;
   if (S == nullptr) {
     return "unset";
   }
@@ -1727,8 +1715,8 @@ std::string PrintTopOrbit(StabChain<Telt> const& S)
 //  reduced = -1 corresponds to reduced = -1 in GAP code
 //  reduced = 0  corresponds to reduced = false in GAP code
 //  reduced = 1  corresponds to reduced = true in GAP code
-template<typename Telt>
-bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<typename Telt::Tidx> const& base, int const& reduced)
+template<typename Telt, typename Tidx_label>
+bool ChangeStabChain(StabChain<Telt,Tidx_label> & Gptr, std::vector<typename Telt::Tidx> const& base, int const& reduced)
 {
   using Tidx=typename Telt::Tidx;
 #ifdef DEBUG_CHANGE_STAB_CHAIN
@@ -1737,7 +1725,7 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<typename Telt::Tidx> co
   std::cerr << "CPP Beginning ChangeStabChain, GetStabilizerDepth = " << GetStabilizerDepth(Gptr) << "\n";
 #endif
   Telt cnj = Gptr->comm->identity;
-  StabChain<Telt> Sptr = Gptr;
+  StabChain<Telt,Tidx_label> Sptr = Gptr;
 #ifdef DEBUG_CHANGE_STAB_CHAIN
   std::string strS_current=GetStringExpressionOfStabChain(Sptr);
   std::cerr << "CPP we have strS_current\n";
@@ -1833,7 +1821,7 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<typename Telt::Tidx> co
         KeyUpdating("After S:=S.stabilizer 2");
 #endif
       }
-    } else if (PositionVect(newBase, old) != -1 || (reduced == int_true && Sptr->orbit.size() == 1)) {
+    } else if (PositionVect_ui<Tidx,Tidx_label>(newBase, old) != std::numeric_limits<Tidx_label>::max() || (reduced == int_true && Sptr->orbit.size() == 1)) {
 #ifdef DEBUG_CHANGE_STAB_CHAIN
       std::cerr << "CPP Stabilizer shift in ChangeStabChain\n";
 #endif
@@ -1882,8 +1870,8 @@ bool ChangeStabChain(StabChain<Telt> & Gptr, std::vector<typename Telt::Tidx> co
   return true;
 }
 
-template<typename Telt>
-bool ExtendStabChain(StabChain<Telt> & Stot, std::vector<typename Telt::Tidx> const& base)
+template<typename Telt, typename Tidx_label>
+bool ExtendStabChain(StabChain<Telt,Tidx_label> & Stot, std::vector<typename Telt::Tidx> const& base)
 {
 #ifdef DEBUG_STABCHAIN
   std::cerr << "CPP Beginning of ExtendStabChain\n";
@@ -1892,8 +1880,8 @@ bool ExtendStabChain(StabChain<Telt> & Stot, std::vector<typename Telt::Tidx> co
 }
 
 
-template<typename Telt>
-bool ReduceStabChain(StabChain<Telt> & Stot)
+template<typename Telt, typename Tidx_label>
+bool ReduceStabChain(StabChain<Telt,Tidx_label> & Stot)
 {
   return ChangeStabChain(Stot, {}, int_true);
 }
@@ -1901,11 +1889,11 @@ bool ReduceStabChain(StabChain<Telt> & Stot)
 
 
 
-template<typename Telt>
-bool TestEqualityStabChain(StabChain<Telt> const& L, StabChain<Telt> const& R)
+template<typename Telt, typename Tidx_label>
+bool TestEqualityStabChain(StabChain<Telt,Tidx_label> const& L, StabChain<Telt,Tidx_label> const& R)
 {
-  StabChain<Telt> Lptr = L;
-  StabChain<Telt> Rptr = R;
+  StabChain<Telt,Tidx_label> Lptr = L;
+  StabChain<Telt,Tidx_label> Rptr = R;
   //#define DEBUG_EQUALITY
   while(true) {
     if (Lptr == nullptr && Rptr != nullptr) {
@@ -1935,22 +1923,23 @@ bool TestEqualityStabChain(StabChain<Telt> const& L, StabChain<Telt> const& R)
       return false;
     }
     size_t lenL=Lptr->transversal.size();
+    Tidx_label miss_val = std::numeric_limits<Tidx_label>::max();
     for (size_t u=0; u<lenL; u++) {
-      if (Lptr->transversal[u] == -1 && Rptr->transversal[u] != -1) {
+      if (Lptr->transversal[u] == miss_val && Rptr->transversal[u] != miss_val) {
 #ifdef DEBUG_EQUALITY
         std::cerr << "TestEqualityStabChain 5\n";
 #endif
 	return false;
       }
-      if (Lptr->transversal[u] != -1 && Rptr->transversal[u] == -1) {
+      if (Lptr->transversal[u] != miss_val && Rptr->transversal[u] == miss_val) {
 #ifdef DEBUG_EQUALITY
         std::cerr << "TestEqualityStabChain 6\n";
 #endif
 	return false;
       }
-      if (Lptr->transversal[u] != -1) {
-	int idxL=Lptr->transversal[u];
-	int idxR=Rptr->transversal[u];
+      if (Lptr->transversal[u] != miss_val) {
+	Tidx_label idxL=Lptr->transversal[u];
+	Tidx_label idxR=Rptr->transversal[u];
 	const Telt& permL=Lptr->comm->labels[idxL];
 	const Telt& permR=Rptr->comm->labels[idxR];
 	if (permL != permR) {
@@ -1971,8 +1960,10 @@ bool TestEqualityStabChain(StabChain<Telt> const& L, StabChain<Telt> const& R)
 }
 
 
-template<typename Telt>
-void SetStabChainFromLevel(std::vector<StabChain<Telt>> & R_list, std::vector<StabChain<Telt>> const& L_list,
+
+template<typename Telt, typename Tidx_label>
+void SetStabChainFromLevel(std::vector<StabChain<Telt,Tidx_label>> & R_list,
+                           std::vector<StabChain<Telt,Tidx_label>> const& L_list,
                            size_t const& levbegin, size_t const& levend)
 {
   for (size_t iLev=levbegin; iLev<levend; iLev++)
@@ -1982,10 +1973,10 @@ void SetStabChainFromLevel(std::vector<StabChain<Telt>> & R_list, std::vector<St
 
 
 
-template<typename Telt>
-bool IsFixedStabilizer(StabChain<Telt> const& S, typename Telt::Tidx const& pnt)
+template<typename Telt, typename Tidx_label>
+bool IsFixedStabilizer(StabChain<Telt,Tidx_label> const& S, typename Telt::Tidx const& pnt)
 {
-  for (auto & posGen : S->genlabels) {
+  for (const Tidx_label & posGen : S->genlabels) {
     if (pnt != PowAct(pnt, S->comm->labels[posGen]))
       return false;
   }
@@ -1993,12 +1984,12 @@ bool IsFixedStabilizer(StabChain<Telt> const& S, typename Telt::Tidx const& pnt)
 }
 
 
-template<typename Telt>
-Telt MinimalElementCosetStabChain(StabChain<Telt> const& Stot, Telt const& g)
+template<typename Telt, typename Tidx_label>
+Telt MinimalElementCosetStabChain(StabChain<Telt,Tidx_label> const& Stot, Telt const& g)
 {
   using Tidx=typename Telt::Tidx;
   Telt gRet=g;
-  StabChain<Telt> Sptr = Stot;
+  StabChain<Telt,Tidx_label> Sptr = Stot;
   while (Sptr != nullptr) {
     if (Sptr->genlabels.size() == 0)
       return gRet;
@@ -2011,7 +2002,7 @@ Telt MinimalElementCosetStabChain(StabChain<Telt> const& Stot, Telt const& g)
     Tidx bp=Sptr->orbit[0];
     Tidx pp=SlashAct(pMin, gRet);
     while (bp != pp) {
-      int pos=Sptr->transversal[pp];
+      Tidx_label pos=Sptr->transversal[pp];
       gRet = LeftQuotient(Sptr->comm->labels[pos], gRet);
       pp = SlashAct(pMin, gRet);
     }
@@ -2025,8 +2016,8 @@ Telt MinimalElementCosetStabChain(StabChain<Telt> const& Stot, Telt const& g)
 
 
 
-template<typename Telt, typename Tret>
-StabChain<Tret> HomomorphismMapping(StabChain<Telt> const& Stot, std::function<Tret(Telt const&)> const& f)
+template<typename Telt, typename Tidx_label, typename Tret>
+StabChain<Tret,Tidx_label> HomomorphismMapping(StabChain<Telt,Tidx_label> const& Stot, std::function<Tret(Telt const&)> const& f)
 {
   using Tidx = typename Telt::Tidx;
   Tret idMap = f(Stot->comm->identity);
@@ -2040,12 +2031,12 @@ StabChain<Tret> HomomorphismMapping(StabChain<Telt> const& Stot, std::function<T
   std::vector<Tret> labelsMap = fVector(Stot->comm->labels);
   std::shared_ptr<CommonStabInfo<Tret>> comm = std::make_shared<CommonStabInfo<Tret>>(CommonStabInfo<Tret>({nMap, idMap, labelsMap}));
 
-  StabChain<Telt> Sptr = Stot;
-  StabChain<Tret> Swork = nullptr;
-  StabChain<Tret> Sreturn = nullptr;
+  StabChain<Telt,Tidx_label> Sptr = Stot;
+  StabChain<Tret,Tidx_label> Swork = nullptr;
+  StabChain<Tret,Tidx_label> Sreturn = nullptr;
 
   while (Sptr != nullptr) {
-    Swork = std::make_shared<StabLevel<Telt>>(StabLevel<Telt>({Sptr->transversal, Sptr->orbit, Sptr->genlabels, Sptr->cycles, Sptr->IsBoundCycle, fVector(Sptr->treegen), fVector(Sptr->treegeninv), fVector(Sptr->aux), Sptr->treedepth, Sptr->diam, comm, nullptr}));
+    Swork = std::make_shared<StabLevel<Telt,Tidx_label>>(StabLevel<Telt,Tidx_label>({Sptr->transversal, Sptr->orbit, Sptr->genlabels, Sptr->cycles, Sptr->IsBoundCycle, fVector(Sptr->treegen), fVector(Sptr->treegeninv), fVector(Sptr->aux), Sptr->treedepth, Sptr->diam, comm, nullptr}));
     if (Sreturn == nullptr)
       Sreturn = Swork;
     Sptr = Sptr->stabilizer;

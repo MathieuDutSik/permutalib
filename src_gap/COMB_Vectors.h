@@ -18,14 +18,14 @@ int PositionVect(std::vector<T> const& V, T const& eVal)
   return -1;
 }
 
-template<typename T>
-size_t PositionVect_sz(std::vector<T> const& V, T const& eVal)
+template<typename T, typename Tui>
+Tui PositionVect_ui(std::vector<T> const& V, T const& eVal)
 {
-  size_t len=V.size();
-  for (size_t i=0; i<len; i++)
+  Tui len=Tui(V.size());
+  for (Tui i=0; i<len; i++)
     if (V[i] == eVal)
       return i;
-  return std::numeric_limits<size_t>::max();
+  return std::numeric_limits<Tui>::max();
 }
 
 template<typename T>
