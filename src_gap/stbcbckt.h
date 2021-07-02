@@ -785,7 +785,7 @@ void NextRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt> & rbase,
     while (true) {
       l = PositionProperty<Tidx>(ClosedInterval<Tidx>(0, lens[k]), [&](Tidx const& i) -> bool {
 	  return !IsFixedStabilizer(rbase.level.Stot, P.points[i+P.firsts[order[k]]]);});
-      if (l != -1)
+      if (l != miss_val)
 	break;
       k++;
     }

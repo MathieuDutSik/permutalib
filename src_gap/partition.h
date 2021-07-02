@@ -86,6 +86,7 @@ void CheckConsistencyPartition(std::string const& str, Partition<Tidx> const& P)
   if (ChangeVal)
     Max_points++;
   if (Tidx(P.cellno.size()) != Max_points) {
+    std::cerr << "P.cellno.size()=" << P.cellno.size() << " Max_points=" << int(Max_points) << "\n";
     std::cerr << "1: We should have |P.cellno| = Maximum(P.points) (at least, that's true at init)\n";
     nbError++;
   }
@@ -99,7 +100,7 @@ void CheckConsistencyPartition(std::string const& str, Partition<Tidx> const& P)
   for (Tidx iPoint=0; iPoint<nbPoint; iPoint++) {
     Tidx iPart=P.cellno[iPoint];
     if ((iPart >= nbPart) && (iPart != std::numeric_limits<Tidx>::max())) {
-      std::cerr << "3: Error, iPart=" << iPart << " but nbPart=" << nbPart << "\n";
+      std::cerr << "3: Error, iPart=" << int(iPart) << " but nbPart=" << int(nbPart) << "\n";
       nbError++;
     }
     if (iPart >= 0 && iPart < nbPart)
@@ -107,11 +108,11 @@ void CheckConsistencyPartition(std::string const& str, Partition<Tidx> const& P)
   }
   for (Tidx iPart=0; iPart<nbPart; iPart++) {
     if (MeasuredLength[iPart] != P.lengths[iPart]) {
-      std::cerr << "4: At iPart=" << iPart << " we have error in lengths: MeasuredLength[iPart]=" << MeasuredLength[iPart] << " and P.lengths[iPart]=" << P.lengths[iPart] << "\n";
+      std::cerr << "4: At iPart=" << int(iPart) << " we have error in lengths: MeasuredLength[iPart]=" << int(MeasuredLength[iPart]) << " and P.lengths[iPart]=" << int(P.lengths[iPart]) << "\n";
       nbError++;
     }
     if (MeasuredLength[iPart] == 0) {
-      std::cerr << "5: At iPart=" << iPart << " the length is zero\n";
+      std::cerr << "5: At iPart=" << int(iPart) << " the length is zero\n";
       nbError++;
     }
   }
@@ -121,12 +122,12 @@ void CheckConsistencyPartition(std::string const& str, Partition<Tidx> const& P)
     for (Tidx u=0; u<len; u++) {
       Tidx ePt = P.points[eFirst + u];
       if (ePt < 0 || ePt >= nbPoint) {
-	std::cerr << "6: At iPart=" << iPart << " u=" << u << " ePt=" << ePt << " point out of range\n";
+	std::cerr << "6: At iPart=" << int(iPart) << " u=" << int(u) << " ePt=" << int(ePt) << " point out of range\n";
 	nbError++;
       }
       if (ePt >= 0 && ePt < nbPoint) {
 	if (P.cellno[ePt] != iPart) {
-	  std::cerr << "7: At iPart=" << iPart << " u=" << u << " ePt=" << ePt << " has wrong cellno\n";
+	  std::cerr << "7: At iPart=" << int(iPart) << " u=" << int(u) << " ePt=" << int(ePt) << " has wrong cellno\n";
 	  nbError++;
 	}
       }

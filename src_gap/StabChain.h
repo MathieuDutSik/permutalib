@@ -1266,18 +1266,19 @@ void ChooseNextBasePoint(StabChain<Telt> & S, std::vector<typename Telt::Tidx> c
 #endif
   }
   Tidx bpt;
-  int pos;
+  size_t pos;
+  size_t miss_val = std::numeric_limits<size_t>::max();
   if (S->orbit.size() > 0) {
     bpt = S->orbit[0];
-    pos = PositionVect(base, bpt);
+    pos = PositionVect_sz(base, bpt);
   } else {
     bpt = std::numeric_limits<Tidx>::max();
-    pos = -1;
+    pos = miss_val;
   }
 #ifdef DEBUG_STABCHAIN
   std::cerr << "CPP pnt=" << PosFail_to_string(pnt) << " bpt=" << ConstrainedIntInfinity_to_string(bpt, S->comm->n) << " pos=" << PosFail_to_string(pos) << "\n";
 #endif
-  if ((pos != -1 && i < pos) || (pos == -1 && i < base.size()) || (pos == -1 && pnt < bpt)) {
+  if ((pos != miss_val && i < pos) || (pos == miss_val && i < base.size()) || (pos == miss_val && pnt < bpt)) {
 #ifdef DEBUG_STABCHAIN
     std::cerr << "CPP matching test\n";
 #endif
