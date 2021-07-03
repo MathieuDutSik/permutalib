@@ -51,6 +51,17 @@ Face BlistList(std::vector<Tidx> const& list, std::vector<Tidx> const& sub)
 
 
 
+
+template<typename Tidx>
+Face BlistList_direct(size_t const& len, std::vector<Tidx> const& sub)
+{
+  Face ret(len);
+  for (auto & eVal : sub)
+    ret[eVal]=true;
+  return ret;
+}
+
+
 boost::dynamic_bitset<>::size_type PositionNthTrueBlist(Face const& blist, size_t const& hpos)
 {
   boost::dynamic_bitset<>::size_type b=blist.find_first();

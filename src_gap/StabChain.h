@@ -1107,11 +1107,8 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt,Tidx_label> & S, std::vector
     Swrite = Swrite->stabilizer;
   }
 #endif
-  Tidx_label nbLabel=Tidx_label(S->comm->labels.size());
-  std::vector<Tidx_label> ListAtt(nbLabel);
-  for (Tidx_label i=0; i<nbLabel; i++)
-    ListAtt[i] = i;
-  Face old=BlistList(ListAtt, S->genlabels);
+  size_t nbLabel = S->comm->labels.size();
+  Face old=BlistList_direct(nbLabel, S->genlabels);
   old[0]=true;
   Face ald=old;
 #ifdef DEBUG_ADD_GEN_SCH
