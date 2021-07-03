@@ -20,7 +20,7 @@ Telt RandomElement(const std::vector<Telt>& LGen, const typename Telt::Tidx& n)
   Telt eElt(n);
   for (size_t iIter=0; iIter<len; iIter++) {
     size_t pos = size_t(rand()) % n_gen;
-    eElt = eElt * LGen[pos];
+    eElt *= LGen[pos];
   }
   return eElt;
 }

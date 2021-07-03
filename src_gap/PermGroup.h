@@ -231,7 +231,7 @@ Telt PowerGroupElement(Telt const& u, int const& n)
   }
   Telt pow = u;
   for (int i=1; i<n; i++)
-    pow = pow * u;
+    pow *= u;
   return pow;
 }
 

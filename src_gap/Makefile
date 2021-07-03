@@ -1,11 +1,11 @@
-#PROGRAM	= GapRepresentativeActionOnSet GapStabilizerOnSet TestStabilizerOnSet TestRepresentativeActionOnSet GapEquivalenceOnSet GapCanonicalImage BenchmarkingPermutalib Factorize
+PROGRAM	= GapRepresentativeActionOnSet GapStabilizerOnSet TestStabilizerOnSet TestRepresentativeActionOnSet GapEquivalenceOnSet GapCanonicalImage BenchmarkingPermutalib Factorize TestPermutationProduct
 #PROGRAM	= EqSymmGroup
 #PROGRAM	= TestStabilizerOnSet
 #PROGRAM	= GapStabilizerOnSet
 #PROGRAM	= GapRepresentativeActionOnSet
 #PROGRAM	= TestRepresentativeActionOnSet
 #PROGRAM	= TestSymmetricGroup
-PROGRAM	= TestPermutationProduct
+#PROGRAM	= TestPermutationProduct
 #PROGRAM	= GapCanonicalImage
 #PROGRAM	= BenchmarkingPermutalib
 #PROGRAM	= BenchmarkingPermutalib GapCanonicalImage

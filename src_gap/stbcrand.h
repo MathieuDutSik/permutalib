@@ -253,7 +253,7 @@ Telt SCRSift(StabChain<Telt,Tidx_label> const& S, Telt const& g)
       if (bpt == img)
 	break;
       Tidx_label pos=Sptr->transversal[img];
-      gRet=gRet * Sptr->comm->labels[pos];
+      gRet *= Sptr->comm->labels[pos];
     }
     Sptr = Sptr->stabilizer;
   }
@@ -290,7 +290,7 @@ Telt Product(std::vector<Telt> const& eList)
   size_t siz=eList.size();
   Telt retVal=eList[0];
   for (size_t i=1; i<siz; i++)
-    retVal = retVal * eList[i];
+    retVal *= eList[i];
   return retVal;
 }
 
@@ -412,7 +412,7 @@ void SCRMakeStabStrong(StabChain<Telt,Tidx_label> & S, std::vector<Telt> const& 
     for (Tidx x=0; x<len; x++) {
       Tidx ximg=PowAct(x, ran1);
       if (string[x] == 1)
-	w = w * S->aux[ximg];
+	w *= S->aux[ximg];
     }
   } else {
     w = S->aux[1];
@@ -502,13 +502,13 @@ std::vector<Telt> GetWpair(std::vector<Telt> const& Saux, int const& k, paramOpt
     for (Tidx x=0; x<len; x++) {
       Tidx ximg=PowAct(x, ran1);
       if (string[x] == 1)
-	w1 = w1 * Saux[ximg];
+	w1 *= Saux[ximg];
     }
     Telt w2 = TheId;
     for (Tidx x=0; x<len2; x++) {
       Tidx ximg=PowAct(x, ran2);
       if (string[x + len] == 1)
-	w2 = w2 * Saux[ximg];
+	w2 *= Saux[ximg];
     }
     return {w1, w2};
   } else {
@@ -789,7 +789,7 @@ Telt VerifyStabilizer(StabChain<Telt,Tidx_label> const& S, Telt const& z, std::v
 	    }
 	  }
 	} else {
-	  schgen = schgen * z * Product(w3) * Product(w4);
+	  schgen *= (z * Product(w3) * Product(w4));
 	  result = SCRSift(stab, schgen);
 	}
       }

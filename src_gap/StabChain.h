@@ -627,7 +627,7 @@ Telt InverseRepresentative(StabChain<Telt,Tidx_label> const& S, typename Telt::T
 #ifdef DEBUG_INV_REP
     std::cerr << "CPP INVREP   pnt=" << int(pntw+1) << "\n";
 #endif
-    rep = rep * te;
+    rep *= te;
 #ifdef DEBUG_INV_REP
     std::cerr << "CPP INVREP   rep=" << rep << "\n";
 #endif
@@ -673,7 +673,7 @@ Telt SiftedPermutation(StabChain<Telt,Tidx_label> const& S, Telt const& g)
       if (img == bpt)
 	break;
       Tidx_label idx = Sptr->transversal[img];
-      gW = gW * Sptr->comm->labels[idx];
+      gW *= Sptr->comm->labels[idx];
       img = PowAct(bpt, gW);
     }
     Sptr = Sptr->stabilizer;
@@ -1339,7 +1339,7 @@ void StabChainStrong(StabChain<Telt,Tidx_label> & S, std::vector<Telt> const& ne
 #ifdef DEBUG_STABCHAIN
   std::cerr << "CPP StabChainStrong O=" << GapStringIntVector(S->orbit) << "\n";
 #endif
-  for (Tidx & i : Reversed(pnts)) {
+  for (const Tidx & i : Reversed(pnts)) {
     Tidx p=S->orbit[i];
 #ifdef DEBUG_STABCHAIN
     std::cerr << "CPP StabChainStrong i=" << int(i+1) << " p=" << int(p+1) << "\n";
@@ -1350,7 +1350,7 @@ void StabChainStrong(StabChain<Telt,Tidx_label> & S, std::vector<Telt> const& ne
 #ifdef DEBUG_STABCHAIN
     std::cerr << "CPP StabChainStrong gen1=" << int(gen1+1) << " rep=" << rep << "\n";
 #endif
-    for (Tidx & j : ClosedInterval<Tidx>(gen1, Tidx(S->genlabels.size()))) {
+    for (const Tidx & j : ClosedInterval<Tidx>(gen1, Tidx(S->genlabels.size()))) {
       const Telt& g = S->comm->labels[ S->genlabels[j] ];
 #ifdef DEBUG_STABCHAIN
       std::cerr << "CPP StabChainStrong   j=" << int(j+1) << " g=" << g << "\n";
@@ -1536,7 +1536,7 @@ bool StabChainSwap(StabChain<Telt,Tidx_label> & Stot)
 #ifdef DEBUG_STABCHAIN
         std::cerr << "DEBUG posGen=" << posGen << "\n";
 #endif
-	gen = gen * Stot->comm->labels[posGen];
+	gen *= Stot->comm->labels[posGen];
       }
 #ifdef DEBUG_STABCHAIN
       std::cerr << "CPP Determining gen, step 2 gen=" << gen << "\n";
@@ -1549,7 +1549,7 @@ bool StabChainSwap(StabChain<Telt,Tidx_label> & Stot)
 #ifdef DEBUG_STABCHAIN
         std::cerr << "DEBUG posGen=" << posGen << "\n";
 #endif
-	gen = gen * Stot->stabilizer->comm->labels[posGen];
+	gen *= Stot->stabilizer->comm->labels[posGen];
       }
 #ifdef DEBUG_STABCHAIN
       std::cerr << "CPP Determining gen, step 3 gen=" << gen << "\n";
@@ -1973,10 +1973,9 @@ void SetStabChainFromLevel(std::vector<StabChain<Telt,Tidx_label>> & R_list,
 template<typename Telt, typename Tidx_label>
 bool IsFixedStabilizer(StabChain<Telt,Tidx_label> const& S, typename Telt::Tidx const& pnt)
 {
-  for (const Tidx_label & posGen : S->genlabels) {
+  for (const Tidx_label & posGen : S->genlabels)
     if (pnt != PowAct(pnt, S->comm->labels[posGen]))
       return false;
-  }
   return true;
 }
 

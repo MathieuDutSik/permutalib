@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     }
     std::string InputFile = argv[1];
     std::string opt = argv[2];
-    std::vector<std::string> ListOpts={"canonical", "stabilizer", "pointstabilizer", "pointrepresentative"};
+    std::vector<std::string> ListOpts={"canonical", "stabilizer", "pointstabilizer", "pointrepresentative", "all"};
     bool IsMatch=false;
     for (auto & e_opt : ListOpts) {
       if (e_opt == opt)
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
       }
       Tgroup eG(LGen, n);
       //
-      if (opt == "canonical") {
+      auto bench_canonical=[&]() -> void {
         for (long iter=0; iter<n_iter; iter++) {
           permutalib::Face eFace(n);
           for (int i=0; i<n; i++) {
@@ -77,9 +77,8 @@ int main(int argc, char *argv[])
           permutalib::Face set_can = eG.CanonicalImage(eFace);
           siz_control += set_can.count();
         }
-      }
-      //
-      if (opt == "stabilizer") {
+      };
+      auto bench_stabilizer=[&]() -> void {
         for (long iter=0; iter<n_iter; iter++) {
           permutalib::Face eFace(n);
           for (int i=0; i<n; i++) {
@@ -89,23 +88,37 @@ int main(int argc, char *argv[])
           Tgroup eG2 = eG.Stabilizer_OnSets(eFace);
           siz_control += eG2.n_act();
         }
-      }
-      //
-      if (opt == "pointstabilizer") {
+      };
+      auto bench_pointstabilizer=[&]() -> void {
         for (long iter=0; iter<n_iter; iter++) {
           Tidx pos = rand() % n;
           Tgroup eG2 = eG.Stabilizer_OnPoints(pos);
           siz_control += eG2.n_act();
         }
-      }
-      //
-      if (opt == "pointrepresentative") {
+      };
+      auto bench_pointrepresentative=[&]() -> void {
         for (long iter=0; iter<n_iter; iter++) {
           Tidx pos1 = rand() % n;
           Tidx pos2 = rand() % n;
           std::pair<bool,Telt> eP = eG.RepresentativeAction_OnPoints(pos1, pos2);
           siz_control += int(eP.first);
         }
+      };
+      //
+      if (opt == "canonical")
+        bench_canonical();
+      if (opt == "stabilizer")
+        bench_stabilizer();
+      if (opt == "pointstabilizer")
+        bench_pointstabilizer();
+      if (opt == "pointrepresentative")
+        bench_pointrepresentative();
+      //
+      if (opt == "all") {
+        bench_canonical();
+        bench_stabilizer();
+        bench_pointstabilizer();
+        bench_pointrepresentative();
       }
     }
     //

@@ -964,9 +964,8 @@ void SubtractBlistOrbitStabChain(Face & blist, std::vector<Telt> const& LGen, ty
   size_t pos=0;
   while(true) {
     size_t siz = orb.size();
-    if (pos == siz) {
+    if (pos == siz)
       break;
-    }
     for (size_t ePos=pos; ePos<siz; ePos++) {
       Tidx pnt=orb[ePos];
       for (auto& eGen : LGen) {
@@ -1057,7 +1056,7 @@ template<typename Telt, typename Tidx_label, typename Tint, bool repr>
 ResultPBT<Telt,Tidx_label> PartitionBacktrack(StabChain<Telt,Tidx_label> const& G, std::function<bool(Telt const&)> const& Pr, rbaseType<Telt,Tidx_label> & rbase, dataType<typename Telt::Tidx> & data, StabChain<Telt,Tidx_label> & L, StabChain<Telt,Tidx_label> & R)
 {
   using Tidx=typename Telt::Tidx;
-  Tidx n=G->comm->n;
+  Tidx n = G->comm->n;
   Telt id = G->comm->identity;
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP PartitionBacktrack step 1\n";
