@@ -687,11 +687,8 @@ SingleSidedPerm<Tidx> LeftQuotient(SingleSidedPerm<Tidx> const& a, SingleSidedPe
 {
   Tidx siz=a.size();
   std::vector<Tidx> ListVal(siz);
-  for (Tidx i=0; i<siz; i++) {
-    Tidx i1=a.atRev(i);
-    Tidx j1=b.at(i1);
-    ListVal[i]=j1;
-  }
+  for (Tidx i=0; i<siz; i++)
+    ListVal[a.at(i)] = b.at(i);
   return SingleSidedPerm<Tidx>(ListVal);
 }
 
