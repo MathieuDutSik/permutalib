@@ -30,16 +30,16 @@ struct permPlusBool {
   Telt val;
 };
 
-template<typename Telt>
+template<typename Telt, typename Tidx_label>
 struct StabChainPlusLev {
   int status; // possible values in {int_false, int_true, int_int, int_stablev}
   int value_int;
-  StabChain<Telt> Stot;
+  StabChain<Telt,Tidx_label> Stot;
 };
 
 
-template<typename Telt>
-StabChainPlusLev<Telt> StructuralCopy(StabChainPlusLev<Telt> const& S)
+template<typename Telt, typename Tidx_label>
+StabChainPlusLev<Telt,Tidx_label> StructuralCopy(StabChainPlusLev<Telt,Tidx_label> const& S)
 {
   return {S.status, S.value_int, StructuralCopy(S.Stot)};
 }
@@ -47,8 +47,8 @@ StabChainPlusLev<Telt> StructuralCopy(StabChainPlusLev<Telt> const& S)
 
 // The ExtendedT in gap seems to be passing by value for img entries that gets
 // modified
-template<typename Telt>
-permPlusBool<Telt> ExtendedT(Telt const& t, typename Telt::Tidx const& pnt, typename Telt::Tidx img, typename Telt::Tidx const& simg, StabChainPlusLev<Telt> const& S)
+template<typename Telt, typename Tidx_label>
+permPlusBool<Telt> ExtendedT(Telt const& t, typename Telt::Tidx const& pnt, typename Telt::Tidx img, typename Telt::Tidx const& simg, StabChainPlusLev<Telt,Tidx_label> const& S)
 {
   using Tidx=typename Telt::Tidx;
 #ifdef DEBUG_STBCBCKT
@@ -77,7 +77,7 @@ permPlusBool<Telt> ExtendedT(Telt const& t, typename Telt::Tidx const& pnt, type
       return {int_perm, t};
     }
   }
-  if (S.Stot->transversal[img] == -1) {
+  if (S.Stot->transversal[img] == std::numeric_limits<Tidx_label>::max()) {
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP ExtendedT, return false 2\n";
 #endif
@@ -91,8 +91,8 @@ permPlusBool<Telt> ExtendedT(Telt const& t, typename Telt::Tidx const& pnt, type
 }
 
 
-template<typename Telt>
-bool IsBool(StabChainPlusLev<Telt> const& S)
+template<typename Telt, typename Tidx_label>
+bool IsBool(StabChainPlusLev<Telt,Tidx_label> const& S)
 {
   if (S.status == int_true || S.status == int_false)
     return true;
@@ -100,8 +100,8 @@ bool IsBool(StabChainPlusLev<Telt> const& S)
 }
 
 
-template<typename Telt>
-typename Telt::Tidx BasePoint(StabChainPlusLev<Telt> const& S)
+template<typename Telt, typename Tidx_label>
+typename Telt::Tidx BasePoint(StabChainPlusLev<Telt,Tidx_label> const& S)
 {
   return BasePoint(S.Stot);
 }
@@ -214,29 +214,29 @@ struct dataType {
 //    But S does not show up later on.
 // ---So we need to find an adequate mechanism for dealing with the problem
 //    of pointers.
-template<typename Telt>
+template<typename Telt, typename Tidx_label>
 struct rbaseType {
   std::vector<typename Telt::Tidx> domain;
   std::vector<typename Telt::Tidx> base;
   std::vector<typename Telt::Tidx> where;
   //
-  StabChain<Telt> chain;
+  StabChain<Telt,Tidx_label> chain;
   std::vector<std::vector<typename Telt::Tidx>> fix;
   //
   std::vector<std::vector<Refinement<typename Telt::Tidx>>> rfm;
   Partition<typename Telt::Tidx> partition;
-  std::vector<StabChainPlusLev<Telt>> lev;
-  StabChainPlusLev<Telt> level;
+  std::vector<StabChainPlusLev<Telt,Tidx_label>> lev;
+  StabChainPlusLev<Telt,Tidx_label> level;
   //
-  std::vector<StabChainPlusLev<Telt>> lev2;
-  StabChainPlusLev<Telt> level2;
+  std::vector<StabChainPlusLev<Telt,Tidx_label>> lev2;
+  StabChainPlusLev<Telt,Tidx_label> level2;
   //
   std::vector<std::string> levkey;
 };
 
 
-template<typename Telt>
-void KeyUpdatingRbase(std::string const& str, rbaseType<Telt> & rbase)
+template<typename Telt, typename Tidx_label>
+void KeyUpdatingRbase(std::string const& str, rbaseType<Telt,Tidx_label> & rbase)
 {
   bool DoPrint=false;
   std::vector<std::string> ListKey;
@@ -257,15 +257,16 @@ void KeyUpdatingRbase(std::string const& str, rbaseType<Telt> & rbase)
     bool test = ListKey[len-1] == GetStringExpressionOfStabChain(rbase.level.Stot);
     std::cerr << "CPP KUR: at " << str << " test_equality=" << test << "\n";
     for (size_t i=0; i<len; i++)
-      if (i<rbase.levkey.size())
+      if (i < rbase.levkey.size())
         if (rbase.levkey[i] != ListKey[i])
           std::cerr << "CPP  KUR: Change of key at i=" << int(i+1) << "\n";
     rbase.levkey = ListKey;
   }
 }
 
-template<typename Telt>
-std::string ListOrbitOfRbaseLEV(rbaseType<Telt> const& rbase)
+
+template<typename Telt, typename Tidx_label>
+std::string ListOrbitOfRbaseLEV(rbaseType<Telt,Tidx_label> const& rbase)
 {
   std::string str = "[ ";
   size_t sizLev=rbase.lev.size();
@@ -287,8 +288,9 @@ std::string ListOrbitOfRbaseLEV(rbaseType<Telt> const& rbase)
 }
 
 
-template<typename Telt>
-void PrintRBaseLevel(rbaseType<Telt> const& rbase, std::string const& str)
+
+template<typename Telt, typename Tidx_label>
+void PrintRBaseLevel(rbaseType<Telt,Tidx_label> const& rbase, std::string const& str)
 {
   if (rbase.level.status == int_int) {
     std::cerr << str << " PRBL rbase.level, integer : " << rbase.level.value_int << "\n";
@@ -311,8 +313,8 @@ void PrintRBaseLevel(rbaseType<Telt> const& rbase, std::string const& str)
 
 
 
-template<typename Telt>
-bool ProcessFixpoint_rbase(rbaseType<Telt> & rbase, typename Telt::Tidx const& pnt)
+template<typename Telt, typename Tidx_label>
+bool ProcessFixpoint_rbase(rbaseType<Telt,Tidx_label> & rbase, typename Telt::Tidx const& pnt)
 {
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP ProcessFixpoint_rbase beginning pnt=" << int(pnt+1) << "\n";
@@ -361,24 +363,24 @@ bool ProcessFixpoint_rbase(rbaseType<Telt> & rbase, typename Telt::Tidx const& p
 
 
 
-template<typename Telt>
+template<typename Telt, typename Tidx_label>
 struct imageType {
   size_t depth;
   Partition<typename Telt::Tidx>& partition;
   permPlusBool<Telt> perm;
-  StabChainPlusLev<Telt> level;
+  StabChainPlusLev<Telt,Tidx_label> level;
   std::vector<typename Telt::Tidx> bimg;
   //
   permPlusBool<Telt> perm2;
-  StabChainPlusLev<Telt> level2;
+  StabChainPlusLev<Telt,Tidx_label> level2;
   imageType(Partition<typename Telt::Tidx>& _partition) : partition(_partition)
   {
   }
 };
 
 
-template<typename Telt>
-bool ProcessFixpoint_image(imageType<Telt> & image, typename Telt::Tidx const& pnt, typename Telt::Tidx & img, typename Telt::Tidx const& simg)
+template<typename Telt, typename Tidx_label>
+bool ProcessFixpoint_image(imageType<Telt,Tidx_label> & image, typename Telt::Tidx const& pnt, typename Telt::Tidx & img, typename Telt::Tidx const& simg)
 {
   using Tidx=typename Telt::Tidx;
   if (image.perm.status != int_true) {
@@ -423,8 +425,8 @@ bool ProcessFixpoint_image(imageType<Telt> & image, typename Telt::Tidx const& p
 }
 
 
-template<typename Telt>
-bool IsTrivialRBase(rbaseType<Telt> const& rbase)
+template<typename Telt, typename Tidx_label>
+bool IsTrivialRBase(rbaseType<Telt,Tidx_label> const& rbase)
 {
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP IsTrivialRBase : IsInt()=";
@@ -469,11 +471,11 @@ bool IsTrivialRBase(rbaseType<Telt> const& rbase)
 
 
 
-template<typename Telt>
-rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& IsId, std::vector<typename Telt::Tidx> const& Omega, Partition<typename Telt::Tidx> const& P)
+template<typename Telt, typename Tidx_label>
+rbaseType<Telt,Tidx_label> EmptyRBase(std::vector<StabChain<Telt,Tidx_label>> const& G, bool const& IsId, std::vector<typename Telt::Tidx> const& Omega, Partition<typename Telt::Tidx> const& P)
 {
   using Tidx = typename Telt::Tidx;
-  rbaseType<Telt> rbase;
+  rbaseType<Telt,Tidx_label> rbase;
   rbase.domain = Omega;
   rbase.base = {};
   rbase.where = {};
@@ -484,7 +486,7 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
     Tidx n = GetNumberPoint(P);
     if (IsId) {
       rbase.level2.status = int_true;
-      rbase.level2.Stot = EmptyStabChain<Telt>(n);
+      rbase.level2.Stot = EmptyStabChain<Telt,Tidx_label>(n);
     } else {
       rbase.level2 = {int_stablev, -555, G[1]};
 #ifdef DEBUG_STBCBCKT
@@ -511,8 +513,8 @@ rbaseType<Telt> EmptyRBase(std::vector<StabChain<Telt>> const& G, bool const& Is
 
 
 
-template<typename Telt>
-bool MeetPartitionStrat(rbaseType<Telt> const& rbase, imageType<Telt> & image, Partition<typename Telt::Tidx> const& S, Telt const& g, std::vector<singStrat<typename Telt::Tidx>> const& strat)
+template<typename Telt, typename Tidx_label>
+bool MeetPartitionStrat(rbaseType<Telt,Tidx_label> const& rbase, imageType<Telt,Tidx_label> & image, Partition<typename Telt::Tidx> const& S, Telt const& g, std::vector<singStrat<typename Telt::Tidx>> const& strat)
 {
   using Tidx=typename Telt::Tidx;
 #ifdef DEBUG_STBCBCKT
@@ -548,8 +550,8 @@ bool MeetPartitionStrat(rbaseType<Telt> const& rbase, imageType<Telt> & image, P
 ##            i.e., `P[p]' has become a one-point cell.
 ##
 */
-template<typename Telt>
-std::vector<singStrat<typename Telt::Tidx>> StratMeetPartition(rbaseType<Telt> & rbase, Partition<typename Telt::Tidx> & P, Partition<typename Telt::Tidx> const& S, Telt const& g)
+template<typename Telt, typename Tidx_label>
+std::vector<singStrat<typename Telt::Tidx>> StratMeetPartition(rbaseType<Telt,Tidx_label> & rbase, Partition<typename Telt::Tidx> & P, Partition<typename Telt::Tidx> const& S, Telt const& g)
 {
   using Tidx=typename Telt::Tidx;
   std::vector<singStrat<Tidx>> strat;
@@ -625,8 +627,10 @@ std::vector<singStrat<typename Telt::Tidx>> StratMeetPartition(rbaseType<Telt> &
   return strat;
 }
 
-template<typename Telt>
-void AddRefinement(rbaseType<Telt> & rbase, size_t const& pos, Refinement<typename Telt::Tidx> const& eRfm)
+
+
+template<typename Telt, typename Tidx_label>
+void AddRefinement(rbaseType<Telt,Tidx_label> & rbase, size_t const& pos, Refinement<typename Telt::Tidx> const& eRfm)
 {
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP beginning of AddRefinement\n";
@@ -645,8 +649,9 @@ void AddRefinement(rbaseType<Telt> & rbase, size_t const& pos, Refinement<typena
 }
 
 
-template<typename Telt>
-void RegisterRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt> & rbase, typename Telt::Tidx const& pnt, Telt const& TheId)
+
+template<typename Telt, typename Tidx_label>
+void RegisterRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_label> & rbase, typename Telt::Tidx const& pnt, Telt const& TheId)
 {
   using Tidx=typename Telt::Tidx;
   if (rbase.level2.status != int_true && rbase.level2.status != int_false) {
@@ -715,7 +720,7 @@ void RegisterRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt> & rb
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP Matching the ! false test\n";
 #endif
-    auto MainInsert=[&](StabChainPlusLev<Telt> const& lev) -> void {
+    auto MainInsert=[&](StabChainPlusLev<Telt,Tidx_label> const& lev) -> void {
       if (lev.status != int_int) {
 	std::vector<Telt> LGenStrong = StrongGeneratorsStabChain(lev.Stot);
 #ifdef DEBUG_STBCBCKT
@@ -757,9 +762,8 @@ void RegisterRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt> & rb
 
 
 
-
-template<typename Telt>
-void NextRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt> & rbase, Telt const& TheId)
+template<typename Telt, typename Tidx_label>
+void NextRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_label> & rbase, Telt const& TheId)
 {
   using Tidx=typename Telt::Tidx;
   std::vector<Tidx> lens = P.lengths; // Copy is needed as the lens is changed in the sortparallel
@@ -799,8 +803,10 @@ void NextRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt> & rbase,
   RegisterRBasePoint(P, rbase, p, TheId);
 }
 
-template<typename Telt>
-bool Refinements_ProcessFixpoint(rbaseType<Telt> & rbase, imageType<Telt> & image, typename Telt::Tidx const& pnt, typename Telt::Tidx const& cellnum)
+
+
+template<typename Telt, typename Tidx_label>
+bool Refinements_ProcessFixpoint(rbaseType<Telt,Tidx_label> & rbase, imageType<Telt,Tidx_label> & image, typename Telt::Tidx const& pnt, typename Telt::Tidx const& cellnum)
 {
   using Tidx=typename Telt::Tidx;
   Tidx img = FixpointCellNo(image.partition, cellnum);
@@ -811,8 +817,9 @@ bool Refinements_ProcessFixpoint(rbaseType<Telt> & rbase, imageType<Telt> & imag
 }
 
 
-template<typename Telt>
-bool Refinements_Intersection(rbaseType<Telt> & rbase, imageType<Telt> & image, Partition<typename Telt::Tidx> const& Q, std::vector<singStrat<typename Telt::Tidx>> const& strat)
+
+template<typename Telt, typename Tidx_label>
+bool Refinements_Intersection(rbaseType<Telt,Tidx_label> & rbase, imageType<Telt,Tidx_label> & image, Partition<typename Telt::Tidx> const& Q, std::vector<singStrat<typename Telt::Tidx>> const& strat)
 {
   Telt t;
   if (image.level2.status == int_false) {
@@ -828,8 +835,8 @@ bool Refinements_Intersection(rbaseType<Telt> & rbase, imageType<Telt> & image, 
 // It processes a number of refinement strategies.
 // The functions Refinements used return only booleans
 //
-template<typename Telt>
-int RRefine(rbaseType<Telt> & rbase, imageType<Telt> & image, bool const& uscore)
+template<typename Telt, typename Tidx_label>
+int RRefine(rbaseType<Telt,Tidx_label> & rbase, imageType<Telt,Tidx_label> & image, bool const& uscore)
 {
   using Tidx=typename Telt::Tidx;
 #ifdef DEBUG_STBCBCKT
@@ -907,8 +914,9 @@ int RRefine(rbaseType<Telt> & rbase, imageType<Telt> & image, bool const& uscore
 }
 
 
-template<typename Telt>
-bool PBIsMinimal(std::vector<typename Telt::Tidx> const& range, typename Telt::Tidx const& a, typename Telt::Tidx const& b, StabChain<Telt> const& S)
+
+template<typename Telt, typename Tidx_label>
+bool PBIsMinimal(std::vector<typename Telt::Tidx> const& range, typename Telt::Tidx const& a, typename Telt::Tidx const& b, StabChain<Telt,Tidx_label> const& S)
 {
   using Tidx=typename Telt::Tidx;
   if (IsInBasicOrbit(S, b)) {
@@ -932,7 +940,7 @@ bool PBIsMinimal(std::vector<typename Telt::Tidx> const& range, typename Telt::T
       break;
     for (size_t i=pos; i<siz; i++) {
       Tidx pnt=orb[i];
-      for (auto & lVal : S->genlabels) {
+      for (const Tidx_label & lVal : S->genlabels) {
         Tidx img = PowAct(pnt, S->comm->labels[lVal]);
         if (!old[img]) {
           if (img < a)
@@ -974,15 +982,17 @@ void SubtractBlistOrbitStabChain(Face & blist, std::vector<Telt> const& LGen, ty
 }
 
 
-template<typename Telt>
+
+template<typename Telt, typename Tidx_label>
 struct ResultPBT {
   int nature; // Allowed values in {int_group, int_fail, int_perm}.
               // int_group for group
               // int_fail for fail
               // int_perm for equivalence element
-  StabChain<Telt> stab;
+  StabChain<Telt,Tidx_label> stab;
   Telt res;
 };
+
 
 
 template<typename Telt>
@@ -1032,19 +1042,19 @@ std::string GetStringGAP(Face const& f)
   return str;
 }
 
-template<typename Telt, bool repr>
-imageType<Telt> BuildInitialImage(rbaseType<Telt> & rbase, dataType<typename Telt::Tidx> & data)
+template<typename Telt, typename Tidx_label, bool repr>
+imageType<Telt,Tidx_label> BuildInitialImage(rbaseType<Telt,Tidx_label> & rbase, dataType<typename Telt::Tidx> & data)
 {
   if (repr) {
-    return imageType<Telt>(data.P);
+    return imageType<Telt,Tidx_label>(data.P);
   } else {
-    return imageType<Telt>(rbase.partition);
+    return imageType<Telt,Tidx_label>(rbase.partition);
   }
 };
 
 
-template<typename Telt, typename Tint, bool repr>
-ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(Telt const&)> const& Pr, rbaseType<Telt> & rbase, dataType<typename Telt::Tidx> & data, StabChain<Telt> & L, StabChain<Telt> & R)
+template<typename Telt, typename Tidx_label, typename Tint, bool repr>
+ResultPBT<Telt,Tidx_label> PartitionBacktrack(StabChain<Telt,Tidx_label> const& G, std::function<bool(Telt const&)> const& Pr, rbaseType<Telt,Tidx_label> & rbase, dataType<typename Telt::Tidx> & data, StabChain<Telt,Tidx_label> & L, StabChain<Telt,Tidx_label> & R)
 {
   using Tidx=typename Telt::Tidx;
   Tidx n=G->comm->n;
@@ -1059,7 +1069,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
   std::cerr << "CPP INIT sgs(L)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(L))) << "\n";
   std::cerr << "CPP INIT sgs(R)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(R))) << "\n";
 #endif
-  imageType<Telt> image = BuildInitialImage<Telt,repr>(rbase, data);
+  imageType<Telt,Tidx_label> image = BuildInitialImage<Telt,Tidx_label,repr>(rbase, data);
   std::vector<Face> orB; // backup of <orb>.
   std::vector<Face> orb;
   std::vector<std::vector<Tidx>> org; // intersected (mapped) basic orbits of <G>
@@ -1071,7 +1081,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
     range.push_back(i);
   Partition<Tidx> oldcel;       // old value of <image.partition.cellno>
   std::vector<Tidx> oldcel_cellno;
-  std::vector<StabChain<Telt>> L_list, R_list;
+  std::vector<StabChain<Telt,Tidx_label>> L_list, R_list;
   std::function<permPlusBool<Telt>(size_t const&,bool const&)> PBEnumerate = [&](size_t const& d, bool const & wasTriv) -> permPlusBool<Telt> {
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP PBEnumerate, step 1, d=" << int(d+1) << " wasTriv=" << wasTriv << "\n";
@@ -1156,7 +1166,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
           std::cerr << "CPP sgs(L)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(L))) << " base=" << GapStringIntVector(rbase.base) << "\n";
           std::cerr << "CPP assigning L sequence\n";
 #endif
-	  L_list = ListStabChain(StabChainOp_stabchain_nofalse<Telt,Tint>(L, options));
+	  L_list = ListStabChain(StabChainOp_stabchain_nofalse<Telt,Tidx_label,Tint>(L, options));
 #ifdef DEBUG_STBCBCKT
           PrintListStabCommPartition("CPP ListStabChain", L_list);
 #endif
@@ -1567,7 +1577,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
             std::cerr << "CPP LGenB=" << GapStringTVector(LGenB) << "\n";
             std::cerr << "XXX ELIMINATE begin\n";
 #endif
-	    R_list[d+1] = StabChainGenerators(LGenB, n, id);
+	    R_list[d+1] = StabChainGenerators<Telt,Tidx_label>(LGenB, n, id);
 #ifdef DEBUG_STBCBCKT
             std::cerr << "XXX ELIMINATE end\n";
             std::cerr << "CPP After assignation R[d+1]=\n";
@@ -1652,7 +1662,7 @@ ResultPBT<Telt> PartitionBacktrack(StabChain<Telt> const& G, std::function<bool(
 #ifdef DEBUG_STBCBCKT
 	std::cerr << "CPP ORB 2: Before subtract d=" << int(d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
 #endif
-	if (R_list[d]->transversal.size() > 0 && R_list[d]->transversal[b] != -1) {
+	if (R_list[d]->transversal.size() > 0 && R_list[d]->transversal[b] != std::numeric_limits<Tidx_label>::max()) {
 #ifdef DEBUG_STBCBCKT
           std::cerr << "CPP subtract case 1\n";
 #endif
@@ -1781,8 +1791,9 @@ Face OnSets(Face const& f, Telt const& g)
 }
 
 
-template<typename Telt, typename Tint, bool repr>
-ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, Face const& Phi, Face const& Psi)
+
+template<typename Telt, typename Tidx_label, typename Tint, bool repr>
+ResultPBT<Telt,Tidx_label> RepOpSetsPermGroup(StabChain<Telt,Tidx_label> const& G, Face const& Phi, Face const& Psi)
 {
   using Tidx=typename Telt::Tidx;
 #ifdef DEBUG_STBCBCKT
@@ -1840,17 +1851,17 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, Face const& Phi, Fa
   std::cerr << "CPP repr=" << repr << "\n";
 #endif
 
-  auto GetSubgroup=[&](Face const& Ph) -> StabChain<Telt> {
-    std::vector<Telt> sgs=Filtered(LGen, [&](Telt const& g)->bool{return OnSets(Ph, g) == Ph;});
+  auto GetSubgroup=[&](Face const& Ph) -> StabChain<Telt,Tidx_label> {
+    std::vector<Telt> sgs=Filtered(LGen, [&](Telt const& g)->bool {return OnSets(Ph, g) == Ph;});
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP SelectedGens=" << GapStringTVector(SortVector(sgs)) << "\n";
 #endif
-    return MinimalStabChain<Telt,Tint>(SortVector(sgs), n);
+    return MinimalStabChain<Telt,Tidx_label,Tint>(SortVector(sgs), n);
   };
 
 
-  StabChain<Telt> L = GetSubgroup(Phi);
-  StabChain<Telt> R;
+  StabChain<Telt,Tidx_label> L = GetSubgroup(Phi);
+  StabChain<Telt,Tidx_label> R;
   if (repr)
     R = GetSubgroup(Psi);
   else
@@ -1858,7 +1869,7 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, Face const& Phi, Fa
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Orders: |R|=" << SizeStabChain<Telt,Tint>(R) << " |L|=" << SizeStabChain<Telt,Tint>(L) << "\n";
 #endif
-  rbaseType<Telt> rbase = EmptyRBase<Telt>({G, G}, true, Omega, P);
+  rbaseType<Telt,Tidx_label> rbase = EmptyRBase<Telt,Tidx_label>({G, G}, true, Omega, P);
   //#ifdef DEBUG_STBCBCKT
   //  std::cerr << "CPP RepOpSetsPermGroup rbase.level2.status=" << GetIntTypeNature(rbase.level2.status) << "\n";
   //#endif
@@ -1875,13 +1886,13 @@ ResultPBT<Telt> RepOpSetsPermGroup(StabChain<Telt> const& G, Face const& Phi, Fa
   std::cerr << "CPP Before call to PartitionBacktrack\n";
 #endif
   dataType<Tidx> data(Q);
-  return PartitionBacktrack<Telt,Tint,repr>( G, Pr, rbase, data, L, R );
+  return PartitionBacktrack<Telt,Tidx_label,Tint,repr>( G, Pr, rbase, data, L, R );
 }
 
 // Stabilizer part
 
-template<typename Telt,typename Tint>
-StabChain<Telt> Kernel_Stabilizer_OnPoints(StabChain<Telt> const& G, typename Telt::Tidx const& x)
+template<typename Telt, typename Tidx_label,typename Tint>
+StabChain<Telt,Tidx_label> Kernel_Stabilizer_OnPoints(StabChain<Telt,Tidx_label> const& G, typename Telt::Tidx const& x)
 {
   using Tidx=typename Telt::Tidx;
 #ifdef DEBUG_STBCBCKT
@@ -1901,12 +1912,12 @@ StabChain<Telt> Kernel_Stabilizer_OnPoints(StabChain<Telt> const& G, typename Te
   StabChainOptions<Tint,Tidx> options = GetStandardOptions<Tint,Tidx>(n);
   options.base = base;
   std::vector<Telt> Lgen = Kernel_GeneratorsOfGroup(G);
-  StabChain<Telt> K = StabChainOp_listgen(Lgen, options);
+  StabChain<Telt,Tidx_label> K = StabChainOp_listgen<Telt,Tidx_label,Tint>(Lgen, options);
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP K=\n";
   PrintStabChain(K);
 #endif
-  StabChain<Telt> Sptr = K;
+  StabChain<Telt,Tidx_label> Sptr = K;
   while (true) {
     if (Sptr == nullptr) {
 #ifdef DEBUG_STBCBCKT
@@ -1935,8 +1946,8 @@ StabChain<Telt> Kernel_Stabilizer_OnPoints(StabChain<Telt> const& G, typename Te
 }
 
 
-template<typename Telt,typename Tint>
-StabChain<Telt> Kernel_Stabilizer_OnSets(StabChain<Telt> const& G, Face const& Phi)
+template<typename Telt, typename Tidx_label, typename Tint>
+StabChain<Telt,Tidx_label> Kernel_Stabilizer_OnSets(StabChain<Telt,Tidx_label> const& G, Face const& Phi)
 {
   using Tidx = typename Telt::Tidx;
 #ifdef DEBUG_STBCBCKT
@@ -1954,17 +1965,17 @@ StabChain<Telt> Kernel_Stabilizer_OnSets(StabChain<Telt> const& G, Face const& P
     for (size_t i=0; i<n; i++)
       PhiC[i] = 1 - Phi[i];
     if (PhiC.count() > 1) {
-      return RepOpSetsPermGroup<Telt,Tint,false>(G, PhiC, PhiC).stab;
+      return RepOpSetsPermGroup<Telt,Tidx_label,Tint,false>(G, PhiC, PhiC).stab;
     } else {
       Tidx x = Tidx(PhiC.find_first());
-      return Kernel_Stabilizer_OnPoints<Telt,Tint>(G, x);
+      return Kernel_Stabilizer_OnPoints<Telt,Tidx_label,Tint>(G, x);
     }
   } else {
     if (Phi.count() > 1) {
-      return RepOpSetsPermGroup<Telt,Tint,false>(G, Phi, Phi).stab;
+      return RepOpSetsPermGroup<Telt,Tidx_label,Tint,false>(G, Phi, Phi).stab;
     } else {
       Tidx x = Tidx(Phi.find_first());
-      return Kernel_Stabilizer_OnPoints<Telt,Tint>(G, x);
+      return Kernel_Stabilizer_OnPoints<Telt,Tidx_label,Tint>(G, x);
     }
   }
 }
@@ -1972,8 +1983,8 @@ StabChain<Telt> Kernel_Stabilizer_OnSets(StabChain<Telt> const& G, Face const& P
 
 // This code is 80% slower than the Kernel_Stabilizer_OnPoints_backtrack
 // We keep it for trace because it works fine and gives correct result.
-template<typename Telt,typename Tint>
-StabChain<Telt> Kernel_Stabilizer_OnPoints_backtrack(StabChain<Telt> const& G, typename Telt::Tidx const& x)
+template<typename Telt, typename Tidx_label, typename Tint>
+StabChain<Telt,Tidx_label> Kernel_Stabilizer_OnPoints_backtrack(StabChain<Telt,Tidx_label> const& G, typename Telt::Tidx const& x)
 {
   using Tidx=typename Telt::Tidx;
 #ifdef DEBUG_STBCBCKT
@@ -1988,15 +1999,15 @@ StabChain<Telt> Kernel_Stabilizer_OnPoints_backtrack(StabChain<Telt> const& G, t
 #endif
   Face Phi(n);
   Phi[x]=1;
-  return RepOpSetsPermGroup<Telt,Tint,false>(G, Phi, Phi).stab;
+  return RepOpSetsPermGroup<Telt,Tidx_label,Tint,false>(G, Phi, Phi).stab;
 }
 
 
 // RepresentativeAction
 
 
-template<typename Telt,typename Tint>
-std::pair<bool,Telt> Kernel_RepresentativeAction_OnSets(StabChain<Telt> const& G, Face const& f1, Face const& f2)
+template<typename Telt, typename Tidx_label, typename Tint>
+std::pair<bool,Telt> Kernel_RepresentativeAction_OnSets(StabChain<Telt,Tidx_label> const& G, Face const& f1, Face const& f2)
 {
   size_t n = size_t(G->comm->n);
 #ifdef DEBUG_STBCBCKT
@@ -2012,7 +2023,7 @@ std::pair<bool,Telt> Kernel_RepresentativeAction_OnSets(StabChain<Telt> const& G
     return {false, {}};
   if (f1 == f2)
     return {true, G->comm->identity};
-  auto Process_ResultPBT=[&](ResultPBT<Telt> const& eRec) -> std::pair<bool,Telt> {
+  auto Process_ResultPBT=[&](ResultPBT<Telt,Tidx_label> const& eRec) -> std::pair<bool,Telt> {
     if (eRec.nature == int_fail)
       return {false, {}};
     return {true, eRec.res};
@@ -2024,16 +2035,18 @@ std::pair<bool,Telt> Kernel_RepresentativeAction_OnSets(StabChain<Telt> const& G
       f1C[i] = 1 - f1[i];
       f2C[i] = 1 - f2[i];
     }
-    ResultPBT<Telt> eRec = RepOpSetsPermGroup<Telt,Tint,true>(G, f1C, f2C);
+    ResultPBT<Telt,Tidx_label> eRec = RepOpSetsPermGroup<Telt,Tidx_label,Tint,true>(G, f1C, f2C);
     return Process_ResultPBT(eRec);
   } else {
-    ResultPBT<Telt> eRec = RepOpSetsPermGroup<Telt,Tint,true>(G, f1, f2);
+    ResultPBT<Telt,Tidx_label> eRec = RepOpSetsPermGroup<Telt,Tidx_label,Tint,true>(G, f1, f2);
     return Process_ResultPBT(eRec);
   }
 }
 
-template<typename Telt,typename Tint>
-std::pair<bool,Telt> Kernel_RepresentativeAction_OnPoints(StabChain<Telt> const& G, typename Telt::Tidx const& x1, typename Telt::Tidx const& x2)
+
+
+template<typename Telt, typename Tidx_label, typename Tint>
+std::pair<bool,Telt> Kernel_RepresentativeAction_OnPoints(StabChain<Telt,Tidx_label> const& G, typename Telt::Tidx const& x1, typename Telt::Tidx const& x2)
 {
   using Tidx=typename Telt::Tidx;
   Tidx n = G->comm->n;
@@ -2046,7 +2059,7 @@ std::pair<bool,Telt> Kernel_RepresentativeAction_OnPoints(StabChain<Telt> const&
   Face f1(n), f2(n);
   f1[x1] = 1;
   f2[x2] = 1;
-  ResultPBT<Telt> eRec = RepOpSetsPermGroup<Telt,Tint,true>(G, f1, f2);
+  ResultPBT<Telt,Tidx_label> eRec = RepOpSetsPermGroup<Telt,Tidx_label,Tint,true>(G, f1, f2);
   if (eRec.nature == int_fail)
     return {false, {}};
   return {true, eRec.res};

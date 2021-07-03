@@ -9,7 +9,7 @@
 namespace permutalib {
 
 template<typename Telt>
-std::pair<std::vector<std::vector<size_t>>,std::vector<Face>> Blocks_Kernel(std::vector<Telt> const& ListGen, std::vector<int> const& Omega, std::vector<int> const& seed)
+std::pair<std::vector<std::vector<typename Telt::Tidx>>,std::vector<Face>> Blocks_Kernel(std::vector<Telt> const& ListGen, std::vector<typename Telt::Tidx> const& Omega, std::vector<typename Telt::Tidx> const& seed)
 {
   using Tidx=typename Telt::Tidx;
   int nbMax=VectorMax(Omega);
@@ -83,7 +83,7 @@ std::pair<std::vector<std::vector<size_t>>,std::vector<Face>> Blocks_Kernel(std:
 	ePt = eFace.find_next(ePt);
       }
     }
-    std::vector<size_t> eBlock;
+    std::vector<Tidx> eBlock;
     size_t blkSiz=eFaceComb.count();
     boost::dynamic_bitset<>::size_type ePt=eFaceComb.find_first();
     for (size_t u=0; u<blkSiz; u++) {
@@ -165,10 +165,10 @@ std::vector<std::vector<int>> Blocks_without_seed(std::vector<Telt> const& ListG
 }
 
 template<typename Telt>
-std::function<Telt(Telt const&)> MapElementToSetPlusBlocks(std::vector<std::vector<int>> const& blks, int const& n)
+std::function<Telt(Telt const&)> MapElementToSetPlusBlocks(std::vector<std::vector<typename Telt::Tidx>> const& blks, typename Telt::Tidx const& n)
 {
   using Tidx=typename Telt::Tidx;
-  int TheMax=0;
+  Tidx TheMax=0;
   for (auto & eBlock : blks)
     for (auto & ePt : eBlock)
       if (ePt > TheMax)
@@ -183,7 +183,7 @@ std::function<Telt(Telt const&)> MapElementToSetPlusBlocks(std::vector<std::vect
     for (size_t i=0; i<n; i++)
       eList[i] = u.at(i);
     for (size_t iBlk=0; iBlk<nbBlock; iBlk++) {
-      int ePt=blks[iBlk][0];
+      Tidx ePt=blks[iBlk][0];
       Tidx ePtImg=u.at(ePt);
       size_t iBlkImg=VectStatus[ePtImg];
       eList[n+iBlk] = Tidx(n+iBlkImg);
@@ -196,7 +196,7 @@ std::function<Telt(Telt const&)> MapElementToSetPlusBlocks(std::vector<std::vect
 std::vector<int> GetBlock(std::vector<std::vector<int>> const& ListBlock, int const& ePt)
 {
   for (auto & eBlock : ListBlock)
-    if (PositionVect(eBlock, ePt) != -1)
+    if (PositionVect_ui<int,size_t>(eBlock, ePt) != std::numeric_limits<size_t>::max())
       return eBlock;
   return {-1};
 }

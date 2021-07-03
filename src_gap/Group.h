@@ -36,8 +36,9 @@ public:
   using Telt = Telt_inp;
   using Tidx = typename Telt::Tidx;
   using Tint = Tint_inp;
+  using Tidx_label = uint16_t;
   // constructors
-  Group(const StabChain<Telt>& _S) : S(_S), size_tint(Order<Telt,Tint>(_S))
+  Group(const StabChain<Telt,Tidx_label>& _S) : S(_S), size_tint(Order<Telt,Tidx_label,Tint>(_S))
   {
   }
   Group(const std::vector<Telt>& LGen, const Tidx& n)
@@ -50,9 +51,9 @@ public:
 #ifdef DEBUG_STABCHAINMAIN
     std::cerr << "CPP Before StabChainOp_listgen\n";
 #endif
-    S = StabChainOp_listgen(LGen, options);
+    S = StabChainOp_listgen<Telt,Tidx_label,Tint>(LGen, options);
     UnbindCycles(S);
-    size_tint = Order<Telt,Tint>(S);
+    size_tint = Order<Telt,Tidx_label,Tint>(S);
   }
   Group(const Tidx& n) : Group({}, n)
   {
@@ -91,19 +92,19 @@ public:
   // Action on points or sets
   Group<Telt,Tint> Stabilizer_OnPoints(const Tidx& x) const
   {
-    return Group(Kernel_Stabilizer_OnPoints<Telt,Tint>(S, x));
+    return Group(Kernel_Stabilizer_OnPoints<Telt,Tidx_label,Tint>(S, x));
   }
   std::pair<bool,Telt> RepresentativeAction_OnPoints(const Tidx& x1, const Tidx& x2) const
   {
-    return Kernel_RepresentativeAction_OnPoints<Telt,Tint>(S, x1, x2);
+    return Kernel_RepresentativeAction_OnPoints<Telt,Tidx_label,Tint>(S, x1, x2);
   }
   Group<Telt,Tint> Stabilizer_OnSets(const Face& f) const
   {
-    return Group(Kernel_Stabilizer_OnSets<Telt,Tint>(S, f));
+    return Group(Kernel_Stabilizer_OnSets<Telt,Tidx_label,Tint>(S, f));
   }
   std::pair<bool,Telt> RepresentativeAction_OnSets(const Face& f1, const Face& f2) const
   {
-    return Kernel_RepresentativeAction_OnSets<Telt,Tint>(S, f1, f2);
+    return Kernel_RepresentativeAction_OnSets<Telt,Tidx_label,Tint>(S, f1, f2);
   }
   bool operator==(const Group& g) const
   {
@@ -111,14 +112,14 @@ public:
   }
   Face CanonicalImage(const Face& f) const
   {
-    return Kernel_CanonicalImage<Telt,Tint>(S, f);
+    return Kernel_CanonicalImage<Telt,Tidx_label,Tint>(S, f);
   }
   Telt rand() const
   {
     return RandomElement(Kernel_GeneratorsOfGroup(S), S->comm->n);
   }
 private:
-  StabChain<Telt> S;
+  StabChain<Telt,Tidx_label> S;
   Tint size_tint;
 };
 
