@@ -561,7 +561,7 @@ public:
     for (Tidx j=0; j<siz; j++)
       if (ListVal[j] == i)
         return j;
-    return -1;
+    return std::numeric_limits<Tidx>::max();
   }
   const Tidx* getPtr() const
   {

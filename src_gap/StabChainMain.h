@@ -125,7 +125,7 @@ StabChain<Telt,Tidx_label> MinimalStabChain(std::vector<Telt> const& LGen, typen
 
 
 template<typename Telt, typename Tidx_label, typename Tint>
-StabChain<Telt,Tidx_label> FCT_Group(std::vector<Telt> const& LGen, int const& n)
+StabChain<Telt,Tidx_label> FCT_Group(std::vector<Telt> const& LGen, typename Telt::Tidx const& n)
 {
 #ifdef DEBUG_STABCHAINMAIN
   std::cerr << "CPP Beginning of MinimalStabChain\n";
