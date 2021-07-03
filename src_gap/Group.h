@@ -13,7 +13,7 @@ namespace permutalib {
 
 
 template<typename Telt>
-Telt RandomElement(const std::vector<Telt>& LGen, const int& n)
+Telt RandomElement(const std::vector<Telt>& LGen, const typename Telt::Tidx& n)
 {
   size_t len = rand() % 100;
   size_t n_gen = LGen.size();

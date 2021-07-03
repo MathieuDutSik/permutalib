@@ -212,7 +212,7 @@ public:
     return siz;
   }
   //
-private:
+public: // Should be private but simpler to do it like that.
   Tidx siz;
   std::vector<Tidx> ListVal;
   std::vector<Tidx> ListRev;
@@ -297,6 +297,28 @@ DoubleSidedPerm<Tidx> operator*(DoubleSidedPerm<Tidx> const& v1, DoubleSidedPerm
   }
   return DoubleSidedPerm<Tidx>(vVal, vRev);
 }
+
+
+template<typename Tidx>
+void operator*=(DoubleSidedPerm<Tidx> & v1, DoubleSidedPerm<Tidx> const& v2)
+{
+  size_t siz=v1.size();
+  std::vector<Tidx> vRev(siz);
+  Tidx siz_idx = Tidx(siz);
+  for (Tidx i=0; i<siz_idx; i++) {
+    Tidx j=v1.at(i);
+    Tidx k=v2.at(j);
+    v1.ListVal[i]=k;
+    //
+    Tidx j2=v2.atRev(i);
+    Tidx k2=v1.atRev(j2);
+    vRev[i]=k2;
+  }
+  v1.ListRev = vRev;
+}
+
+
+
 
 
 
@@ -470,11 +492,11 @@ public:
     siz=0;
     ListVal = {};
   }
-  SingleSidedPerm (int const& n)
+  SingleSidedPerm (Tidx const& n)
   {
-    siz=n;
+    siz = n;
     ListVal = std::vector<Tidx>(n);
-    for (int i=0; i<n; i++)
+    for (Tidx i=0; i<n; i++)
       ListVal[i]=i;
   }
   SingleSidedPerm(std::vector<Tidx> const& v)
@@ -558,7 +580,7 @@ public:
     return siz;
   }
   //
-private:
+public: // Should be private in a more classic construction
   Tidx siz;
   std::vector<Tidx> ListVal;
 };
@@ -641,6 +663,21 @@ SingleSidedPerm<Tidx> operator*(SingleSidedPerm<Tidx> const& v1, SingleSidedPerm
   }
   return SingleSidedPerm<Tidx>(vVal);
 }
+
+
+template<typename Tidx>
+void operator*=(SingleSidedPerm<Tidx> & v1, SingleSidedPerm<Tidx> const& v2)
+{
+  Tidx siz_idx = Tidx(v1.size());
+  for (Tidx i=0; i<siz_idx; i++) {
+    Tidx j=v1.at(i);
+    Tidx k=v2.at(j);
+    v1.ListVal[i]=k;
+  }
+}
+
+
+
 
 
 
