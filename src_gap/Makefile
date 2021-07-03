@@ -6,8 +6,8 @@
 #PROGRAM	= TestRepresentativeActionOnSet
 #PROGRAM	= TestSymmetricGroup
 #PROGRAM	= TestPermutationProduct
-PROGRAM	= GapCanonicalImage
-#PROGRAM	= BenchmarkingPermutalib
+#PROGRAM	= GapCanonicalImage
+PROGRAM	= BenchmarkingPermutalib
 #PROGRAM	= BenchmarkingPermutalib GapCanonicalImage
 #PROGRAM	= Factorize
 
