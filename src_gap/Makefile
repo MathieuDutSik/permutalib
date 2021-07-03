@@ -1,6 +1,6 @@
-PROGRAM	= GapRepresentativeActionOnSet GapStabilizerOnSet TestStabilizerOnSet TestRepresentativeActionOnSet GapEquivalenceOnSet GapCanonicalImage BenchmarkingPermutalib Factorize TestPermutationProduct
+#PROGRAM	= GapRepresentativeActionOnSet GapStabilizerOnSet TestStabilizerOnSet TestRepresentativeActionOnSet GapEquivalenceOnSet GapCanonicalImage BenchmarkingPermutalib Factorize TestPermutationProduct
 #PROGRAM	= EqSymmGroup
-#PROGRAM	= TestStabilizerOnSet
+PROGRAM	= TestStabilizerOnSet
 #PROGRAM	= GapStabilizerOnSet
 #PROGRAM	= GapRepresentativeActionOnSet
 #PROGRAM	= TestRepresentativeActionOnSet
@@ -22,7 +22,8 @@ OBJECTS		= $(PROGRAM:%=%.o)
 #CC		= g++ -std=c++17 -Wall -g -O2 -fsanitize=address -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fstack-protector-all
 #CC		= g++ -std=c++17 -Wall -g -O2 -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=bounds-strict -fsanitize=alignment -Wstrict-aliasing
 #CC		= g++ -std=c++17 -Wall -g -O3
-CC		= g++ -std=c++17 -Wall -Wconversion -g -O3
+#CC		= g++ -std=c++17 -Wall -Wconversion -g -O3
+CC		= g++ -std=c++17 -Wall -Wextra -g -O3
 #CC		= clang++ -std=c++17 -Wall -Wconversion -g -O3
 #CC		= clang++ -std=c++17 -O3 -fprofile-instr-generate
 #CC		= clang++ -std=c++17 -O3 -fprofile-instr-use=a.profdata

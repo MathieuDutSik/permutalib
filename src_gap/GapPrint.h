@@ -181,7 +181,7 @@ std::string GapStringMissingTVector(std::vector<std::optional<T>> const& f)
   for (size_t i=0; i<len; i++) {
     if (Vstatus[i])
       last_nz = i+1;
-    if (first_nz == -1) {
+    if (first_nz == std::numeric_limits<size_t>::max()) {
       if (Vstatus[i]) {
         first_nz = i;
       }
@@ -194,7 +194,7 @@ std::string GapStringMissingTVector(std::vector<std::optional<T>> const& f)
   os << "[";
   if (first_nz>0) {
     os << " ";
-    for (int i=0; i<first_nz; i++)
+    for (size_t i=0; i<first_nz; i++)
       os << ",";
   }
   for (size_t i=first_nz; i<last_nz; i++) {
