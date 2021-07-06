@@ -7,7 +7,7 @@
 int main(int argc, char *argv[])
 {
   try {
-    using Tidx = int16_t;
+    using Tidx = uint16_t;
     using Telt = permutalib::SingleSidedPerm<Tidx>;
     using Tint = mpz_class;
     if (argc != 3) {
@@ -20,14 +20,15 @@ int main(int argc, char *argv[])
     std::string OutputFile = argv[2];
     //
     std::ifstream is(InputFile);
-    int nbGen, n;
+    size_t nbGen;
+    Tidx n;
     is >> nbGen;
     is >> n;
     std::vector<Telt> LGen(nbGen);
-    for (int iGen=0; iGen<nbGen; iGen++) {
+    for (size_t iGen=0; iGen<nbGen; iGen++) {
       std::vector<Tidx> ePermV(n);
-      for (int i=0; i<n; i++) {
-	int eVal;
+      for (Tidx i=0; i<n; i++) {
+	Tidx eVal;
 	is >> eVal;
 	ePermV[i]=eVal;
       }

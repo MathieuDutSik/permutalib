@@ -280,7 +280,7 @@ struct paramOpt {
   int param3;
   int param4;
   int param5;
-  int param6;
+  size_t param6;
 };
 
 
@@ -346,7 +346,7 @@ void SCRSchTree(StabChain<Telt,Tidx_label> & S, std::vector<Telt> const& newgens
 
 
 template<typename Telt, typename Tidx_label>
-void SCRMakeStabStrong(StabChain<Telt,Tidx_label> & S, std::vector<Telt> const& newgens, paramOpt const& param, std::vector<std::vector<int>> const& orbits, std::vector<int> const& where, std::vector<int> & basesize, std::vector<typename Telt::Tidx> const& base, bool const& correct, std::vector<int> & missing, bool const& top)
+void SCRMakeStabStrong(StabChain<Telt,Tidx_label> & S, std::vector<Telt> const& newgens, paramOpt const& param, std::vector<std::vector<int>> const& orbits, std::vector<int> const& where, std::vector<size_t> & basesize, std::vector<typename Telt::Tidx> const& base, bool const& correct, std::vector<int> & missing, bool const& top)
 {
   using Tidx=typename Telt::Tidx;
   Tidx n=S->comm->n;
@@ -452,8 +452,8 @@ void SCRMakeStabStrong(StabChain<Telt,Tidx_label> & S, std::vector<Telt> const& 
 	while (l < orbits.size()) {
 	  l++;
 	  if (int(orbits[l].size()) > param.param5) {
-	    int j=0;
-	    int jlimit=std::max(param.param6, basesize[l]);
+	    size_t j=0;
+	    size_t jlimit=std::max(param.param6, basesize[l]);
 	    while (j < jlimit) {
 	      j++;
 	      size_t ran=RandomInteger<size_t>(orbits[l].size());
@@ -522,7 +522,7 @@ std::vector<Telt> GetWpair(std::vector<Telt> const& Saux, int const& k, paramOpt
 
 
 template<typename Telt, typename Tidx_label>
-Telt SCRStrongGenTest(StabChain<Telt,Tidx_label> const& S, paramOpt const& param, std::vector<std::vector<int>> const& orbits, std::vector<int> const& basesize, std::vector<int> const& base, bool const& correct, std::vector<int> const& missing)
+Telt SCRStrongGenTest(StabChain<Telt,Tidx_label> const& S, paramOpt const& param, std::vector<std::vector<int>> const& orbits, std::vector<size_t> const& basesize, std::vector<int> const& base, bool const& correct, std::vector<int> const& missing)
 {
   int k = 0;
   size_t l;
@@ -558,7 +558,7 @@ Telt SCRStrongGenTest(StabChain<Telt,Tidx_label> const& S, paramOpt const& param
 	        l++;
 		if (int(orbits[l].size()) > param.param5) {
 		  j = 0;
-		  int jlimit = std::max(param.param6, basesize[l]);
+		  size_t jlimit = std::max(param.param6, basesize[l]);
 		  while (j < jlimit) {
 		    j++;
 		    size_t ran = RandomInteger<size_t>(orbits[l].size());
@@ -854,7 +854,7 @@ StabChain<Telt,Tidx_label> StabChainRandomPermGroup(std::vector<Telt> const& gen
   //
   std::vector<int> missing;
   std::vector<int> base;
-  std::vector<int> basesize;
+  std::vector<size_t> basesize;
   std::vector<int> where;
   std::vector<std::vector<Tidx>> orbits;
   if (correct) {
@@ -869,7 +869,7 @@ StabChain<Telt,Tidx_label> StabChainRandomPermGroup(std::vector<Telt> const& gen
     for (auto & eOrb : orbits2)
       if (eOrb.size() > 1)
 	orbits.push_back(eOrb);
-    basesize = std::vector<int>(orbits.size(), 0);
+    basesize = std::vector<size_t>(orbits.size(), 0);
     where = std::vector<int>(degree, -1);
     for (size_t iOrb=0; iOrb<orbits.size(); iOrb++)
       for (auto & ePt : orbits[iOrb])

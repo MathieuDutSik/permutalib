@@ -244,7 +244,7 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt,Tidx_label> cons
 #ifdef DEBUG_NSI
     std::cerr << "CPP result_0=" << result_0.orbCount << " / " << result_0.orbSize << "   result_1=" << int(result_1+1) << "\n";
 #endif
-    for (size_t i=1; i<orbmins.size(); i++) {
+    for (Tidx i=1; i<Tidx(orbmins.size()); i++) {
       typeCnt ret_0 = selector(i);
       Tidx ret_1 = orbmins[i];
       bool lower=false;
@@ -302,7 +302,7 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt,Tidx_label> cons
 #endif
   StabChain<Telt,Tidx_label> s = CopyStabChain(g);
   StabChain<Telt,Tidx_label> l = Action<Telt,Tidx_label,Tint>(k, set);
-  Tidx m = set.size();
+  Tidx m = Tidx(set.size());
   Node root_v;
   root_v.image = set;
   root_v.substab = l;
@@ -378,7 +378,7 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt,Tidx_label> cons
 #ifdef DEBUG_NSI
     std::cerr << "CPP Beginning of simpleOrbitReps\n";
 #endif
-    Tidx m = set.size();
+    Tidx m = Tidx(set.size());
     Tidx n = set[m-1] + 1;
     for (Tidx i=0; i<n; i++)
       b_sor[i] = 0;
@@ -487,7 +487,7 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt,Tidx_label> cons
       q.clear();
       q.push_back(x);
       Tidx rep = x;
-      Tidx num = orbmins.size();
+      Tidx num = Tidx(orbmins.size());
       orbnums[x] = num;
 #ifdef DEBUG_NSI
       std::cerr << "CPP 1 : x=" << int(x+1) << " Assign orbnums[x]=" << int(orbnums[x] + 1) << "\n";
@@ -518,7 +518,7 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt,Tidx_label> cons
       std::cerr << "CPP make_orbit rep=" << int(rep+1) << " |q|=" << q.size() << " num=" << int(num+1) << "\n";
 #endif
       orbmins.push_back(rep);
-      orbsizes.push_back(q.size());
+      orbsizes.push_back(Tidx(q.size()));
       return num;
     };
     /*
@@ -595,7 +595,7 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt,Tidx_label> cons
         std::cerr << "CPP y=" << int(y+1) << " x=" << int(x+1) << "\n";
 #endif
         Tidx num = make_orbit(x);
-        Tidx siz = globalOrbitCounts.size();
+        Tidx siz = Tidx(globalOrbitCounts.size());
         if (num < siz) {
           globalOrbitCounts[num]++;
         } else {
@@ -698,7 +698,7 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt,Tidx_label> cons
       node = leftmost_node(depth);
       while (node != nullptr) {
         if (node->selectedbaselength == max_val_type)
-          node->selectedbaselength = node->selected.size();
+          node->selectedbaselength = Tidx(node->selected.size());
         node->selected.push_back(node->validkids[0]);
 #ifdef DEBUG_NSI
         std::cerr << "CPP Now node.selected=" << GapStringIntVector(node->selected) << "\n";
@@ -734,7 +734,7 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt,Tidx_label> cons
           std::cerr << "DEBUG After Stabilize_OnPoints\n";
 #endif
           newnode_v.parent = node;
-          newnode_v.childno = node->children.size();
+          newnode_v.childno = Tidx(node->children.size());
           newnode_v.next = nullptr;
           newnode_v.prev = prevnode;
           newnode_v.deleted = false;
@@ -798,7 +798,7 @@ Face Kernel_CanonicalImage(StabChain<Telt,Tidx_label> const& g, Face const& set)
   if (2 * set.count() <= set.size()) {
     boost::dynamic_bitset<>::size_type aRow = set.find_first();
     while (aRow != boost::dynamic_bitset<>::npos) {
-      set_i.push_back(aRow);
+      set_i.push_back(Tidx(aRow));
       aRow = set.find_next(aRow);
     }
     StabChain<Telt,Tidx_label> k = Kernel_Stabilizer_OnSets<Telt,Tidx_label,Tint>(g, set);
@@ -815,7 +815,7 @@ Face Kernel_CanonicalImage(StabChain<Telt,Tidx_label> const& g, Face const& set)
       setC[i] = 1 - set[i];
     boost::dynamic_bitset<>::size_type aRow = setC.find_first();
     while (aRow != boost::dynamic_bitset<>::npos) {
-      set_i.push_back(aRow);
+      set_i.push_back(Tidx(aRow));
       aRow = setC.find_next(aRow);
     }
     StabChain<Telt,Tidx_label> k = Kernel_Stabilizer_OnSets<Telt,Tidx_label,Tint>(g, setC);

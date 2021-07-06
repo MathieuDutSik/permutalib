@@ -7,7 +7,7 @@
 int main(int argc, char *argv[])
 {
   try {
-    using Tidx = int16_t;
+    using Tidx = uint16_t;
     //    using Telt = permutalib::DoubleSidedPerm<Tidx>;
     using Telt = permutalib::SingleSidedPerm<Tidx>;
     using Tint = mpz_class;
@@ -23,16 +23,17 @@ int main(int argc, char *argv[])
       OutputFile = argv[2];
     //
     std::ifstream is(InputFile);
-    int nbGen, n;
+    size_t nbGen;
+    Tidx n;
     is >> nbGen;
     is >> n;
     std::vector<Telt> LGen(nbGen);
-    for (int iGen=0; iGen<nbGen; iGen++) {
+    for (size_t iGen=0; iGen<nbGen; iGen++) {
       std::vector<Tidx> ePermV(n);
-      for (int i=0; i<n; i++) {
-	int eVal;
+      for (Tidx i=0; i<n; i++) {
+	Tidx eVal;
 	is >> eVal;
-	ePermV[i]=eVal;
+	ePermV[i] = eVal;
       }
       Telt ePerm(ePermV);
       LGen[iGen] = ePerm;
@@ -46,7 +47,7 @@ int main(int argc, char *argv[])
     std::cerr << "CPP |eG|=" << eG.size() << "\n";
     //
     permutalib::Face eFace(n);
-    for (int i=0; i<n; i++) {
+    for (Tidx i=0; i<n; i++) {
       int eVal;
       is >> eVal;
       eFace[i] = eVal;
@@ -55,12 +56,12 @@ int main(int argc, char *argv[])
     //
     std::ofstream os(OutputFile);
     os << "return [";
-    int siz = set_can.count();
-    int aRow = set_can.find_first();
-    for (int i=0; i<siz; i++) {
+    size_t siz = set_can.count();
+    boost::dynamic_bitset<>::size_type aRow = set_can.find_first();
+    for (size_t i=0; i<siz; i++) {
       if (i > 0)
         os << ",";
-      os << (aRow + 1);
+      os << (int(aRow) + 1);
       aRow = set_can.find_next(aRow);
     }
     os << "];\n";

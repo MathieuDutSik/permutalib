@@ -50,15 +50,16 @@ int main(int argc, char *argv[])
     is >> nGroup;
     for (int iGroup=0; iGroup<nGroup; iGroup++) {
       //      std::cerr << "iGroup=" << iGroup << " / " << nGroup << "\n";
-      int nbGen, n;
+      size_t nbGen;
+      Tidx n;
       is >> nbGen;
       is >> n;
       std::cerr << "iGroup=" << iGroup << " n=" << n << " nbGen=" << nbGen << "\n";
       std::vector<Telt> LGen(nbGen);
-      for (int iGen=0; iGen<nbGen; iGen++) {
+      for (size_t iGen=0; iGen<nbGen; iGen++) {
         std::vector<Tidx> ePermV(n);
-        for (int i=0; i<n; i++) {
-          int eVal;
+        for (Tidx i=0; i<n; i++) {
+          Tidx eVal;
           is >> eVal;
           ePermV[i]=eVal;
         }
@@ -70,8 +71,8 @@ int main(int argc, char *argv[])
       auto bench_canonical=[&]() -> void {
         for (long iter=0; iter<n_iter; iter++) {
           permutalib::Face eFace(n);
-          for (int i=0; i<n; i++) {
-            int eVal = rand() % 2;
+          for (Tidx i=0; i<n; i++) {
+            int eVal = Tidx(rand()) % 2;
             eFace[i] = eVal;
           }
           permutalib::Face set_can = eG.CanonicalImage(eFace);
@@ -81,8 +82,8 @@ int main(int argc, char *argv[])
       auto bench_stabilizer=[&]() -> void {
         for (long iter=0; iter<n_iter; iter++) {
           permutalib::Face eFace(n);
-          for (int i=0; i<n; i++) {
-            int eVal = rand() % 2;
+          for (Tidx i=0; i<n; i++) {
+            int eVal = Tidx(rand()) % 2;
             eFace[i] = eVal;
           }
           Tgroup eG2 = eG.Stabilizer_OnSets(eFace);
@@ -91,15 +92,15 @@ int main(int argc, char *argv[])
       };
       auto bench_pointstabilizer=[&]() -> void {
         for (long iter=0; iter<n_iter; iter++) {
-          Tidx pos = rand() % n;
+          Tidx pos = Tidx(rand()) % n;
           Tgroup eG2 = eG.Stabilizer_OnPoints(pos);
           siz_control += eG2.n_act();
         }
       };
       auto bench_pointrepresentative=[&]() -> void {
         for (long iter=0; iter<n_iter; iter++) {
-          Tidx pos1 = rand() % n;
-          Tidx pos2 = rand() % n;
+          Tidx pos1 = Tidx(rand()) % n;
+          Tidx pos2 = Tidx(rand()) % n;
           std::pair<bool,Telt> eP = eG.RepresentativeAction_OnPoints(pos1, pos2);
           siz_control += int(eP.first);
         }
