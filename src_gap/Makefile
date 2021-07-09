@@ -21,10 +21,10 @@ OBJECTS		= $(PROGRAM:%=%.o)
 #CC		= g++ -std=c++14 -Wall -g -O2 -fsanitize=address -fsanitize=undefined -fstack-protector-all
 #CC		= g++ -std=c++14 -Wall -g -O2 -fsanitize=address -fsanitize=undefined -fsanitize=bool -fstack-protector-all
 #CC		= g++ -std=c++17 -Wall -g -O2 -fsanitize=address -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fstack-protector-all
-#CC		= g++ -std=c++17 -Wall -g -O2 -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=bounds-strict -fsanitize=alignment -Wstrict-aliasing
+CC		= g++-11 -std=c++17 -Wall -g -O2 -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=bounds-strict -fsanitize=alignment -Wstrict-aliasing
 #CC		= g++ -std=c++17 -Wall -g -O3
 #CC		= g++ -std=c++17 -Wall -Wconversion -g -O3
-CC		= g++ -std=c++17 -Wall -Wextra -g -O3
+#CC		= g++ -std=c++17 -Wall -Wextra -g -O3
 #CC		= clang++ -std=c++17 -Wall -Wconversion -g -O3
 #CC		= clang++ -std=c++17 -O3 -fprofile-instr-generate
 #CC		= clang++ -std=c++17 -O3 -fprofile-instr-use=a.profdata
@@ -33,9 +33,9 @@ CC		= g++ -std=c++17 -Wall -Wextra -g -O3
 NOLINKFLAG 	= -c
 OUTPUTFLAG 	= -o
 
-#CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK
+CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK
 #CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK -DSYNCHRONIZED_DEBUG_GAP478
-CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK -DSYNCHRONIZED_DEBUG_GAP478 -DDEBUG -DDEBUG_ADD_GEN_SCH -DDEBUG_CHANGE_STAB_CHAIN -DDEBUG_EQUALITY -DDEBUG_INV_REP -DDEBUG_STABCHAIN
+#CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK -DSYNCHRONIZED_DEBUG_GAP478 -DDEBUG -DDEBUG_ADD_GEN_SCH -DDEBUG_CHANGE_STAB_CHAIN -DDEBUG_EQUALITY -DDEBUG_INV_REP -DDEBUG_STABCHAIN
 
 
 

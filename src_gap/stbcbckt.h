@@ -1961,12 +1961,10 @@ StabChain<Telt,Tidx_label> Kernel_Stabilizer_OnSets(StabChain<Telt,Tidx_label> c
     throw PermutalibException{1};
   }
 #endif
-  std::cerr << "|Phi|=" << Phi.count() << "\n";
   if (2 * Phi.count() > n) {
     Face PhiC(n);
     for (size_t i=0; i<n; i++)
       PhiC[i] = 1 - Phi[i];
-    std::cerr << "|PhiC|=" << PhiC.count() << "\n";
     if (PhiC.count() > 1) {
       return RepOpSetsPermGroup<Telt,Tidx_label,Tint,false>(G, PhiC, PhiC).stab;
     }

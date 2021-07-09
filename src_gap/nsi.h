@@ -282,7 +282,7 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt,Tidx_label> cons
     std::shared_ptr<Node> next;
     std::shared_ptr<Node> prev;
     std::shared_ptr<Node> parent;
-    Tidx selectedbaselength;
+    //    Tidx selectedbaselength;
     // children
     Tidx childno;
     bool IsBoundChildren;
@@ -311,7 +311,7 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt,Tidx_label> cons
   root_v.prev = nullptr;
   root_v.parent = nullptr;
   // unset values
-  root_v.selectedbaselength = max_val_type;
+  //  root_v.selectedbaselength = max_val_type;
   root_v.IsBoundChildren = false;
   NodePtr root = std::make_shared<Node>(root_v);
   // no need to put root in the list of nodes to be deleted as the setting of all to nullptr eventually kills it.
@@ -697,8 +697,8 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt,Tidx_label> cons
       */
       node = leftmost_node(depth);
       while (node != nullptr) {
-        if (node->selectedbaselength == max_val_type)
-          node->selectedbaselength = Tidx(node->selected.size());
+        //        if (node->selectedbaselength == max_val_type)
+        //          node->selectedbaselength = Tidx(node->selected.size());
         node->selected.push_back(node->validkids[0]);
 #ifdef DEBUG_NSI
         std::cerr << "CPP Now node.selected=" << GapStringIntVector(node->selected) << "\n";

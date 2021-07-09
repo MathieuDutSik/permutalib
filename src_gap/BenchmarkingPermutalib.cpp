@@ -21,7 +21,8 @@ int main(int argc, char *argv[])
     }
     std::string InputFile = argv[1];
     std::string opt = argv[2];
-    std::vector<std::string> ListOpts={"canonical", "stabilizer", "pointstabilizer", "pointrepresentative", "all"};
+    std::vector<std::string> ListOpts={"canonical", "stabilizer", "pointstabilizer", "pointrepresentative",
+      "check_canonical", "check_representative", "check_stabilizer", "all"};
     bool IsMatch=false;
     for (auto & e_opt : ListOpts) {
       if (e_opt == opt)
@@ -61,7 +62,6 @@ int main(int argc, char *argv[])
         std::cerr << "iGen=" << iGen << "/" << nbGen << " n=" << int(n) << "\n";
         std::vector<Tidx> ePermV(n);
         for (Tidx i=0; i<n; i++) {
-          std::cerr << "  i=" << int(i) << " n=" << int(n) << "\n";
           int eVal_i;
           is >> eVal_i;
           Tidx eVal = Tidx(eVal_i);
@@ -76,25 +76,26 @@ int main(int argc, char *argv[])
         LGen[iGen] = ePerm;
       }
       Tgroup eG(LGen, n);
+      std::cerr << "  |eG|=" << eG.size() << "\n";
       //
+      auto random_face=[](const Tidx& len) -> permutalib::Face {
+        permutalib::Face eFace(len);
+        for (Tidx i=0; i<len; i++) {
+          int eVal = Tidx(rand()) % 2;
+          eFace[i] = eVal;
+        }
+        return eFace;
+      };
       auto bench_canonical=[&]() -> void {
         for (long iter=0; iter<n_iter; iter++) {
-          permutalib::Face eFace(n);
-          for (Tidx i=0; i<n; i++) {
-            int eVal = Tidx(rand()) % 2;
-            eFace[i] = eVal;
-          }
+          permutalib::Face eFace = random_face(n);
           permutalib::Face set_can = eG.CanonicalImage(eFace);
           siz_control += set_can.count();
         }
       };
       auto bench_stabilizer=[&]() -> void {
         for (long iter=0; iter<n_iter; iter++) {
-          permutalib::Face eFace(n);
-          for (Tidx i=0; i<n; i++) {
-            int eVal = Tidx(rand()) % 2;
-            eFace[i] = eVal;
-          }
+          permutalib::Face eFace = random_face(n);
           Tgroup eG2 = eG.Stabilizer_OnSets(eFace);
           siz_control += eG2.n_act();
         }
@@ -114,6 +115,48 @@ int main(int argc, char *argv[])
           siz_control += int(eP.first);
         }
       };
+      auto check_canonical=[&]() -> void {
+        for (long iter=0; iter<n_iter; iter++) {
+          permutalib::Face eFace1 = random_face(n);
+          permutalib::Face set_can1 = eG.CanonicalImage(eFace1);
+          for (int i=0; i<4; i++) {
+            Telt u = eG.rand();
+            permutalib::Face eFace2 = OnSets(eFace1, u);
+            permutalib::Face set_can2 = eG.CanonicalImage(eFace2);
+            if (set_can1 != set_can2) {
+              std::cerr << "Canonicalization failed\n";
+              throw PermutalibException{1};
+            }
+          }
+        }
+      };
+      auto check_representative=[&]() -> void {
+        for (long iter=0; iter<n_iter; iter++) {
+          permutalib::Face eFace1 = random_face(n);
+          Telt u = eG.rand();
+          permutalib::Face eFace2 = OnSets(eFace1, u);
+          std::pair<bool,Telt> eP = eG.RepresentativeAction_OnSets(eFace1, eFace2);
+          if (!eP.first) {
+            std::cerr << "RepresentativeAction_OnSets error\n";
+            throw PermutalibException{1};
+          }
+        }
+      };
+      auto check_stabilizer=[&]() -> void {
+        for (long iter=0; iter<n_iter; iter++) {
+          permutalib::Face eFace1 = random_face(n);
+          Tgroup eG1 = eG.Stabilizer_OnSets(eFace1);
+          for (int i=0; i<4; i++) {
+            Telt u = eG.rand();
+            permutalib::Face eFace2 = OnSets(eFace1, u);
+            Tgroup eG2 = eG.Stabilizer_OnSets(eFace2);
+            if (eG1.size() != eG2.size()) {
+              std::cerr << "Stabilizer_OnSets error\n";
+              throw PermutalibException{1};
+            }
+          }
+        }
+      };
       //
       if (opt == "canonical")
         bench_canonical();
@@ -123,12 +166,21 @@ int main(int argc, char *argv[])
         bench_pointstabilizer();
       if (opt == "pointrepresentative")
         bench_pointrepresentative();
+      if (opt == "check_canonical")
+        check_canonical();
+      if (opt == "check_representative")
+        check_representative();
+      if (opt == "check_stabilizer")
+        check_stabilizer();
       //
       if (opt == "all") {
         bench_canonical();
         bench_stabilizer();
         bench_pointstabilizer();
         bench_pointrepresentative();
+        check_canonical();
+        check_representative();
+        check_stabilizer();
       }
     }
     //
