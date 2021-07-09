@@ -1900,7 +1900,8 @@ StabChain<Telt,Tidx_label> Kernel_Stabilizer_OnPoints(StabChain<Telt,Tidx_label>
   Tidx n = G->comm->n;
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   if (x >= n) {
-    std::cerr << "We should have x < n\n";
+    std::cerr << "1 : We should have x < n\n";
+    std::cerr << "x=" << int(x) << " n=" << int(n) << "\n";
     throw PermutalibException{1};
   }
 #endif
@@ -1956,15 +1957,21 @@ StabChain<Telt,Tidx_label> Kernel_Stabilizer_OnSets(StabChain<Telt,Tidx_label> c
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   if (Phi.size() != n) {
     std::cerr << "We should have Phi of size equal to n\n";
+    std::cerr << "n=" << n << " |Phi|=" << Phi.size() << "\n";
     throw PermutalibException{1};
   }
 #endif
+  std::cerr << "|Phi|=" << Phi.count() << "\n";
   if (2 * Phi.count() > n) {
     Face PhiC(n);
     for (size_t i=0; i<n; i++)
       PhiC[i] = 1 - Phi[i];
+    std::cerr << "|PhiC|=" << PhiC.count() << "\n";
     if (PhiC.count() > 1) {
       return RepOpSetsPermGroup<Telt,Tidx_label,Tint,false>(G, PhiC, PhiC).stab;
+    }
+    if (PhiC.count() == 0) {
+      return G;
     } else {
       Tidx x = Tidx(PhiC.find_first());
       return Kernel_Stabilizer_OnPoints<Telt,Tidx_label,Tint>(G, x);
@@ -1972,6 +1979,9 @@ StabChain<Telt,Tidx_label> Kernel_Stabilizer_OnSets(StabChain<Telt,Tidx_label> c
   } else {
     if (Phi.count() > 1) {
       return RepOpSetsPermGroup<Telt,Tidx_label,Tint,false>(G, Phi, Phi).stab;
+    }
+    if (Phi.count() == 0) {
+      return G;
     } else {
       Tidx x = Tidx(Phi.find_first());
       return Kernel_Stabilizer_OnPoints<Telt,Tidx_label,Tint>(G, x);
@@ -1992,7 +2002,8 @@ StabChain<Telt,Tidx_label> Kernel_Stabilizer_OnPoints_backtrack(StabChain<Telt,T
   Tidx n = G->comm->n;
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   if (x >= n) {
-    std::cerr << "We should have x < n\n";
+    std::cerr << "2 : We should have x < n\n";
+    std::cerr << "x=" << int(x) << " n=" << int(n) << "\n";
     throw PermutalibException{1};
   }
 #endif
@@ -2015,6 +2026,7 @@ std::pair<bool,Telt> Kernel_RepresentativeAction_OnSets(StabChain<Telt,Tidx_labe
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   if (f1.size() != n || f2.size() != n) {
     std::cerr << "We should have f1 and f2 of size equal to n\n";
+    std::cerr << "n=" << n << " |f1|=" << f1.size() << " |f2|=" << f2.size() << "\n";
     throw PermutalibException{1};
   }
 #endif
