@@ -27,17 +27,19 @@ int main(int argc, char *argv[])
       // Reading one group
       //
       size_t nbGen;
-      Tidx n;
+      int n_i;
       is >> nbGen;
-      is >> n;
+      is >> n_i;
+      Tidx n = Tidx(n_i);
       std::cerr << "iGroup=" << iGroup << " n=" << n << " nbGen=" << nbGen << "\n";
       std::vector<Telt> LGen(nbGen);
       for (size_t iGen=0; iGen<nbGen; iGen++) {
         std::vector<Tidx> ePermV(n);
         for (Tidx i=0; i<n; i++) {
-          Tidx eVal;
-          is >> eVal;
-          ePermV[i]=eVal;
+          int eVal_i;
+          is >> eVal_i;
+          Tidx eVal = Tidx(eVal_i);
+          ePermV[i] = eVal;
         }
         Telt ePerm(ePermV);
         LGen[iGen] = ePerm;
