@@ -786,8 +786,9 @@ Face Kernel_CanonicalImage(StabChain<Telt,Tidx_label> const& g, Face const& set)
 {
   using Tidx = typename Telt::Tidx;
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-  if (Tidx(g->comm->n) != Tidx(set.size())) {
+  if (g->comm->n != Tidx(set.size())) {
     std::cerr << "The set set should have the same size as the number of elements on which g acts\n";
+    std::cerr << "g->comm->n=" << int(g->comm->n) << " |set|=" << set.size() << "\n";
     throw PermutalibException{1};
   }
 #endif
