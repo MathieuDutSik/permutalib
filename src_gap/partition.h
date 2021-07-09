@@ -547,7 +547,7 @@ Partition<Tidx> TrivialPartition(std::vector<Tidx> const& Omega)
 
 
 template<typename Telt>
-std::vector<std::vector<typename Telt::Tidx>> OrbitsPermsB(std::vector<Telt> const& gens, typename Telt::Tidx const&n, std::vector<typename Telt::Tidx> const& Omega)
+std::vector<std::vector<typename Telt::Tidx>> OrbitsPermsB(std::vector<Telt> const& gens, std::vector<typename Telt::Tidx> const& Omega)
 {
   using Tidx = typename Telt::Tidx;
 #ifdef DEBUG_PARTITION
@@ -616,7 +616,7 @@ Partition<typename Telt::Tidx> OrbitsPartition(std::vector<Telt> const& gens, ty
   std::cerr << "CPP OrbitsPartition, using OrbitsPerms\n";
   std::cerr << "CPP generators=" << GapStringTVector(gens) << "\n";
 #endif
-  return GetPartition(OrbitsPermsB(gens, n, Omega));
+  return GetPartition(OrbitsPermsB(gens, Omega));
 }
 
 

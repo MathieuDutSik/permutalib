@@ -51,16 +51,25 @@ int main(int argc, char *argv[])
     for (int iGroup=0; iGroup<nGroup; iGroup++) {
       //      std::cerr << "iGroup=" << iGroup << " / " << nGroup << "\n";
       size_t nbGen;
-      Tidx n;
+      int n_i;
       is >> nbGen;
-      is >> n;
-      std::cerr << "iGroup=" << iGroup << " n=" << n << " nbGen=" << nbGen << "\n";
+      is >> n_i;
+      Tidx n=Tidx(n_i);
+      std::cerr << "iGroup=" << iGroup << "/" << nGroup << " n=" << int(n) << " nbGen=" << nbGen << "\n";
       std::vector<Telt> LGen(nbGen);
       for (size_t iGen=0; iGen<nbGen; iGen++) {
+        std::cerr << "iGen=" << iGen << "/" << nbGen << " n=" << int(n) << "\n";
         std::vector<Tidx> ePermV(n);
         for (Tidx i=0; i<n; i++) {
-          Tidx eVal;
-          is >> eVal;
+          std::cerr << "  i=" << int(i) << " n=" << int(n) << "\n";
+          int eVal_i;
+          is >> eVal_i;
+          Tidx eVal = Tidx(eVal_i);
+          if (eVal >= n) {
+            std::cerr << "Values is above range\n";
+            std::cerr << "i=" << int(i) << " n=" << int(n) << " eVal=" << int(eVal) << "\n";
+            throw PermutalibException{1};
+          }
           ePermV[i]=eVal;
         }
         Telt ePerm(ePermV);

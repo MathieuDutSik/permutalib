@@ -1161,7 +1161,7 @@ ResultPBT<Telt,Tidx_label> PartitionBacktrack(StabChain<Telt,Tidx_label> const& 
 	  options.base = rbase.base;
 	  options.reduced = false;
 #ifdef DEBUG_STBCBCKT
-	  std::cerr << "CPP Before computation of ListStabChain Order(L)=" << Order<Telt,Tint>(L) << "\n";
+	  std::cerr << "CPP Before computation of ListStabChain Order(L)=" << Order<Telt,Tidx_label,Tint>(L) << "\n";
           std::cerr << "CPP sgs(L)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(L))) << " base=" << GapStringIntVector(rbase.base) << "\n";
           std::cerr << "CPP assigning L sequence\n";
 #endif
@@ -1866,7 +1866,7 @@ ResultPBT<Telt,Tidx_label> RepOpSetsPermGroup(StabChain<Telt,Tidx_label> const& 
   else
     R = L;
 #ifdef DEBUG_STBCBCKT
-  std::cerr << "CPP Orders: |R|=" << SizeStabChain<Telt,Tint>(R) << " |L|=" << SizeStabChain<Telt,Tint>(L) << "\n";
+  std::cerr << "CPP Orders: |R|=" << SizeStabChain<Telt,Tidx_label,Tint>(R) << " |L|=" << SizeStabChain<Telt,Tidx_label,Tint>(L) << "\n";
 #endif
   rbaseType<Telt,Tidx_label> rbase = EmptyRBase<Telt,Tidx_label>({G, G}, true, Omega, P);
   //#ifdef DEBUG_STBCBCKT

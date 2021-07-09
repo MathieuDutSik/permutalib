@@ -1293,6 +1293,7 @@ void StabChainStrong(StabChain<Telt,Tidx_label> & S, std::vector<Telt> const& ne
   using Tidx = typename Telt::Tidx;
 #ifdef DEBUG_STABCHAIN
   std::cerr << "CPP Begin StabChainStrong : newgens=" << GapStringTVector(newgens) << "\n";
+  std::cerr << "DEBUG |S->genlabels|=" << S->genlabels.size() << "\n";
   std::cerr << "CPP StabChainStrong 1: genlabels=" << GapStringIntVector(S->genlabels) << "\n";
 #endif
   ChooseNextBasePoint(S, options.base, newgens);
