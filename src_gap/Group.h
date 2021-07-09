@@ -61,6 +61,10 @@ public:
   Group() : Group(0)
   {
   }
+  // Delete the unneeded stuff
+  Group(const Group<Telt,Tint>&) = delete;
+  Group(Group<Telt,Tint>&&) = delete;
+  Group<Telt,Tint>& operator=(const Group<Telt,Tint>&) = delete;
   // Basic getters
   std::vector<Telt> GeneratorsOfGroup() const
   {

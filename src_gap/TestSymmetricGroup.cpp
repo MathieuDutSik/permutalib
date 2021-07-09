@@ -7,6 +7,7 @@ int main(int argc, char *argv[])
 {
   try {
     using Tidx = uint16_t;
+    using Tidx_label = uint16_t;
     using Telt = permutalib::DoubleSidedPerm<Tidx>;
     using Tint = mpz_class;
     if (argc != 2) {
@@ -35,7 +36,7 @@ int main(int argc, char *argv[])
     //
     std::vector<Telt> LGen{ePerm1, ePerm2};
     //
-    permutalib::StabChain<Telt> S = permutalib::MinimalStabChain<Telt,Tint>(LGen, n);
+    permutalib::StabChain<Telt,Tidx_label> S = permutalib::MinimalStabChain<Telt,Tidx_label,Tint>(LGen, n);
     std::cerr << "S=" << S << "\n";
   }
   catch (PermutalibException const& e) {
