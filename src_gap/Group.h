@@ -61,10 +61,18 @@ public:
   Group() : Group(0)
   {
   }
-  // Delete the unneeded stuff
-  Group(const Group<Telt,Tint>&) = delete;
-  Group(Group<Telt,Tint>&&) = delete;
-  Group<Telt,Tint>& operator=(const Group<Telt,Tint>&) = delete;
+  Group(Group<Telt,Tint> && G) : S(std::move(G.S)), size_tint(G.size_tint)
+  {
+  }
+  Group(const Group<Telt,Tint>& G) : S(G.S), size_tint(G.size_tint) 
+  { // The S is a shared_ptr so copy is fine.
+  }
+  Group<Telt,Tint>& operator=(const Group<Telt,Tint>& G)
+  { // The S is a shared_ptr so copy is fine.
+    S = G.S;
+    size_tint = G.size_tint;
+    return *this;
+  }
   // Basic getters
   std::vector<Telt> GeneratorsOfGroup() const
   {
