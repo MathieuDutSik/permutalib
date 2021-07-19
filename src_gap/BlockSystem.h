@@ -29,7 +29,7 @@ std::pair<std::vector<std::vector<typename Telt::Tidx>>,std::vector<Face>> Block
       eList[u] = uImg;
     }
     Telt eGenRed(eList);
-    ListGenRed.push_back(eGenRed);
+    ListGenRed.emplace_back(std::move(eGenRed));
   }
   // Building the orbit
   Face eFace(n);
@@ -90,7 +90,7 @@ std::pair<std::vector<std::vector<typename Telt::Tidx>>,std::vector<Face>> Block
       eBlock.push_back(Omega[ePt]);
       ePt = eFaceComb.find_next(ePt);
     }
-    ListBlocks.push_back(eBlock);
+    ListBlocks.emplace_back(std::move(eBlock));
   }
   return {std::move(ListBlocks),std::move(SeedOrbit)};
 }
