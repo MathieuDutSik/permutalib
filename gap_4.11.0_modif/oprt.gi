@@ -2641,8 +2641,9 @@ end );
 ##
 InstallGlobalFunction( RepresentativeAction, function( arg )
 local   G,  D,  d,  e,  gens,  acts,  act,  xset,  hom,  p,  rep;
-    
+    Print("RepresentativeAction begin\n");
     if IsExternalSet( arg[ 1 ] )  then
+        Print("RepresentativeAction case 1\n");
         xset := arg[ 1 ];
         d := arg[ 2 ];
         e := arg[ 3 ];
@@ -2664,6 +2665,7 @@ local   G,  D,  d,  e,  gens,  acts,  act,  xset,  hom,  p,  rep;
             act := FunctionAction( xset );
         fi;
     else
+        Print("RepresentativeAction case 2\n");
         G := arg[ 1 ];
         if Length( arg ) > 2  and
 	  IsIdenticalObj( FamilyObj( arg[ 2 ] ),
@@ -2706,8 +2708,9 @@ local   G,  D,  d,  e,  gens,  acts,  act,  xset,  hom,  p,  rep;
 	  fi;
         fi;
     fi;
-    
+
     if IsBound(xset) and IsExternalSetByActorsRep(xset) then
+      Print("RepresentativeAction case 3\n");
       # in all other cases the homomorphism was ignored anyhow
       hom := ActionHomomorphismAttr(xset);
 
@@ -2719,12 +2722,14 @@ local   G,  D,  d,  e,  gens,  acts,  act,  xset,  hom,  p,  rep;
       fi;
       return rep;
     elif IsBound( D )  then
+      Print("RepresentativeAction case 4\n");
       if IsBound( gens )  and  IsPcgs( gens )  then
 	return RepresentativeAction( G, D, d, e, gens, acts, act );
       else
 	return RepresentativeActionOp( G, D, d, e, act );
       fi;
     else
+        Print("RepresentativeAction case 5\n");
         return RepresentativeActionOp( G, d, e, act );
     fi;
 end );

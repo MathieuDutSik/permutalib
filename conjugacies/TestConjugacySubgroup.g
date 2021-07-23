@@ -1,6 +1,10 @@
-G:=SymmetricGroup(7);
+GRP:=SymmetricGroup(7);
 
-U:=SymmetricGroup([1..5]);
-V:=SymmetricGroup([3..7]);
+CJ:=ConjugacyClassesSubgroups(GRP);
+ListOrd:=List(CJ, x->Order(Representative(x)));
+pos:=Position(ListOrd, 16);
 
-g:=RepresentativeAction(G, U, V);
+eRepr:=Representative(CJ[pos]);
+fRepr:=ConjugateGroup(eRepr, Random(GRP));
+
+g:=RepresentativeAction(GRP, eRepr, fRepr);
