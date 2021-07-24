@@ -130,6 +130,14 @@ public:
   {
     return RandomElement(Kernel_GeneratorsOfGroup(S), S->comm->n);
   }
+  bool IsCommutative() const
+  {
+    return Kernel_IsCommutative(S);
+  }
+  bool IsTransitive() const
+  {
+    return Kernel_IsTransitive(S);
+  }
 private:
   StabChain<Telt,Tidx_label> S;
   Tint size_tint;
