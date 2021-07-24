@@ -8,6 +8,263 @@
 
 namespace permutalib {
 
+
+template<typename Telt>
+std::vector<std::vector<typename Telt::Tidx>> Blocks(const std::vector<Telt>& acts, const typename Telt::Tidx& n)
+{
+  using Tidx = typename Telt::Tidx;
+  if (n == 1) {
+    std::vector<Tidx> V = {0};
+    return {V};
+  }
+  if (acts.size() == 0) {
+    std::cerr << "We need at least one generator for Blocks computation\n";
+    throw PermutalibException{1};
+  }
+  if (IsPrime(n)) {
+    std::vector<Tidx> V(size_t(n));;
+    for (Tidx i=0; i<n; i++)
+      V[i] = i;
+    return {V};
+  }
+  //
+  // Now no easy case. Need to do a complex computation
+  //
+
+    one:= One( G );
+    orbit := [ D[1] ];
+    trans := [];
+    trans[ D[1] ] := one;
+    for pnt  in orbit  do
+        for gen  in acts  do
+            if not IsBound( trans[ pnt / gen ] )  then
+                Add( orbit, pnt / gen );
+                trans[ pnt / gen ] := gen;
+            fi;
+        od;
+    od;
+
+    # check that the group is transitive
+    if Length( orbit ) <> Length( D )  then
+        Error("<G> must operate transitively on <D>");
+    fi;
+    nrorbs := Length( orbit );
+
+    # since $i \in k^{G_1}$ implies $\beta(i)=\beta(k)$,  we initialize <eql>
+    # so that the connected components are orbits of some subgroup  $H < G_1$
+    eql := [];
+    leq := [];
+    next := [];
+    last := [];
+    for pnt  in orbit  do
+        eql[pnt]  := pnt;
+        leq[pnt]  := pnt;
+        next[pnt] := 0;
+        last[pnt] := pnt;
+    od;
+
+    # repeat until we have a block system
+    changed := 0;
+    cur := orbit[2];
+    rnd := one;
+    repeat
+
+        # compute such an $H$ by taking random  Schreier generators  of $G_1$
+        # and stop if 2 successive generators dont change the orbits any more
+	while changed < 2  do
+
+            # compute a random Schreier generator of $G_1$
+            i := Length( orbit );
+            while 1 <= i  do
+                rnd := rnd * Random( acts );
+                i   := QuoInt( i, 2 );
+            od;
+            gen := rnd;
+            d1g:=D[1]^gen;
+            while d1g <> D[1]  do
+                tr:=trans[ d1g ];
+		gen := gen * tr;
+                d1g:=d1g^tr;
+            od;
+            changed := changed + 1;
+
+            # compute the image of every point under <gen>
+            for pnt  in orbit  do
+                img := pnt ^ gen;
+
+                # find the representative of the orbit of <pnt>
+                while eql[pnt] <> pnt  do
+                    pnt := eql[pnt];
+		od;
+
+                # find the representative of the orbit of <img>
+		while eql[img] <> img  do
+                    img := eql[img];
+                od;
+
+                # if the don't agree merge their orbits
+                if   pnt < img  then
+                    eql[img] := pnt;
+                    next[ last[pnt] ] := img;
+                    last[pnt] := last[img];
+                    nrorbs := nrorbs - 1;
+                    changed := 0;
+                elif img < pnt  then
+                    eql[pnt] := img;
+                    next[ last[img] ] := pnt;
+                    last[img] := last[pnt];
+                    nrorbs := nrorbs - 1;
+                    changed := 0;
+                fi;
+            od;
+
+        od;
+
+        # take arbitrary point <cur>,  and an element <gen> taking 1 to <cur>
+        while eql[cur] <> cur  do
+            cur := eql[cur];
+        od;
+        gen := [];
+        img := cur;
+        while img <> D[1]  do
+            Add( gen, trans[img] );
+            img := img ^ trans[img];
+        od;
+        gen := Reversed( gen );
+
+        # compute an alleged block as orbit of 1 under $< H, gen >$
+        pnt := cur;
+        while pnt <> 0  do
+
+            # compute the representative of the block containing the image
+            img := pnt;
+            for i  in gen  do
+                img := img / i;
+            od;
+            while eql[img] <> img  do
+                img := eql[img];
+            od;
+
+            # if it is not our current block but a minimal block
+            if   img <> D[1]  and img <> cur  and leq[img] = img  then
+
+                # then try <img> as a new start
+                leq[cur] := img;
+                cur := img;
+                gen := [];
+                img := cur;
+                while img <> D[1]  do
+                    Add( gen, trans[img] );
+                    img := img ^ trans[img];
+                od;
+                gen := Reversed( gen );
+                pnt := cur;
+
+
+            # otherwise if it is not our current block but contains it
+            # by construction a nonminimal block contains the current block
+            elif img <> D[1]  and img <> cur  and leq[img] <> img  then
+
+                # then merge all blocks it contains with <cur>
+                while img <> cur  do
+                    eql[img] := cur;
+                    next[ last[cur] ] := img;
+                    last[ cur ] := last[ img ];
+                    img := leq[img];
+                    while img <> eql[img]  do
+                        img := eql[img];
+                    od;
+                od;
+                pnt := next[pnt];
+
+            # go on to the next point in the orbit
+            else
+                pnt := next[pnt];
+            fi;
+        od;
+
+        # make the alleged block
+        block := [ D[1] ];
+        pnt := cur;
+        while pnt <> 0  do
+            Add( block, pnt );
+            pnt := next[pnt];
+        od;
+        block := Set( block );
+        blocks := [ block ];
+
+        # quick test to see if the group is primitive
+        if Length( block ) = Length( orbit )  then
+            return Immutable( [ D ] );
+        fi;
+
+        # quick test to see if the orbit can be a block
+        if Length( orbit ) mod Length( block ) <> 0  then
+            changed := -1000;
+        fi;
+
+        # '<rep>[<i>]' is the representative of the block containing <i>
+        rep := [];
+        for pnt  in orbit  do
+            rep[pnt] := 0;
+        od;
+        for pnt  in block  do
+            rep[pnt] := 1;
+        od;
+        
+        # compute the block system with an orbit algorithm
+        i := 1;
+        while 0 <= changed  and i <= Length( blocks )  do
+
+            # loop over the generators
+            for gen  in acts  do
+
+                # compute the image of the block under the generator
+                img := OnSets( blocks[i], gen );
+
+                # if this block is new
+                if rep[ img[1] ] = 0  then
+
+                    # add the new block to the list of blocks
+                    Add( blocks, img );
+
+                    # check that all points in the image are new
+                    for pnt  in img  do
+                        if rep[pnt] <> 0  then
+                            changed := -1000;
+                        fi;
+                        rep[pnt] := img[1];
+                    od;
+
+                # if this block is old
+                else
+
+                    # check that all points in the image lie in the block
+                    for pnt  in img  do
+                        if rep[pnt] <> rep[img[1]]  then
+                            changed := -1000;
+                        fi;
+                    od;
+
+                fi;
+
+            od;
+
+            # on to the next block in the orbit
+            i := i + 1;
+        od;
+
+    until 0 <= changed;
+    # force sortedness
+    if Length(blocks[1])>0 and CanEasilySortElements(blocks[1][1]) then
+      blocks:=AsSSortedList(List(blocks,i->Immutable(Set(i))));
+      IsSSortedList(blocks);
+    fi;
+    # return the block system
+    return Immutable( blocks );
+}
+
+
 template<typename Telt>
 std::pair<std::vector<std::vector<typename Telt::Tidx>>,std::vector<Face>> Blocks_Kernel(std::vector<Telt> const& ListGen, std::vector<typename Telt::Tidx> const& Omega, std::vector<typename Telt::Tidx> const& seed)
 {

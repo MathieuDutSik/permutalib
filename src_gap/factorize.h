@@ -68,6 +68,22 @@ namespace permutalib {
 
 
   template<typename T>
+  bool successive_division_isprime(T const& N)
+  {
+    T pos = 2;
+    while(true) {
+      T res = N % pos;
+      if (res == 0)
+        return false;
+      pos++;
+      if (pos * pos > N)
+        break;
+    }
+    return true;
+  }
+
+
+  template<typename T>
   std::vector<T> factorize(T const& N)
   {
     std::pair<bool, T> epair = rho_pollard_factorize(N);
@@ -85,6 +101,16 @@ namespace permutalib {
     }
   }
 
+  template<typename T>
+  bool IsPrime(const T& N)
+  {
+    std::pair<bool, T> epair = rho_pollard_factorize(N);
+    if (epair.first) {
+      return false;
+    } else {
+      return successive_division_isprime(N);
+    }
+  }
 
 }
 #endif
