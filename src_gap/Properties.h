@@ -2,7 +2,9 @@
 #define DEFINE_PERMUTALIB_PROPERTIES_H
 
 
+
 #include "StabChain.h"
+#include "BlockSystem.h"
 
 namespace permutalib {
 
@@ -30,6 +32,20 @@ bool Kernel_IsTransitive(const StabChain<Telt,Tidx_label>& S)
   Tidx len=Tidx(S->orbit.size());
   Tidx n = S->comm->n;
   return len == n;
+}
+
+
+template<typename Telt, typename Tidx_label>
+bool Kernel_IsPrimitive(const StabChain<Telt,Tidx_label>& S)
+{
+  if (!Kernel_IsTransitive(S)) {
+    return false;
+  }
+  using Tidx = typename Telt::Tidx;
+  std::vector<Telt> acts = Kernel_GeneratorsOfGroup(S);
+  Tidx n = S->comm->n;
+  std::vector<std::vector<Tidx>> blocks = Blocks(acts, n);
+  return blocks.size() == 1;
 }
 
 

@@ -5,6 +5,7 @@
 #include "StabChainMain.h"
 #include "stbcbckt.h"
 #include "nsi.h"
+#include "Properties.h"
 #include <map>
 
 
@@ -137,6 +138,10 @@ public:
   bool IsTransitive() const
   {
     return Kernel_IsTransitive(S);
+  }
+  bool IsPrimitive() const
+  {
+    return Kernel_IsPrimitive(S);
   }
 private:
   StabChain<Telt,Tidx_label> S;

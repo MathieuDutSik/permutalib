@@ -212,10 +212,10 @@ int CycleLength(Telt const& u, int const& x)
 }
 
 
-template<typename Telt>
-std::vector<int> OnSets(std::vector<int> const& V, Telt const& u)
+template<typename Tidx, typename Telt>
+std::vector<Tidx> OnSets(std::vector<Tidx> const& V, Telt const& u)
 {
-  std::vector<int> Vret;
+  std::vector<Tidx> Vret;
   for (auto & ePt : V)
     Vret.push_back(u.at(ePt));
   sort(Vret.begin(), Vret.end());

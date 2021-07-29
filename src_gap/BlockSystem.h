@@ -22,10 +22,10 @@ std::vector<std::vector<typename Telt::Tidx>> Blocks(const std::vector<Telt>& ac
     throw PermutalibException{1};
   }
   if (IsPrime(n)) {
-    std::vector<Tidx> V(size_t(n));;
+    std::vector<Tidx> eVect(n);;
     for (Tidx i=0; i<n; i++)
-      V[i] = i;
-    return {V};
+      eVect[i] = i;
+    return {eVect};
   }
   //
   // Now no easy case. Need to do a complex computation
@@ -93,7 +93,7 @@ std::vector<std::vector<typename Telt::Tidx>> Blocks(const std::vector<Telt>& ac
         i_siz = i_siz / 2;
       }
       Telt gen = rnd;
-      Tidx d1g = PowAct(0, gen);
+      Tidx d1g = PowAct(Tidx(0), gen);
       while (d1g != 0) {
         Telt tr = trans[d1g];
         gen *= tr;
@@ -224,7 +224,7 @@ std::vector<std::vector<typename Telt::Tidx>> Blocks(const std::vector<Telt>& ac
 
       // compute the block system with an orbit algorithm
       int i = 0;
-      while (0 <= changed &&  i < blocks.size()) {
+      while (0 <= changed &&  i < int(blocks.size())) {
 
         // loop over the generators
         for (auto & gen : acts) {
