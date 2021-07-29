@@ -2680,7 +2680,8 @@ local   G,  D,  d,  e,  gens,  acts,  act,  xset,  hom,  p,  rep;
         fi;
         d := arg[ p     ];
         e := arg[ p + 1 ];
-
+        Print("d=", d, " e=", e, "\n");
+        
 	# catch a trivial case (that is called from some operations often)
 	if d=e then
 	  return One(G);
@@ -2729,7 +2730,7 @@ local   G,  D,  d,  e,  gens,  acts,  act,  xset,  hom,  p,  rep;
 	return RepresentativeActionOp( G, D, d, e, act );
       fi;
     else
-        Print("RepresentativeAction case 5\n");
+        Print("RepresentativeAction case 5 act=", act, "\n");
         return RepresentativeActionOp( G, d, e, act );
     fi;
 end );
