@@ -144,7 +144,7 @@ InstallMethod( BlocksOp, "permgroup on integers",
 	    d1g,	# D[1]^gen
 	    tr,		# transversal element
             i;          # loop variable
-
+    Print("acts=", acts, "\n");
     if act <> OnPoints  then
         TryNextMethod();
     fi;
@@ -198,7 +198,7 @@ InstallMethod( BlocksOp, "permgroup on integers",
     cur := orbit[2];
     rnd := one;
     repeat
-
+        Print("Passing by the while loop changed=", changed, "\n");
         # compute such an $H$ by taking random  Schreier generators  of $G_1$
         # and stop if 2 successive generators dont change the orbits any more
         while changed < 2  do
@@ -210,6 +210,7 @@ InstallMethod( BlocksOp, "permgroup on integers",
                 i   := QuoInt( i, 2 );
             od;
             gen := rnd;
+            Print("gen=", gen, "\n");
 	    d1g:=D[1]^gen;
             while d1g <> D[1]  do
                 tr:=trans[ d1g ];
@@ -249,7 +250,7 @@ InstallMethod( BlocksOp, "permgroup on integers",
                 fi;
 
             od;
-
+            Print("changed=", changed, "\n");
         od;
         Info( InfoAction, 1, "BlocksNoSeed ",
                        "number of orbits of <H> < <G>_1 is ",nrorbs );
@@ -265,9 +266,11 @@ InstallMethod( BlocksOp, "permgroup on integers",
             img := img ^ trans[img];
         od;
         gen := Reversed( gen );
+        Print("gen=", gen, "\n");
 
         # compute an alleged block as orbit of 1 under $< H, gen >$
         pnt := cur;
+        Print("cur=", cur, "\n");
         while pnt <> 0  do
 
             # compute the representative of the block containing the image
@@ -337,6 +340,7 @@ InstallMethod( BlocksOp, "permgroup on integers",
             return Immutable( [ D ] );
         fi;
 
+        Print("block=", block, "\n");
         # quick test to see if the orbit can be a block
         if Length( orbit ) mod Length( block ) <> 0  then
             Info( InfoAction, 1, "BlocksNoSeed ",
@@ -398,9 +402,10 @@ InstallMethod( BlocksOp, "permgroup on integers",
             # on to the next block in the orbit
             i := i + 1;
         od;
-
+        Print("Before until changed=", changed, "\n");
     until 0 <= changed;
-
+    Print("blocks=", blocks, "\n");
+    
     # force sortedness
     if Length(blocks[1])>0 and CanEasilySortElements(blocks[1][1]) then
       blocks:=AsSSortedList(List(blocks,i->Immutable(Set(i))));

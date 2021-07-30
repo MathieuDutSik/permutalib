@@ -81,7 +81,7 @@ std::vector<std::vector<typename Telt::Tidx>> Blocks(const std::vector<Telt>& ac
   Telt rnd = one;
   std::vector<std::vector<Tidx>> blocks;
   while(true) {
-
+    std::cerr << "Passing by the while loop changed=" << changed << "\n";
     // compute such an $H$ by taking random  Schreier generators  of $G_1$
     // and stop if 2 successive generators dont change the orbits any more
     while (changed < 2) {
@@ -93,6 +93,7 @@ std::vector<std::vector<typename Telt::Tidx>> Blocks(const std::vector<Telt>& ac
         i_siz = i_siz / 2;
       }
       Telt gen = rnd;
+      std::cerr << "gen=" << gen << "\n";
       Tidx d1g = PowAct(Tidx(0), gen);
       while (d1g != 0) {
         Telt tr = trans[d1g];
@@ -130,143 +131,148 @@ std::vector<std::vector<typename Telt::Tidx>> Blocks(const std::vector<Telt>& ac
           }
         }
       }
+      std::cerr << "changed=" << changed << "\n";
+    }
 
-      // take arbitrary point <cur>,  and an element <gen> taking 1 to <cur>
-      while (eql[cur] != cur) {
-        cur = eql[cur];
+    // take arbitrary point <cur>,  and an element <gen> taking 1 to <cur>
+    while (eql[cur] != cur) {
+      cur = eql[cur];
+    }
+    std::vector<Telt> gen_list;
+    Tidx img = cur;
+    while (img != 0) {
+      gen_list.push_back(trans[img]);
+      img = PowAct(img, trans[img]);
+    }
+    gen_list = Reversed(gen_list);
+    std::cerr << "|gen_list|=" << gen_list.size() << "\n";
+
+    // compute an alleged block as orbit of 1 under $< H, gen >$
+    Tidx pnt = cur;
+    std::cerr << "cur=" << cur << "\n";
+    while (pnt != 0) {
+
+      // compute the representative of the block containing the image
+      img = pnt;
+      for (auto & e_gen : gen_list) {
+        img = SlashAct(img, e_gen);
       }
-      std::vector<Telt> gen_list;
-      Tidx img = cur;
-      while (img != 0) {
-        gen_list.push_back(trans[img]);
-        img = PowAct(img, trans[img]);
+      while (eql[img] != img) {
+        img = eql[img];
       }
-      gen_list = Reversed(gen_list);
 
-      // compute an alleged block as orbit of 1 under $< H, gen >$
-      Tidx pnt = cur;
-      while (pnt != 0) {
+      // if it is not our current block but a minimal block
+      if (img != 0 && img != cur && leq[img] == img) {
 
-        // compute the representative of the block containing the image
-        img = pnt;
-        for (auto & e_gen : gen_list) {
-          img = SlashAct(img, e_gen);
+        // then try <img> as a new start
+        leq[cur] = img;
+        cur = img;
+        gen_list.clear();
+        img = cur;
+        while (img != 0) {
+          gen_list.push_back(trans[img]);
+          img = PowAct(img, trans[img]);
         }
-        while (eql[img] != img) {
-          img = eql[img];
-        }
+        gen_list = Reversed( gen_list );
+        pnt = cur;
 
-        // if it is not our current block but a minimal block
-        if (img != 0 && img != cur && leq[img] == img) {
 
-          // then try <img> as a new start
-          leq[cur] = img;
-          cur = img;
-          gen_list.clear();
-          img = cur;
-          while (img != 0) {
-            gen_list.push_back(trans[img]);
-            img = PowAct(img, trans[img]);
+        // otherwise if it is not our current block but contains it
+        // by construction a nonminimal block contains the current block
+      } else {
+        if (img != 0 && img != cur && leq[img] != img) {
+
+          // then merge all blocks it contains with <cur>
+          while (img != cur) {
+            eql[img] = cur;
+            next[ last[cur] ] = img;
+            last[ cur ] = last[ img ];
+            img = leq[img];
+            while (img != eql[img]) {
+              img = eql[img];
+            }
           }
-          gen_list = Reversed( gen_list );
-          pnt = cur;
+          pnt = next[pnt];
 
-
-          // otherwise if it is not our current block but contains it
-          // by construction a nonminimal block contains the current block
+          // go on to the next point in the orbit
         } else {
-          if (img != 0 && img != cur && leq[img] != img) {
-
-            // then merge all blocks it contains with <cur>
-            while (img != cur) {
-              eql[img] = cur;
-              next[ last[cur] ] = img;
-              last[ cur ] = last[ img ];
-              img = leq[img];
-              while (img != eql[img]) {
-                img = eql[img];
-              }
-            }
-            pnt = next[pnt];
-
-            // go on to the next point in the orbit
-          } else {
-            pnt = next[pnt];
-          }
+          pnt = next[pnt];
         }
-      }
-
-      // make the alleged block
-      std::vector<Tidx> block{0};
-      pnt = cur;
-      while (pnt != 0) {
-        block.push_back(pnt);
-        pnt = next[pnt];
-      }
-      block = SortVector(block);
-      blocks = {block};
-
-      // quick test to see if the group is primitive
-      if (block.size() == orbit.size()) {
-        return blocks;
-      }
-
-      // quick test to see if the orbit can be a block
-      if (orbit.size() % block.size() != 0) {
-        changed = -1000;
-      }
-
-      // '<rep>[<i>]' is the representative of the block containing <i>
-      Tidx miss_val = std::numeric_limits<Tidx>::max();
-      std::vector<Tidx> rep(n,miss_val);
-      for (auto & pnt : block)
-        rep[pnt] = 0;
-
-      // compute the block system with an orbit algorithm
-      int i = 0;
-      while (0 <= changed &&  i < int(blocks.size())) {
-
-        // loop over the generators
-        for (auto & gen : acts) {
-
-          // compute the image of the block under the generator
-          std::vector<Tidx> img = OnSets(blocks[i], gen);
-
-          // if this block is new
-          if (rep[ img[0] ] == 0) {
-
-            // add the new block to the list of blocks
-            blocks.push_back(img);
-
-            // check that all points in the image are new
-            for (auto & pnt : img) {
-              if (rep[pnt] != miss_val) {
-                changed = -1000;
-              }
-              rep[pnt] = img[0];
-            }
-
-            // if this block is old
-          } else {
-
-            // check that all points in the image lie in the block
-            for (auto & pnt : img) {
-              if (rep[pnt] != rep[img[0]]) {
-                changed = -1000;
-              }
-            }
-          }
-        }
-
-        // on to the next block in the orbit
-        i++;
       }
     }
-    if (changed < 0) {
+
+    // make the alleged block
+    std::vector<Tidx> block{0};
+    pnt = cur;
+    while (pnt != 0) {
+      block.push_back(pnt);
+      pnt = next[pnt];
+    }
+    block = SortVector(block);
+    blocks = {block};
+
+    // quick test to see if the group is primitive
+    if (block.size() == orbit.size()) {
+      return blocks;
+    }
+
+    std::cerr << "|block|=" << block.size() << "\n";
+    // quick test to see if the orbit can be a block
+    if (orbit.size() % block.size() != 0) {
+      changed = -1000;
+    }
+
+    // '<rep>[<i>]' is the representative of the block containing <i>
+    Tidx miss_val = std::numeric_limits<Tidx>::max();
+    std::vector<Tidx> rep(n,miss_val);
+    for (auto & pnt : block)
+      rep[pnt] = 0;
+
+    // compute the block system with an orbit algorithm
+    int i = 0;
+    while (0 <= changed &&  i < int(blocks.size())) {
+
+      // loop over the generators
+      for (auto & gen : acts) {
+
+        // compute the image of the block under the generator
+        std::vector<Tidx> img = OnSets(blocks[i], gen);
+
+        // if this block is new
+        if (rep[ img[0] ] == miss_val) {
+
+          // add the new block to the list of blocks
+          blocks.push_back(img);
+
+          // check that all points in the image are new
+          for (auto & pnt : img) {
+            if (rep[pnt] != miss_val) {
+              changed = -1000;
+            }
+            rep[pnt] = img[0];
+          }
+
+          // if this block is old
+        } else {
+
+          // check that all points in the image lie in the block
+          for (auto & pnt : img) {
+            if (rep[pnt] != rep[img[0]]) {
+              changed = -1000;
+            }
+          }
+        }
+      }
+
+      // on to the next block in the orbit
+      i++;
+    }
+    std::cerr << "Before until changed=" << changed << "\n";
+    if (changed >= 0) {
       break;
     }
   }
-
+  std::cerr << "|blocks|=" << blocks.size() << "\n";
   // return the block system
   return blocks;
 }
