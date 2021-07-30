@@ -682,6 +682,15 @@ Telt SiftedPermutation(StabChain<Telt,Tidx_label> const& S, Telt const& g)
 }
 
 
+template<typename Telt, typename Tidx_label>
+bool IsElementInStabChain(StabChain<Telt,Tidx_label> const& S, Telt const& g)
+{
+  Telt res = SiftedPermutation(S, g);
+  return res.isIdentity();
+}
+
+
+
 // Testing that S1 is a subset of S2
 template<typename Telt, typename Tidx_label>
 bool InclusionTest(const StabChain<Telt,Tidx_label>& S1, const StabChain<Telt,Tidx_label>& S2)
@@ -1377,7 +1386,7 @@ void ClosureGroup_options(StabChain<Telt,Tidx_label> & S, Telt const& g, StabCha
 {
   Telt sch = SiftedPermutation(S, g);
   if (!sch.isIdentity())
-    StabChainStrong(S, {g}, options);
+    StabChainStrong(S, {sch}, options);
 }
 
 
