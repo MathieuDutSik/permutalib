@@ -6,6 +6,105 @@
 
 namespace permutalib {
 
+//
+// Actions
+//
+
+
+
+
+template<typename Tidx, typename Telt>
+std::vector<Tidx> OnSets(std::vector<Tidx> const& V, Telt const& u)
+{
+  std::vector<Tidx> Vret;
+  for (auto & ePt : V)
+    Vret.push_back(u.at(ePt));
+  sort(Vret.begin(), Vret.end());
+  return Vret;
+}
+
+//
+// One single element being used
+//
+
+
+
+template<typename Telt>
+int CycleLength(Telt const& u, int const& x)
+{
+  int CycleLen=0;
+  int xFirst=x;
+  int xWork=x;
+  while(true) {
+    int xImg=u.at(xWork);
+    CycleLen++;
+    if (xImg == xFirst)
+      break;
+    xWork = xImg;
+  }
+  return CycleLen;
+}
+
+template<typename Telt>
+Telt PowerGroupElement(Telt const& u, int const& n)
+{
+  if (n < 0) {
+    std::cerr << "We should have n >= 1\n";
+    throw PermutalibException{1};
+  }
+  Telt pow = u;
+  for (int i=1; i<n; i++)
+    pow *= u;
+  return pow;
+}
+
+template<typename Telt>
+typename Telt::Tidx OrderElement(const Telt& x)
+{
+  using Tidx = typename Telt::Tidx;
+  if (x.isIdentity())
+    return 1;
+  Telt xw = x;
+  Tidx ord = 1;
+  while(true) {
+    xw *= x;
+    ord++;
+    if (xw.isIdentity())
+      return ord;
+  }
+}
+
+
+/* Return:
+   --- <Tidx>::max() if no such power exist
+   --- e if a^e = b.
+*/
+template<typename Telt>
+typename Telt::Tidx LogPerm(const Telt& a, const Telt& b)
+{
+  using Tidx = typename Telt::Tidx;
+  if (a.isIdentity()) {
+    if (b.isIdentity())
+      return 1;
+    else
+      return std::numeric_limits<Tidx>::max();
+  }
+  Telt apow = a;
+  Tidx ord = 1;
+  while(true) {
+    apow *= a;
+    ord++;
+    if (apow == b)
+      return ord;
+    if (apow.isIdentity())
+      return std::numeric_limits<Tidx>::max();
+  }
+}
+
+//
+// vector<Telt> taking functions
+//
+
 template<typename Telt>
 typename Telt::Tidx SmallestMovedPoint(std::vector<Telt> const& LGen)
 {
@@ -193,47 +292,6 @@ std::vector<int> OrbitPerms(std::vector<Telt> const& ListGen, int const & ePt)
   return Orbit(ListGen, ePt, act);
 }
 */
-
-
-template<typename Telt>
-int CycleLength(Telt const& u, int const& x)
-{
-  int CycleLen=0;
-  int xFirst=x;
-  int xWork=x;
-  while(true) {
-    int xImg=u.at(xWork);
-    CycleLen++;
-    if (xImg == xFirst)
-      break;
-    xWork = xImg;
-  }
-  return CycleLen;
-}
-
-
-template<typename Tidx, typename Telt>
-std::vector<Tidx> OnSets(std::vector<Tidx> const& V, Telt const& u)
-{
-  std::vector<Tidx> Vret;
-  for (auto & ePt : V)
-    Vret.push_back(u.at(ePt));
-  sort(Vret.begin(), Vret.end());
-  return Vret;
-}
-
-template<typename Telt>
-Telt PowerGroupElement(Telt const& u, int const& n)
-{
-  if (n <= 0) {
-    std::cerr << "We should have n >= 1\n";
-    throw PermutalibException{1};
-  }
-  Telt pow = u;
-  for (int i=1; i<n; i++)
-    pow *= u;
-  return pow;
-}
 
 
 
