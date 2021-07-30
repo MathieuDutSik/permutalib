@@ -112,5 +112,19 @@ namespace permutalib {
     }
   }
 
+  // Assumes that the quotient does indeed
+  template<typename Tidx>
+  std::map<Tidx,int> QuotientMapMultiplicity(const std::map<Tidx,int>& x, const std::map<Tidx,int>& y)
+  {
+    std::map<Tidx,int> quot;
+    for (auto & kv : x) {
+      Tidx k = kv.first;
+      int val = x[k] - y[k];
+      if (val > 0)
+        quot[k] = val;
+    }
+    return quot;
+  }
+
 }
 #endif
