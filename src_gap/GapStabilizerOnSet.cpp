@@ -58,13 +58,7 @@ int main(int argc, char *argv[])
     if (argc == 3) {
       std::string OutputFile = argv[2];
       std::ofstream os(OutputFile);
-      os << "local ListGen;\n";
-      std::vector<Telt> LGenRet = eG2.GeneratorsOfGroup();
-      os << "ListGen:=" << GapStringTVector(LGenRet) << ";\n";
-      if (LGenRet.size() == 0)
-        os << "return Group(());\n";
-      else
-        os << "return Group(ListGen);\n";
+      os << "return " + eG2.GapString() + ";\n";
     } else {
       std::cerr << "CPP |eG2|=" << eG2.size() << "\n";
     }

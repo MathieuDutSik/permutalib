@@ -73,6 +73,14 @@ public:
   std::vector<Telt> GeneratorsOfGroup() const {
     return Kernel_GeneratorsOfGroup(S);
   }
+  std::string GapString() const {
+    std::vector<Telt> LGen = Kernel_GeneratorsOfGroup(S);
+    if (LGen.size() == 0) {
+      return "Group(())";
+    } else {
+      return "Group(" + GapStringTVector(LGen) + ")";
+    }
+  }
   Tint size() const {
     return size_tint;
   }
@@ -137,6 +145,10 @@ private:
   StabChain<Telt,Tidx_label> S;
   Tint size_tint;
 };
+
+
+
+
 
 
 
