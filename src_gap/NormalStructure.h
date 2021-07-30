@@ -25,14 +25,11 @@ bool Kernel_IsNormalSubgroup(const StabChain<Telt,Tidx_label>& G, const StabChai
 
 
 
-template<typename Telt, typename Tidx_label>
+template<typename Telt, typename Tidx_label, typename Tint>
 StabChain<Telt,Tidx_label> Kernel_NormalClosure(const StabChain<Telt,Tidx_label>& G, const StabChain<Telt,Tidx_label>& H)
 {
   std::vector<Telt> gens_G = Kernel_GeneratorsOfGroup(G);
-
-
   StabChain<Telt,Tidx_label> Hret = H;
-
   auto test=[&]() -> std::optional<Telt> {
     std::vector<Telt> gens_Hret = Kernel_GeneratorsOfGroup(Hret);
     for (auto & eGen_G : gens_G) {
@@ -48,13 +45,13 @@ StabChain<Telt,Tidx_label> Kernel_NormalClosure(const StabChain<Telt,Tidx_label>
     std::optional<Telt> ret = test();
     if (!ret)
       break;
-    ClosureGroup(Hret, *ret);
+    ClosureGroup<Telt,Tidx_label,Tint>(Hret, *ret);
   }
   return Hret;
 }
 
 
-template<typename Telt, typename Tidx_label>
+template<typename Telt, typename Tidx_label, typename Tint>
 StabChain<Telt,Tidx_label> Kernel_DerivedSubgroup(const StabChain<Telt,Tidx_label>& G)
 {
   using Tidx = typename Telt::Tidx;
@@ -67,10 +64,10 @@ StabChain<Telt,Tidx_label> Kernel_DerivedSubgroup(const StabChain<Telt,Tidx_labe
     for (size_t j=i+1; j<n_gen; j++) {
       const Telt& g2 = LGen[j];
       Telt comm = Conjugation(g1, g2) * Inverse(g1);
-      ClosureGroup(S, comm);
+      ClosureGroup<Telt,Tidx_label,Tint>(S, comm);
     }
   }
-  return Kernel_NormalClosure(G, S);
+  return Kernel_NormalClosure<Telt,Tidx_label,Tint>(G, S);
 }
 
 

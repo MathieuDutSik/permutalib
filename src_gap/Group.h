@@ -136,10 +136,10 @@ public:
     return Kernel_IsNormalSubgroup(S, U.S);
   }
   Group<Telt,Tint> NormalClosure(const Group<Telt,Tint>& H) const {
-    return Group<Telt,Tint>(Kernel_NormalClosure(S, H.S));
+    return Group<Telt,Tint>(Kernel_NormalClosure<Telt,Tidx_label,Tint>(S, H.S));
   }
   Group<Telt,Tint> DerivedSubgroup() const {
-    return Group<Telt,Tint>(Kernel_DerivedSubgroup(S));
+    return Group<Telt,Tint>(Kernel_DerivedSubgroup<Telt,Tidx_label,Tint>(S));
   }
 private:
   StabChain<Telt,Tidx_label> S;
