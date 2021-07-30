@@ -251,6 +251,50 @@ end;
 
 
 
+
+TestPropertiesGroup:=function(nbMov, eGRP)
+    local eDir, FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, Result1, Result2, test;
+    Print("Treating a group for its properties\n");
+    eDir:="/tmp/DebugStabOnSets_datarun/";
+    eCommand:=Concatenation("mkdir -p ", eDir);
+    Exec(eCommand);
+    #
+    FileName:=Concatenation(eDir, "Input");
+    MyRemoveFileIfExist(FileName);
+    output:=OutputTextFile(FileName, true);
+    LGen:=GeneratorsOfGroup(eGRP);
+    AppendTo(output, Length(LGen), " ", nbMov, "\n");
+    for eGen in LGen
+    do
+        for iMov in [1..nbMov]
+        do
+            eImg:=OnPoints(iMov, eGen);
+            AppendTo(output, " ", eImg-1);
+        od;
+        AppendTo(output, "\n");
+    od;
+    CloseStream(output);
+    #
+    eBinary:="/home/mathieu/GITall/GIT/permutalib/src_gap/GroupProperties";
+    FileErr:=Concatenation(eDir, "CppError");
+    FileRes:=Concatenation(eDir, "GapOutput");
+    eCommand:=Concatenation(eBinary, " ", FileName, " ", FileRes, " 2> ", FileErr);
+#    Print("eCommand=", eCommand, "\n");
+    Exec(eCommand);
+    #
+    Result1:=rec(IsPrimitive:=IsPrimitive(eGRP), IsTransitive:=IsTransitive(eGRP), IsCommutative:=IsCommutative(eGRP));
+    Result2:=ReadAsFunction(FileRes)();
+    test:=Result1 = Result2;
+    if test=false then
+        Error("Found some error. Please debug");
+    fi;
+    MyRemoveFileIfExist(FileName);
+    MyRemoveFileIfExist(FileErr);
+    MyRemoveFileIfExist(FileRes);
+end;
+
+
+
 TestSpecificGroup:=function(method, size_opt, nbMov, eGRP)
     local iMov, sizSet, i, eSet, fSet, eElt;
     Print("ListGens(eGRP)=", GeneratorsOfGroup(eGRP), "\n");
@@ -301,6 +345,9 @@ TestSpecificGroup:=function(method, size_opt, nbMov, eGRP)
                 TestSpecificGroupSet_Canonical(nbMov, eGRP, eSet);
             od;
         fi;
+        if method="properties" then
+            TestPropertiesGroup(nbMov, eGRP);
+        fi;
     od;
 end;
 
@@ -347,7 +394,8 @@ WriteAllGroupsInFile:=function(eFile)
 end;
 
 
-TestAllGroups("stabilizer", 1);
+TestAllGroups("properties", 1);
+#TestAllGroups("stabilizer", 1);
 #TestAllGroups("equivalence", 2);
 #TestAllGroups("canonical", 3);
 
