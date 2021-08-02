@@ -576,12 +576,12 @@ std::vector<singStrat<typename Telt::Tidx>> StratMeetPartition(rbaseType<Telt,Ti
     for (auto & eVal : p)
       p2.push_back(cellsP[eVal]);
     //    PrintVectDebug("p2", p2);
-    CollectedResult<Tidx> p3=Collected(p2);
+    std::map<Tidx,Tidx> p3=Collected<Tidx,Tidx>(p2);
     std::vector<Tidx> splits;
-    for (size_t h=0; h<p3.LVal.size(); h++) {
+    for (auto & kv : p3) {
       // a cell will split iff it contains more points than are in the s-cell
-      if (P.lengths[p3.LVal[h]] > p3.LMult[h])
-        splits.push_back(p3.LVal[h]);
+      if (P.lengths[kv.first] > kv.second)
+        splits.push_back(kv.first);
     }
     for (auto & pVal : splits) {
       // Last argument true means that the cell will split.

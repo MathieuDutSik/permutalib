@@ -62,19 +62,10 @@ template<typename T, typename... Args>
 std::vector<T> Concatenation(std::vector<T> const& first, Args... args)
 {
   std::vector<T> ret = first;
-  for (auto & eVal : Concatenation(args...))
-    ret.push_back(eVal);
+  std::vector<T> part = Concatenation(args...);
+  ret.insert(ret.end(), part.begin(), part.end());
   return ret;
 }
-
-
-template<typename T>
-struct CollectedResult {
-  std::vector<T> LVal;
-  std::vector<int> LMult;
-};
-
-
 
 
 template<typename T>
@@ -114,27 +105,13 @@ private:
 
 
 
-template<typename T>
-CollectedResult<T> Collected(std::vector<T> const& eVect)
+template<typename T, typename Tidx>
+std::map<T,Tidx> Collected(const std::vector<T>& eVect)
 {
-  std::set<T> SetVal;
+  std::map<T,Tidx> map;
   for (auto & eVal : eVect)
-    SetVal.insert(eVal);
-  std::vector<T> LVal;
-  for (auto & eVal : SetVal)
-    LVal.push_back(eVal);
-  size_t eSize=LVal.size();
-  std::vector<int> LMult(eSize,0);
-  auto UpPosition=[&](T const& eVal) -> void {
-    for (size_t i=0; i<eSize; i++)
-      if (LVal[i] == eVal) {
-        LMult[i] += 1;
-        return;
-      }
-  };
-  for (auto & eVal : eVect)
-    UpPosition(eVal);
-  return {std::move(LVal), std::move(LMult)};
+    map[eVal] += 1;
+  return map;
 }
 
 
