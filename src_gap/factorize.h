@@ -3,6 +3,7 @@
 
 
 #include <vector>
+#include <map>
 
 namespace permutalib {
 
