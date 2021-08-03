@@ -136,7 +136,7 @@ std::vector<Tidx> OnTuples(std::vector<Tidx> const& V, Telt const& g)
 }
 
 template<typename Telt, typename Tidx>
-void  OnTuples_inplace(std::vector<Tidx> & V, Telt const& g)
+void OnTuples_inplace(std::vector<Tidx> & V, Telt const& g)
 {
   size_t len = V.size();
   for (size_t i=0; i<len; i++)
@@ -797,12 +797,16 @@ Face Kernel_CanonicalImage(StabChain<Telt,Tidx_label> const& g, Face const& set)
 #endif
   if (set.count() == 0 || set.count() == set.size())
     return set;
-  std::vector<Tidx> set_i;
-  Face ret(set.size());
-  if (2 * set.count() <= set.size()) {
+  size_t siz = set.size();
+  Face ret(siz);
+  size_t cnt = set.count();
+  if (2 * cnt <= siz) {
+    std::vector<Tidx> set_i(cnt);
+    size_t pos=0;
     boost::dynamic_bitset<>::size_type aRow = set.find_first();
     while (aRow != boost::dynamic_bitset<>::npos) {
-      set_i.push_back(Tidx(aRow));
+      set_i[pos] = Tidx(aRow);
+      pos++;
       aRow = set.find_next(aRow);
     }
     StabChain<Telt,Tidx_label> k = Kernel_Stabilizer_OnSets<Telt,Tidx_label,Tint>(g, set);
@@ -814,12 +818,16 @@ Face Kernel_CanonicalImage(StabChain<Telt,Tidx_label> const& g, Face const& set)
       ret[eVal] = 1;
     }
   } else {
-    Face setC(set.size());
-    for (size_t i=0; i<set.size(); i++)
+    // instead of building the complement, we do a simple iteration
+    Face setC(siz);
+    for (size_t i=0; i<siz; i++)
       setC[i] = 1 - set[i];
+    std::vector<Tidx> set_i(siz - cnt);
+    size_t pos=0;
     boost::dynamic_bitset<>::size_type aRow = setC.find_first();
     while (aRow != boost::dynamic_bitset<>::npos) {
-      set_i.push_back(Tidx(aRow));
+      set_i[pos] = Tidx(aRow);
+      pos++;
       aRow = setC.find_next(aRow);
     }
     StabChain<Telt,Tidx_label> k = Kernel_Stabilizer_OnSets<Telt,Tidx_label,Tint>(g, setC);
