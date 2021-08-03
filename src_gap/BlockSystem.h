@@ -307,7 +307,7 @@ std::pair<std::vector<std::vector<typename Telt::Tidx>>,std::vector<Face>> Block
     Tidx u=OmegaRev[ePt];
     eFace[u]=1;
   }
-  std::function<Face(Face const&,Telt const&)> act=[&](Face const& x, Telt const& eElt) -> Face {
+  auto act=[&](Face const& x, Telt const& eElt) -> Face {
     Face eImg(n);
     int siz=x.count();
     boost::dynamic_bitset<>::size_type ePt=x.find_first();

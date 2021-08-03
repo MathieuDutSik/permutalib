@@ -252,8 +252,8 @@ Telt RestrictedPermNC(Telt const& x, std::vector<int> const& listRes)
   return eRet;
 }
 
-template<typename Telt, typename Tobj>
-std::vector<Tobj> Orbit(std::vector<Telt> const& ListGen, Tobj const& x, std::function<Tobj(Tobj const&,Telt const&)> const& act)
+template<typename Telt, typename Tobj, typename Tact>
+std::vector<Tobj> Orbit(std::vector<Telt> const& ListGen, Tobj const& x, Tact act)
 {
   std::vector<Tobj> ListObj{x};
   std::vector<uint8_t> ListStat(0);
