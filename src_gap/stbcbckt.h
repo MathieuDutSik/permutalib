@@ -74,7 +74,7 @@ permPlusBool<Telt> ExtendedT(Telt const& t, typename Telt::Tidx const& pnt, type
 #endif
       return {int_false, {}};
     } else {
-      return {int_perm, t};
+      return {int_perm, std::move(t)};
     }
   }
   if (S.Stot->transversal[img] == std::numeric_limits<Tidx_label>::max()) {
@@ -87,7 +87,7 @@ permPlusBool<Telt> ExtendedT(Telt const& t, typename Telt::Tidx const& pnt, type
   std::cerr << "CPP Final case t=" << t << "\n";
   std::cerr << "CPP sgs(S.Stot)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(S.Stot))) << "\n";
 #endif
-  return {int_perm, LeftQuotient(InverseRepresentative(S.Stot, img), t)};
+  return {int_perm, std::move(LeftQuotient(InverseRepresentative(S.Stot, img), t))};
 }
 
 

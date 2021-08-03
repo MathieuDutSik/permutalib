@@ -966,17 +966,15 @@ typename Telt::Tidx LargestMovedPoint(std::vector<Telt> const& LGen)
   if (LGen.size() == 0)
     return 0;
   Tidx n=LGen[0].size();
-  Face Status(n);
-  for (auto & eGen : LGen)
-    for (Tidx u=0; u<n; u++) {
-      Tidx v=eGen.at(u);
-      if (u != v)
-	Status[u] = 1;
-    }
   Tidx eMov=0;
-  for (Tidx u=0; u<n; u++)
-    if (Status[u] == 1)
-      eMov = u;
+  for (auto & eGen : LGen)
+    for (Tidx u=1; u<n; u++) {
+      Tidx v=eGen.at(u);
+      if (u != v) {
+        if (u > eMov)
+          eMov = u;
+      }
+    }
   eMov++;
   return eMov;
 }

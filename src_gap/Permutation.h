@@ -499,6 +499,11 @@ public:
     for (Tidx i=0; i<n; i++)
       ListVal[i]=i;
   }
+  SingleSidedPerm(std::vector<Tidx> && v)
+  {
+    ListVal=v;
+    siz=Tidx(v.size());
+  }
   SingleSidedPerm(std::vector<Tidx> const& v)
   {
     ListVal=v;
@@ -661,7 +666,8 @@ SingleSidedPerm<Tidx> operator*(SingleSidedPerm<Tidx> const& v1, SingleSidedPerm
     Tidx k=v2.at(j);
     vVal[i]=k;
   }
-  return SingleSidedPerm<Tidx>(vVal);
+  //  return SingleSidedPerm<Tidx>(vVal);
+  return SingleSidedPerm<Tidx>(std::move(vVal)); // Does not seem to get us a speedup
 }
 
 
@@ -726,7 +732,7 @@ SingleSidedPerm<Tidx> LeftQuotient(SingleSidedPerm<Tidx> const& a, SingleSidedPe
   std::vector<Tidx> ListVal(siz);
   for (Tidx i=0; i<siz; i++)
     ListVal[a.at(i)] = b.at(i);
-  return SingleSidedPerm<Tidx>(ListVal);
+  return SingleSidedPerm<Tidx>(std::move(ListVal));
 }
 
 
