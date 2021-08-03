@@ -2042,9 +2042,10 @@ StabChain<Tret,Tidx_label> HomomorphismMapping(StabChain<Telt,Tidx_label> const&
   Tret idMap = f(Stot->comm->identity);
   Tidx nMap=idMap.size();
   auto fVector =[&](std::vector<Telt> const& V) -> std::vector<Tret> {
-    std::vector<Tret> Vret;
-    for (auto & eElt : V)
-      Vret.emplace_back(f(eElt));
+    size_t len = V.size();
+    std::vector<Tret> Vret(len);
+    for (size_t i=0; i<len; i++)
+      Vret[i] = f(V[i]);
     return Vret;
   };
   std::vector<Tret> labelsMap = fVector(Stot->comm->labels);

@@ -820,19 +820,20 @@ Face Kernel_CanonicalImage(StabChain<Telt,Tidx_label> const& g, Face const& set)
   } else {
     // instead of building the complement, we do a simple iteration
     Face setC(siz);
-    for (size_t i=0; i<siz; i++)
-      setC[i] = 1 - set[i];
     std::vector<Tidx> set_i(siz - cnt);
+    Tidx siz_i = Tidx(siz);
     size_t pos=0;
-    boost::dynamic_bitset<>::size_type aRow = setC.find_first();
-    while (aRow != boost::dynamic_bitset<>::npos) {
-      set_i[pos] = Tidx(aRow);
-      pos++;
-      aRow = setC.find_next(aRow);
+    for (Tidx i=0; i<siz_i; i++) {
+      int val = set[i];
+      setC[i] = 1 - val;
+      if (val == 0) {
+        set_i[pos] = i;
+        pos++;
+      }
     }
     StabChain<Telt,Tidx_label> k = Kernel_Stabilizer_OnSets<Telt,Tidx_label,Tint>(g, setC);
     std::vector<Tidx> eSetCan = NewCanonicImage<Telt,Tidx_label,Tint>(g, set_i, k);
-    for (size_t i=0; i<set.size(); i++)
+    for (size_t i=0; i<siz; i++)
       ret[i] = 1;
     for (auto & eVal : eSetCan)
       ret[eVal] = 0;
