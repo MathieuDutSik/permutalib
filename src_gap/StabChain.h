@@ -1371,7 +1371,8 @@ void StabChainStrong(StabChain<Telt,Tidx_label> & S, std::vector<Telt> const& ne
 #ifdef DEBUG_STABCHAIN
     std::cerr << "CPP StabChainStrong gen1=" << int(gen1+1) << " rep=" << rep << "\n";
 #endif
-    for (const Tidx & j : ClosedInterval<Tidx>(gen1, Tidx(S->genlabels.size()))) {
+    Tidx end_seq = Tidx(S->genlabels.size());
+    for (Tidx j=gen1; j<end_seq; j++) {
       const Telt& g = S->comm->labels[ S->genlabels[j] ];
 #ifdef DEBUG_STABCHAIN
       std::cerr << "CPP StabChainStrong   j=" << int(j+1) << " g=" << g << "\n";
