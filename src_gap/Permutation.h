@@ -71,7 +71,7 @@ std::pair<std::vector<Tidx>, std::vector<Tidx>> GetListValRev(std::string const&
       insertLVal(LVal);
     }
   }
-  return {ListVal,ListRev};
+  return {std::move(ListVal), std::move(ListRev)};
 }
 
 
