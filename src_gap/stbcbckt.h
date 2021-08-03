@@ -570,13 +570,15 @@ std::vector<singStrat<typename Telt::Tidx>> StratMeetPartition(rbaseType<Telt,Ti
 
   for (Tidx s=0; s<nrcells; s++) {
     // now split with cell number s of S.
-    std::vector<Tidx> p=Cell(S, s);
-
-    std::vector<Tidx> p2;
-    for (auto & eVal : p)
-      p2.push_back(cellsP[eVal]);
-    //    PrintVectDebug("p2", p2);
-    std::map<Tidx,Tidx> p3=Collected<Tidx,Tidx>(p2);
+    // Write here hackish code. Hopefully faster
+    Tidx cell_first = S.firsts[s];
+    Tidx cell_len = S.lengths[s];
+    std::map<Tidx,Tidx> p3;
+    for (Tidx u=0; u<cell_len; u++) {
+      Tidx eVal = S.points[cell_first + u];
+      Tidx mVal = cellsP[eVal];
+      p3[mVal] += 1;
+    }
     std::vector<Tidx> splits;
     splits.reserve(p3.size());
     for (auto & kv : p3) {
