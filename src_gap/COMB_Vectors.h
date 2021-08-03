@@ -148,9 +148,10 @@ Tidx PositionProperty(std::vector<T> const& V, UnaryPredicate const& f)
 template<typename T, class UnaryPredicate>
 std::vector<T> ListT(std::vector<T> const& V, UnaryPredicate const& f)
 {
-  std::vector<T> retV;
-  for (auto & eVal : V)
-    retV.push_back(f(eVal));
+  size_t len = V.size();
+  std::vector<T> retV(len);
+  for (size_t i=0; i<len; i++)
+    retV[i] = f(V[i]);
   return retV;
 }
 

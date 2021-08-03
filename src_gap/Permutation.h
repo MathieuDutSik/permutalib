@@ -572,7 +572,7 @@ public:
   {
     return ListVal.data();
   }
-  std::vector<Tidx> getListVal() const
+  const std::vector<Tidx>& getListVal() const
   {
     return ListVal;
   }
@@ -623,7 +623,7 @@ bool operator<(SingleSidedPerm<Tidx> const& v1, SingleSidedPerm<Tidx> const& v2)
   Tidx siz1=v1.size();
   Tidx siz2=v2.size();
   if (siz1 != siz2)
-    return siz1<siz2;
+    return siz1 < siz2;
   Tidx siz=siz1;
   for (Tidx i=0; i<siz; i++) {
     if (v1.at(i) != v2.at(i))
@@ -636,11 +636,11 @@ template<typename Tidx>
 SingleSidedPerm<Tidx> operator~(SingleSidedPerm<Tidx> const& ePerm)
 {
   Tidx siz = ePerm.size();
-  std::vector<Tidx> LVal = ePerm.getListVal();
+  const std::vector<Tidx>& LVal = ePerm.getListVal();
   std::vector<Tidx> v(siz);
   for (Tidx i=0; i<siz; i++)
     v[LVal[i]] = i;
-  return SingleSidedPerm<Tidx>(v);
+  return SingleSidedPerm<Tidx>(std::move(v));
 }
 
 
@@ -660,10 +660,12 @@ SingleSidedPerm<Tidx> operator*(SingleSidedPerm<Tidx> const& v1, SingleSidedPerm
     throw PermutalibException{1};
   }
 #endif
+  const std::vector<Tidx>& LVal1 = v1.getListVal();
+  const std::vector<Tidx>& LVal2 = v2.getListVal();
   std::vector<Tidx> vVal(siz);
   for (Tidx i=0; i<siz; i++) {
-    Tidx j=v1.at(i);
-    Tidx k=v2.at(j);
+    Tidx j=LVal1[i];
+    Tidx k=LVal2[j];
     vVal[i]=k;
   }
   //  return SingleSidedPerm<Tidx>(vVal);
@@ -704,7 +706,7 @@ SingleSidedPerm<Tidx> Conjugation(SingleSidedPerm<Tidx> const& v1, SingleSidedPe
     Tidx j2=v2[j];
     v[i2]=j2;
   }
-  return SingleSidedPerm<Tidx>(v);
+  return SingleSidedPerm<Tidx>(std::move(v));
 }
 
 
@@ -728,10 +730,12 @@ Tidx SlashAct(Tidx const& i, SingleSidedPerm<Tidx> const& g)
 template<typename Tidx>
 SingleSidedPerm<Tidx> LeftQuotient(SingleSidedPerm<Tidx> const& a, SingleSidedPerm<Tidx> const& b)
 {
-  Tidx siz=a.size();
+  Tidx siz=Tidx(a.size());
+  const std::vector<Tidx>& Val_A = a.getListVal();
+  const std::vector<Tidx>& Val_B = b.getListVal();
   std::vector<Tidx> ListVal(siz);
   for (Tidx i=0; i<siz; i++)
-    ListVal[a.at(i)] = b.at(i);
+    ListVal[Val_A[i]] = Val_B[i];
   return SingleSidedPerm<Tidx>(std::move(ListVal));
 }
 
@@ -840,7 +844,8 @@ namespace std {
       const Tidx* ptr_tidx = e_val.getPtr();
       const uint8_t* ptr_i = (const uint8_t*)ptr_tidx;
       size_t len = sizeof(Tidx) * e_val.size();
-      return permutalib::murmur3_32(ptr_i, len, seed);
+      return permutalib::robin_hood_hash_bytes(ptr_i, len, seed);
+      //      return permutalib::murmur3_32(ptr_i, len, seed);
     }
   };
   template<typename Tidx>
@@ -852,7 +857,8 @@ namespace std {
       const Tidx* ptr_tidx = e_val.getPtr();
       const uint8_t* ptr_i = (const uint8_t*)ptr_tidx;
       size_t len = sizeof(Tidx) * e_val.size();
-      return permutalib::murmur3_32(ptr_i, len, seed);
+      return permutalib::robin_hood_hash_bytes(ptr_i, len, seed);
+      //      return permutalib::murmur3_32(ptr_i, len, seed);
     }
   };
 

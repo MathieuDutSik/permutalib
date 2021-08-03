@@ -2,6 +2,7 @@
 #define DEFINE_PERMUTALIB_PERM_GROUP_H
 
 #include "Face_basic.h"
+#include <unordered_set>
 #include <set>
 
 namespace permutalib {
@@ -17,6 +18,7 @@ template<typename Tidx, typename Telt>
 std::vector<Tidx> OnSets(std::vector<Tidx> const& V, Telt const& u)
 {
   std::vector<Tidx> Vret;
+  Vret.reserve(V.size());
   for (auto & ePt : V)
     Vret.push_back(u.at(ePt));
   sort(Vret.begin(), Vret.end());
@@ -113,12 +115,9 @@ typename Telt::Tidx SmallestMovedPoint(std::vector<Telt> const& LGen)
     return std::numeric_limits<Tidx>::max();
   Tidx n=LGen[0].size();
   for (Tidx u=0; u<n; u++) {
-    bool IsOK=false;
     for (auto & eGen : LGen)
       if (eGen.at(u) != u)
-	IsOK=true;
-    if (IsOK)
-      return u;
+        return u;
   }
   return std::numeric_limits<Tidx>::max();
 }
@@ -187,7 +186,7 @@ std::vector<std::vector<typename Telt::Tidx>> OrbitsPerms(std::vector<Telt> cons
       }
       posDone = posTot;
     }
-    orbs.push_back(orb);
+    orbs.emplace_back(std::move(orb));
   }
   return orbs;
 }
@@ -208,12 +207,12 @@ typename Telt::Tidx SmallestMovedPointsPerms(std::vector<Telt> const& gens)
 
 
 template<typename Telt>
-std::vector<int> MovedPointsPerms(std::vector<Telt> const& gens)
+std::vector<typename Telt::Tidx> MovedPointsPerms(std::vector<Telt> const& gens)
 {
   using Tidx=typename Telt::Tidx;
   if (gens.size() == 0)
     return {};
-  std::vector<int> ListMoved;
+  std::vector<Tidx> ListMoved;
   Tidx siz=Tidx(gens[0].size());
   for (Tidx i=0; i<siz; i++) {
     auto IsMoved=[&](int const& ePt) -> bool {
@@ -258,7 +257,7 @@ std::vector<Tobj> Orbit(std::vector<Telt> const& ListGen, Tobj const& x, std::fu
 {
   std::vector<Tobj> ListObj{x};
   std::vector<uint8_t> ListStat(0);
-  std::set<Tobj> SetObj{x};
+  std::unordered_set<Tobj> SetObj{x};
   while(true) {
     bool IsFinished=true;
     size_t len=ListObj.size();
@@ -268,7 +267,7 @@ std::vector<Tobj> Orbit(std::vector<Telt> const& ListGen, Tobj const& x, std::fu
 	ListStat[u]=1;
 	for (auto & eElt : ListGen) {
 	  Tobj eImg = act(ListObj[u], eElt);
-	  if (SetObj.find(eImg) == SetObj.end()) {
+	  if (SetObj.count(eImg) == 0) {
 	    ListObj.push_back(eImg);
 	    ListStat.push_back(0);
 	    SetObj.insert(eImg);

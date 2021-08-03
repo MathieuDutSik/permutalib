@@ -31,13 +31,14 @@ namespace boost::serialization {
     ar & make_nvp("n_act", n_act);
     ar & make_nvp("n_gen", n_gen);
     std::vector<Telt> LGen;
+    LGen.reserve(n_gen);
     for (size_t i_gen=0; i_gen<n_gen; i_gen++) {
       std::vector<Tidx> eList(n_act);
       for (Tidx i=0; i<n_act; i++) {
         ar & make_nvp("val", eList[i]);
       }
       Telt eGen(eList);
-      LGen.push_back(eGen);
+      LGen.emplace_back(std::move(eGen));
     }
     val = permutalib::Group<Telt,Tint>(LGen, n_act);
     std::cerr << "load(Tgroup), step 2\n";

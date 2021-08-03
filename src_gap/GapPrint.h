@@ -112,9 +112,9 @@ std::string GapStringListBoolVector(std::vector<Face> const& f)
 {
   if (f.size() == 0)
     return std::string("[ ]");
-  std::vector<std::string> Lstr;
-  for (auto & eF : f)
-    Lstr.push_back(GapStringBoolVector(eF));
+  std::vector<std::string> Lstr(f.size());
+  for (size_t i=0; i<f.size(); i++)
+    Lstr[i] = GapStringBoolVector(f[i]);
   return GapStringTVector(Lstr);
 }
 

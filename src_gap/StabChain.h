@@ -351,6 +351,18 @@ int GetStabilizerDepth(StabChain<Telt,Tidx_label> const& S1)
 }
 
 
+template<typename Telt, typename Tidx_label>
+bool HasStabStab(StabChain<Telt,Tidx_label> const& S)
+{
+  if (S == nullptr)
+    return false;
+  if (S->stabilizer == nullptr)
+    return false;
+  return true;
+}
+
+
+
 template<typename Telt>
 std::string perm_to_string(Telt const& eVal)
 {
@@ -512,7 +524,7 @@ StabLevel<Telt,Tidx_label> EmptyStabLevel(std::shared_ptr<CommonStabInfo<Telt>> 
   std::vector<Telt> aux;
   int treedepth = 0;
   int diam = 0;
-  return {transversal, orbit, genlabels, cycles, IsBoundCycle, treegen, treegeninv, aux, treedepth, diam, comm, nullptr};
+  return {std::move(transversal), std::move(orbit), std::move(genlabels), std::move(cycles), IsBoundCycle, std::move(treegen), std::move(treegeninv), std::move(aux), treedepth, diam, comm, nullptr};
 }
 
 
@@ -783,8 +795,7 @@ std::vector<Telt> StrongGeneratorsStabChain(StabChain<Telt,Tidx_label> const& S)
     Sptr = Sptr->stabilizer;
   }
   std::vector<Telt> sgs;
-  for (auto & ePos : sgs_set)
-    sgs.push_back(ePos);
+  sgs.insert(sgs.end(), sgs_set.begin(), sgs_set.end());
   return sgs;
 }
 
@@ -794,6 +805,7 @@ template<typename Telt, typename Tidx_label>
 std::vector<Telt> GeneratorsStabChain(StabChain<Telt,Tidx_label> const& S)
 {
   std::vector<Telt> sgs;
+  sgs.reserve(S->genlabels.size());
   for (auto & ePos : S->genlabels) {
 #ifdef DEBUG_STABCHAIN
     std::cerr << "DEBUG ePos=" << ePos << "\n";
@@ -932,8 +944,9 @@ std::vector<typename Telt::Tidx> MovedPoints(StabChain<Telt,Tidx_label> const& S
 	return true;
     return false;
   };
-  std::vector<Tidx> LMoved;
   Tidx n=S->comm->n;
+  std::vector<Tidx> LMoved;
+  LMoved.reserve(n);
   for (Tidx i=0; i<n; i++)
     if (IsMoved(i))
       LMoved.push_back(i);
@@ -1627,7 +1640,7 @@ T LabsLims(T const& lab, std::function<T(T const&)> const& hom, std::vector<T> &
 // It is simplified from the original one with us being in the case
 // IsPerm(hom) and IsPerm(map).
 template<typename Telt, typename Tidx_label, typename Fhom, typename Fmap, typename Fcond>
-StabChain<Telt,Tidx_label> ConjugateStabChain(StabChain<Telt,Tidx_label> & Stot, StabChain<Telt,Tidx_label> & Ttot, Fhom const& hom, Fmap const& map, Fcond const& cond)
+StabChain<Telt,Tidx_label> ConjugateStabChain(StabChain<Telt,Tidx_label> & Stot, StabChain<Telt,Tidx_label> & Ttot, Fhom hom, Fmap map, Fcond cond)
 {
   using Tidx=typename Telt::Tidx;
   Tidx n  = Stot->comm->n;
@@ -1750,7 +1763,7 @@ bool ChangeStabChain(StabChain<Telt,Tidx_label> & Gptr, std::vector<typename Tel
   std::cerr << "CPP ChangeStabChain base = " << GapStringIntVector(base) << "\n";
   std::cerr << "CPP ChangeStabChain 1 orbit=" << PrintTopOrbit(Gptr) << "\n";
 #endif
-  while (GetStabilizerDepth(Sptr) > 1 || i < basSiz) {
+  while (HasStabStab(Sptr) || i < basSiz) {
 #ifdef DEBUG_CHANGE_STAB_CHAIN
     KeyUpdating("Before BasePoint");
 #endif

@@ -174,11 +174,12 @@ Partition<Tidx> GetPartition(std::vector<std::vector<Tidx>> const& list)
   std::vector<Tidx> cellno(nbPoint, std::numeric_limits<Tidx>::max());
   Tidx i=0;
   for (Tidx iPart=0; iPart<nbPart; iPart++) {
-    Tidx len=Tidx(list[iPart].size());
+    const std::vector<Tidx>& eL = list[iPart];
+    Tidx len=Tidx(eL.size());
     firsts[iPart]=i;
     lengths[iPart]=len;
     i += len;
-    for (auto & eVal : list[iPart])
+    for (auto & eVal : eL)
       cellno[eVal] = iPart;
   }
   Partition<Tidx> P{std::move(points), std::move(firsts), std::move(lengths), std::move(cellno)};
@@ -537,9 +538,8 @@ typeFixcellsCell<Tidx> FixcellsCell(Partition<Tidx> const& P, Partition<Tidx> co
   }
   if (K.size() == 0) {
     return {false,{},{}};
-  }
-  else {
-    return {true, K, I};
+  } else {
+    return {true, std::move(K), std::move(I)};
   }
 }
 
@@ -603,7 +603,7 @@ std::vector<std::vector<typename Telt::Tidx>> OrbitsPermsB(std::vector<Telt> con
 #ifdef DEBUG_PARTITION
     std::cerr << "DEBUG After the pnt loop\n";
 #endif
-    orbs.push_back(orb);
+    orbs.emplace_back(std::move(orb));
     fst=dom.find_first();
   }
   for (auto & pnt : Omega)
