@@ -726,9 +726,8 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt,Tidx_label> cons
 #endif
         for (auto & x : node->validkids) {
           Node newnode_v;
-          std::vector<Tidx> selected = node->selected;
-          selected.push_back(x);
-          newnode_v.selected = selected;
+          newnode_v.selected = node->selected;
+          newnode_v.selected.push_back(x);
           //          PrintStabChain(node->substab);
 #ifdef DEBUG_NSI
           std::cerr << "DEBUG Before Stabilize_OnPoints x=" << int(x+1) << "\n";
@@ -744,7 +743,7 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt,Tidx_label> cons
           newnode_v.deleted = false;
           newnode_v.IsBoundChildren = false;
 #ifdef DEBUG_NSI
-          std::cerr << "CPP newnode.selected=" << GapStringIntVector(selected) << "\n";
+          std::cerr << "CPP newnode.selected=" << GapStringIntVector(newnode_v.selected) << "\n";
 #endif
           NodePtr newnode = std::make_shared<Node>(newnode_v);
           ListPtr.push_back(newnode);
