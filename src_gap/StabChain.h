@@ -214,7 +214,7 @@ StabChain<Telt,Tidx_label> StabChainGenerators(std::vector<Telt> const& generato
   std::vector<Telt> aux;
   int treedepth = 0;
   int diam = 0;
-  return std::make_shared<StabLevel<Telt,Tidx_label>>(StabLevel<Telt,Tidx_label>({transversal, orbit, genlabels, cycles, IsBoundCycle, treegen, treegeninv, aux, treedepth, diam, comm, nullptr}));
+  return std::make_shared<StabLevel<Telt,Tidx_label>>(StabLevel<Telt,Tidx_label>({std::move(transversal), std::move(orbit), std::move(genlabels), std::move(cycles), IsBoundCycle, std::move(treegen), std::move(treegeninv), std::move(aux), treedepth, diam, comm, nullptr}));
 }
 
 
@@ -1450,9 +1450,10 @@ bool StabChainForcePoint(StabChain<Telt,Tidx_label> & Stot, typename Telt::Tidx 
 template<typename Telt, typename Tidx_label>
 std::vector<Telt> GetListGenerators(StabChain<Telt,Tidx_label> const& Stot)
 {
-  std::vector<Telt> LGens;
-  for (const Tidx_label & posGen : Stot->genlabels)
-    LGens.push_back(Stot->comm->labels[posGen]);
+  size_t len = Stot->genlabels.size();
+  std::vector<Telt> LGens(len);
+  for (size_t i=0; i<len; i++)
+    LGens[i] = Stot->comm->labels[Stot->genlabels[i]];
   return LGens;
 }
 

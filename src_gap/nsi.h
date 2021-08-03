@@ -432,10 +432,14 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt,Tidx_label> cons
      Face b(m);
      for (auto & eVal : LIdx)
        b[eVal] = 1;
-     std::vector<Tidx> cands;
+     size_t len_ret = size_t(m) - LIdx.size();
+     size_t pos = 0;
+     std::vector<Tidx> cands(len_ret);
      for (Tidx i=0; i<m; i++)
-       if (b[i] == 0)
-         cands.push_back(i);
+       if (b[i] == 0) {
+         cands[pos] = i;
+         pos++;
+       }
      return cands;
   };
   // We need to break all the cycles in order to the memory free to happen correctly.
