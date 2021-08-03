@@ -1624,8 +1624,8 @@ bool StabChainSwap(StabChain<Telt,Tidx_label> & Stot)
 
 
 // maybe use std::map<T, T> instead
-template<typename T>
-T LabsLims(T const& lab, std::function<T(T const&)> const& hom, std::vector<T> & labs, std::vector<T> & lims)
+template<typename T, typename Thom>
+T LabsLims(T const& lab, Thom hom, std::vector<T> & labs, std::vector<T> & lims)
 {
   size_t pos=PositionVect_ui<T,size_t>(labs, lab);
   if (pos == std::numeric_limits<size_t>::max()) {

@@ -274,8 +274,8 @@ std::vector<Tidx> Fixcells(Partition<Tidx> const& ePartition)
 }
 
 
-template<typename Tidx>
-Tidx SplitCell_Kernel(Partition<Tidx> & P, Tidx const& i, std::function<bool(Tidx)> const& test, Tidx const& out)
+template<typename Tidx, typename Ftest>
+Tidx SplitCell_Kernel(Partition<Tidx> & P, Tidx const& i, Ftest test, Tidx const& out)
 {
 #ifdef DEBUG_PARTITION
   //  std::cerr << "CPP i=" << int(i+1) << " out=" << out << "\n";
@@ -373,7 +373,7 @@ typename Telt::Tidx SplitCell_Partition(Partition<typename Telt::Tidx> & P, type
   std::cerr << "CPP Q=\n";
   RawPrintPartition(Q);
 #endif
-  std::function<bool(Tidx)> test=[&](Tidx ePt) -> bool {
+  auto test=[&](const Tidx& ePt) -> bool {
     Tidx fPt=PowAct(P.points[ePt], g);
 #ifdef DEBUG_PARTITION
     std::cerr << "CPP SplitCellTestfun1 fPt=" << int(fPt+1) << "\n";
@@ -388,7 +388,7 @@ template<typename Telt>
 typename Telt::Tidx SplitCell_Face(Partition<typename Telt::Tidx> & P, typename Telt::Tidx const& i, Face const& f, typename Telt::Tidx const& j, Telt const& g, typename Telt::Tidx const& out)
 {
   using Tidx = typename Telt::Tidx;
-  std::function<bool(Tidx)> test=[&](Tidx ePt) -> bool {
+  auto test=[&](const Tidx& ePt) -> bool {
     Tidx fPt=PowAct(P.points[ePt], g);
     if (j == 1) {
       if (f[fPt] == 1)
@@ -486,6 +486,7 @@ Tidx FixpointCellNo(Partition<Tidx> const& P, Tidx const& i)
 }
 
 
+/*
 template<typename Tidx>
 Tidx FixcellPoint(Partition<Tidx> const& P, std::set<Tidx> & old)
 {
@@ -503,7 +504,7 @@ Tidx FixcellPoint(Partition<Tidx> const& P, std::set<Tidx> & old)
   old.insert(p);
   return p;
 }
-
+*/
 
 template<typename Tidx>
 struct typeFixcellsCell {
@@ -522,7 +523,7 @@ typeFixcellsCell<Tidx> FixcellsCell(Partition<Tidx> const& P, Partition<Tidx> co
     Tidx start=P.firsts[iPart];
     Tidx kPart=CellNoPoint(Q, P.points[start]);
     if (old.find(kPart) == old.end()) {
-      std::function<bool()> eval=[&]() -> bool {
+      auto eval=[&]() -> bool {
 	for (int j=1; j<P.lengths[iPart]; j++) {
 	  if (CellNoPoint(Q, P.points[j]) != kPart)
 	    return false;
