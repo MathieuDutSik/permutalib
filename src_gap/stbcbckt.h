@@ -1056,7 +1056,7 @@ imageType<Telt,Tidx_label> BuildInitialImage(rbaseType<Telt,Tidx_label> & rbase,
 
 
 template<typename Telt, typename Tidx_label, typename Tint, bool repr, typename Tpr>
-ResultPBT<Telt,Tidx_label> PartitionBacktrack(StabChain<Telt,Tidx_label> const& G, Tpr Pr, rbaseType<Telt,Tidx_label> & rbase, dataType<typename Telt::Tidx> & data, StabChain<Telt,Tidx_label> & L, StabChain<Telt,Tidx_label> & R)
+ResultPBT<Telt,Tidx_label> PartitionBacktrack(StabChain<Telt,Tidx_label> const& G, const Tpr& Pr, rbaseType<Telt,Tidx_label> & rbase, dataType<typename Telt::Tidx> & data, StabChain<Telt,Tidx_label> & L, StabChain<Telt,Tidx_label> & R)
 {
   using Tidx=typename Telt::Tidx;
   Tidx n = G->comm->n;
