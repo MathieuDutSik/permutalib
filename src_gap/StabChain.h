@@ -272,7 +272,7 @@ std::string GetListStabCommPartition(std::vector<StabChain<Telt,Tidx_label>> con
         }
       }
       std::string estr = GapStringIntVector(LVal);
-      ListStr.push_back(estr);
+      ListStr.emplace_back(std::move(estr));
     }
   }
   return GapStringTVector(ListStr);
@@ -912,7 +912,7 @@ StabChainOptions<Tint,Tidx> GetStandardOptions(Tidx const& n)
   bool reduced=true;
   Tint size=0;
   Tint limit=0;
-  return {n, base, knownBase, random, reduced, size, limit};
+  return {n, std::move(base), std::move(knownBase), random, reduced, size, limit};
 }
 
 
@@ -1642,7 +1642,7 @@ T LabsLims(T const& lab, Thom hom, std::vector<T> & labs, std::vector<T> & lims)
 // It is simplified from the original one with us being in the case
 // IsPerm(hom) and IsPerm(map).
 template<typename Telt, typename Tidx_label, typename Fhom, typename Fmap, typename Fcond>
-StabChain<Telt,Tidx_label> ConjugateStabChain(StabChain<Telt,Tidx_label> & Stot, StabChain<Telt,Tidx_label> & Ttot, Fhom hom, Fmap map, Fcond cond)
+StabChain<Telt,Tidx_label> ConjugateStabChain(StabChain<Telt,Tidx_label> & Stot, StabChain<Telt,Tidx_label> & Ttot, const Fhom& hom, const Fmap& map, const Fcond& cond)
 {
   using Tidx=typename Telt::Tidx;
   Tidx n  = Stot->comm->n;
@@ -2049,7 +2049,7 @@ StabChain<Tret,Tidx_label> HomomorphismMapping(StabChain<Telt,Tidx_label> const&
     return Vret;
   };
   std::vector<Tret> labelsMap = fVector(Stot->comm->labels);
-  std::shared_ptr<CommonStabInfo<Tret>> comm = std::make_shared<CommonStabInfo<Tret>>(CommonStabInfo<Tret>({nMap, idMap, labelsMap}));
+  std::shared_ptr<CommonStabInfo<Tret>> comm = std::make_shared<CommonStabInfo<Tret>>(CommonStabInfo<Tret>({nMap, idMap, std::move(labelsMap)}));
 
   StabChain<Telt,Tidx_label> Sptr = Stot;
   StabChain<Tret,Tidx_label> Swork = nullptr;

@@ -1834,7 +1834,7 @@ ResultPBT<Telt,Tidx_label> RepOpSetsPermGroup(StabChain<Telt,Tidx_label> const& 
 	DiffVect.push_back(eVal);
     }
     //    std::cerr << "CPP IntVect=" << GapStringIntVector(IntVect) << " DiffVect=" << GapStringIntVector(DiffVect) << "\n";
-    return GetPartition<Tidx>({IntVect, DiffVect});
+    return GetPartition<Tidx>({std::move(IntVect), std::move(DiffVect)});
   };
 
 
