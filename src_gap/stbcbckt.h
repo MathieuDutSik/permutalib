@@ -2078,7 +2078,537 @@ std::pair<bool,Telt> Kernel_RepresentativeAction_OnPoints(StabChain<Telt,Tidx_la
 }
 
 
+#############################################################################
+##
+#F  RepOpElmTuplesPermGroup( <repr>, <G>, <e>, <f>, <L>, <R> )  on elm tuples
+##
+InstallGlobalFunction( RepOpElmTuplesPermGroup,
+function( repr, G, e, f, L, R )
+local  Omega,      # a common operation domain for <G>, <E> and <F>
+	order,      # orders of elements in <e>
+	cycles,     # cycles of <e> on <Omega>
+	P, Q,       # partition refined during construction of <rbase>
+	rbase,      # the R-base for the backtrack algorithm
+	Pr,	       # property
+	baspts,     # base for group
+	eran,       # range
+	oe,of,sets,
+	pre,l,map,
+	bailout,
+	i,j, size; # loop/auxiliary variables
 
+  # Central elements and trivial subgroups.
+  if ForAll( GeneratorsOfGroup( G ), gen -> OnTuples( e, gen ) = e )  then
+      if not repr  then  return G;
+      elif e = f   then  return One( G );
+		    else  return fail;      fi;
+  fi;
+
+  if repr and
+      ( Length( e ) <> Length( f )  or  ForAny( [ 1 .. Length( e ) ],
+	      i -> CycleStructurePerm( e[ i ] ) <>
+		  CycleStructurePerm( f[ i ] ) ) )  then
+      return fail;
+  fi;
+
+  bailout:=repr;
+  if IsTrivial(L) then
+    L:=SubgroupNC(G,Filtered( Concatenation(
+	    Filtered(e,gen->gen in G),
+	    StrongGeneratorsStabChain(StabChainMutable(G))),
+	  gen->OnTuples(e,gen)=e));
+  else
+    bailout:=false;
+  fi;
+
+  if IsTrivial(R) then
+    if repr then
+      R:=SubgroupNC(G,Filtered( Concatenation(
+	    Filtered(f,gen->gen in G),
+	    StrongGeneratorsStabChain(StabChainMutable(G))),
+	  gen->OnTuples(f,gen)=f));
+
+    else
+      R:=L;
+    fi;
+  fi;
+
+  Omega := MovedPoints( Concatenation( GeneratorsOfGroup( G ), e, f ) );
+
+  P := TrivialPartition( Omega );
+  if repr  then  size := 1;
+	    else  size := Size( G );  fi;
+  for i  in [ 1 .. Length( e ) ]  do
+      cycles := Partition( Cycles( e[ i ], Omega ) );
+      StratMeetPartition( P, CollectedPartition( cycles, size ) );
+  od;
+
+  # Find the order in which to process the points in the base choice.
+  #SortParallel( ShallowCopy( -cycles.lengths ), order );
+
+  # The criterion for selection of base points is to select them according
+  # to (descending) cycle length of the permutation to be conjugated. At the
+  # moment no other criterion is used (though experiments can observe a
+  # significant impact on run time -- there is work TODO).
+  # Beyond this choice, the base point order is determined as a side effect
+  # of the sorting algorithm.
+  # To avoid particular configurations falling repeatedly into a bad case,
+  # we permute the base points to obtain a random ordering beyond the
+  # criterion used. This can be turned off through an option for debugging
+  # purposes.
+  if ValueOption("norandom")=true then
+    i:=[1..Length(cycles.firsts)];
+  else
+    i:=FLOYDS_ALGORITHM(RandomSource(IsMersenneTwister),
+         Length(cycles.firsts),false);
+  fi;
+  order := cycles.points{ cycles.firsts{i} };
+  SortParallel( -(cycles.lengths{i}), order );
+
+  repeat
+
+    # Construct an R-base.
+    rbase := EmptyRBase( G, Omega, P );
+
+    # Loop over the stabilizer chain of <G>.
+    rbase.nextLevel := function( P, rbase )
+        local   fix,  pnt,  img,  g,  strat;
+
+        NextRBasePoint( P, rbase, order );
+
+        # Centralizer refinement.
+        fix := Fixcells( P );
+        for pnt  in fix  do
+            for g  in [ 1 .. Length( e ) ]  do
+                img := pnt ^ e[ g ];
+                strat := IsolatePoint( P, img );
+                if strat <> false  then
+                    Add( fix, img );
+                    ProcessFixpoint( rbase, img );
+                    AddRefinement( rbase, STBBCKT_STRING_CENTRALIZER,
+                            [ CellNoPoint(P,pnt), g, img, strat ] );
+                    if P.lengths[ strat ] = 1  then
+                        pnt := FixpointCellNo( P, strat );
+                        ProcessFixpoint( rbase, pnt );
+                        AddRefinement( rbase, "ProcessFixpoint",
+                                [ pnt, strat ] );
+                    fi;
+                fi;
+            od;
+        od;
+    end;
+
+    if repr  then
+        Q := TrivialPartition( Omega );
+        for i  in [ 1 .. Length( f ) ]  do
+            StratMeetPartition( Q, CollectedPartition( Partition
+                    ( Cycles( f[ i ], Omega ) ), 1 ) );
+        od;
+    else
+        Q := P;
+    fi;
+
+    #Pr:=gen -> gen!.lftObj = gen!.rgtObj;
+    baspts:=BaseStabChain(StabChainMutable(G));
+    if not (ForAll(e,i->i in G) and ForAll(f,i->i in G)) then
+      baspts:=Union(baspts,MovedPoints(Concatenation(e,f)));
+    fi;
+
+    eran:=[1..Length(e)];
+    Pr:=function(gen)
+        local i,j;
+
+	  for i in eran do
+	    for j in baspts do
+	      if not ((j/gen)^e[i])^gen=j^f[i] then
+	        return false;
+	      fi;
+	    od;
+	  od;
+	  return true;
+        end;
+
+    map:=PartitionBacktrack( G, [ e, f, OnTuples,Pr],
+                   repr, rbase, Concatenation( [ Q ], f ),
+		   L, R:bailout:=bailout );
+    if not (bailout and map=infinity) then
+      return map;
+    fi;
+    Info(InfoBckt,1,"\n#I  ------\n#I  First compute new L");
+
+    L:=G;
+    for i in e do
+      L:=Centralizer(L,i);
+    od;
+    bailout:=false;
+    # go back as we need to build the base anew
+  until false;
+
+end );
+
+
+
+
+
+#############################################################################
+##
+#F  ConjugatorPermGroup( <arg> )  . . . . isomorphism / conjugating element
+##
+InstallGlobalFunction( ConjugatorPermGroup, function( arg )
+local G, E, F, L, R, mpG, mpE, mpF, map, Omega, P, orb, comb, found, pos,
+dom, et, ft, Pr, rbase, BF, Q, data,lc;
+
+    G := arg[ 1 ];
+    E := arg[ 2 ];
+    F := arg[ 3 ];
+    if   Size( E ) <> Size( F )  then  return fail;
+    elif IsTrivial( E )          then  return ();
+    elif Size( E ) = 2  then
+        if Length( arg ) > 3  then
+            L := arg[ 4 ];  R := arg[ 5 ];
+        else
+            L := TrivialSubgroup( G );  R := L;
+        fi;
+        E := First( GeneratorsOfGroup( E ), gen -> Order( gen ) <> 1 );
+        F := First( GeneratorsOfGroup( F ), gen -> Order( gen ) <> 1 );
+        return RepOpElmTuplesPermGroup( true, G, [ E ], [ F ], L, R );
+    elif IsAbelian(E) and IsCyclic(F) then
+      # special case of cyclic groups
+      if not IsCyclic(F) then return fail;fi;
+      if Length( arg ) > 3  then
+	  L := arg[ 4 ];  R := arg[ 5 ];
+      else
+	  L := TrivialSubgroup( G );  R := L;
+      fi;
+      E:=MinimalGeneratingSet(E)[1];
+      F:=MinimalGeneratingSet(F)[1];
+      Q:=Order(E);
+      for pos in Filtered([1..Q],x->Gcd(x,Q)=1) do
+        found:=RepOpElmTuplesPermGroup( true, G, [ E ], [ F^pos ], L, R );
+	if found<>fail then return found;fi;
+      od;
+      return fail;
+      Error("hier");
+    fi;
+    # `Suborbits' uses all points. (AH, 7/17/02)
+    mpG:=MovedPoints(GeneratorsOfGroup(G));
+    mpE:=MovedPoints(GeneratorsOfGroup(E));
+    mpF:=MovedPoints(GeneratorsOfGroup(F));
+
+    map:=false;
+    Omega := [1..Maximum(Maximum(mpG),Maximum(mpE),Maximum(mpF))];
+
+    if IsSubset(mpG,mpE) and IsSubset(mpG,mpF) and not IsTransitive(G,mpG) then
+      # is there a chance to use only some orbits?
+      if not (IsSubset(G,E) and IsSubset(G,F)) then
+	P:=Group(Concatenation(GeneratorsOfGroup(G),
+                               GeneratorsOfGroup(E),GeneratorsOfGroup(F)));
+      else
+	P:=G;
+      fi;
+      orb:=Orbits(P,mpG);
+      if Length(orb)>7 then
+	# join orbits to make only a few
+	orb:=ShallowCopy(orb);
+	Sort(orb,function(a,b) return Length(a)<Length(b);end);
+	comb:=Union(orb{[7..Length(orb)]});
+	orb:=Concatenation(orb{[1..6]},[comb]);
+      fi;
+      comb:=Combinations(orb);
+      Sort(comb,function(a,b) return Sum(a,Length)<Sum(b,Length);end);
+      found:=false;
+      pos:=0; # pos1 is empty
+      lc:=Length(mpG)*2/3;
+      while pos<Length(comb) and not found and pos<=Length(comb) do
+        pos:=pos+1;
+	if Sum(comb[pos],Length)<lc then
+	  dom:=Union(comb[pos]);
+	  if Size(Stabilizer(P,dom,OnTuples))=1 then
+	    # found faithful
+	    found:=true;
+	  fi;
+        fi;
+      od;
+      if found then
+	map:=ActionHomomorphism(P,dom,"surjective");
+	SetIsInjective(map,true);
+	G:=Image(map,G);
+	E:=Image(map,E);
+	F:=Image(map,F);
+	Omega:=[1..Length(dom)];
+      fi;
+    fi;
+
+    # test whether we have a chance mapping the groups (as their orbits fit
+    # together)
+    if Collected(List(OrbitsDomain(E,Omega),Length))<>
+       Collected(List(OrbitsDomain(F,Omega),Length)) then
+      return fail;
+    fi;
+
+    # The test uses special condition if primitive, thus rule out different
+    # transitivity/primitivity first.
+    if not IsIdenticalObj(E,F) then
+      et:=IsTransitive(E,Omega);
+      ft:=IsTransitive(F,Omega);
+      if et<>ft then
+	return fail;
+      elif et and IsPrimitive(E,Omega)<>IsPrimitive(F,Omega) then
+	return fail;
+      fi;
+    fi;
+
+    Pr := gen -> ForAll( GeneratorsOfGroup( E ), g -> g ^ gen in F );
+    if Length( arg ) > 3  then
+      L := arg[ Length( arg ) - 1 ];
+      R := arg[ Length( arg ) ];
+      if map<>false then
+	L:=Image(map,L);
+	R:=Image(map,R);
+      fi;
+    elif IsSubset( G, E )  then
+        L := E;
+        if IsSubset( G, F )  then  R := F;
+                             else  return fail;  fi;
+    else
+        L := TrivialSubgroup( G );
+        R := TrivialSubgroup( G );
+    fi;
+
+    rbase := RBaseGroupsBloxPermGroup( true, G, Omega,
+                     E, 1, OrbitsPartition( E, Omega ) );
+    BF := OrbitsPartition( F, Omega );
+    Q := CollectedPartition( BF, 1 );
+    data := [ Q, F, [  ], BF, [  ] ];
+    if IsBound( rbase.reggrp )  then
+      P:=rbase.reggrp( F, Omega );
+      if P=fail then
+	# the first group has an EARNS, the second not.
+        return fail;
+      fi;
+      Add( data, P );
+    fi;
+
+    found:=PartitionBacktrack( G, Pr, true, rbase, data, L, R );
+    if IsPerm(found) and map<>false then
+      found:=PreImagesRepresentative(map,found);
+    fi;
+    return found;
+end );
+
+#############################################################################
+##
+#F  NormalizerPermGroup( <arg> ) . . . automorphism group / normalizer
+##
+
+# the backtrack call
+BindGlobal("DoNormalizerPermGroup",function(G,E,L,Omega)
+local Pr, div, B, rbase, data, N;
+
+  Pr := gen -> ForAll( GeneratorsOfGroup( E ), g -> g ^ gen in E );
+  if not (IsTrivial( G ) or IsTrivial(E)) then
+    if IsSubset( G, E )  then
+      div := SmallestPrimeDivisor( Index( G, E ) );
+    else
+      div := SmallestPrimeDivisor( Size( G ) );
+    fi;
+    if Length(MovedPoints(G))>Size(G) and Length(MovedPoints(G))>500 then
+      return SubgroupProperty(G,
+	i->ForAll(GeneratorsOfGroup(E),j->j^i in E));
+    fi;
+    B := OrbitsPartition( E, Omega );
+    rbase := RBaseGroupsBloxPermGroup( false, G, Omega, E, div, B );
+    data := [ true, E, [  ], B, [  ] ];
+    if IsBound( rbase.reggrp )  then
+      Add( data, rbase.reggrp( E, Omega ) );
+    fi;
+    N := PartitionBacktrack( G, Pr, false, rbase, data, L, L );
+  else
+    N := ShallowCopy( G );
+  fi;
+  # remove cached information
+  G!.suborbits:=[];
+  E!.suborbits:=[];
+
+  # bring the stabilizer chains back into a decent form
+  ReduceStabChain(StabChainMutable(G));
+  ReduceStabChain(StabChainMutable(E));
+  ReduceStabChain(StabChainMutable(N));
+
+  return N;
+end );
+
+InstallGlobalFunction( NormalizerPermGroup, function( arg )
+local G, E, L, issub, mpG, mpE, cnt, P, Omega, orb, i, start, so, hom, Gh,
+Eh, Lh, Nh,G0;
+
+  G := arg[ 1 ];
+  E := arg[ 2 ];
+  G!.suborbits:=[]; # in case any remained from interruption
+  E!.suborbits:=[];
+  if IsTrivial( E ) or IsTrivial( G ) then
+      return G;
+  elif Size( E ) = 2  then
+    if Length( arg ) > 2  then  L := arg[ 3 ];
+			  else  L := TrivialSubgroup( G );  fi;
+    E := [ First( GeneratorsOfGroup( E ),
+		  gen -> Order( gen ) <> 1 ) ];
+    return RepOpElmTuplesPermGroup( false, G, E, E, L, L );
+  fi;
+
+  if   Length( arg ) = 3  then
+    L := arg[ 3 ];
+    issub:=fail;
+  elif IsSubset( G, E )   then
+    L := E;
+    issub:=true;
+  else
+    L := TrivialSubgroup( G );
+    issub:=false;;
+  fi;
+
+  mpG:=MovedPoints(GeneratorsOfGroup(G));
+  mpE:=MovedPoints(GeneratorsOfGroup(E));
+  if IsSubset(mpG,mpE) and not IsTransitive(G,mpG) then
+    cnt:=0;
+    if issub=false then
+      issub:=IsSubset(G,E);
+    fi;
+    G0:=G;
+    if issub then
+      P:=G;
+    else
+      P:=Group(Concatenation(GeneratorsOfGroup(G), GeneratorsOfGroup(E)));
+    fi;
+    Omega:=ShallowCopy(mpG);
+
+    while Length(Omega)>0
+      # it is not unlikely that some orbits suffice. Thus we can just stop
+      # then
+      and not IsNormal(G,E) do
+
+      orb:=ShallowCopy(Orbits(P,Omega));
+      SortBy(orb,Length);
+      i:=1;
+      while i<=Length(orb) and Length(orb[i])=1 do
+	Omega:=Difference(Omega,orb[i]);
+	i:=i+1;
+      od;
+      if i<=Length(orb) then
+	start:=i;
+	cnt:=Length(orb[i]);
+	i:=i+1;
+	# don't bother with very short orbits -- they will give little
+	# improvement.
+	while i<=Length(orb) and cnt+Length(orb[i])<10 do
+	  cnt:=cnt+Length(orb[i]);
+	  i:=i+1;
+	od;
+	if cnt=Length(mpG) then
+	  # no orbits...
+	  Omega := [1..Maximum(Maximum(mpG),Maximum(mpE))];
+	  return DoNormalizerPermGroup(G,E,L,Omega);
+	fi;
+	so:=Union(orb{[start..i-1]});
+
+	hom:=ActionHomomorphism(P,so,"surjective");
+	Gh:=Image(hom,G);
+	Eh:=Image(hom,E);
+	Lh:=Image(hom,L);
+	Nh:=DoNormalizerPermGroup(Gh,Eh,Lh,[1..Length(so)]);
+	if Size(Nh)<Size(Gh) then
+	  # improvement!
+	  if not IsIdenticalObj(P,G) then
+	    P:=PreImage(hom,ClosureGroup(Nh,Eh));
+	  fi;
+	  G:=PreImage(hom,Nh);
+	  Info(InfoGroup,1,"Orbit ",Length(so)," reduces by ",Size(Gh)/Size(Nh));
+	fi;
+	Omega:=Difference(Omega,so);
+      fi;
+    od;
+
+    if not issub then
+      G:=Intersection(G,G0);
+    fi;
+
+    if Length(Omega)=0 and not IsNormal(G,E) then
+      # we ran through all orbits and did not stop early because everything
+      # normalized. We thus have to test the normalization on all orbits
+      Nh:=DoNormalizerPermGroup(G,E,L,mpG);
+      Info(InfoGroup,1,"Union reduces by ",Size(G)/Size(Nh));
+    else
+      Nh:=G; # we know that G normalizes
+    fi;
+    Assert(3,Nh=DoNormalizerPermGroup(G,E,L,
+                  [1..Maximum(Maximum(mpG),Maximum(mpE))]));
+    return Nh;
+
+  else
+    # `Suborbits' uses all points. (AH, 7/17/02)
+    Omega := [1..Maximum(Maximum(mpG),Maximum(mpE))];
+    return DoNormalizerPermGroup(G,E,L,Omega);
+  fi;
+end);
+
+
+
+#############################################################################
+##
+#F  ElementProperty( <G>, <Pr> [, <L> [, <R> ] ] )  one element with property
+##
+InstallGlobalFunction( ElementProperty, function( arg )
+    local  G,  Pr,  L,  R,  Omega,  rbase,  P;
+
+    # Get the arguments.
+    G  := arg[ 1 ];
+    Pr := arg[ 2 ];
+    if Length( arg ) > 2  then  L := arg[ 3 ];
+                          else  L := TrivialSubgroup( G );  fi;
+    if Length( arg ) > 3  then  R := arg[ 4 ];
+                          else  R := TrivialSubgroup( G );  fi;
+
+    # Treat the trivial case.
+    if IsTrivial( G )  then
+        if Pr( One( G ) )  then  return One( G );
+                           else  return fail;      fi;
+    fi;
+
+    # Construct an R-base.
+    Omega := MovedPoints( G );
+    P := TrivialPartition( Omega );
+    rbase := EmptyRBase( G, Omega, P );
+    rbase.nextLevel := NextRBasePoint;
+
+    return PartitionBacktrack( G, Pr, true, rbase, [ P ], L, R );
+end );
+
+#############################################################################
+##
+#F  SubgroupProperty( <G>, <Pr> [, <L> ] )  . . . . . . . fulfilling subgroup
+##
+InstallGlobalFunction( SubgroupProperty, function( arg )
+    local  G,  Pr,  L,  Omega,  rbase,  P;
+
+    # Get the arguments.
+    G  := arg[ 1 ];
+    Pr := arg[ 2 ];
+    if Length( arg ) > 2  then  L := arg[ 3 ];
+                          else  L := TrivialSubgroup( G );  fi;
+
+    # Treat the trivial case.
+    if IsTrivial( G )  then
+        return G;
+    fi;
+
+    # Construct an R-base.
+    Omega := MovedPoints( G );
+    P := TrivialPartition( Omega );
+    rbase := EmptyRBase( G, Omega, P );
+    rbase.nextLevel := NextRBasePoint;
+
+    return PartitionBacktrack( G, Pr, false, rbase, [ P ], L, L );
+end );
 
 
 }
