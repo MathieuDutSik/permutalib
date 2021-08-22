@@ -71,52 +71,39 @@ StabChain<Telt,Tidx_label> Kernel_DerivedSubgroup(const StabChain<Telt,Tidx_labe
 }
 
 
-#############################################################################
-##
-#M  SmallGeneratingSet(<G>) 
-##
-InstallMethod(SmallGeneratingSet,"random and generators subset, randsims",true,
-  [IsPermGroup],0,
-function (G)
-local  i, j, U, gens,o,v,a,sel,min,orb,orp,ok;
 
-  gens := ShallowCopy(Set(GeneratorsOfGroup(G)));
+template<typename Telt, typename Tidx_label, typename Tint>
+std::vector<Telt> Kernel_SmallGeneratingSet(const StabChain<Telt,Tidx_label>& G)
+{
+  using Tidx = typename Telt::Tidx;
+  std::unordered_set<Telt> gens_set;
+  for (auto & eGen : Kernel_GeneratorsOfGroup(G)) {
+    if (!eGen.isIdentity())
+      gens.insert(eGen);
+  }
+  std::vector<Telt> gens;
+  for (auto & eGen : gens_set)
+    gens.push_back(eGen);
 
-  # try pc methods first. The solvability test should not exceed cost, nor
-  # the number of points.
-  if #Length(MovedPoints(G))<50000 and 
-   #((HasIsSolvableGroup(G) and IsSolvableGroup(G)) or IsAbelian(G))
-      IsSolvableGroup(G) 
-      and Length(gens)>3 then
-    return MinimalGeneratingSet(G);
-  fi;
+  size_t len=gens.size();
+  Face status_remove(len);
+  for (size_t i=0; i<len; i++) {
+    if (status_remove[i] == 0) {
+      if (size_t j=0; j<len; j++) {
+        if (i != j && status_remove[j] == 0) {
+          Tidx val = LogPerm(gens[i], gens[j]); // test if gens[i]^e = gens[j]
+          if (val != std::numeric_limits<Tidx>::max()) {
+            status_remove[j]=1;
+          }
+        }
+      }
+    }
+  }
+  std::vector<Telt> gens2;
+  for (size_t i=0; i<len; i++)
+    if (status_remove[i] == 0)
+      gens2.push_back(gens[i]);
 
-  # remove obvious redundancies
-  o:=List(gens,Order);
-  SortParallel(o,gens,function(a,b) return a>b;end);
-  sel:=Filtered([1..Length(gens)],x->o[x]>1);
-
-  for i in [1..Length(gens)] do
-    if i in sel then
-      #Print(i," ",sel,"\n");
-      for j in sel do
-        if j>i then
-	  a:=LogPerm(gens[i],gens[j]);
-	  if a=false then
-	    #Assert(1,not gens[j] in Group(gens[i]));
-	    a:=a; # avoid empty case
-	  else
-	    #Assert(1,gens[i]^a=gens[j]);
-	    #Print("Remove ",j," by ",i,"\n");
-	    RemoveSet(sel,j);
-	  fi;
-	fi;
-      od;
-    fi;
-  od;
-  gens:=gens{sel};
-
-  # store orbit data
   orb:=Set(List(Orbits(G,MovedPoints(G)),Set));
   orp:=Filtered([1..Length(orb)],x->IsPrimitive(Action(G,orb[x])));
 
@@ -138,10 +125,7 @@ local  i, j, U, gens,o,v,a,sel,min,orb,orp,ok;
           ok:=Length(orb)=Length(Orbits(U,MovedPoints(U))) and
               ForAll(orp,x->IsPrimitive(U,orb[x]));
         fi;
-
-
 	StabChainOptions(U).random:=100; # randomized size
-#Print("A:",i,",",j," ",Size(G)/Size(U),"\n");
         if ok and Size(U)=Size(G) then
           gens:=Set(GeneratorsOfGroup(U));
         fi;

@@ -49,6 +49,22 @@ bool Kernel_IsPrimitive(const StabChain<Telt,Tidx_label>& S)
 }
 
 
+/*
+  We follow here a different approach to GAP.
+  Testing cyclicity should not be a computationally intensive
+  operation.
+*/
+template<typename Telt, typename Tidx_label>
+std::optional<Telt> Kernel_IsCyclic(const StabChain<Telt,Tidx_label>& S)
+{
+  using Tidx=typename Telt::Tidx;
+  Tidx order = 1;
+  StabChain<Telt,Tidx_label> Swork = S;
+  while(true) {
+    
+  }
+}
+
 }
 
 

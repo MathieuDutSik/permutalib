@@ -1,7 +1,7 @@
 #ifndef INCLUDE_PERMUTALIB_ASCENDING_CHAIN_H
 #define INCLUDE_PERMUTALIB_ASCENDING_CHAIN_H
 
-
+/*
 #############################################################################
 ##
 ##  IntermediateGroup(<G>,<U>)  . . . . . . . . . subgroup of G containing U
@@ -11,8 +11,9 @@
 ##  finding minimal blocks for
 ##  the operation of G on the Right Cosets of U.
 ##
+*/
+
 InstallGlobalFunction( IntermediateGroup, function(G,U)
-local o,b,img,G1,c,m,mt,hardlimit,gens,t,k,intersize;
 
   if U=G then
     return fail;
@@ -24,40 +25,9 @@ local o,b,img,G1,c,m,mt,hardlimit,gens,t,k,intersize;
     return fail; # avoid infinite recursion
   fi;
 
-  # use maximals, use `Try` as we call with limiting options
-  IsNaturalAlternatingGroup(G);
-  IsNaturalSymmetricGroup(G);
-  m:=TryMaximalSubgroupClassReps(G:cheap,intersize:=intersize,nolattice);
-  if m<>fail and Length(m)>0 then
-
-    m:=Filtered(m,x->Size(x) mod Size(U)=0 and Size(x)>Size(U));
-    SortBy(m,x->Size(G)/Size(x));
-    
-    gens:=SmallGeneratingSet(U);
-    for c in m do
-      if Index(G,c)<50000 then
-        t:=RightTransversal(G,c:noascendingchain); # conjugates
-        for k in t do
-          if ForAll(gens,x->k*x/k in c) then
-            Info(InfoCoset,2,"Found Size ",Size(c));
-            # U is contained in c^k
-            return c^k;
-          fi;
-        od;
-      else
-        t:=DoConjugateInto(G,c,U,true:intersize:=intersize,onlyone:=true);
-        if t<>fail and t<>[] then 
-          Info(InfoCoset,2,"Found Size ",Size(c));
-          return c^(Inverse(t));
-        fi;
-      fi;
-    od;
-
-    Info(InfoCoset,2,"Found no intermediate subgroup ",Size(G)," ",Size(U));
-    return fail;
-  fi;
-
-  # old code -- obsolete
+  // use maximals, use `Try` as we call with limiting options
+  // We disable the code using the TryMaximalSubgroupClassReps
+  // as it requires a lot of prerequisite.
 
   c:=ValueOption("refineChainActionLimit");
   if IsInt(c) then
