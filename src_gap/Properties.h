@@ -11,7 +11,7 @@ namespace permutalib {
 
 
 template<typename Telt>
-bool Kernel_IsCommutativeGenerators(const std::vector<Telt>& S)
+bool Kernel_IsCommutativeGenerators(const std::vector<Telt>& LGen)
 {
   size_t len = LGen.size();
   for (size_t i=0; i<len; i++) {

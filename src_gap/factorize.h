@@ -113,7 +113,7 @@ namespace permutalib {
     }
   }
 
-  // Assumes that the quotient does indeed
+  // Assumes that the quotient does indeed make sense.
   template<typename Tidx>
   std::map<Tidx,int> QuotientMapMultiplicity(const std::map<Tidx,int>& x, const std::map<Tidx,int>& y)
   {
