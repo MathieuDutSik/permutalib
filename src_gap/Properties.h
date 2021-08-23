@@ -88,9 +88,6 @@ bool Kernel_IsCyclic(const StabChain<Telt,Tidx_label>& S)
     for (auto & eGen : acts)
       GenPow.push_back(ElementPower(eGen, kv.first));
     StabChainOptions<Tint,Tidx> options = GetStandardOptions<Tint,Tidx>(n);
-#ifdef DEBUG_STABCHAINMAIN
-    std::cerr << "CPP Before StabChainOp_listgen\n";
-#endif
     StabChain<Telt,Tidx_label> Spow = StabChainOp_listgen<Telt,Tidx_label,Tint>(GenPow, options);
     std::map<Tidx,int> LFactPow = FactorsSizeStabChain(Spow);
     std::map<Tidx,int> Quot1 = QuotientMapMultiplicity(LFact, LFactPow);

@@ -173,7 +173,7 @@ std::vector<typename Telt::Tidx> OrbitPerms(std::vector<Telt> const& gens, typen
 
 
 template<typename Telt>
-std::vector<std::vector<typename Telt::Tidx>> OrbitsPerms(std::vector<Telt> const& gens, typename Telt::Tidx const&n, std::vector<typename Telt::Tidx> const& D)
+std::vector<std::vector<typename Telt::Tidx>> Kernel_OrbitsPerms(std::vector<Telt> const& gens, typename Telt::Tidx const&n, std::vector<typename Telt::Tidx> const& D)
 {
   using Tidx=typename Telt::Tidx;
   std::vector<std::vector<Tidx>> orbs;
@@ -209,6 +209,26 @@ std::vector<std::vector<typename Telt::Tidx>> OrbitsPerms(std::vector<Telt> cons
   }
   return orbs;
 }
+
+template<typename Telt>
+std::vector<std::vector<typename Telt::Tidx>> OrbitsPerms(std::vector<Telt> const& gens, typename Telt::Tidx const&n, std::vector<typename Telt::Tidx> const& D)
+{
+  Face dom(n);
+  for (auto & eV : D)
+    dom[eV]=1;
+  return Kernel_OrbitsPerms(gens, n, dom);
+}
+
+template<typename Telt>
+std::vector<std::vector<typename Telt::Tidx>> OrbitsPerms(std::vector<Telt> const& gens, typename Telt::Tidx const&n)
+{
+  using Tidx=typename Telt::Tidx;
+  Face dom(n);
+  for (Tidx i=0; i<n; i++)
+    dom[i] = 1;
+  return Kernel_OrbitsPerms(gens, n, dom);
+}
+
 
 template<typename Telt>
 typename Telt::Tidx SmallestMovedPointsPerms(std::vector<Telt> const& gens)

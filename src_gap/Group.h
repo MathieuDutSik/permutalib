@@ -47,7 +47,6 @@ public:
     std::cerr << "CPP Beginning of MinimalStabChain\n";
 #endif
     StabChainOptions<Tint,Tidx> options = GetStandardOptions<Tint,Tidx>(n);
-    options.base = {};
 #ifdef DEBUG_STABCHAINMAIN
     std::cerr << "CPP Before StabChainOp_listgen\n";
 #endif

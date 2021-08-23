@@ -2,6 +2,7 @@
 #define PERMUTALIB_INCLUDE_NORMAL_STRUCTURE_H
 
 #include "StabChain.h"
+#include "BlockSystem.h"
 
 
 namespace permutalib {
@@ -70,7 +71,31 @@ StabChain<Telt,Tidx_label> Kernel_DerivedSubgroup(const StabChain<Telt,Tidx_labe
   return Kernel_NormalClosure<Telt,Tidx_label,Tint>(G, S);
 }
 
-  /*
+
+
+template<typename Telt>
+bool IsPrimitive_Subset(const std::vector<Telt>& LGen, const std::vector<typename Telt::Tidx>& subset, const typename Telt::Tidx& n) {
+  using Tidx=typename Telt::Tidx;
+  std::vector<Tidx> subset_rev(n);
+  Tidx len = Tidx(subset.size());
+  for (Tidx i=0; i<len; i++)
+    subset_rev[subset[i]] = i;
+  std::vector<Telt> gensB;
+  for (auto & eGen : LGen) {
+    std::vector<Tidx> eList(len);
+    for (Tidx i=0; i<len; i++) {
+      Tidx val1 = subset[i];
+      Tidx val2 = PowAct(val1, eGen);
+      Tidx val3 = subset_rev[val2];
+      eList[i] = val3;
+    }
+    Telt eElt(std::move(eList));
+    gensB.emplace_back(eElt);
+  }
+  std::vector<std::vector<Tidx>> blocks = Blocks(gensB, len);
+  return blocks.size() == 1;
+}
+
 
 template<typename Telt, typename Tidx_label, typename Tint>
 std::vector<Telt> Kernel_SmallGeneratingSet(const StabChain<Telt,Tidx_label>& G)
@@ -104,63 +129,84 @@ std::vector<Telt> Kernel_SmallGeneratingSet(const StabChain<Telt,Tidx_label>& G)
     if (status_remove[i] == 0)
       gens2.push_back(gens[i]);
 
-  orb:=Set(List(Orbits(G,MovedPoints(G)),Set));
-  orp:=Filtered([1..Length(orb)],x->IsPrimitive(Action(G,orb[x])));
+  std::vector<Tidx> LMoved = MovedPoints(gens2);
+  std::vector<std::vector<Tidx>> orb = OrbitPerms(gens2, n, LMoved);
+  size_t n_orb = orb.size();
+  std::vector<size_t> orp;
+  for (size_t i_orb=0; i_orb<n_orb; i_orb++)
+    if (IsPrimitive_Subset(gens2, orb[i_orb], n))
+      orp.push_back(i_orb);
 
-  min:=2;
-  if Length(gens)>2 then
-  # minimal: AbelianInvariants
-    min:=Maximum(List(Collected(Factors(Size(G)/Size(DerivedSubgroup(G)))),x->x[2]));
-    min:=Maximum(min,2);
-    if min=Length(GeneratorsOfGroup(G)) then return GeneratorsOfGroup(G);fi;
-    i:=Maximum(2,min);
-    while i<=min+1 and i<Length(gens) do
-      # try to find a small generating system by random search
-      j:=1;
-      while j<=5 and i<Length(gens) do
-        U:=Subgroup(G,List([1..i],j->Random(G)));
-        ok:=true;
-        # first test orbits
-        if ok then
-          ok:=Length(orb)=Length(Orbits(U,MovedPoints(U))) and
-              ForAll(orp,x->IsPrimitive(U,orb[x]));
-        fi;
-	StabChainOptions(U).random:=100; # randomized size
-        if ok and Size(U)=Size(G) then
-          gens:=Set(GeneratorsOfGroup(U));
-        fi;
-        j:=j+1;
-      od;
-      i:=i+1;
-    od;
-  fi;
+  Tint order_G = Order<Telt,Tidx_label,Tint>(G);
+  size_t min = 2;
+  std::map<Tidx,int> LFact = FactorsSizeStabChain(G);
+  auto check_correctness_gens=[&](const std::vector<Telt>& LGen) -> bool {
+    if (LMoved.size() != MovedPoints(gensB))
+      return false;
+    if (orb.size() != OrbitPerms(gensB, n, LMoved))
+      return false;
+    for (auto & i_orb : orp)
+      if (!IsPrimitive_Subset(gensB, orb[i_orb], n))
+        return false;
+    StabChainOptions<Tint,Tidx> options = GetStandardOptions<Tint,Tidx>(n);
+    StabChain<Telt,Tidx_label> U = StabChainOp_listgen<Telt,Tidx_label,Tint>(gensB, options);
+    Tint order_U = Order<Telt,Tidx_label,Tint>(U);
+    return order_G == order_U;
+  };
 
-  i := 1;
-  if not IsAbelian(G) then
-    i:=i+1;
-  fi;
-  while i <= Length(gens) and Length(gens)>min do
-    # random did not improve much, try subsets
-    U:=Subgroup(G,gens{Difference([1..Length(gens)],[i])});
+  
+  if (gens2.size() > 2) {
+    // minimal: AbelianInvariants
+    std::map<Tidx,int> LFactDer = FactorsSizeStabChain(Kernel_DerivedSubgroup(G));
+    std::map<Tidx,int> Quot = QuotientMapMultiplicity(LFact, LFactDer);
+    min = 0;
+    for (auto & kv : Quot) {
+      min = std::max(min, size_t(kv.second));
+    }
+    min = std::max(min, 2);
+    if (min == gens2.size())
+      return gens2;
+    size_t i = std::max(2, min);
+    while (i <= min+1 && i < gens.size()) {
+      // try to find a small generating system by random search
+      size_t j = 1;
+      while (j <= 5 && i < gens.size()) {
+        std::vector<Telt> gensB;
+        for (size_t u=0; u<i; u++) {
+          Telt g = RandomElement(gens2, n);
+          gensB.push_back(std::move(g));
+        }
+        if (check_correctness_gens(gensB)) {
+          gens2 = gensB;
+        }
+        j++;
+      }
+      i++;
+    }
+  }
 
-    ok:=true;
-    # first test orbits
-    if ok then
-      ok:=Length(orb)=Length(Orbits(U,MovedPoints(U))) and
-          ForAll(orp,x->IsPrimitive(U,orb[x]));
-    fi;
+  size_t i = 1;
+  if (!Kernel_IsCommutativeGenerators(gens2))
+    i++;
 
-    StabChainOptions(U).random:=100; # randomized size
-    if Size(U)<Size(G) then
-      i:=i+1;
-    else
-      gens:=Set(GeneratorsOfGroup(U));
-    fi;
-  od;
-  return gens;
-end);
+  while (i <= gens2.size() && gens2.size() > min) {
+    // random did not improve much, try subsets
 
+    std::vector<Telt> gensB;
+    for (size_t i_orb=0; i_orb<gens2.size(); i_orb++) {
+      if (i_orb != i+1)
+        gensB.push_back(gens2[i_orb]);
+    }
+    if (check_correctness_gens(gensB)) {
+      gens2 = gensB;
+    } else {
+      i++;
+    }
+  }
+  return gens2;
+}
 
+  /*
 
 
 #############################################################################
