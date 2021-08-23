@@ -103,6 +103,24 @@ typename Telt::Tidx LogPerm(const Telt& a, const Telt& b)
   }
 }
 
+
+template<typename Telt>
+Telt ElementPower(const Telt& x, const Tidx& n) {
+  std::function<Telt(const Tidx& n)> pow=[&](const Tidx& u) -> Telt {
+    if (u == 0)
+      return Telt(x.size());
+    Tidx res = u % 2;
+    if (res == 0) {
+      Telt xp = pow(u / 2);
+      return xp * xp;
+    }
+    Telt xp = pow(u / 2);
+    return x * (xp * xp);
+  };
+  return pow(n);
+}
+
+
 //
 // vector<Telt> taking functions
 //
