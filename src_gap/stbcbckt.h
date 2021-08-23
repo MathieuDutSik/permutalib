@@ -2078,6 +2078,8 @@ std::pair<bool,Telt> Kernel_RepresentativeAction_OnPoints(StabChain<Telt,Tidx_la
 }
 
 
+  /*
+
 #############################################################################
 ##
 #F  RepOpElmTuplesPermGroup( <repr>, <G>, <e>, <f>, <L>, <R> )  on elm tuples
@@ -2610,7 +2612,7 @@ InstallGlobalFunction( SubgroupProperty, function( arg )
     return PartitionBacktrack( G, Pr, false, rbase, [ P ], L, L );
 end );
 
-
+  */
 }
 
 #endif

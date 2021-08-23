@@ -70,7 +70,7 @@ StabChain<Telt,Tidx_label> Kernel_DerivedSubgroup(const StabChain<Telt,Tidx_labe
   return Kernel_NormalClosure<Telt,Tidx_label,Tint>(G, S);
 }
 
-
+  /*
 
 template<typename Telt, typename Tidx_label, typename Tint>
 std::vector<Telt> Kernel_SmallGeneratingSet(const StabChain<Telt,Tidx_label>& G)
@@ -442,7 +442,7 @@ end );
 
 
 
-
+  */
 
 
 }
