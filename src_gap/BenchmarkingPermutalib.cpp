@@ -14,8 +14,8 @@ int main(int argc, char *argv[])
     using Tint = mpz_class;
     using Tgroup = permutalib::Group<Telt,Tint>;
     if (argc != 3 && argc != 4) {
-      std::cerr << "We should have argc = 2\n";
       std::cerr << "BenchmarkingPermutalib [EXMP] [opt]\n";
+      std::cerr << "or\n";
       std::cerr << "BenchmarkingPermutalib [EXMP] [opt] [n_iter]\n";
       throw PermutalibException{1};
     }

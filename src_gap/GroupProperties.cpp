@@ -11,7 +11,6 @@ int main(int argc, char *argv[])
     using Telt = permutalib::SingleSidedPerm<Tidx>;
     using Tint = mpz_class;
     if (argc != 2 && argc != 3) {
-      std::cerr << "We should have argc = 2\n";
       std::cerr << "GroupProperties [EXMP]\n";
       std::cerr << "or\n";
       std::cerr << "GroupProperties [EXMP] [OutFile]\n";
@@ -53,7 +52,7 @@ int main(int argc, char *argv[])
       };
       os << "return rec(IsPrimitive:=" << fct(IsPrimitive) <<
         ", IsTransitive:=" << fct(IsTransitive) <<
-        ", IsCommutative:=" << fct(IsCommutative) << 
+        ", IsCommutative:=" << fct(IsCommutative) <<
         ", IsCyclic:=" << fct(IsCyclic) << ");\n\n";
     };
 
