@@ -96,7 +96,7 @@ TestSpecificGroupSet_Stabilizer:=function(nbMov, eGRP, eSet)
     AppendTo(output, "\n");
     CloseStream(output);
     #
-    eBinary:="/home/mathieu/GITall/GIT/permutalib/src_gap/GapStabilizerOnSet";
+    eBinary:="../src_gap/GapStabilizerOnSet";
     FileErr:=Concatenation(eDir, "CppError");
     FileRes:=Concatenation(eDir, "GapOutput");
     eCommand:=Concatenation(eBinary, " ", FileName, " 2> ", FileErr, " ", FileRes);
@@ -155,7 +155,7 @@ TestSpecificGroupSet_Canonical:=function(nbMov, eGRP, eSet)
     AppendTo(output, "\n");
     CloseStream(output);
     #
-    eBinary:="/home/mathieu/GITall/GIT/permutalib/src_gap/GapCanonicalImage";
+    eBinary:="../src_gap/GapCanonicalImage";
     FileErr:=Concatenation(eDir, "CppError");
     FileRes:=Concatenation(eDir, "GapOutput");
     eCommand:=Concatenation(eBinary, " ", FileName, " 2> ", FileErr, " ", FileRes);
@@ -227,7 +227,7 @@ TestSpecificGroupSet_Equivalence:=function(nbMov, eGRP, eSet, fSet)
     AppendTo(output, "\n");
     CloseStream(output);
     #
-    eBinary:="/home/mathieu/GITall/GIT/permutalib/src_gap/GapRepresentativeActionOnSet";
+    eBinary:="../src_gap/GapRepresentativeActionOnSet";
     FileErr:=Concatenation(eDir, "CppError");
     FileRes:=Concatenation(eDir, "GapOutput");
     eCommand:=Concatenation(eBinary, " ", FileName, " 2> ", FileErr, " ", FileRes);
@@ -255,7 +255,7 @@ end;
 TestPropertiesGroup:=function(nbMov, eGRP)
     local eDir, FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, Result1, Result2, test;
     Print("Treating a group for its properties\n");
-    eDir:="/tmp/DebugStabOnSets_datarun/";
+    eDir:="/tmp/DebugGroupProperties_datarun/";
     eCommand:=Concatenation("mkdir -p ", eDir);
     Exec(eCommand);
     #
@@ -275,7 +275,7 @@ TestPropertiesGroup:=function(nbMov, eGRP)
     od;
     CloseStream(output);
     #
-    eBinary:="/home/mathieu/GITall/GIT/permutalib/src_gap/GroupProperties";
+    eBinary:="../src_gap/GroupProperties";
     FileErr:=Concatenation(eDir, "CppError");
     FileRes:=Concatenation(eDir, "GapOutput");
     eCommand:=Concatenation(eBinary, " ", FileName, " ", FileRes, " 2> ", FileErr);
@@ -286,6 +286,48 @@ TestPropertiesGroup:=function(nbMov, eGRP)
     Result2:=ReadAsFunction(FileRes)();
     test:=Result1 = Result2;
     if test=false then
+        Error("Found some error. Please debug");
+    fi;
+    MyRemoveFileIfExist(FileName);
+    MyRemoveFileIfExist(FileErr);
+    MyRemoveFileIfExist(FileRes);
+end;
+
+
+
+
+TestSmallGeneratingSet:=function(nbMov, eGRP)
+    local eDir, FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, Result1, Result2, test;
+    Print("Checking SmallGeneratingSet feature\n");
+    eDir:="/tmp/DebugSmallGeneratingSet_datarun/";
+    eCommand:=Concatenation("mkdir -p ", eDir);
+    Exec(eCommand);
+    #
+    FileName:=Concatenation(eDir, "Input");
+    MyRemoveFileIfExist(FileName);
+    output:=OutputTextFile(FileName, true);
+    LGen:=GeneratorsOfGroup(eGRP);
+    AppendTo(output, Length(LGen), " ", nbMov, "\n");
+    for eGen in LGen
+    do
+        for iMov in [1..nbMov]
+        do
+            eImg:=OnPoints(iMov, eGen);
+            AppendTo(output, " ", eImg-1);
+        od;
+        AppendTo(output, "\n");
+    od;
+    CloseStream(output);
+    #
+    eBinary:="../src_gap/GapSmallGeneratingSet";
+    FileErr:=Concatenation(eDir, "CppError");
+    FileRes:=Concatenation(eDir, "GapOutput");
+    eCommand:=Concatenation(eBinary, " ", FileName, " ", FileRes, " 2> ", FileErr);
+#    Print("eCommand=", eCommand, "\n");
+    Exec(eCommand);
+    #
+    LGen:=ReadAsFunction(FileRes)();
+    if Group(LGen) <> eGRP then
         Error("Found some error. Please debug");
     fi;
     MyRemoveFileIfExist(FileName);
@@ -348,6 +390,9 @@ TestSpecificGroup:=function(method, size_opt, nbMov, eGRP)
         if method="properties" then
             TestPropertiesGroup(nbMov, eGRP);
         fi;
+        if method="smallgeneratingset" then
+            TestSmallGeneratingSet(nbMov, eGRP);
+        fi;
     od;
 end;
 
@@ -394,7 +439,8 @@ WriteAllGroupsInFile:=function(eFile)
 end;
 
 
-TestAllGroups("properties", 1);
+TestAllGroups("smallgeneratingset", 1);
+#TestAllGroups("properties", 1);
 #TestAllGroups("stabilizer", 1);
 #TestAllGroups("equivalence", 2);
 #TestAllGroups("canonical", 3);
