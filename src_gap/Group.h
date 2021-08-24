@@ -130,6 +130,9 @@ public:
   bool IsPrimitive() const {
     return Kernel_IsPrimitive(S);
   }
+  bool IsCyclic() const {
+    return Kernel_IsCyclic<Telt,Tidx_label,Tint>(S);
+  }
   // Normal structure
   bool IsNormalSubgroup(const Group<Telt,Tint>& U) const {
     return Kernel_IsNormalSubgroup(S, U.S);

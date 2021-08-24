@@ -120,7 +120,7 @@ namespace permutalib {
     std::map<Tidx,int> quot;
     for (auto & kv : x) {
       Tidx k = kv.first;
-      int val = x[k] - y[k];
+      int val = kv.second - y.at(k);
       if (val > 0)
         quot[k] = val;
     }

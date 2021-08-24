@@ -42,6 +42,7 @@ int main(int argc, char *argv[])
     bool IsPrimitive = eG.IsPrimitive();
     bool IsTransitive = eG.IsTransitive();
     bool IsCommutative = eG.IsCommutative();
+    bool IsCyclic = eG.IsCyclic();
     //
     auto fct=[&](const bool& val) -> std::string {
       if (val)
@@ -51,7 +52,8 @@ int main(int argc, char *argv[])
     std::ofstream os(OutputFile);
     os << "return rec(IsPrimitive:=" << fct(IsPrimitive) <<
       ", IsTransitive:=" << fct(IsTransitive) <<
-      ", IsCommutative:=" << fct(IsCommutative) << ");\n\n";
+      ", IsCommutative:=" << fct(IsCommutative) << 
+      ", IsCyclic:=" << fct(IsCyclic) << ");\n\n";
   }
   catch (PermutalibException const& e) {
     std::cerr << "Erroneous completion of the program\n";
