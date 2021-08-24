@@ -282,7 +282,7 @@ TestPropertiesGroup:=function(nbMov, eGRP)
 #    Print("eCommand=", eCommand, "\n");
     Exec(eCommand);
     #
-    Result1:=rec(IsPrimitive:=IsPrimitive(eGRP), IsTransitive:=IsTransitive(eGRP), IsCommutative:=IsCommutative(eGRP));
+    Result1:=rec(IsPrimitive:=IsPrimitive(eGRP), IsTransitive:=IsTransitive(eGRP), IsCommutative:=IsCommutative(eGRP), IsCyclic:=IsCyclic(eGRP));
     Result2:=ReadAsFunction(FileRes)();
     test:=Result1 = Result2;
     if test=false then
