@@ -101,10 +101,11 @@ template<typename Telt, typename Tidx_label, typename Tint>
 std::vector<Telt> Kernel_SmallGeneratingSet(const StabChain<Telt,Tidx_label>& G)
 {
   using Tidx = typename Telt::Tidx;
+  Tidx n = G->comm->n;
   std::unordered_set<Telt> gens_set;
   for (auto & eGen : Kernel_GeneratorsOfGroup(G)) {
     if (!eGen.isIdentity())
-      gens.insert(eGen);
+      gens_set.insert(eGen);
   }
   std::vector<Telt> gens;
   for (auto & eGen : gens_set)
@@ -114,7 +115,7 @@ std::vector<Telt> Kernel_SmallGeneratingSet(const StabChain<Telt,Tidx_label>& G)
   Face status_remove(len);
   for (size_t i=0; i<len; i++) {
     if (status_remove[i] == 0) {
-      if (size_t j=0; j<len; j++) {
+      for (size_t j=0; j<len; j++) {
         if (i != j && status_remove[j] == 0) {
           Tidx val = LogPerm(gens[i], gens[j]); // test if gens[i]^e = gens[j]
           if (val != std::numeric_limits<Tidx>::max()) {
@@ -138,18 +139,18 @@ std::vector<Telt> Kernel_SmallGeneratingSet(const StabChain<Telt,Tidx_label>& G)
       orp.push_back(i_orb);
 
   Tint order_G = Order<Telt,Tidx_label,Tint>(G);
-  size_t min = 2;
+
   std::map<Tidx,int> LFact = FactorsSizeStabChain(G);
   auto check_correctness_gens=[&](const std::vector<Telt>& LGen) -> bool {
-    if (LMoved.size() != MovedPoints(gensB))
+    if (LMoved.size() != MovedPoints(LGen))
       return false;
-    if (orb.size() != OrbitPerms(gensB, n, LMoved))
+    if (orb.size() != OrbitPerms(LGen, n, LMoved))
       return false;
     for (auto & i_orb : orp)
-      if (!IsPrimitive_Subset(gensB, orb[i_orb], n))
+      if (!IsPrimitive_Subset(LGen, orb[i_orb], n))
         return false;
     StabChainOptions<Tint,Tidx> options = GetStandardOptions<Tint,Tidx>(n);
-    StabChain<Telt,Tidx_label> U = StabChainOp_listgen<Telt,Tidx_label,Tint>(gensB, options);
+    StabChain<Telt,Tidx_label> U = StabChainOp_listgen<Telt,Tidx_label,Tint>(LGen, options);
     Tint order_U = Order<Telt,Tidx_label,Tint>(U);
     return order_G == order_U;
   };
