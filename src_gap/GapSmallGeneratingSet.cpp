@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
       std::ofstream os(OutputFile);
       os << "return " + GapStringTVector(Sma) + ";\n";
     } else {
-      std::cerr << "CPP Sma=" << GapStringTVerctor(Sma) << "\n";
+      std::cerr << "CPP Sma=" << GapStringTVector(Sma) << "\n";
     }
     std::cerr << "CPP Normal completion of the program\n";
   }

@@ -130,8 +130,8 @@ std::vector<Telt> Kernel_SmallGeneratingSet(const StabChain<Telt,Tidx_label>& G)
     if (status_remove[i] == 0)
       gens2.push_back(gens[i]);
 
-  std::vector<Tidx> LMoved = MovedPoints(gens2);
-  std::vector<std::vector<Tidx>> orb = OrbitPerms(gens2, n, LMoved);
+  std::vector<Tidx> LMoved = MovedPoints(gens2, n);
+  std::vector<std::vector<Tidx>> orb = OrbitsPerms(gens2, n, LMoved);
   size_t n_orb = orb.size();
   std::vector<size_t> orp;
   for (size_t i_orb=0; i_orb<n_orb; i_orb++)
@@ -142,9 +142,9 @@ std::vector<Telt> Kernel_SmallGeneratingSet(const StabChain<Telt,Tidx_label>& G)
 
   std::map<Tidx,int> LFact = FactorsSizeStabChain(G);
   auto check_correctness_gens=[&](const std::vector<Telt>& LGen) -> bool {
-    if (LMoved.size() != MovedPoints(LGen))
+    if (LMoved.size() != MovedPoints(LGen, n).size())
       return false;
-    if (orb.size() != OrbitPerms(LGen, n, LMoved))
+    if (orb.size() != OrbitsPerms(LGen, n, LMoved).size())
       return false;
     for (auto & i_orb : orp)
       if (!IsPrimitive_Subset(LGen, orb[i_orb], n))
@@ -177,7 +177,7 @@ std::vector<Telt> Kernel_SmallGeneratingSet(const StabChain<Telt,Tidx_label>& G)
     size_t len = gens.size();
     for (size_t i=min; i<len; i++) {
       for (size_t j=0; j<5; j++) {
-        bool test = get_and_test();
+        bool test = get_and_test(i);
         if (test)
           return;
       }

@@ -459,9 +459,9 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt,Tidx_label> cons
     return {};
   }
   Tidx depth;
-  PreAllocatedVector<Tidx> orbmins(n);
-  PreAllocatedVector<Tidx> orbsizes(n);
-  PreAllocatedVector<Tidx> q(n);
+  std::vector<Tidx> orbmins; orbmins.reserve(n);
+  std::vector<Tidx> orbsizes; orbsizes.reserve(n);
+  std::vector<Tidx> q; q.reserve(n);
   std::vector<Tidx> orbnums(n,max_val_type);
   for (depth=0; depth<m; depth++) {
 #ifdef DEBUG_NSI

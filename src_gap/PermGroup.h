@@ -173,13 +173,10 @@ std::vector<typename Telt::Tidx> OrbitPerms(std::vector<Telt> const& gens, typen
 
 
 template<typename Telt>
-std::vector<std::vector<typename Telt::Tidx>> Kernel_OrbitsPerms(std::vector<Telt> const& gens, typename Telt::Tidx const&n, std::vector<typename Telt::Tidx> const& D)
+std::vector<std::vector<typename Telt::Tidx>> Kernel_OrbitsPerms(const std::vector<Telt>& gens, const typename Telt::Tidx&n, Face & dom)
 {
   using Tidx=typename Telt::Tidx;
   std::vector<std::vector<Tidx>> orbs;
-  Face dom(n);
-  for (auto & eV : D)
-    dom[eV]=1;
   while(true) {
     if (dom.count() == 0)
       break;
@@ -211,7 +208,7 @@ std::vector<std::vector<typename Telt::Tidx>> Kernel_OrbitsPerms(std::vector<Tel
 }
 
 template<typename Telt>
-std::vector<std::vector<typename Telt::Tidx>> OrbitsPerms(std::vector<Telt> const& gens, typename Telt::Tidx const&n, std::vector<typename Telt::Tidx> const& D)
+std::vector<std::vector<typename Telt::Tidx>> OrbitsPerms(const std::vector<Telt>& gens, const typename Telt::Tidx&n, const std::vector<typename Telt::Tidx>& D)
 {
   Face dom(n);
   for (auto & eV : D)
@@ -220,7 +217,7 @@ std::vector<std::vector<typename Telt::Tidx>> OrbitsPerms(std::vector<Telt> cons
 }
 
 template<typename Telt>
-std::vector<std::vector<typename Telt::Tidx>> OrbitsPerms(std::vector<Telt> const& gens, typename Telt::Tidx const&n)
+std::vector<std::vector<typename Telt::Tidx>> OrbitsPerms(const std::vector<Telt>& gens, const typename Telt::Tidx&n)
 {
   using Tidx=typename Telt::Tidx;
   Face dom(n);
@@ -319,6 +316,27 @@ std::vector<Tobj> Orbit(std::vector<Telt> const& ListGen, Tobj const& x, Tact ac
   }
   return ListObj;
 }
+
+
+template<typename Telt>
+std::vector<typename Telt::Tidx> MovedPoints(const std::vector<Telt>& LGen, const typename Telt::Tidx& n)
+{
+  using Tidx = typename Telt::Tidx;
+  auto IsMoved=[&](Tidx const& ePt) -> bool {
+    for (auto & eGen : LGen)
+      if (eGen.at(ePt) != ePt)
+        return true;
+    return false;
+  };
+  std::vector<Tidx> LMoved;
+  LMoved.reserve(n);
+  for (Tidx i=0; i<n; i++)
+    if (IsMoved(i))
+      LMoved.push_back(i);
+  return LMoved;
+}
+
+
 
 /*
 template<typename Telt>
