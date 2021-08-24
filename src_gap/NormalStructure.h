@@ -154,47 +154,44 @@ std::vector<Telt> Kernel_SmallGeneratingSet(const StabChain<Telt,Tidx_label>& G)
     return order_G == order_U;
   };
 
-  
-  if (gens2.size() > 2) {
-    // minimal: AbelianInvariants
-    std::map<Tidx,int> LFactDer = FactorsSizeStabChain(Kernel_DerivedSubgroup(G));
-    std::map<Tidx,int> Quot = QuotientMapMultiplicity(LFact, LFactDer);
-    min = 0;
-    for (auto & kv : Quot) {
-      min = std::max(min, size_t(kv.second));
+  // Computing the lower bound on the number of generators
+  size_t min = 1;
+  if (!Kernel_IsCommutativeGenerators(gens2))
+    min = 2;
+
+  // Generating elements at
+  auto get_and_test=[&](const size_t& i) -> bool {
+    std::vector<Telt> gensB;
+    for (size_t u=0; u<i; u++) {
+      Telt g = RandomElement(gens2, n);
+      gensB.push_back(std::move(g));
     }
-    min = std::max(min, 2);
-    if (min == gens2.size())
-      return gens2;
-    size_t i = std::max(2, min);
-    while (i <= min+1 && i < gens.size()) {
-      // try to find a small generating system by random search
-      size_t j = 1;
-      while (j <= 5 && i < gens.size()) {
-        std::vector<Telt> gensB;
-        for (size_t u=0; u<i; u++) {
-          Telt g = RandomElement(gens2, n);
-          gensB.push_back(std::move(g));
-        }
-        if (check_correctness_gens(gensB)) {
-          gens2 = gensB;
-        }
-        j++;
+    if (check_correctness_gens(gensB)) {
+      gens2 = gensB;
+      return true;
+    }
+    return false;
+  };
+  auto update_iife=[&]() -> void {
+    size_t len = gens.size();
+    for (size_t i=min; i<len; i++) {
+      for (size_t j=0; j<5; j++) {
+        bool test = get_and_test();
+        if (test)
+          return;
       }
-      i++;
     }
-  }
+  };
+  update_iife();
 
   size_t i = 1;
-  if (!Kernel_IsCommutativeGenerators(gens2))
-    i++;
 
   while (i <= gens2.size() && gens2.size() > min) {
     // random did not improve much, try subsets
 
     std::vector<Telt> gensB;
     for (size_t i_orb=0; i_orb<gens2.size(); i_orb++) {
-      if (i_orb != i+1)
+      if (i_orb != i-1)
         gensB.push_back(gens2[i_orb]);
     }
     if (check_correctness_gens(gensB)) {
