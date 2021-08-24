@@ -168,7 +168,7 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt,Tidx_label> cons
   Tidx max_val_type = std::numeric_limits<Tidx>::max();
 
 
-  auto calculateBestOrbit=[&](PreAllocatedVector<Tidx> const& orbmins, std::vector<Tidx> const& orbitCounts, PreAllocatedVector<Tidx> const& orbsizes) -> Tidx {
+  auto calculateBestOrbit=[&](std::vector<Tidx> const& orbmins, std::vector<Tidx> const& orbitCounts, std::vector<Tidx> const& orbsizes) -> Tidx {
 #ifdef DEBUG_NSI
     std::cerr << "CPP Beginning of calculateBestOrbit\n";
 #endif
@@ -372,7 +372,7 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt,Tidx_label> cons
 
   // Given a group 'gp' and a set 'set', find orbit representatives
   // of 'set' in 'gp' simply.
-  PreAllocatedVector<Tidx> q_sor(n);
+  std::vector<Tidx> q_sor; q_sor.reserve(n);
   Face b_sor(n);
   auto simpleOrbitReps=[&](StabChain<Telt,Tidx_label> const& gp, std::vector<Tidx> const& set) -> std::vector<Tidx> {
 #ifdef DEBUG_NSI

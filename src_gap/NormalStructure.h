@@ -206,6 +206,11 @@ std::vector<Telt> Kernel_SmallGeneratingSet(const StabChain<Telt,Tidx_label>& G)
 
   /*
 
+If g commutes with h then we have
+g ( h(x) ) = h ( g(x) )
+
+
+
 
 #############################################################################
 ##

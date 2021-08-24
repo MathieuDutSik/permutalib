@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     }
     permutalib::Face set_can = eG.CanonicalImage(eFace);
     //
-    auto prt=[&](std..ostream & os) -> void {
+    auto prt=[&](std::ostream & os) -> void {
       os << "return [";
       size_t siz = set_can.count();
       boost::dynamic_bitset<>::size_type aRow = set_can.find_first();
