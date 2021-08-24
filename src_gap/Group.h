@@ -133,6 +133,9 @@ public:
   bool IsCyclic() const {
     return Kernel_IsCyclic<Telt,Tidx_label,Tint>(S);
   }
+  std::vector<Telt> SmallGeneratingSet() const {
+    return Kernel_SmallGeneratingSet<Telt,Tidx_label,Tint>(S);
+  }
   // Normal structure
   bool IsNormalSubgroup(const Group<Telt,Tint>& U) const {
     return Kernel_IsNormalSubgroup(S, U.S);
