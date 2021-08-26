@@ -2080,6 +2080,30 @@ std::pair<bool,Telt> Kernel_RepresentativeAction_OnPoints(StabChain<Telt,Tidx_la
 
   /*
 
+
+#############################################################################
+##
+#M  Centralizer( <G>, <e> ) . . . . . . . . . . . . . . in permutation groups
+##
+InstallMethod( CentralizerOp, "perm group,elm",IsCollsElms,
+  [ IsPermGroup, IsPerm ], 0,
+    function( G, e )
+    e := [ e ];
+    return RepOpElmTuplesPermGroup( false, G, e, e,
+                   TrivialSubgroup( G ), TrivialSubgroup( G ) );
+end );
+
+InstallMethod( CentralizerOp, "perm group, perm group", IsIdenticalObj, 
+  [ IsPermGroup, IsPermGroup ], 0,
+    function( G, E )
+    return RepOpElmTuplesPermGroup( false, G,
+                   GeneratorsOfGroup( E ), GeneratorsOfGroup( E ),
+                   TrivialSubgroup( G ), TrivialSubgroup( G ) );
+end );
+
+
+
+
 #############################################################################
 ##
 #F  RepOpElmTuplesPermGroup( <repr>, <G>, <e>, <f>, <L>, <R> )  on elm tuples
