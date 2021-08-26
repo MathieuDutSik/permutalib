@@ -21,7 +21,6 @@ int main(int argc, char *argv[])
     Tint limit = limit_i;
     //
     std::ifstream is(InputFile);
-    int siz_control = 0;
     int nGroup;
     is >> nGroup;
     for (int iGroup=0; iGroup<nGroup; iGroup++) {

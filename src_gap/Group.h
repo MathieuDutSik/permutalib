@@ -149,12 +149,15 @@ public:
 private:
   struct IteratorType {
   private:
-    std::vector<StabChain<const Telt,Tidx_label>&> ListS;
+    std::vector<StabChain<Telt,Tidx_label>> ListS;
     std::vector<size_t> ListPos;
     std::vector<size_t> ListSiz;
     std::vector<Telt> ListRes;
   public:
-    Telt operator*() const {
+    IteratorType(std::vector<StabChain<Telt,Tidx_label>> ListS,
+                 std::vector<size_t> ListPos, std::vector<size_t> ListSiz, std::vector<Telt> ListRes) : ListS(ListS), ListPos(ListPos), ListSiz(ListSiz), ListRes(ListRes) {
+    }
+    const Telt& operator*() const {
       return ListRes[0];
     }
     void IterIncrease() {
@@ -214,7 +217,7 @@ public:
   using const_iterator=IteratorType;
   const_iterator begin() const {
     Tidx n = S->comm->n;
-    std::vector<StabChain<const Telt,Tidx_label>&> ListS;
+    std::vector<StabChain<Telt,Tidx_label>> ListS;
     std::vector<size_t> ListPos;
     std::vector<size_t> ListSiz;
     std::vector<Telt> ListRes;
@@ -226,7 +229,7 @@ public:
       ListRes.push_back(Telt(n));
       Swork = Swork->stabilizer;
     }
-    return {std::move(ListS), std::move(ListPos), std::move(ListSiz), std::move(ListRes)};
+    return IteratorType(ListS, ListPos, ListSiz, ListRes);
   }
   const_iterator end() const {
     std::vector<size_t> ListPos;
@@ -235,11 +238,11 @@ public:
       ListPos.push_back(Swork->orbit.size());
       Swork = Swork->stabilizer;
     }
-    return {{}, std::move(ListPos), {}, {}};
+    return IteratorType({}, ListPos, {}, {});
   }
 
 private:
-      StabChain<Telt,Tidx_label> S;
+  StabChain<Telt,Tidx_label> S;
   Tint size_tint;
 };
 
