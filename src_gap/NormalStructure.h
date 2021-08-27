@@ -1,7 +1,7 @@
 #ifndef PERMUTALIB_INCLUDE_NORMAL_STRUCTURE_H
 #define PERMUTALIB_INCLUDE_NORMAL_STRUCTURE_H
 
-#include "StabChain.h"
+#include "StabChainMain.h"
 #include "BlockSystem.h"
 
 
@@ -204,6 +204,141 @@ std::vector<Telt> Kernel_SmallGeneratingSet(const StabChain<Telt,Tidx_label>& G)
   return gens2;
 }
 
+
+
+
+
+
+
+
+
+template<typename Telt, typename Tidx_label, typename Tint>
+StabChain<Telt,Tidx_label> SubsetStabChain(const StabChain<Telt,Tidx_label>& S, const std::vector<typename Telt::Tidx>& subset)
+{
+  using Tidx=typename Telt::Tidx;
+  Tidx n = S->comm->n;
+  Tidx miss_val = std::numeric_limits<Tidx>::max();
+  std::vector<Tidx> subset_rev(n, miss_val);
+  Tidx len = Tidx(subset.size());
+  for (Tidx i=0; i<len; i++)
+    subset_rev[subset[i]] = i;
+  auto map=[&](const Telt& eGen) -> Telt {
+    std::vector<Tidx> eList(len);
+    for (Tidx i=0; i<len; i++) {
+      Tidx i_big = subset[i];
+      Tidx j_big = PowAct(i_big, eGen);
+      Tidx j = subset_rev[j_big];
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+      if (j == miss_val) {
+        std::cerr << "The subset is not stabilized. Clear bug\n";
+        throw TerminalException{1};
+      }
+#endif
+      eList[i] = j;
+    }
+    return Telt(std::move(eList));
+  };
+
+  // We cannot do an operation of subsetting directly on the stab chain
+  // because the base might be outside of the subset
+  std::vector<Telt> LGen = Kernel_GeneratorsOfGroup(S);
+  size_t n_gen = LGen.size();
+  std::vector<Telt> LGenRed(n_gen);
+  for (size_t i=0; i<n_gen; i++)
+    LGenRed[i] = map(LGen[i]);
+  StabChainOptions<Tint,Tidx> options = GetStandardOptions<Tint,Tidx>(len);
+  return StabChainOp_listgen<Telt,Tidx_label,Tint>(LGenRed, options);
+}
+
+
+
+template<typename Telt, typename Tidx_label>
+StabChain<Telt,Tidx_label> Stabilizer_OnTuples_CorrectStabChain(const StabChain<Telt,Tidx_label>& S, const std::vector<typename Telt::Tidx>& subset)
+{
+  using Tidx=typename Telt::Tidx;
+  Tidx n = S->comm->n;
+  Tidx miss_val = std::numeric_limits<Tidx>::max();
+  std::vector<Tidx> subset_rev(n, miss_val);
+  Tidx len = Tidx(subset.size());
+  for (Tidx i=0; i<len; i++)
+    subset_rev[subset[i]] = i;
+  StabChain<Telt,Tidx_label> Sptr = S;
+  while (true) {
+    if (Sptr == nullptr) {
+      break;
+    }
+    if (Sptr->orbit.size() == 0) {
+      break;
+    }
+    if (subset_rev[Sptr->orbit[0]] == miss_val) {
+      break;
+    }
+    Sptr = Sptr->stabilizer;
+  }
+  return Sptr;
+}
+
+
+
+
+
+  /*
+#############################################################################
+##
+#F  IntersectionNormalClosurePermGroup(<G>,<H>[,order]) . . . intersection of
+#F                                   normal closure of <H> under <G> with <G>
+##
+##  computes $H^G \cap G$ as subgroup of Parent(G)
+##
+  */
+template<typename Telt, typename Tidx_label, typename Tint>
+StabChain<Telt,Tidx_label> Kernel_IntersectionNormalClosurePermGroup(const StabChain<Telt,Tidx_label>& G, const StabChain<Telt,Tidx_label>& H, const Tint& size)
+{
+  using Tidx = typename Telt::Tidx;
+  Tidx n = G->comm->n;
+  if (Order<Telt,Tidx_label,Tint>(G) == 1 || Order<Telt,Tidx_label,Tint>(H) == 1) {
+    StabChainOptions<Tint,Tidx> options1 = GetStandardOptions<Tint,Tidx>(n);
+    return StabChainOp_listgen<Telt,Tidx_label,Tint>({}, options1);
+  }
+  std::vector<Telt> newgens;
+  for (auto & eGen : Kernel_GeneratorsOfGroup(G)) {
+    std::vector<Tidx> eList(2*n);
+    for (Tidx i=0; i<n; i++) {
+      Tidx img = PowAct(i, eGen);
+      eList[i] = img;
+      eList[i + n] = img + n;
+    }
+    newgens.emplace_back(std::move(Telt(std::move(eList))));
+  }
+  for (auto & eGen : Kernel_GeneratorsOfGroup(H)) {
+    std::vector<Tidx> eList(2*n);
+    for (Tidx i=0; i<n; i++) {
+      Tidx img = PowAct(i, eGen);
+      eList[i] = i;
+      eList[i + n] = img + n;
+    }
+    newgens.emplace_back(std::move(Telt(std::move(eList))));
+  }
+  StabChainOptions<Tint,Tidx> options2 = GetStandardOptions<Tint,Tidx>(2 * n);
+  options2.size = size;
+  options2.base.reserve(n);
+  for (Tidx i=0; i<n; i++)
+    options2.base.push_back(i + n);
+  const std::vector<Telt> & tuple = options2.base;
+  StabChain<Telt,Tidx_label> S = StabChainOp_listgen<Telt,Tidx_label,Tint>(newgens, options2);
+  StabChain<Telt,Tidx_label> S_red = Stabilizer_OnTuples_CorrectStabChain(S, tuple);
+  return SubsedtStabChain(S_red, tuple);
+}
+
+
+
+
+
+
+
+
+
+
   /*
 
 If g commutes with h then we have
@@ -275,69 +410,6 @@ InstallGlobalFunction( CentralizerTransSymmCSPG, function( G, chainG )
     SetSize( H, Length( L ) );
     return H;
 end );
-
-#############################################################################
-##
-#F  IntersectionNormalClosurePermGroup(<G>,<H>[,order]) . . . intersection of
-#F                                   normal closure of <H> under <G> with <G>
-##
-##  computes $H^G \cap G$ as subgroup of Parent(G)
-##
-InstallGlobalFunction( IntersectionNormalClosurePermGroup,
-    function(arg)
-    local   G,H,        # the groups to be handled
-            n,          # maximum of degrees of G,H
-            i,j,        # loop variables
-            conperm,    # perm exchanging first and second n points
-            newgens,    # set of extended generators
-            options,    # options record for stabilizer computation
-            group;      # the group generated by newgens
-                        # stabilizing the second n points, we get H^G \cap G
-
-    G := arg[1];
-    H := arg[2];
-
-    if IsTrivial(G) or IsTrivial(H)  then
-        return TrivialSubgroup( Parent(G) );
-    fi;
-
-    n := Maximum(LargestMovedPoint(G),
-                 LargestMovedPoint(H));
-    conperm := PermList( Concatenation( [n+1 .. 2*n] , [1 .. n] ) );
-    # extend the generators of G acting on [n+1..2n] exactly as on [1..n]
-    newgens := List( StabChainMutable( G ).generators,
-                     g -> g * ( g^conperm ) );
-
-    # from the generators of H, create permutations which act on [n+1..2n]
-    # as the original generator on [1..n] and which act trivially on [1..n]
-    for i in StabChainMutable( H ).generators do
-      Add( newgens, i^conperm );
-    od;
-
-    group := GroupByGenerators(newgens,());
-
-
-    # create options record for stabilizer chain computation
-    options := rec( base := [n+1..2*n] );
-    #if size of group is part of input, use it
-    if Length(arg) = 3 then
-       options.size := arg[3];
-       # if H is normalized by G and G,H already have stabilizer chains
-       # then compute base for group
-       #if ( IsBound(G.size) or IsBound(G.stabChain) ) and
-       #   ( IsBound(H.size) or IsBound(H.stabChain) )  then
-       #   if Size(G) * Size(H) = arg[3] then
-       #      options.knownBase :=
-       #      Concatenation( List( Base(H), x -> n + x ), Base(G) ) ;
-       #   fi;
-       #fi;
-    fi;
-    StabChain(group,options);
-#T is this meaningful ??
-    group := Stabilizer(group,[n+1 .. 2*n],OnTuples);
-    return AsSubgroup( Parent(G),group);
-end );
-
 
 
 
