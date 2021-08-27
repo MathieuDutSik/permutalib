@@ -4,8 +4,69 @@
 
 #include "Group.h"
 
+#define USE_LIBGAP
+//#undef USE_LIBGAP
+
+
+
+#ifdef USE_LIBGAP
+
+#include <libgap-api.h>
+extern char ** environ;
+
+
+
+template<typename Tgroup>
+Tgroup GetStabilizer_libgap(const Tgroup& G, const permutalib::Face& f)
+{
+  std::string comm1 = "G:=" + G.GapString() + ";";
+  std::string comm2 = "f:=[";
+  boost::dynamic_bitset<>::size_type ePt=f.find_first();
+  for (size_t u=0; u<f.count(); u++) {
+    if (u>0)
+      comm2 += ",";
+    comm2 += std::to_string(ePt + 1);
+    ePt = f.find_next(ePt);
+  }
+  comm2 += "];";
+  std::string comm3 = "GeneratorsOfGroup(Stabilizer(G, f, OnSets));";
+  std::string commtot = comm1 + ";" + comm2 + ";" + comm3;
+  //
+  std::cerr << "GetStabilizer_libgap, step 1\n";
+  Obj res = GAP_EvalString(commtot.c_str());
+  std::cerr << "GetStabilizer_libgap, step 2\n";
+  Int rc = GAP_LenList(res);
+  std::cerr << "GetStabilizer_libgap, step 3\n";
+  if (rc != 1) {
+    std::cerr << "We have rc=" << rc << "\n";
+    throw PermutalibException{1};
+  }
+  std::cerr << "GetStabilizer_libgap, step 4\n";
+  Obj ires = GAP_ElmList(res, 1);
+  std::cerr << "GetStabilizer_libgap, step 5\n";
+  if (GAP_ElmList(ires, 1) == GAP_True) {
+    Char * buffer = GAP_CSTR_STRING(GAP_ElmList(ires, 5));
+    if (buffer)
+      printf("%s\n", buffer);
+  }
+  std::cerr << "GetStabilizer_libgap, step 6\n";
+  return G.Stabilizer_OnSets(f);
+}
+
+
+
+
+#endif
+
+
+
+
+
 int main(int argc, char *argv[])
 {
+#ifdef USE_LIBGAP
+  (void)GAP_Enter();
+#endif
   try {
     //    using Tidx = int16_t;
     using Tidx = uint8_t;
@@ -96,7 +157,11 @@ int main(int argc, char *argv[])
       auto bench_stabilizer=[&]() -> void {
         for (long iter=0; iter<n_iter; iter++) {
           permutalib::Face eFace = random_face(n);
+#ifdef USE_LIBGAP
+          Tgroup eG2 = GetStabilizer_libgap(eG, eFace);
+#else
           Tgroup eG2 = eG.Stabilizer_OnSets(eFace);
+#endif
           siz_control += eG2.n_act();
         }
       };
@@ -190,5 +255,7 @@ int main(int argc, char *argv[])
     std::cerr << "Erroneous completion of the program\n";
     exit(e.eVal);
   }
-  return 0;
+#ifdef USE_LIBGAP
+  GAP_Leave();
+#endif
 }

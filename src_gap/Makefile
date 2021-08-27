@@ -1,4 +1,4 @@
-PROGRAM	= GapRepresentativeActionOnSet GapStabilizerOnSet GapEquivalenceOnSet GapCanonicalImage BenchmarkingPermutalib Factorize TestPermutationProduct TestSymmetricGroup GroupProperties EqSymmGroup TestSerialization GapDerivedSubgroup GapSmallGeneratingSet TestEnumerationElement
+#PROGRAM	= GapRepresentativeActionOnSet GapStabilizerOnSet GapEquivalenceOnSet GapCanonicalImage BenchmarkingPermutalib Factorize TestPermutationProduct TestSymmetricGroup GroupProperties EqSymmGroup TestSerialization GapDerivedSubgroup GapSmallGeneratingSet TestEnumerationElement
 #PROGRAM	= EqSymmGroup
 #PROGRAM	= GapStabilizerOnSet
 #PROGRAM	= GapRepresentativeActionOnSet
@@ -8,7 +8,7 @@ PROGRAM	= GapRepresentativeActionOnSet GapStabilizerOnSet GapEquivalenceOnSet Ga
 #PROGRAM	= GroupProperties
 #PROGRAM	= GapSmallGeneratingSet
 #PROGRAM	= GapDerivedSubgroup
-#PROGRAM	= BenchmarkingPermutalib
+PROGRAM	= BenchmarkingPermutalib
 #PROGRAM	= BenchmarkingPermutalib GapCanonicalImage
 #PROGRAM	= Factorize
 #PROGRAM	= TestSerialization
@@ -48,9 +48,9 @@ CLOCAL          =
 
 
 #CFLAGS 		= -I$(BOOST_INCDIR) -I$(GMP_INCDIR) 
-CFLAGS 		= -I$(BOOST_INCDIR)
+CFLAGS 		= -I$(BOOST_INCDIR) $(LIBGAP_INCLUDE)
 
-LIBS		= $(GMP_CXX_LINK) $(BOOST_LINK)
+LIBS		= $(GMP_CXX_LINK) $(BOOST_LINK) $(LIBGAP_LINK)
 
 %.o: %.cpp
 	@echo

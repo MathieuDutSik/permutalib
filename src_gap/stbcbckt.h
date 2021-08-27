@@ -1949,6 +1949,12 @@ StabChain<Telt,Tidx_label> Kernel_Stabilizer_OnPoints(StabChain<Telt,Tidx_label>
 }
 
 
+
+
+
+
+
+
 template<typename Telt, typename Tidx_label, typename Tint>
 StabChain<Telt,Tidx_label> Kernel_Stabilizer_OnSets(StabChain<Telt,Tidx_label> const& G, Face const& Phi)
 {

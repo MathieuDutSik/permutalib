@@ -28,9 +28,7 @@ std::string GapStringTVector(std::vector<T> const& f)
   for (size_t i=0; i<len; i++) {
     if (i>0)
       os << ", ";
-    std::cerr << "Before string conversion\n";
     os << f[i];
-    std::cerr << "After string conversion\n";
   }
   os << " ]";
   return os.str();
