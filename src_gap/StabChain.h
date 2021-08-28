@@ -2035,28 +2035,42 @@ Telt MinimalElementCosetStabChain(StabChain<Telt,Tidx_label> const& Stot, Telt c
 
 
 
-template<typename Telt, typename Tidx_label, typename Tret>
-StabChain<Tret,Tidx_label> HomomorphismMapping(StabChain<Telt,Tidx_label> const& Stot, std::function<Tret(Telt const&)> const& f)
+template<typename Tret, typename Telt, typename Tidx_label, typename F_pt, typename F_elt>
+StabChain<Tret,Tidx_label> HomomorphismMapping(StabChain<Telt,Tidx_label> const& Stot, F_pt f_pt, F_elt f_elt)
 {
   using Tidx = typename Telt::Tidx;
-  Tret idMap = f(Stot->comm->identity);
-  Tidx nMap=idMap.size();
+  using Tret_idx = typename Tret::Tidx;
+  Tret idMap = f_elt(Stot->comm->identity);
+  Tret_idx nMap=idMap.size();
   auto fVector =[&](std::vector<Telt> const& V) -> std::vector<Tret> {
     size_t len = V.size();
     std::vector<Tret> Vret(len);
     for (size_t i=0; i<len; i++)
-      Vret[i] = f(V[i]);
+      Vret[i] = f_elt(V[i]);
     return Vret;
   };
-  std::vector<Tret> labelsMap = fVector(Stot->comm->labels);
-  std::shared_ptr<CommonStabInfo<Tret>> comm = std::make_shared<CommonStabInfo<Tret>>(CommonStabInfo<Tret>({nMap, idMap, std::move(labelsMap)}));
 
   StabChain<Telt,Tidx_label> Sptr = Stot;
   StabChain<Tret,Tidx_label> Swork = nullptr;
   StabChain<Tret,Tidx_label> Sreturn = nullptr;
 
+
+  std::vector<std::pair< std::shared_ptr<CommonStabInfo<Telt>>, std::shared_ptr<CommonStabInfo<Tret>> >> ListPairComm;
+  auto get_mapped_comm=[&](const std::shared_ptr<CommonStabInfo<Telt>>& comm_in) -> std::shared_ptr<CommonStabInfo<Tret>> {
+    for (auto & e_pair : ListPairComm)
+      if (e_pair.first == comm_in)
+        return e_pair.second;
+    std::vector<Tret> labelsMap = fVector(comm_in->labels);
+    std::shared_ptr<CommonStabInfo<Tret>> comm_out = std::make_shared<CommonStabInfo<Tret>>(CommonStabInfo<Tret>({nMap, idMap, std::move(labelsMap)}));
+    ListPairComm.push_back({comm_in, comm_out});
+    return comm_out;
+  };
+
   while (Sptr != nullptr) {
-    Swork = std::make_shared<StabLevel<Telt,Tidx_label>>(StabLevel<Telt,Tidx_label>({Sptr->transversal, Sptr->orbit, Sptr->genlabels, Sptr->cycles, Sptr->IsBoundCycle, fVector(Sptr->treegen), fVector(Sptr->treegeninv), fVector(Sptr->aux), Sptr->treedepth, Sptr->diam, comm, nullptr}));
+    std::vector<Tret_idx> orbit;
+    for (auto & eVal : Sptr->orbit)
+      orbit.push_back(f_pt(eVal));
+    Swork = std::make_shared<StabLevel<Telt,Tidx_label>>(StabLevel<Telt,Tidx_label>({Sptr->transversal, orbit, Sptr->genlabels, Sptr->cycles, Sptr->IsBoundCycle, fVector(Sptr->treegen), fVector(Sptr->treegeninv), fVector(Sptr->aux), Sptr->treedepth, Sptr->diam, get_mapped_comm(Sptr->comm), nullptr}));
     if (Sreturn == nullptr)
       Sreturn = Swork;
     Sptr = Sptr->stabilizer;

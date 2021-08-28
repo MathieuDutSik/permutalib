@@ -354,6 +354,75 @@ StabChain<Telt,Tidx_label> Kernel_IntersectionNormalClosurePermGroup(const StabC
 
 
 
+template<typename Telt, typename Tidx_label>
+struct InjectiveRestrictionHomomorphism_base {
+  using Tidx=typename Telt::Tidx;
+  const StabChain<Telt,Tidx_label> & G;
+  const std::vector<Tidx>& subset;
+  std::vector<Tidx> subset_rev;
+  Tidx miss_val = std::numeric_limits<Tidx>::max();
+  StabChain<Telt,Tidx_label> S_restr;
+  InjectiveRestrictionHomomorphism_base(const StabChain<Telt,Tidx_label>& G, const std::vector<typename Telt::Tidx>& subset) : G(G), subset(subset) {
+    Tidx n = G->comm->n;
+    Tidx len = Tidx(subset.size());
+    subset_rev = std::vector<Tidx>(n, miss_val);
+    for (Tidx i=0; i<len; i++)
+      subset_rev[subset[i]] = i;
+    auto f_pt=[&](const Tidx& x) -> Tidx {
+      return subset_rev[x];
+    };
+    auto f_elt=[&](const Telt& u) -> Telt {
+      std::vector<Tidx> eList(len);
+      for (Tidx i=0; i<len; i++) {
+        Tidx i_big = subset[i];
+        Tidx j_big = PowAct(i_big, u);
+        Tidx j = subset_rev[j_big];
+        eList[i] = j;
+      }
+      return Telt(std::move(eList));
+    };
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+    StabChain<Telt,Tidx_label> G_ptr = G;
+    while (G_ptr != nullptr) {
+      if (subset_rev[G_ptr->orbit[0]] == miss_val) {
+        std::cerr << "The value is a missing one. Wrong base for the restriction\n";
+        throw PermutalibException{1};
+      }
+    }
+#endif
+    S_restr = HomomorphismMapping<Telt,Telt,Tidx_label,decltype(f_elt),decltype(f_pt)>(G, f_pt, f_elt);
+  }
+  Telt PreImage_elt(const Telt& eElt) const {
+    std::vector<Tidx> eList(n);
+    for (Tidx i=0; i<n; i++)
+      eList[i] = i;
+    Tidx n_restr = S_restr->comm->n;
+    for (Tidx i=0; i<n_restr; i++) {
+      eList[subset[i]] = PowAct(i, eElt);
+    }
+    Telt g(eList); // Build g, but keep eList separately for further use.
+    Telt res = SiftedPermutation(G, g);
+    Telt res_inv = Inverse(res);
+    for (Tidx i=0; i<n; i++)
+      if (subset_rev[i] == miss_val)
+        eList[i] = PowAct(i, res_inv);
+    return Telt(std::move(eList));
+  }
+  StabChain<Telt,Tidx_label> PreImage_grp(const StabChain<Telt,Tidx_label>& U) const {
+    auto f_pt=[&](const Tidx& x) -> Tidx {
+      return subset[x];
+    };
+    auto f_elt=[&](const Telt& u) -> Telt {
+      return PreImage_elt(u);
+    };
+    return HomomorphismMapping<Telt,Telt,Tidx_label,decltype(f_elt),decltype(f_pt)>(U, f_pt, f_elt);
+  }
+};
+
+
+
+
+
 
 
 /*
@@ -364,47 +433,52 @@ StabChain<Telt,Tidx_label> Kernel_IntersectionNormalClosurePermGroup(const StabC
 ##  computes the centralizer of a transitive group G in S_n
 ##
 */
-template<typename Telt, typename Tidx_label, typename Tint>
-std::vector<Telt> CentralizerTransSymmCSPG(const StabChain<Telt,Tidx_label>& S, const typename Telt::Tidx& x, const std::vector<typename Telt::Tidx>& L)
+template<typename Telt, typename Tidx_label>
+std::pair<std::vector<Telt>,typename Telt::Tidx> CentralizerTransSymmCSPG(const StabChain<Telt,Tidx_label>& S, const typename Telt::Tidx& x, Face & L)
 {
   using Tidx=typename Telt::Tidx;
+  size_t L_size = L.count();
   Tidx n = S->comm->n;
   Tidx miss_val = std::numeric_limits<Tidx>::max();
   std::vector<Telt> LGen = Kernel_GeneratorsOfGroup(S);
   if (IsTrivialListGen(LGen)) {
-    StabChainOptions<Tint,Tidx> options1 = GetStandardOptions<Tint,Tidx>(n);
-    return StabChainOp_listgen<Telt,Tidx_label,Tint>({}, options1);
+    return {};
   }
 
   // the centralizer of G is semiregular, acting transitively on L
-  std::vector<Tidx> orbitx{x};
-  Face orbitx_rev(n);
-  orbitx_rev[x] = 1;
-  auto get_entry=[&]() -> Tidx {
-    for (auto & y : L) {
-      if (orbitx_rev[y] == 0) {
-        return y;
-      }
-    }
-    std::cerr << "Failed to find value\n";
-    throw PermutalibException{1};
-  };
   std::vector<Telt> gens;
-  auto set_orbitx=[&]() -> void {
-    
-  };
-  while ( orbitx.size() < L.size()) {
+  std::pair<std::vector<Tidx>,Face> epair = OrbitPerms(gens, n, x);
+  while ( epair.first.size() < L_size ) {
     // construct element of centralizer which carries x to new point in L
     std::vector<Tidx> gen(n);
-    Tidx y = get_entry();
+    Tidx y = Tidx(L.find_first());
     for (Tidx z=0; z<n; z++) {
       Telt h = InverseRepresentative(S, z);
       gen[z] = SlashAct(y, h);
     }
     gens.emplace_back(std::move(Telt(std::move(gen))));
-    set_orbitx();
+    epair = OrbitPerms(gens, n, x);
+    for (auto & eVal : epair.first)
+      L[eVal] = 0;
   }
-  return gens;
+  return {std::move(gens), Tidx(L_size)};
+}
+
+
+template<typename Telt, typename Tidx_label, typename Tint>
+std::pair<std::vector<Telt>,typename Telt::Tidx> CentralizerTransSymmCSPG_direct(const StabChain<Telt,Tidx_label>& S)
+{
+  using Tidx=typename Telt::Tidx;
+  Tidx n = S->comm->n;
+  Tidx x = S->orbit[0];
+  Tidx miss_val = std::numeric_limits<Tidx>::max();
+  std::vector<Telt> LMoved = MovedPoints(Kernel_GeneratorsOfGroup(S->stabilizer));
+  Face L(n);
+  for (Tidx i=0; i<n; i++)
+    L[i] = 1;
+  for (auto & eVal : LMoved)
+    L[eVal] = 0;
+  return CentralizerTransSymmCSPG(S, x, L);
 }
 
 
@@ -417,125 +491,145 @@ std::vector<Telt> CentralizerTransSymmCSPG(const StabChain<Telt,Tidx_label>& S, 
 ##  Reference: Beals-Seress, 24th Symp. on Theory of Computing 1992, sect. 9
 ##
 */
-/*
-
-StabChain<Telt,Tidx_label> Centre(const StabChain<Telt,Tidx_label>& S)
+template<typename Telt, typename Tidx_label, typename Tint>
+StabChain<Telt,Tidx_label> Centre(const StabChain<Telt,Tidx_label>& G)
 {
+  using Tidx=typename Telt::Tidx;
+  Tidx n = G->comm->n;
+  Tidx miss_val = std::numeric_limits<Tidx>::max();
+  std::vector<Telt> LGen = Kernel_GeneratorsOfGroup(G);
+  if (IsTrivialListGen(LGen)) {
+    StabChainOptions<Tint,Tidx> options1 = GetStandardOptions<Tint,Tidx>(n);
+    return StabChainOp_listgen<Telt,Tidx_label,Tint>({}, options1);
+  }
+  std::vector<Tidx> base = BaseStabChain(G);
+  std::vector<std::vector<Tidx>> orbits = OrbitsPerms(LGen, n);
 
-    if IsTrivial(G)  then
-       return TrivialSubgroup(G);
-    fi;
 
-    base := BaseStabChain(StabChainMutable(G));
-    n := Maximum( Maximum( base ), LargestMovedPoint(G) );
-    orbits := OrbitsDomain(G,[1..n]);
+  auto get_centralizer_transitive_case=[](const StabChain<Telt,Tidx_label>& U) -> StabChain<Telt,Tidx_label> {
+    Tidx len = U->comm->n;
+    std::pair<std::vector<Telt>,Tidx> pair_centr = CentralizerTransSymmCSPG_direct(U);
+    if (IsTrivialListGen(pair_centr.first)) {
+      StabChainOptions<Tint,Tidx> options1 = GetStandardOptions<Tint,Tidx>(len);
+      return StabChainOp_listgen<Telt,Tidx_label,Tint>({}, options1);
+    } else {
+      Tint order_p_size = pair_centr.second * Order<Telt,Tidx_label,Tint>(U);
+      std::vector<Telt> LGen_U = Kernel_GeneratorsOfGroup(U);
+      return Kernel_IntersectionNormalClosurePermGroup_LGen(n, LGen_U, pair_centr.first, order_p_size);
+    }
+  };
+  // handle case of transitive G directly
+  if (orbits.size() == 1)
+    return get_centralizer_transitive_case(G);
 
-    # handle case of transitive G directly
-    if Length(orbits) = 1  then
-        centr := CentralizerTransSymmCSPG( G, StabChainMutable( G ) );
-        if IsEmpty( GeneratorsOfGroup( centr ) ) then
-           return TrivialSubgroup( G );
-        else
-           order := Size(centr);
-           cent := IntersectionNormalClosurePermGroup(G,centr,order*Size(G));
-           Assert( 1, IsAbelian( cent ) );
-           SetIsAbelian( cent, true );
-           return cent;
-        fi;
-    fi;
-    # for intransitive G, find which orbit contains which
-    # points of permutation domain
-    reps := [];
-    for i in [1..Length(orbits)] do
-        for j in [1..Length(orbits[i])] do
-            reps[orbits[i][j]] := i;
-        od;
-    od;
+  // for intransitive G, find which orbit contains which
+  // points of permutation domain
+  std::vector<Tidx> reps(n);
+  Tidx n_orbit = Tidx(orbits.size());
+  for (Tidx i_orbit=0; i_orbit<n_orbit; i_orbit++)
+    for (auto & eVal : orbits[i_orbit])
+      reps[eVal] = i_orbit;
 
-    # take union of significant orbits which contain base points
-    max := reps[base[1]];
-    significant := [max];
-    domain := ShallowCopy(orbits[max]);
-    for i in [2..Length(base)] do
-        if not (reps[base[i]] in significant)  then
-            max := reps[base[i]];
-            Append(domain,orbits[max]);
-            Add(significant,max);
-        fi;
-    od;
-    len := Length(domain);
-
-    # restrict G to significant orbits
-    if n = len then
-       GG := G;
-    else
-       tchom := ActionHomomorphism(G,domain,"surjective");
-       GG := Image(tchom,G);
-    fi;
-
-    # handle case of transitive GG directly
-    if Length(significant) = 1  then
-        centr := CentralizerTransSymmCSPG( GG, StabChainMutable( GG ) );
-        if IsEmpty( GeneratorsOfGroup( centr ) ) then
-           return TrivialSubgroup( G );
-        else
-           order := Size( centr );
-           cent := IntersectionNormalClosurePermGroup(GG,centr,order*Size(GG));
-           cent:= PreImages(tchom,cent);
-           Assert( 1, IsAbelian( cent ) );
-           SetIsAbelian( cent, true );
-           return cent;
-        fi;
-    fi;
-
-    # case of intransitive GG
-    # for each orbit of GG, construct generators of centralizer of GG in
-    # Sym(orbit).  hgens is a list of generators for the direct product of
-    # these centralizers.
-    # the group generated by hgens contains the center of GG
-    hgens := [];
-    order := 1;
-    for i in significant do
-        if n = len then
-           orbit := orbits[i];
-        else
-           orbit := OnTuples(orbits[i],tchom!.conperm);
-        fi;
-        tchom2 := ActionHomomorphism(GG,orbit,"surjective");
-        GGG := Image(tchom2,GG);
-        chainGG:= StabChainOp( GG, [ orbit[1] ] );
-        chainGGG:= StabChainMutable( GGG );
-        chainGGG.stabFxdPnts:=[ orbit[1]^tchom2!.conperm,
-            OnTuples( Difference(orbit,
-                      MovedPoints( chainGG.stabilizer.generators ) ),
-                      tchom2!.conperm ) ];
-        centr := CentralizerTransSymmCSPG( GGG, chainGGG );
-        if not IsEmpty( GeneratorsOfGroup( centr ) ) then
-           order := order * Size( centr );
-           inverse2 := tchom2!.conperm^(-1);
-           for g in StabChainMutable( centr ).generators do
-               Add(hgens,g^inverse2);
-           od;
-        fi;
-    od;
-    if order = 1 then
-        return TrivialSubgroup( G );
-    else
-        cent := IntersectionNormalClosurePermGroup
-                 ( GG, GroupByGenerators(hgens,()), order*Size(GG) );
-        if n <> len then
-          cent:= PreImages( tchom, cent );
-        fi;
-        Assert( 1, IsAbelian( cent ) );
-        SetIsAbelian( cent, true );
-        return cent;
-    fi;
-end );
+  // take union of significant orbits which contain base points
+  Face significant_v(n_orbit);
+  std::vector<Tidx> significant;
+  Tidx len_base = Tidx(base.size());
+  std::vector<Tidx> domain;
+  for (Tidx i_base=0; i_base<len_base; i_base++) {
+    Tidx i_orbit = reps[base[i_base]];
+    if (significant_v[i_orbit] == 0) {
+      significant_v[i_orbit]=1;
+      significant.push_back(i_orbit);
+      domain.insert(domain.end(), orbits[i_orbit].begin(), orbits[i_orbit].end());
+    }
+  }
+  Tidx len = Tidx(domain.size());
 
 
 
 
-  */
+
+  auto compute_centr=[&](const StabChain<Telt,Tidx_label>& GG, const std::vector<std::vector<Tidx>>& orbits) -> StabChain<Telt,Tidx_label> {
+    // handle case of transitive GG directly
+    if (orbits.size() == 1) {
+      return get_centralizer_transitive_case(GG);
+    }
+    Tidx len = GG->comm->n;
+    std::vector<Telt> hgens;
+    Tint order = 1;
+
+    /* case of intransitive GG
+       for each orbit of GG, construct generators of centralizer of GG in
+       Sym(orbit).  hgens is a list of generators for the direct product of
+       these centralizers.
+       the group generated by hgens contains the center of GG */
+    std::vector<Telt> LGen_GG = Kernel_GeneratorsOfGroup(GG);
+    for (auto & orbit : orbits) {
+      Tidx len_o = Tidx(orbit.size());
+      std::vector<Tidx> orbit_rev(len,miss_val);
+      for (Tidx i=0; i<len_o; i++)
+        orbit_rev[orbit[i]] = i;
+      StabChainOptions<Tint,Tidx> options1 = GetStandardOptions<Tint,Tidx>(len);
+      options1.base.push_back(0);
+      std::vector<Telt> LGen_o;
+      for (auto & eGen : LGen_GG) {
+        std::vector<Tidx> eList(len_o);
+        for (Tidx i=0; i<len_o; i++) {
+          Tidx i_big = orbit[i];
+          Tidx j_big = PowAct(i_big, eGen);
+          Tidx j = orbit_rev[j_big];
+          eList[i] = j;
+        }
+        LGen_o.emplace_back(std::move(Telt(std::move(eList))));
+      }
+      StabChain<Telt,Tidx_label> GGG = StabChainOp_listgen<Telt,Tidx_label,Tint>(LGen_o, options1);
+      std::pair<std::vector<Telt>,Tidx> pair_centr = CentralizerTransSymmCSPG_direct(GGG);
+      if (!IsTrivialListGen(pair_centr.first)) {
+        order *= Tint(pair_centr.second);
+        for (auto & eGen : pair_centr.first) {
+          std::vector<Telt> eList(len);
+          for (Tidx i=0; i<len; i++)
+            eList[i] = i;
+          for (Tidx i=0; i<len_o; i++)
+            eList[orbit[i]] = orbit[ PowAct(i, eGen) ];
+          hgens.emplace_back(std::move(Telt(std::move(eList))));
+        }
+      }
+    }
+    if (order == 1) {
+      StabChainOptions<Tint,Tidx> options1 = GetStandardOptions<Tint,Tidx>(len);
+      return StabChainOp_listgen<Telt,Tidx_label,Tint>({}, options1);
+    } else {
+      Tint order_p_size = order * Order<Telt,Tidx_label,Tint>(GG);
+      return IntersectionNormalClosurePermGroup( LGen_GG, hgens, order_p_size);
+    }
+
+    
+  };
+
+  // We restrict G to significant orbits
+  std::vector<std::vector<Tidx>> orbits_red;
+  if (n == len) {
+    for (auto & eVal : significant)
+      orbits_red.emplace_back(std::move(orbits[eVal]));
+    return compute_centr(G, orbits_red);
+  } else {
+    InjectiveRestrictionHomomorphism_base<Telt,Tidx_label> InjResHom(G, domain);
+    for (auto & eVal : significant) {
+      std::vector<Tidx>& V = orbits[eVal];
+      std::vector<Tidx> orbit_red;
+      orbit_red.reseve(V.size());
+      for (auto & eIdx : V)
+        orbit_red.push_back(InjResHom.subset_rev[eIdx]);
+      orbits_red.emplace_back(std::move(orbit_red));
+    }
+    StabChain<Telt,Tidx_label> cent1 = compute_centr(InjResHom.S_restr, orbits_red);
+    return InjResHom.PreImage_grp(cent);
+  }
+}
+
+
+
 
 
 }

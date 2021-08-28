@@ -143,7 +143,7 @@ typename Telt::Tidx SmallestMovedPoint(std::vector<Telt> const& LGen)
 
 
 template<typename Telt>
-std::vector<typename Telt::Tidx> OrbitPerms(std::vector<Telt> const& gens, typename Telt::Tidx const& n, typename Telt::Tidx const& d)
+std::pair<std::vector<typename Telt::Tidx>,Face> OrbitPerms(std::vector<Telt> const& gens, typename Telt::Tidx const& n, typename Telt::Tidx const& d)
 {
   using Tidx=typename Telt::Tidx;
   std::vector<Tidx> orb;
@@ -168,7 +168,7 @@ std::vector<typename Telt::Tidx> OrbitPerms(std::vector<Telt> const& gens, typen
     }
     posDone = posTot;
   }
-  return orb;
+  return {std::move(orb), std::move(eFace)};
 }
 
 
@@ -336,18 +336,6 @@ std::vector<typename Telt::Tidx> MovedPoints(const std::vector<Telt>& LGen, cons
   return LMoved;
 }
 
-
-
-/*
-template<typename Telt>
-std::vector<int> OrbitPerms(std::vector<Telt> const& ListGen, int const & ePt)
-{
-  auto act=[](Telt const& u, int const& eVal) -> int {
-    return u.at(eVal);
-  };
-  return Orbit(ListGen, ePt, act);
-}
-*/
 
 
 
