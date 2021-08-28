@@ -4,23 +4,20 @@
 
 #include "Group.h"
 
-#define USE_LIBGAP
-//#undef USE_LIBGAP
+//#define USE_LIBGAP
+#undef USE_LIBGAP
 
 
 
 #ifdef USE_LIBGAP
 
 #include <libgap-api.h>
-extern char ** environ;
 
 
 
-template<typename Tgroup>
-Tgroup GetStabilizer_libgap(const Tgroup& G, const permutalib::Face& f)
+std::string GAP_string_face(const permutalib::Face& f)
 {
-  std::string comm1 = "G:=" + G.GapString() + ";";
-  std::string comm2 = "f:=[";
+  std::string comm2 = "[";
   boost::dynamic_bitset<>::size_type ePt=f.find_first();
   for (size_t u=0; u<f.count(); u++) {
     if (u>0)
@@ -28,35 +25,108 @@ Tgroup GetStabilizer_libgap(const Tgroup& G, const permutalib::Face& f)
     comm2 += std::to_string(ePt + 1);
     ePt = f.find_next(ePt);
   }
-  comm2 += "];";
-  std::string comm3 = "GeneratorsOfGroup(Stabilizer(G, f, OnSets));";
-  std::string commtot = comm1 + ";" + comm2 + ";" + comm3;
+  comm2 += "]";
+  return comm2;
+}
+
+
+
+template<typename Tgroup>
+bool GetRepresentativeAction_OnSets_libgap(const Tgroup& G, const permutalib::Face& eFace1, const permutalib::Face& eFace2)
+{
+  std::string comm1 = "G:=" + G.GapString() + ";";
+  std::string comm2 = "f1:=" + GAP_string_face(eFace1) + ";";
+  std::string comm3 = "f2:=" + GAP_string_face(eFace2) + ";";
+  std::string comm4 = "RepresentativeAction(G, f1, f2, OnSets)<>fail;";
+  std::string commtot = comm1 + ";  " + comm2 + ";  " + comm3 + ";  " + comm4;
+  //  std::cerr << "commtot=" << commtot << "\n";
   //
-  std::cerr << "GetStabilizer_libgap, step 1\n";
   Obj res = GAP_EvalString(commtot.c_str());
-  std::cerr << "GetStabilizer_libgap, step 2\n";
   Int rc = GAP_LenList(res);
-  std::cerr << "GetStabilizer_libgap, step 3\n";
-  if (rc != 1) {
-    std::cerr << "We have rc=" << rc << "\n";
-    throw PermutalibException{1};
+  //  std::cerr << "rc=" << rc << "\n";
+  for (Int i=1; i<=rc; i++) {
+    Obj ires = GAP_ElmList(res, 1);
+    if (GAP_ElmList(ires, 1) == GAP_True) {
+      Char * buffer = GAP_CSTR_STRING(GAP_ElmList(ires, 5));
+      if (buffer) {
+        //        printf("%s\n", buffer);
+      }
+      if (strlen(buffer) > 0) {
+        std::string str = buffer;
+        if (str == "true")
+          return true;
+        if (str == "false")
+          return false;
+        std::cerr << "Failed to find a matching entry for str=" << str << "\n";
+        throw PermutalibException{1};
+      }
+    }
   }
-  std::cerr << "GetStabilizer_libgap, step 4\n";
-  Obj ires = GAP_ElmList(res, 1);
-  std::cerr << "GetStabilizer_libgap, step 5\n";
-  if (GAP_ElmList(ires, 1) == GAP_True) {
-    Char * buffer = GAP_CSTR_STRING(GAP_ElmList(ires, 5));
-    if (buffer)
-      printf("%s\n", buffer);
+  return true;
+  std::cerr << "We should not reach that stage\n";
+  throw PermutalibException{1};
+}
+
+
+
+template<typename Tgroup>
+Tgroup GetStabilizer_libgap(const Tgroup& G, const permutalib::Face& f)
+{
+  std::string comm1 = "G:=" + G.GapString() + ";";
+  std::string comm2 = "f:=" + GAP_string_face(f) + ";";
+  std::string comm3 = "GeneratorsOfGroup(Stabilizer(G, f, OnSets));";
+  std::string commtot = comm1 + ";  " + comm2 + ";  " + comm3;
+  std::cerr << "commtot=" << commtot << "\n";
+  //
+  Obj res = GAP_EvalString(commtot.c_str());
+  Int rc = GAP_LenList(res);
+  for (Int i=1; i<=rc; i++) {
+    Obj ires = GAP_ElmList(res, 1);
+    if (GAP_ElmList(ires, 1) == GAP_True) {
+      Char * buffer = GAP_CSTR_STRING(GAP_ElmList(ires, 5));
+      if (buffer) {
+        std::cerr << "Parsing code is needed\n";
+        printf("%s\n", buffer);
+      }
+    }
   }
-  std::cerr << "GetStabilizer_libgap, step 6\n";
+  std::cerr << "Code is incomplete\n";
   return G.Stabilizer_OnSets(f);
+}
+
+
+void set_argc_argv_gap(int *argc, char ***argv) {
+  std::vector<std::string> LStr = {"./BenchmarkingPermutalib", "-A", "-l", ".", "-q", "-T", "--nointeract"};
+  *argc = LStr.size();
+  *argv = (char**)malloc(LStr.size() * sizeof(char**));
+  for (size_t i_str=0; i_str<LStr.size(); i_str++) {
+    size_t len_str = LStr[i_str].size();
+    (*argv)[i_str] = (char*)malloc((len_str+1) * sizeof(char*));
+    for (size_t i_c=0; i_c<len_str; i_c++)
+      (*argv)[i_str][i_c] = LStr[i_str][i_c];
+    (*argv)[i_str][len_str] = '\0';
+  }
 }
 
 
 
 
+void free_argc_argv_gap(int *argc, char ***argv) {
+  size_t len = *argc;
+  for (size_t i_str=0; i_str<len; i_str++) {
+    free((*argv)[i_str]);
+  }
+  free(*argv);
+}
+
+
+
+
+
+
 #endif
+
+
 
 
 
@@ -65,7 +135,24 @@ Tgroup GetStabilizer_libgap(const Tgroup& G, const permutalib::Face& f)
 int main(int argc, char *argv[])
 {
 #ifdef USE_LIBGAP
-  (void)GAP_Enter();
+  int argc_gap;
+  char **argv_gap;
+  std::cerr << "Before set_argc_argv_gap\n";
+  set_argc_argv_gap(&argc_gap, &argv_gap);
+  for (int i=0; i<argc; i++) {
+    std::cerr << "main : i=" << i << " argv=" << argv[i] << "\n";
+  }
+  for (int i=0; i<argc_gap; i++) {
+    std::cerr << "gap : i=" << i << " argv=" << argv_gap[i] << "\n";
+  }
+
+  
+  std::cerr << "Before GAP_Initialize\n";
+  GAP_Initialize(argc, argv, 0, 0, 1);
+  std::cerr << "Before GAP_Enter\n";
+  Int ok = GAP_Enter();
+  std::cerr << "ok=" << ok << "\n";
+
 #endif
   try {
     //    using Tidx = int16_t;
@@ -74,6 +161,11 @@ int main(int argc, char *argv[])
     using Telt = permutalib::SingleSidedPerm<Tidx>;
     using Tint = mpz_class;
     using Tgroup = permutalib::Group<Telt,Tint>;
+    long n_iter = 50;
+#ifdef USE_LIBGAP
+    std::string InputFile = "AllFileTest";
+    std::string opt = "check_representative";
+#else
     if (argc != 3 && argc != 4) {
       std::cerr << "BenchmarkingPermutalib [EXMP] [opt]\n";
       std::cerr << "or\n";
@@ -82,6 +174,13 @@ int main(int argc, char *argv[])
     }
     std::string InputFile = argv[1];
     std::string opt = argv[2];
+    if (argc == 4) {
+      sscanf(argv[3], "%ld", &n_iter);
+      std::cerr << "Using input value n_iter=" << n_iter << "\n";
+    } else {
+      std::cerr << "Using default value of 50 on n_iter\n";
+    }
+#endif
     std::vector<std::string> ListOpts={"canonical", "stabilizer", "pointstabilizer", "pointrepresentative",
       "check_canonical", "check_representative", "check_stabilizer", "all"};
     bool IsMatch=false;
@@ -97,13 +196,6 @@ int main(int argc, char *argv[])
       std::cerr << "\n";
       std::cerr << "Please select an option that is allowed\n";
       throw PermutalibException{1};
-    }
-    long n_iter = 50;
-    if (argc == 4) {
-      sscanf(argv[3], "%ld", &n_iter);
-      std::cerr << "Using input value n_iter=" << n_iter << "\n";
-    } else {
-      std::cerr << "Using default value of 50 on n_iter\n";
     }
     //
     std::ifstream is(InputFile);
@@ -200,8 +292,12 @@ int main(int argc, char *argv[])
           permutalib::Face eFace1 = random_face(n);
           Telt u = eG.rand();
           permutalib::Face eFace2 = OnSets(eFace1, u);
-          std::pair<bool,Telt> eP = eG.RepresentativeAction_OnSets(eFace1, eFace2);
-          if (!eP.first) {
+#ifdef USE_LIBGAP
+          bool test = GetRepresentativeAction_OnSets_libgap(eG, eFace1, eFace2);
+#else
+          bool test = eG.RepresentativeAction_OnSets(eFace1, eFace2).first;
+#endif
+          if (!test) {
             std::cerr << "RepresentativeAction_OnSets error\n";
             throw PermutalibException{1};
           }
@@ -257,5 +353,6 @@ int main(int argc, char *argv[])
   }
 #ifdef USE_LIBGAP
   GAP_Leave();
+  free_argc_argv_gap(&argc_gap, &argv_gap);
 #endif
 }

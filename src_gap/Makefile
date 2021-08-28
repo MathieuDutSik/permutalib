@@ -8,7 +8,8 @@
 #PROGRAM	= GroupProperties
 #PROGRAM	= GapSmallGeneratingSet
 #PROGRAM	= GapDerivedSubgroup
-PROGRAM	= BenchmarkingPermutalib
+PROGRAM	= BenchmarkingPermutalib MinimalExample
+#PROGRAM	= MinimalExample
 #PROGRAM	= BenchmarkingPermutalib GapCanonicalImage
 #PROGRAM	= Factorize
 #PROGRAM	= TestSerialization

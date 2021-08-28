@@ -24,7 +24,6 @@ std::string GapStringTVector(std::vector<T> const& f)
   std::ostringstream os;
   os << "[ ";
   size_t len=f.size();
-  std::cerr << "|f|=" << len << "\n";
   for (size_t i=0; i<len; i++) {
     if (i>0)
       os << ", ";
