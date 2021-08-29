@@ -2038,7 +2038,7 @@ Telt MinimalElementCosetStabChain(StabChain<Telt,Tidx_label> const& Stot, Telt c
 template<typename Tret, typename Telt, typename Tidx_label, typename F_pt, typename F_elt>
 StabChain<Tret,Tidx_label> HomomorphismMapping(StabChain<Telt,Tidx_label> const& Stot, F_pt f_pt, F_elt f_elt)
 {
-  using Tidx = typename Telt::Tidx;
+  //  using Tidx = typename Telt::Tidx;
   using Tret_idx = typename Tret::Tidx;
   Tret idMap = f_elt(Stot->comm->identity);
   Tret_idx nMap=idMap.size();
@@ -2050,9 +2050,6 @@ StabChain<Tret,Tidx_label> HomomorphismMapping(StabChain<Telt,Tidx_label> const&
     return Vret;
   };
 
-  StabChain<Telt,Tidx_label> Sptr = Stot;
-  StabChain<Tret,Tidx_label> Swork = nullptr;
-  StabChain<Tret,Tidx_label> Sreturn = nullptr;
 
 
   std::vector<std::pair< std::shared_ptr<CommonStabInfo<Telt>>, std::shared_ptr<CommonStabInfo<Tret>> >> ListPairComm;
@@ -2066,17 +2063,24 @@ StabChain<Tret,Tidx_label> HomomorphismMapping(StabChain<Telt,Tidx_label> const&
     return comm_out;
   };
 
+
+
+
+  std::vector<StabChain<Tret,Tidx_label>> ListLevel;
+
+  StabChain<Telt,Tidx_label> Sptr = Stot;
   while (Sptr != nullptr) {
     std::vector<Tret_idx> orbit;
     for (auto & eVal : Sptr->orbit)
       orbit.push_back(f_pt(eVal));
-    Swork = std::make_shared<StabLevel<Telt,Tidx_label>>(StabLevel<Telt,Tidx_label>({Sptr->transversal, orbit, Sptr->genlabels, Sptr->cycles, Sptr->IsBoundCycle, fVector(Sptr->treegen), fVector(Sptr->treegeninv), fVector(Sptr->aux), Sptr->treedepth, Sptr->diam, get_mapped_comm(Sptr->comm), nullptr}));
-    if (Sreturn == nullptr)
-      Sreturn = Swork;
+    StabChain<Tret,Tidx_label> Swork = std::make_shared<StabLevel<Telt,Tidx_label>>(StabLevel<Telt,Tidx_label>({Sptr->transversal, orbit, Sptr->genlabels, Sptr->cycles, Sptr->IsBoundCycle, fVector(Sptr->treegen), fVector(Sptr->treegeninv), fVector(Sptr->aux), Sptr->treedepth, Sptr->diam, get_mapped_comm(Sptr->comm), nullptr}));
+    ListLevel.push_back(Swork);
     Sptr = Sptr->stabilizer;
-    Swork = Swork->stabilizer;
   }
-  return Sreturn;
+  size_t n_lev = ListLevel.size();
+  for (size_t i=0; i<n_lev-1; i++)
+    ListLevel[i]->stabilizer = ListLevel[i+1];
+  return ListLevel[0];
 }
 
 

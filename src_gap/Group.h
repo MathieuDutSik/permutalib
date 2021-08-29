@@ -146,6 +146,9 @@ public:
   Group<Telt,Tint> DerivedSubgroup() const {
     return Group<Telt,Tint>(Kernel_DerivedSubgroup<Telt,Tidx_label,Tint>(S));
   }
+  Group<Telt,Tint> CentreSubgroup() const {
+    return Group<Telt,Tint>(Kernel_CentreSubgroup<Telt,Tidx_label,Tint>(S));
+  }
 private:
   struct IteratorType {
   private:

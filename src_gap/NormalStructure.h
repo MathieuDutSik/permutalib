@@ -334,10 +334,10 @@ StabChain<Telt,Tidx_label> Kernel_IntersectionNormalClosurePermGroup_LGen(const 
   options2.base.reserve(n);
   for (Tidx i=0; i<n; i++)
     options2.base.push_back(i + n);
-  const std::vector<Telt> & tuple = options2.base;
+  const std::vector<Tidx> & tuple = options2.base;
   StabChain<Telt,Tidx_label> S = StabChainOp_listgen<Telt,Tidx_label,Tint>(newgens, options2);
   StabChain<Telt,Tidx_label> S_red = Stabilizer_OnTuples_CorrectStabChain(S, tuple);
-  return SubsedtStabChain(S_red, tuple);
+  return SubsetStabChain<Telt,Tidx_label,Tint>(S_red, tuple);
 }
 
 
@@ -348,7 +348,7 @@ StabChain<Telt,Tidx_label> Kernel_IntersectionNormalClosurePermGroup(const StabC
   Tidx n = G->comm->n;
   std::vector<Telt> LGen_G = Kernel_GeneratorsOfGroup(G);
   std::vector<Telt> LGen_H = Kernel_GeneratorsOfGroup(H);
-  return Kernel_IntersectionNormalClosurePermGroup_LGen(n, LGen_G, LGen_H, size);
+  return Kernel_IntersectionNormalClosurePermGroup_LGen<Telt,Tidx_label,Tint>(n, LGen_G, LGen_H, size);
 }
 
 
@@ -390,9 +390,10 @@ struct InjectiveRestrictionHomomorphism_base {
       }
     }
 #endif
-    S_restr = HomomorphismMapping<Telt,Telt,Tidx_label,decltype(f_elt),decltype(f_pt)>(G, f_pt, f_elt);
+    S_restr = HomomorphismMapping<Telt,Telt,Tidx_label,decltype(f_pt),decltype(f_elt)>(G, f_pt, f_elt);
   }
   Telt PreImage_elt(const Telt& eElt) const {
+    Tidx n = G->comm->n;
     std::vector<Tidx> eList(n);
     for (Tidx i=0; i<n; i++)
       eList[i] = i;
@@ -415,7 +416,7 @@ struct InjectiveRestrictionHomomorphism_base {
     auto f_elt=[&](const Telt& u) -> Telt {
       return PreImage_elt(u);
     };
-    return HomomorphismMapping<Telt,Telt,Tidx_label,decltype(f_elt),decltype(f_pt)>(U, f_pt, f_elt);
+    return HomomorphismMapping<Telt,Telt,Tidx_label,decltype(f_pt),decltype(f_elt)>(U, f_pt, f_elt);
   }
 };
 
@@ -439,7 +440,6 @@ std::pair<std::vector<Telt>,typename Telt::Tidx> CentralizerTransSymmCSPG(const 
   using Tidx=typename Telt::Tidx;
   size_t L_size = L.count();
   Tidx n = S->comm->n;
-  Tidx miss_val = std::numeric_limits<Tidx>::max();
   std::vector<Telt> LGen = Kernel_GeneratorsOfGroup(S);
   if (IsTrivialListGen(LGen)) {
     return {};
@@ -465,14 +465,13 @@ std::pair<std::vector<Telt>,typename Telt::Tidx> CentralizerTransSymmCSPG(const 
 }
 
 
-template<typename Telt, typename Tidx_label, typename Tint>
+template<typename Telt, typename Tidx_label>
 std::pair<std::vector<Telt>,typename Telt::Tidx> CentralizerTransSymmCSPG_direct(const StabChain<Telt,Tidx_label>& S)
 {
   using Tidx=typename Telt::Tidx;
   Tidx n = S->comm->n;
   Tidx x = S->orbit[0];
-  Tidx miss_val = std::numeric_limits<Tidx>::max();
-  std::vector<Telt> LMoved = MovedPoints(Kernel_GeneratorsOfGroup(S->stabilizer));
+  std::vector<Tidx> LMoved = MovedPoints(Kernel_GeneratorsOfGroup(S->stabilizer), n);
   Face L(n);
   for (Tidx i=0; i<n; i++)
     L[i] = 1;
@@ -492,7 +491,7 @@ std::pair<std::vector<Telt>,typename Telt::Tidx> CentralizerTransSymmCSPG_direct
 ##
 */
 template<typename Telt, typename Tidx_label, typename Tint>
-StabChain<Telt,Tidx_label> Centre(const StabChain<Telt,Tidx_label>& G)
+StabChain<Telt,Tidx_label> Kernel_CentreSubgroup(const StabChain<Telt,Tidx_label>& G)
 {
   using Tidx=typename Telt::Tidx;
   Tidx n = G->comm->n;
@@ -515,7 +514,7 @@ StabChain<Telt,Tidx_label> Centre(const StabChain<Telt,Tidx_label>& G)
     } else {
       Tint order_p_size = pair_centr.second * Order<Telt,Tidx_label,Tint>(U);
       std::vector<Telt> LGen_U = Kernel_GeneratorsOfGroup(U);
-      return Kernel_IntersectionNormalClosurePermGroup_LGen(n, LGen_U, pair_centr.first, order_p_size);
+      return Kernel_IntersectionNormalClosurePermGroup_LGen<Telt,Tidx_label,Tint>(len, LGen_U, pair_centr.first, order_p_size);
     }
   };
   // handle case of transitive G directly
@@ -587,7 +586,7 @@ StabChain<Telt,Tidx_label> Centre(const StabChain<Telt,Tidx_label>& G)
       if (!IsTrivialListGen(pair_centr.first)) {
         order *= Tint(pair_centr.second);
         for (auto & eGen : pair_centr.first) {
-          std::vector<Telt> eList(len);
+          std::vector<Tidx> eList(len);
           for (Tidx i=0; i<len; i++)
             eList[i] = i;
           for (Tidx i=0; i<len_o; i++)
@@ -601,10 +600,9 @@ StabChain<Telt,Tidx_label> Centre(const StabChain<Telt,Tidx_label>& G)
       return StabChainOp_listgen<Telt,Tidx_label,Tint>({}, options1);
     } else {
       Tint order_p_size = order * Order<Telt,Tidx_label,Tint>(GG);
-      return IntersectionNormalClosurePermGroup( LGen_GG, hgens, order_p_size);
+      return Kernel_IntersectionNormalClosurePermGroup_LGen<Telt,Tidx_label,Tint>(len, LGen_GG, hgens, order_p_size);
     }
 
-    
   };
 
   // We restrict G to significant orbits
@@ -618,12 +616,12 @@ StabChain<Telt,Tidx_label> Centre(const StabChain<Telt,Tidx_label>& G)
     for (auto & eVal : significant) {
       std::vector<Tidx>& V = orbits[eVal];
       std::vector<Tidx> orbit_red;
-      orbit_red.reseve(V.size());
+      orbit_red.reserve(V.size());
       for (auto & eIdx : V)
         orbit_red.push_back(InjResHom.subset_rev[eIdx]);
       orbits_red.emplace_back(std::move(orbit_red));
     }
-    StabChain<Telt,Tidx_label> cent1 = compute_centr(InjResHom.S_restr, orbits_red);
+    StabChain<Telt,Tidx_label> cent = compute_centr(InjResHom.S_restr, orbits_red);
     return InjResHom.PreImage_grp(cent);
   }
 }
