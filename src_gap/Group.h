@@ -226,12 +226,16 @@ public:
     std::vector<Telt> ListRes;
     StabChain<Telt,Tidx_label> Swork = S;
     while(Swork != nullptr) {
+      size_t len = Swork->orbit.size();
+      if (len == 0)
+        break;
       ListS.push_back(Swork);
       ListPos.push_back(0);
-      ListSiz.push_back(Swork->orbit.size());
+      ListSiz.push_back(len);
       ListRes.push_back(Telt(n));
       Swork = Swork->stabilizer;
     }
+    std::cerr << "|ListS|=" << ListS.size() << "\n";
     return IteratorType(ListS, ListPos, ListSiz, ListRes);
   }
   const_iterator end() const {

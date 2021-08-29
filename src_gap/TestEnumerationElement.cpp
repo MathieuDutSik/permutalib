@@ -11,18 +11,20 @@ int main(int argc, char *argv[])
     using Telt = permutalib::SingleSidedPerm<Tidx>;
     using Tint = mpz_class;
     using Tgroup = permutalib::Group<Telt,Tint>;
-    if (argc != 3 && argc != 4) {
+    if (argc != 3) {
       std::cerr << "TestEnumerationElement [EXMP] [limit]\n";
       throw PermutalibException{1};
     }
     std::string InputFile = argv[1];
     int limit_i;
-    (void)sscanf(argv[1], "%d", &limit_i);
+    (void)sscanf(argv[2], "%d", &limit_i);
+    
     Tint limit = limit_i;
     //
     std::ifstream is(InputFile);
     int nGroup;
     is >> nGroup;
+    size_t n_treat = 0;
     for (int iGroup=0; iGroup<nGroup; iGroup++) {
       size_t nbGen;
       int n_i;
@@ -49,6 +51,7 @@ int main(int argc, char *argv[])
         LGen[iGen] = ePerm;
       }
       Tgroup eG(LGen, n);
+      std::cerr << "|eG|=" << eG.size() << " limit=" << limit << "\n";
       if (eG.size() <= limit) { // Some groups can be too large to iterate over their elements.
         std::unordered_set<Telt> ListElt;
         size_t n_iter=0;
@@ -68,8 +71,10 @@ int main(int argc, char *argv[])
           std::cerr << "Some elements were missed. Clear bug\n";
           throw PermutalibException{1};
         }
+        n_treat++;
       }
     }
+    std::cerr << "n_treat = " << n_treat << "\n";
     //
     std::cerr << "Normal completion of the program\n";
   }
