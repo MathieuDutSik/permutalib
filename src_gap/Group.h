@@ -235,7 +235,6 @@ public:
       ListRes.push_back(Telt(n));
       Swork = Swork->stabilizer;
     }
-    std::cerr << "|ListS|=" << ListS.size() << "\n";
     return IteratorType(ListS, ListPos, ListSiz, ListRes);
   }
   const_iterator end() const {
