@@ -45,8 +45,7 @@ template<typename T>
 std::vector<T> ConcatenationTwo(std::vector<T> const& L1, std::vector<T> const& L2)
 {
   std::vector<T> ret = L1;
-  for (auto & eVal : L2)
-    ret.push_back(eVal);
+  ret.insert(ret.end(), L2.begin(), L2.end());
   return ret;
 }
 

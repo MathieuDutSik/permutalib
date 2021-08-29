@@ -766,7 +766,7 @@ void RegisterRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_
 
 
 template<typename Telt, typename Tidx_label>
-void NextRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_label> & rbase, Telt const& TheId)
+void NextRBasePoint_no_order(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_label> & rbase, Telt const& TheId)
 {
   using Tidx=typename Telt::Tidx;
   std::vector<Tidx> lens = P.lengths; // Copy is needed as the lens is changed in the sortparallel
@@ -809,6 +809,32 @@ void NextRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_labe
 
 
 template<typename Telt, typename Tidx_label>
+void NextRBasePoint_order(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_label> & rbase, const std::vector<typename Telt::Tidx>& order, Telt const& TheId)
+{
+  using Tidx=typename Telt::Tidx;
+  const std::vector<Tidx>& lens = P.lengths; // Copy is needed as the lens is changed in the sortparallel
+  Tidx miss_val = std::numeric_limits<Tidx>::max();
+  Tidx p = miss_val;
+  if (rbase.level.status == int_int) {
+    p = PositionProperty(order, [&](const Tidx& p_i) -> bool { return lens[ CellNoPoint(P,p_i ) ] != 1});
+  } else {
+    p = PositionProperty(order, [&](const T_i& p_i) -> bool { return lens[ CellNoPoint(P,p_i ) ] != 1 && !IsFixedStabilizer(rbase.level.Stot, p_i); });
+  }
+  if (p != miss_val) {
+    p = order[p];
+    RegisterRBasePoint(P, rbase, p, TheId);
+  } else {
+    NextRBasePoint_no_order(P, rbase, TheId);
+  }
+}
+
+
+
+
+
+
+
+template<typename Telt, typename Tidx_label>
 bool Refinements_ProcessFixpoint(rbaseType<Telt,Tidx_label> & rbase, imageType<Telt,Tidx_label> & image, typename Telt::Tidx const& pnt, typename Telt::Tidx const& cellnum)
 {
   using Tidx=typename Telt::Tidx;
@@ -830,7 +856,7 @@ bool Refinements_Intersection(rbaseType<Telt,Tidx_label> & rbase, imageType<Telt
   } else {
     t = image.perm2.val;
   }
-  Telt tinv =Inverse(t);
+  Telt tinv = Inverse(t);
   return MeetPartitionStrat(rbase, image, Q, tinv, strat);
 }
 
@@ -1055,8 +1081,8 @@ imageType<Telt,Tidx_label> BuildInitialImage(rbaseType<Telt,Tidx_label> & rbase,
 };
 
 
-template<typename Telt, typename Tidx_label, typename Tint, bool repr, typename Tpr>
-ResultPBT<Telt,Tidx_label> PartitionBacktrack(StabChain<Telt,Tidx_label> const& G, const Tpr& Pr, rbaseType<Telt,Tidx_label> & rbase, dataType<typename Telt::Tidx> & data, StabChain<Telt,Tidx_label> & L, StabChain<Telt,Tidx_label> & R)
+template<typename Telt, typename Tidx_label, typename Tint, bool repr, typename F_pr, typename F_nextLevel>
+ResultPBT<Telt,Tidx_label> PartitionBacktrack(StabChain<Telt,Tidx_label> const& G, const F_pr& Pr, F_nextLevel nextLevel, rbaseType<Telt,Tidx_label> & rbase, dataType<typename Telt::Tidx> & data, StabChain<Telt,Tidx_label> & L, StabChain<Telt,Tidx_label> & R)
 {
   using Tidx=typename Telt::Tidx;
   Tidx n = G->comm->n;
@@ -1211,7 +1237,7 @@ ResultPBT<Telt,Tidx_label> PartitionBacktrack(StabChain<Telt,Tidx_label> const& 
         PrintRBaseLevel(rbase, "CPP Before NextRBasePoint");
         std::cerr << "CPP Before NextRBasePoint image.p.c=" << GapStringIntVector(image.partition.cellno) << "\n";
 #endif
-	NextRBasePoint(rbase.partition, rbase, id);
+	nextLevel(rbase.partition, rbase, id);
 #ifdef DEBUG_STBCBCKT
         std::cerr << "CPP After NextRBasePoint image.p.c=" << GapStringIntVector(image.partition.cellno) << "\n";
 	PrintRBaseLevel(rbase, "CPP After NextRBasePoint");
@@ -1888,7 +1914,10 @@ ResultPBT<Telt,Tidx_label> RepOpSetsPermGroup(StabChain<Telt,Tidx_label> const& 
   std::cerr << "CPP Before call to PartitionBacktrack\n";
 #endif
   dataType<Tidx> data(Q);
-  return PartitionBacktrack<Telt,Tidx_label,Tint,repr>( G, Pr, rbase, data, L, R );
+  auto nextLevel=[&](Partition<Tidx> & P, rbaseType<Telt,Tidx_label> & rbase, Telt const& TheId) -> void {
+    NextRBasePoint_no_order(P, rbase, TheId);
+  };
+  return PartitionBacktrack<Telt,Tidx_label,Tint,repr,decltype(Pr),decltype(nextLevel)>( G, Pr, nextLevel, rbase, data, L, R );
 }
 
 // Stabilizer part
@@ -2084,100 +2113,87 @@ std::pair<bool,Telt> Kernel_RepresentativeAction_OnPoints(StabChain<Telt,Tidx_la
 }
 
 
+template<typename Telt>
+std::vector<typename Telt::Tidx> CycleStructurePerm(const Telt& x)
+{
+  using Tidx=typename Telt::Tidx;
+  Tidx n = x.size();
+  std::vector<Tidx> V;
+  Face f(n);
+  for (Tidx u=0; u<n; u++) {
+    if (f[u] == 0) {
+      Tidx len=0;
+      Tidx pos = u;
+      while(true) {
+        f[pos] = 1;
+        len++;
+        pos = PowAct(pos, x);
+        if (f[pos] == 1)
+          break;
+      }
+      V.push_back(len);
+    }
+  }
+  std::sort(V.begin(), V.end());
+  return V;
+}
+
+
   /*
-
-
-#############################################################################
-##
-#M  Centralizer( <G>, <e> ) . . . . . . . . . . . . . . in permutation groups
-##
-InstallMethod( CentralizerOp, "perm group,elm",IsCollsElms,
-  [ IsPermGroup, IsPerm ], 0,
-    function( G, e )
-    e := [ e ];
-    return RepOpElmTuplesPermGroup( false, G, e, e,
-                   TrivialSubgroup( G ), TrivialSubgroup( G ) );
-end );
-
-InstallMethod( CentralizerOp, "perm group, perm group", IsIdenticalObj, 
-  [ IsPermGroup, IsPermGroup ], 0,
-    function( G, E )
-    return RepOpElmTuplesPermGroup( false, G,
-                   GeneratorsOfGroup( E ), GeneratorsOfGroup( E ),
-                   TrivialSubgroup( G ), TrivialSubgroup( G ) );
-end );
-
-
-
-
 #############################################################################
 ##
 #F  RepOpElmTuplesPermGroup( <repr>, <G>, <e>, <f>, <L>, <R> )  on elm tuples
 ##
-InstallGlobalFunction( RepOpElmTuplesPermGroup,
-function( repr, G, e, f, L, R )
-local  Omega,      # a common operation domain for <G>, <E> and <F>
-	order,      # orders of elements in <e>
-	cycles,     # cycles of <e> on <Omega>
-	P, Q,       # partition refined during construction of <rbase>
-	rbase,      # the R-base for the backtrack algorithm
-	Pr,	       # property
-	baspts,     # base for group
-	eran,       # range
-	oe,of,sets,
-	pre,l,map,
-	bailout,
-	i,j, size; # loop/auxiliary variables
+  */
+template<typename Telt, typename Tidx_label, typename Tint, bool repr>
+ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_label>& G, const std::vector<Telt>& e, const std::vector<Telt>& f, const StabChain<Telt,Tidx_label> & L, const StabChain<Telt,Tidx_label> & R)
+{
+  size_t e_siz = e.size();
 
-  # Central elements and trivial subgroups.
-  if ForAll( GeneratorsOfGroup( G ), gen -> OnTuples( e, gen ) = e )  then
-      if not repr  then  return G;
-      elif e = f   then  return One( G );
-		    else  return fail;      fi;
-  fi;
+  // Central elements and trivial subgroups.
+  auto test_gen=[&](auto & g) -> bool {
+    for (size_t i=0; i<e_siz; i++)
+      if (LeftQuotient(e[i], g) != e[i])
+        return false;
+    return true;
+  };
+  if (ForAll(Kernel_GeneratorsOfGroup(G), [&](const Telt& gen) -> bool { return test_gen(gen); })) {
+    if (!repr) {
+      return {int_group, G, {}};
+    } else {
+      if (e != f)
+        return {int_fail, {}, {}};
+      return {int_perm, {}, G->comm->identity};
+    }
+  }
 
-  if repr and
-      ( Length( e ) <> Length( f )  or  ForAny( [ 1 .. Length( e ) ],
-	      i -> CycleStructurePerm( e[ i ] ) <>
-		  CycleStructurePerm( f[ i ] ) ) )  then
-      return fail;
-  fi;
+  if (repr) {
+    for (size_t i=0; i<e_siz; i++) {
+      std::vector<Tidx> V_e = CycleStructurePerm(e[i]);
+      std::vector<Tidx> V_f = CycleStructurePerm(e[j]);
+      if (V_e != V_f)
+        return {int_fail, {}, {}};
+    }
+  }
 
-  bailout:=repr;
-  if IsTrivial(L) then
-    L:=SubgroupNC(G,Filtered( Concatenation(
-	    Filtered(e,gen->gen in G),
-	    StrongGeneratorsStabChain(StabChainMutable(G))),
-	  gen->OnTuples(e,gen)=e));
-  else
-    bailout:=false;
-  fi;
+  std::vector<Telt> LGen = Concatenation(Kernel_GeneratorsOfGroup(G), e, f);
+  std::vector<Tidx> Omega = MovedPoints(LGen, n);
 
-  if IsTrivial(R) then
-    if repr then
-      R:=SubgroupNC(G,Filtered( Concatenation(
-	    Filtered(f,gen->gen in G),
-	    StrongGeneratorsStabChain(StabChainMutable(G))),
-	  gen->OnTuples(f,gen)=f));
+  Partition<Tidx> P = TrivialPartition(Omega);
+  Tint size = 1;
+  if (!repr)
+    size = Order<Telt,Tidx_label,Tint>(G);
 
-    else
-      R:=L;
-    fi;
-  fi;
 
-  Omega := MovedPoints( Concatenation( GeneratorsOfGroup( G ), e, f ) );
-
-  P := TrivialPartition( Omega );
-  if repr  then  size := 1;
-	    else  size := Size( G );  fi;
-  for i  in [ 1 .. Length( e ) ]  do
-      cycles := Partition( Cycles( e[ i ], Omega ) );
+  Partition<Tidx> cycles;
+  for (size_t i=0; i<e_siz; i++) {
+      cycles = Partition( Cycles( e[i], Omega ) );
       StratMeetPartition( P, CollectedPartition( cycles, size ) );
-  od;
+  }
 
-  # Find the order in which to process the points in the base choice.
-  #SortParallel( ShallowCopy( -cycles.lengths ), order );
+  // Find the order in which to process the points in the base choice.
 
+  /*
   # The criterion for selection of base points is to select them according
   # to (descending) cycle length of the permutation to be conjugated. At the
   # moment no other criterion is used (though experiments can observe a
@@ -2187,112 +2203,119 @@ local  Omega,      # a common operation domain for <G>, <E> and <F>
   # To avoid particular configurations falling repeatedly into a bad case,
   # we permute the base points to obtain a random ordering beyond the
   # criterion used. This can be turned off through an option for debugging
-  # purposes.
-  if ValueOption("norandom")=true then
-    i:=[1..Length(cycles.firsts)];
-  else
-    i:=FLOYDS_ALGORITHM(RandomSource(IsMersenneTwister),
-         Length(cycles.firsts),false);
-  fi;
-  order := cycles.points{ cycles.firsts{i} };
+  # purposes.*/
+  //    i:=[1..Length(cycles.firsts)];
+  //    i:=FLOYDS_ALGORITHM(RandomSource(IsMersenneTwister), Length(cycles.firsts),false);
+
+  std::vector<Tidx> order = cycles.points{ cycles.firsts{i} };
   SortParallel( -(cycles.lengths{i}), order );
 
-  repeat
+  rbaseType<Telt,Tidx_label> rbase := EmptyRBase({G,G}, Omega, P );
 
-    # Construct an R-base.
-    rbase := EmptyRBase( G, Omega, P );
+  // Loop over the stabilizer chain of <G>.
+  auto nextLevel=[&](Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_label> & rbase, Telt const& TheId) -> void {
+    NextRBasePoint_order(P, rbase, order );
 
-    # Loop over the stabilizer chain of <G>.
-    rbase.nextLevel := function( P, rbase )
-        local   fix,  pnt,  img,  g,  strat;
+    // Centralizer refinement.
+    std::vector<Tidx> fix = Fixcells( P );
+    for (size_t i_pnt=0; i_pnt<fix.size(); i_pnt++) { // fix is changing, so we need to keep it here.
+      Tidx pnt = fix[i_pnt];
+      for (size_t g=0; g<e_siz; g++) {
+        Tidx img = PowAct(pnt, e[g]);
+        Tidx strat = IsolatePoint( P, img );
+        if (strat != miss_val) {
+          fix.push_back(img);
+          ProcessFixpoint_rbase(rbase, img);
+          AddRefinement( rbase, STBBCKT_STRING_CENTRALIZER,
+                         [ CellNoPoint(P,pnt), g, img, strat ] );
+          if (P.lengths[ strat ] == 1) {
+            Tidx pnt_b = FixpointCellNo(P, strat);
+            ProcessFixpoint_rbase( rbase, pnt );
+            AddRefinement( rbase, "ProcessFixpoint", [ pnt, strat ] );
+          }
+        }
+      }
+    }
+  };
 
-        NextRBasePoint( P, rbase, order );
+  auto get_Q=[&]() -> Partition<Tidx> {
+    if (!repr) {
+      return P;
+    }
+    Partition<Tidx> Q = TrivialPartition(Omega);
+    for (size_t i=0; i<e_siz; i++) {
+      StratMeetPartition( Q, CollectedPartition( Partition( Cycles( f[ i ], Omega ) ), 1 ) );
+    }
+    return Q;
+  };
+  Q = get_Q();
 
-        # Centralizer refinement.
-        fix := Fixcells( P );
-        for pnt  in fix  do
-            for g  in [ 1 .. Length( e ) ]  do
-                img := pnt ^ e[ g ];
-                strat := IsolatePoint( P, img );
-                if strat <> false  then
-                    Add( fix, img );
-                    ProcessFixpoint( rbase, img );
-                    AddRefinement( rbase, STBBCKT_STRING_CENTRALIZER,
-                            [ CellNoPoint(P,pnt), g, img, strat ] );
-                    if P.lengths[ strat ] = 1  then
-                        pnt := FixpointCellNo( P, strat );
-                        ProcessFixpoint( rbase, pnt );
-                        AddRefinement( rbase, "ProcessFixpoint",
-                                [ pnt, strat ] );
-                    fi;
-                fi;
-            od;
-        od;
-    end;
+  //Pr:=gen -> gen!.lftObj = gen!.rgtObj;
+  std::vector<Tidx> baspts = BaseStabChain(G);
 
-    if repr  then
-        Q := TrivialPartition( Omega );
-        for i  in [ 1 .. Length( f ) ]  do
-            StratMeetPartition( Q, CollectedPartition( Partition
-                    ( Cycles( f[ i ], Omega ) ), 1 ) );
-        od;
-    else
-        Q := P;
-    fi;
+  auto test_isin=[&](const Telt& g) -> bool {
+    return SiftedPermutation(G).isIdentity();
+  };
+  auto is_corr=[&]() -> bool {
+    for (auto & i : e)
+      if (!test_isin(i))
+        return false;
+    for (auto & i : f)
+      if (!test_isin(i))
+        return false;
+    return true;
+  };
+  if (!is_corr()) {
+    std::vector<Tidx> V = MovedPoints(Concatenation(e,f));
+    baspts.insert(baspts.end(), V.begin(), V.end());
+  }
 
-    #Pr:=gen -> gen!.lftObj = gen!.rgtObj;
-    baspts:=BaseStabChain(StabChainMutable(G));
-    if not (ForAll(e,i->i in G) and ForAll(f,i->i in G)) then
-      baspts:=Union(baspts,MovedPoints(Concatenation(e,f)));
-    fi;
-
-    eran:=[1..Length(e)];
-    Pr:=function(gen)
-        local i,j;
-
-	  for i in eran do
-	    for j in baspts do
-	      if not ((j/gen)^e[i])^gen=j^f[i] then
-	        return false;
-	      fi;
-	    od;
-	  od;
-	  return true;
-        end;
-
-    map:=PartitionBacktrack( G, [ e, f, OnTuples,Pr],
-                   repr, rbase, Concatenation( [ Q ], f ),
-		   L, R:bailout:=bailout );
-    if not (bailout and map=infinity) then
-      return map;
-    fi;
-    Info(InfoBckt,1,"\n#I  ------\n#I  First compute new L");
-
-    L:=G;
-    for i in e do
-      L:=Centralizer(L,i);
-    od;
-    bailout:=false;
-    # go back as we need to build the base anew
-  until false;
-
-end );
+  auto Pr=[&](const Telt& gen) -> bool {
+    for (size_t i=0; i<e_siz; i++) {
+      for (auto & j : baspts) {
+        Tidx img1 = PowAct(PowAct(j, e[i]), gen);
+        Tidx img2 = PowAct(PowAct(j, gen), f[i]);
+        if (img1 != img2)
+          return false;
+      }
+    }
+  };
+  return PartitionBacktrack( G, Pr, nextLevel,
+                             repr, rbase, Concatenation( [ Q ], f ),
+                             L, R );
+}
 
 
+/*
+#############################################################################
+##
+#M  Centralizer( <G>, <e> ) . . . . . . . . . . . . . . in permutation groups
+##
+*/
+template<typename Telt, typename Tidx_label, typename Tint>
+StabChain<Telt,Tidx_label> Centralizer_elt(const StabChain<Telt,Tidx_label>& G, const Telt& e) {
+  std::vector<Telt> e_v{e};
+  StabChain<Telt,Tidx_label> Triv_G = TrivialGroup(G->comm->n);
+  return RepOpElmTuplesPermGroup<Telt,Tidx_label,Tint,false>(G, e_v, e_v, Triv_G, Triv_G);
+}
 
 
+template<typename Telt, typename Tidx_label, typename Tint>
+StabChain<Telt,Tidx_label> Centralizer_elt(const StabChain<Telt,Tidx_label>& G, const StabChain<Telt,Tidx_label>& U) {
+  std::vector<Telt> LGen_U = Kernel_GeneratorsOfGroup(U);
+  return RepOpElmTuplesPermGroup<Telt,Tidx_label,Tint,false>(G, LGen_U, LGen_U, Triv_G, Triv_G);
+}
 
+
+/*
 #############################################################################
 ##
 #F  ConjugatorPermGroup( <arg> )  . . . . isomorphism / conjugating element
 ##
-InstallGlobalFunction( ConjugatorPermGroup, function( arg )
-local G, E, F, L, R, mpG, mpE, mpF, map, Omega, P, orb, comb, found, pos,
-dom, et, ft, Pr, rbase, BF, Q, data,lc;
-
-    G := arg[ 1 ];
-    E := arg[ 2 ];
-    F := arg[ 3 ];
+*/
+template<typename Telt, typename Tidx_label, typename Tint>
+std::optional<Telt> ConjugatorPermGroup(const StabChain<Telt,Tidx_label>&G, const StabChain<Telt,Tidx_label>& E, const StabChain<Telt,Tidx_label>& F)
+{
     if   Size( E ) <> Size( F )  then  return fail;
     elif IsTrivial( E )          then  return ();
     elif Size( E ) = 2  then
@@ -2320,7 +2343,6 @@ dom, et, ft, Pr, rbase, BF, Q, data,lc;
 	if found<>fail then return found;fi;
       od;
       return fail;
-      Error("hier");
     fi;
     # `Suborbits' uses all points. (AH, 7/17/02)
     mpG:=MovedPoints(GeneratorsOfGroup(G));
@@ -2427,6 +2449,11 @@ dom, et, ft, Pr, rbase, BF, Q, data,lc;
     fi;
     return found;
 end );
+
+
+
+
+
 
 #############################################################################
 ##
