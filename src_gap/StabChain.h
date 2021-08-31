@@ -98,17 +98,6 @@ void AssignationVectorGapStyle(std::vector<T> & eVect, size_t const& pos, T cons
 }
 
 
-template<typename T>
-void PrintVectDebug(std::string const& str, std::vector<T> const& V)
-{
-  std::cerr << str << " =";
-  for (auto & eVal : V)
-    std::cerr << " " << eVal;
-  std::cerr << "\n";
-}
-
-
-
 template<typename T, typename Telt>
 std::vector<T> PermutedAct(std::vector<T> const& V, Telt const& g)
 {
@@ -215,6 +204,21 @@ StabChain<Telt,Tidx_label> StabChainGenerators(std::vector<Telt> const& generato
   int treedepth = 0;
   int diam = 0;
   return std::make_shared<StabLevel<Telt,Tidx_label>>(StabLevel<Telt,Tidx_label>({std::move(transversal), std::move(orbit), std::move(genlabels), std::move(cycles), IsBoundCycle, std::move(treegen), std::move(treegeninv), std::move(aux), treedepth, diam, comm, nullptr}));
+}
+
+
+//
+// Printing functionality
+//
+
+
+template<typename T>
+void PrintVectDebug(std::string const& str, std::vector<T> const& V)
+{
+  std::cerr << str << " =";
+  for (auto & eVal : V)
+    std::cerr << " " << eVal;
+  std::cerr << "\n";
 }
 
 
@@ -326,43 +330,6 @@ void PrintListStabCommPartition(std::string const& mesg, std::vector<StabChain<T
 }
 
 
-template<typename Telt, typename Tidx_label>
-void UnbindCycles(StabChain<Telt,Tidx_label> const& S)
-{
-  StabChain<Telt,Tidx_label> Sptr = S;
-  while (Sptr != nullptr) {
-    Sptr->cycles.clear();
-    Sptr->IsBoundCycle = false;
-    Sptr = Sptr->stabilizer;
-  }
-}
-
-
-template<typename Telt, typename Tidx_label>
-int GetStabilizerDepth(StabChain<Telt,Tidx_label> const& S1)
-{
-  StabChain<Telt,Tidx_label> S2 = S1;
-  int dep = 0;
-  while (S2 != nullptr) {
-    dep++;
-    S2 = S2->stabilizer;
-  }
-  return dep;
-}
-
-
-template<typename Telt, typename Tidx_label>
-bool HasStabStab(StabChain<Telt,Tidx_label> const& S)
-{
-  if (S == nullptr)
-    return false;
-  if (S->stabilizer == nullptr)
-    return false;
-  return true;
-}
-
-
-
 template<typename Telt>
 std::string perm_to_string(Telt const& eVal)
 {
@@ -394,8 +361,6 @@ std::string GetStringExpressionOfStabChain(StabChain<Telt,Tidx_label> const& eRe
   }
   return strRet;
 }
-
-
 
 
 template<typename Telt, typename Tidx_label>
@@ -432,6 +397,47 @@ std::ostream& operator<<(std::ostream& os, StabChain<Telt,Tidx_label> const& Sto
     iLev++;
   }
   return os;
+}
+
+
+//
+// Non printing stuff
+//
+
+
+template<typename Telt, typename Tidx_label>
+void UnbindCycles(StabChain<Telt,Tidx_label> const& S)
+{
+  StabChain<Telt,Tidx_label> Sptr = S;
+  while (Sptr != nullptr) {
+    Sptr->cycles.clear();
+    Sptr->IsBoundCycle = false;
+    Sptr = Sptr->stabilizer;
+  }
+}
+
+
+template<typename Telt, typename Tidx_label>
+int GetStabilizerDepth(StabChain<Telt,Tidx_label> const& S1)
+{
+  StabChain<Telt,Tidx_label> S2 = S1;
+  int dep = 0;
+  while (S2 != nullptr) {
+    dep++;
+    S2 = S2->stabilizer;
+  }
+  return dep;
+}
+
+
+template<typename Telt, typename Tidx_label>
+bool HasStabStab(StabChain<Telt,Tidx_label> const& S)
+{
+  if (S == nullptr)
+    return false;
+  if (S->stabilizer == nullptr)
+    return false;
+  return true;
 }
 
 
@@ -496,18 +502,6 @@ template<typename Telt, typename Tidx_label>
 StabChain<Telt,Tidx_label> CopyStabChain(StabChain<Telt,Tidx_label> const& S)
 {
   return StructuralCopy(S);
-}
-
-
-
-template<typename Telt, typename Tidx_label>
-StabChain<Telt,Tidx_label> RestrictedStabChain(StabChain<Telt,Tidx_label> const& Stot, size_t const& eLev)
-{
-  size_t nbLevel=Stot.stabilizer.size();
-  std::vector<StabLevel<Telt,Tidx_label>> stabilizerRed;
-  for (size_t uLev=eLev; uLev<nbLevel; uLev++)
-    stabilizerRed.push_back(Stot.stabilizer[uLev]);
-  return {Stot.n, Stot.identity, Stot.labels, stabilizerRed};
 }
 
 
@@ -609,15 +603,6 @@ bool IsInBasicOrbit(StabChain<Telt,Tidx_label> const& S, typename Telt::Tidx con
   return true;
 }
 
-// This correspond to the code of
-// pnt^g in GAP code.
-/*
-template<typename Telt>
-int PowAct(int const& pnt, Telt const& g)
-{
-  return g.at(pnt);
-}
-*/
 
 template<typename Telt, typename Tidx_label>
 Telt InverseRepresentative(StabChain<Telt,Tidx_label> const& S, typename Telt::Tidx const& pnt)
@@ -856,37 +841,6 @@ Telt LargestElementStabChain(StabChain<Telt,Tidx_label> const& S)
   }
   return rep;
 }
-
-
-/*
-template<typename Telt>
-std::vector<Telt> ElementsStabChain(StabChain<Telt> const& Stot)
-{
-  std::vector<Telt> elms;
-  auto LevelIncrease=[&](StabLevel<Telt> const& eLev) -> void {
-    std::vector<Telt> NewElms;
-    for (auto & pnt : eLev.orbit) {
-      Telt rep=eLev.identity;
-      while (PowAct(eLev.orbit[0], rep) != pnt) {
-	int jpt=SlashAct(pnt, rep);
-	int idx=Stot.stabilizer[eLev].transversal[jpt];
-	rep=LeftQuotient(Stot->comm->labels[idx], rep);
-      }
-      for (auto & eStb : elms)
-	NewElms.push_back(eStb * rep);
-    }
-    elms=NewElms;
-  };
-  elms={Stot.stabilizer[0].identity};
-  int len=Stot.stabilizer.size();
-  for (int iLev=0; iLev<len; iLev++) {
-    int jLev=len-1-iLev;
-    LevelIncrease(Stot.stabilizer[jLev]);
-  }
-  return elms;
-}
-*/
-
 
 
 
@@ -1551,11 +1505,14 @@ bool StabChainSwap(StabChain<Telt,Tidx_label> & Stot)
       std::cerr << "CPP Determining gen, step 1\n";
 #endif
       Telt gen = Stot->comm->identity;
-      while (PowAct(pnt, gen) != a) {
+      while (true) {
+        Tidx pnt_gen = PowAct(pnt,gen);
+        if (pnt_gen == a)
+          break;
 #ifdef DEBUG_STABCHAIN
-        std::cerr << "CPP pnt^gen=" << int(PowAct(pnt, gen)+1) << "\n";
+        std::cerr << "CPP pnt^gen=" << int(pnt_gen + 1) << "\n";
 #endif
-	Tidx_label posGen=Stot->transversal[PowAct(pnt, gen)];
+	Tidx_label posGen=Stot->transversal[pnt_gen];
 #ifdef DEBUG_STABCHAIN
         std::cerr << "DEBUG posGen=" << posGen << "\n";
 #endif
@@ -1564,11 +1521,14 @@ bool StabChainSwap(StabChain<Telt,Tidx_label> & Stot)
 #ifdef DEBUG_STABCHAIN
       std::cerr << "CPP Determining gen, step 2 gen=" << gen << "\n";
 #endif
-      while (PowAct(b, gen) != b) {
+      while (true) {
+        Tidx b_gen = PowAct(b, gen);
+        if (b_gen != b)
+          break;
 #ifdef DEBUG_STABCHAIN
-        std::cerr << "CPP b^gen=" << int(PowAct(b, gen)+1) << "\n";
+        std::cerr << "CPP b^gen=" << int(b_gen+1) << "\n";
 #endif
-	Tidx_label posGen=Stot->stabilizer->transversal[PowAct(b, gen)];
+	Tidx_label posGen=Stot->stabilizer->transversal[b_gen];
 #ifdef DEBUG_STABCHAIN
         std::cerr << "DEBUG posGen=" << posGen << "\n";
 #endif
