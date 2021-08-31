@@ -195,5 +195,17 @@ std::vector<T> VectorAsSet(std::vector<T> const& V)
   return eV;
 }
 
+template<typename T>
+std::vector<T> SortVector(std::vector<T> const& f)
+{
+  std::vector<T> RetF = f;
+  sort(RetF.begin(), RetF.end(),
+       [](T const& x, T const& y) -> bool {
+         return x<y;
+       });
+  return RetF;
+}
+
+
 }
 #endif

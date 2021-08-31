@@ -73,8 +73,8 @@ local bound,a,b,c,cnt,r,i,j,bb,normalStep,gens,hardlimit,cheap,olda;
     bound:=c;
   fi;
 
-  c:=[];  
-  for i in [2..Length(cc)] do  
+  c:=[];
+  for i in [2..Length(cc)] do
     Add(c,cc[i-1]);
     if Index(cc[i],cc[i-1]) > bound then
       a:=AsSubgroup(Parent(cc[i]),cc[i-1]);
@@ -106,7 +106,6 @@ local bound,a,b,c,cnt,r,i,j,bb,normalStep,gens,hardlimit,cheap,olda;
               cnt:=0;
             else
             # larger indices may take more tests...
-              Info(InfoCoset,5,"Random");
               repeat
                 r:=Random(bb);
               until not(r in a);
@@ -127,7 +126,6 @@ local bound,a,b,c,cnt,r,i,j,bb,normalStep,gens,hardlimit,cheap,olda;
                 b:=ClosureSubgroupNC(a,r);
               fi;
               if Size(b)<Size(bb) then
-                Info(InfoCoset,1,"improvement found ",Size(bb)/Size(b));
                 bb:=b;
               fi;
               cnt:=cnt-1;
@@ -186,7 +184,6 @@ local s,c,mp,o,i,step,a;
     step:=false;
     while i<=Length(o) and step=false do
       if not IsTransitive(U,o[i]) then
-	Info(InfoCoset,2,"AC: orbit");
 	o:=ShallowCopy(OrbitsDomain(U,o[i]));
 	Sort(o,function(a,b) return Length(a)<Length(b);end);
 	# union of same length -- smaller index
@@ -196,9 +193,8 @@ local s,c,mp,o,i,step,a;
 	fi;
 	s:=Stabilizer(s,a,OnSets);
 	step:=true;
-      elif Index(G,U)>NrMovedPoints(U) 
+      elif Index(G,U)>NrMovedPoints(U)
 	  and IsPrimitive(s,o[i]) and not IsPrimitive(U,o[i]) then
-	Info(InfoCoset,2,"AC: blocks");
 	s:=Stabilizer(s,Set(List(MaximalBlocks(U,o[i]),Set)),
                       OnSetsDisjointSets);
 	step:=true;
@@ -213,7 +209,6 @@ local s,c,mp,o,i,step,a;
   if Index(s,U)>1 then
     Add(c,U);
   fi;
-  Info(InfoCoset,2,"Indices",List([1..Length(c)-1],i->Index(c[i],c[i+1])));
   return RefinedChain(G,Reversed(c));
 end);
 
@@ -222,7 +217,7 @@ end);
 #############################################################################
 ##
 #F  CalcDoubleCosets( <G>, <A>, <B> ) . . . . . . . . .  double cosets: A\G/B
-## 
+##
 ##  DoubleCosets routine using an
 ##  ascending chain of subgroups from A to G, using the fact, that a
 ##  double coset is an union of right cosets
@@ -250,7 +245,6 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
     b:=a;
     a:=c;
     flip:=true;
-    Info(InfoCoset,1,"DoubleCosetFlip");
   else
     flip:=false;
   fi;
@@ -268,7 +262,7 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
   # on cosets).
   #c:=AscendingChain(G,a:refineChainActionLimit:=Index(G,a));
   Print(NullMat(5));
-  
+
   c:=AscendingChain(G,a:refineChainActionLimit:=actlimit,indoublecoset);
 
   # cano indicates whether there is a final up step (and thus we need to
@@ -284,7 +278,6 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
     # what about flipping (back)?
     c1:=AscendingChain(G,b:refineChainActionLimit:=actlimit,indoublecoset);
     if maxidx(c1)<=avoidlimit then
-      Info(InfoCoset,1,"flip to get better chain");
       c:=b;
       b:=a;
       a:=c;
@@ -311,7 +304,6 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
             a1:=G;
           fi;
         fi;
-        Info(InfoCoset,4,"attempt up step ",obj," index:",Size(a)/Size(a1));
         if Index(G,G1)<maxidx(c) and Index(a,a1)<=uplimit and (
           maxidx(c)>avoidlimit or Size(a1)>Size(c[1])) then
           c1:=AscendingChain(G1,a1:refineIndex:=avoidlimit,
@@ -320,8 +312,6 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
           if maxidx(c1)<maxidx(c) then
             c:=Concatenation(c1,[G]);
             cano:=true;
-            Info(InfoCoset,1,"improved chain with up step ",obj,
-            " index:",Size(a)/Size(a1)," maxidx=",maxidx(c));
           fi;
         fi;
       end;
@@ -334,22 +324,20 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
           p:=Intersection(a,i);
           AddSet(doneidx,Index(a,p));
           if Index(a,p)<=uplimit then
-            Info(InfoCoset,3,"Try maximal of Indices ",Index(G,i),":",
-              Index(a,p));
             tryfct("max",[i,p]);
           fi;
         fi;
       od;
 
       p:=LargestMovedPoint(a);
-      tryfct(p,OnPoints); 
-          
+      tryfct(p,OnPoints);
+
       for i in Orbits(Stabilizer(a,p),Difference(MovedPoints(a),[p])) do
         tryfct(Set([i[1],p]),OnSets);
       od;
-          
+
     fi;
-    
+
     if maxidx(c)>badlimit then
 
       r:=ShallowCopy(TryMaximalSubgroupClassReps(a:cheap));
@@ -360,15 +348,11 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
         #Print("j=",Size(j),"\n");
         t:=AscendingChain(G,j:refineIndex:=avoidlimit,
                               refineChainActionLimit:=actlimit,indoublecoset);
-        Info(InfoCoset,4,"maxidx ",Index(a,j)," yields ",maxidx(t),": ",
-          List(t,Size));
         if maxidx(t)<maxidx(c) and (maxidx(c)>badlimit or
           # only increase up-step if index gets better by extra index
           (maxidx(c)>maxidx(t)*Size(c[1])/Size(t[1])) ) then
           c:=t;
           cano:=true;
-          Info(InfoCoset,1,"improved chain with up step index:",
-                Size(a)/Size(j));
         fi;
 
       od;
@@ -391,7 +375,6 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
   # outside function at a later stage)?
   if ValueOption("noupfuse")=true then cano:=false;fi;
 
-  Info(InfoCoset,1,"Chosen series is ",List(c,Size));
   #if ValueOption("indoublecoset")<>true then Error("GNASH");fi;
 
   # calculate setup for once
@@ -407,11 +390,10 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
     tra[step]:=t;
 
     # is it worth using a permutation representation?
-    if (step>1 or cano) and Length(t)<badlimit and IsPermGroup(G) and 
+    if (step>1 or cano) and Length(t)<badlimit and IsPermGroup(G) and
       not normal then
       # in this case, we can beneficially compute the action once and then use
       # homomorphism methods to obtain the permutation image
-      Info(InfoCoset,2,"using perm action on step ",step,": ",Length(t));
       hom:=Subgroup(G,SmallGeneratingSet(a1));
       hom:=ActionHomomorphism(hom,t,OnRight,"surjective");
     else
@@ -428,12 +410,7 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
     a2:=c[Length(c)-step];
     normal:=IsNormal(a1,a2);
     indx:=Index(a1,a2);
-    if normal then
-      Info(InfoCoset,1,"Normal Step :",indx,": ",Length(r)," double cosets");
-    else
-      Info(InfoCoset,1,"Step :",indx,": ",Length(r)," double cosets");
-    fi;
-    
+
 
     # is this the last step?
     unten:=step=Length(c)-1 and cano=false;
@@ -449,8 +426,7 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
     nstab:=[];
     for nu in [1..Length(r)] do
       lst:=stabs[nu];
-      Info(InfoCoset,4,"number ",nu,", |stab|=",Size(lst));
-      sifa:=Size(a2)*Size(b)/Size(lst); 
+      sifa:=Size(a2)*Size(b)/Size(lst);
       p:=r[nu];
       pinv:=p^-1;
       blist:=BlistList([1..indx],[]);
@@ -506,7 +482,7 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
         orbcnt:=orbcnt+1;
 
         i:=1;
-        while i<=Length(o) 
+        while i<=Length(o)
           # will not grab if nonreg,. orbiut and stabilizer not computed,
           # but comparatively low cost and huge help if hom=fail
           and Size(st)*Length(o)<Size(lst) do
@@ -540,7 +516,6 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
           od;
           i:=i+1;
         od;
-        Info(InfoCoset,5,"|o|=",Length(o));
 
         ep:=e*rep[mop]*p;
         Add(nr,ep);
@@ -550,7 +525,7 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
           Add(nstab,st);
         fi;
 
-        if cano and step=1 and not normal then 
+        if cano and step=1 and not normal then
           Add(omi,mo);
           Add(omiz,Length(o));
         fi;
@@ -566,7 +541,6 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
         fi;
 
       od;
-      Info(InfoCoset,4,"Get ",orbcnt," orbits");
 
       if normal then
         # in the normal case, we can obtain the other orbits easily via
@@ -615,7 +589,6 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
     od;
     stabs:=nstab;
     r:=nr;
-    Info(InfoCoset,3,Length(r)," double cosets so far.");
   od;
 
   if cano then
@@ -696,25 +669,13 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
           od;
           i:=i+1;
         od;
-        
+
         if calcs then
           stb:=st^(rep[mop]);
         fi;
-        #if HasSmallGeneratingSet(st) then
-        #  SetSmallGeneratingSet(stb,List(SmallGeneratingSet(st),x->x^rep[mop]));
-        #fi;
 
-        #else
-        #  stb:=omis;
-        #fi;
         x:=x*(rep[mop]^pinv)/t[mo];
         p:=t[mo]*p;
-        #Print("step ",step," |Orbit|=",Length(o),"nmin=",mo,"\n");
-
-        #if ForAny(GeneratorsOfGroup(stb),
-        #     i->not x*p*i/p in t!.subgroup) then
-        #     Error("RRR");
-        #fi;
 
       od;
       return p;
@@ -722,8 +683,6 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
 
     # now fuse orbits under the left action of a
     indx:=Index(a,a2);
-    Info(InfoCoset,2,"fusion index ",indx);
-    #t:=Filtered(RightTransversal(a,a2),x->not x in a2);
     t:=RightTransversal(a,a2);
     sifa:=Size(a2)*Size(b);
 
@@ -733,7 +692,7 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
     sizes:=[];
     for i in [1..Length(r)] do
       lr:=Intersection(a,b^(r[i]^-1));
-      # size of double coset and 
+      # size of double coset and
       Add(sizes,[Size(a)*Size(b)/Size(lr),
                  Length(OrbitsDomain(Image(hom,lr),[1..Length(t)],OnPoints))]);
     od;
@@ -763,7 +722,6 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
           else
             Add(dcs,[lr[j[1]],sizes[i][1]]);
           fi;
-          Info(InfoCoset,2,"orbit fusion ",Length(dcs)," orblen=",Length(j));
         od;
         lr:=[];lstabs:=[];
       else
@@ -787,8 +745,6 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
           fi;
           sel:=Difference([1..Length(lr)],o);
           lr:=lr{sel};lstabs:=lstabs{sel};
-          Info(InfoCoset,2,"new fusion ",Length(dcs)," orblen=",Length(o),
-              " remainder ",Length(lr));
 
           num:=num-1;
         od;
@@ -799,8 +755,6 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
         else
           Add(dcs,[lr[1],sizes[i][1]]);
         fi;
-        Info(InfoCoset,2,"final fusion ",Length(dcs)," orblen=",Length(lr),
-            " remainder ",0);
 
       fi;
 
