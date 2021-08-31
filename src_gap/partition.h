@@ -365,7 +365,7 @@ Tidx SplitCell_Kernel(Partition<Tidx> & P, Tidx const& i, Ftest test, Tidx const
 }
 
 template<typename Telt>
-typename Telt::Tidx SplitCell_Partition(Partition<typename Telt::Tidx> & P, typename Telt::Tidx const& i, Partition<typename Telt::Tidx> const& Q, typename Telt::Tidx const& j, Telt const& g, typename Telt::Tidx const& out)
+typename Telt::Tidx SplitCell_Partition_e(Partition<typename Telt::Tidx> & P, typename Telt::Tidx const& i, Partition<typename Telt::Tidx> const& Q, typename Telt::Tidx const& j, Telt const& g, typename Telt::Tidx const& out)
 {
   using Tidx = typename Telt::Tidx;
 #ifdef DEBUG_PARTITION
@@ -375,6 +375,24 @@ typename Telt::Tidx SplitCell_Partition(Partition<typename Telt::Tidx> & P, type
 #endif
   auto test=[&](const Tidx& ePt) -> bool {
     Tidx fPt=PowAct(P.points[ePt], g);
+#ifdef DEBUG_PARTITION
+    std::cerr << "CPP SplitCellTestfun1 fPt=" << int(fPt+1) << "\n";
+#endif
+    return PointInCellNo(Q, fPt, j);
+  };
+  return SplitCell_Kernel(P, i, test, out);
+}
+
+template<typename Telt>
+typename Telt::Tidx SplitCell_Partition(Partition<typename Telt::Tidx> & P, typename Telt::Tidx const& i, Partition<typename Telt::Tidx> const& Q, typename Telt::Tidx const& j, typename Telt::Tidx const& out)
+{
+  using Tidx = typename Telt::Tidx;
+#ifdef DEBUG_PARTITION
+  std::cerr << "CPP Q=\n";
+  RawPrintPartition(Q);
+#endif
+  auto test=[&](const Tidx& ePt) -> bool {
+    Tidx fPt=P.points[ePt];
 #ifdef DEBUG_PARTITION
     std::cerr << "CPP SplitCellTestfun1 fPt=" << int(fPt+1) << "\n";
 #endif

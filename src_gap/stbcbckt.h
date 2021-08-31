@@ -598,9 +598,28 @@ bool MeetPartitionStrat(rbaseType<Telt,Tidx_label,Trfm> const& rbase, imageType<
 ##    [0,a,p] means that fixpoint <a> was mapped to fixpoint in `P[p]',
 ##            i.e., `P[p]' has become a one-point cell.
 ##
+
+## The StratMeetPartition is a complex function with many different use cases (in its GAP code)
+## Number of arguments can be 2, 3 or 4.
+## The argument S can be a partition or a single cell. Right now we only implement the partition case as it is the only one needed.
+##
+## Case 1: 4 arguments
+## StratMeetPartition(rbase, P, S, g) : StratMeetPartition_r_p_p_e
+##
+## Case 2: 3 arguments
+## StratMeetPartition(rbase, P, S) : StratMeetPartition_r_p_p
+##
+## Case 3: 3 arguments
+## StratMeetPartition(P, S, g) : StratMeetPartition_p_p_e
+##
+## Case 4: 2 arguments
+## StratMeetPartition(P, S) : StratMeetPartition_p_p
+##
+## If we were to have a cell version it would be named "c" such as StratMeetPartition_r_p_c_e
+
 */
 template<typename Telt, typename Tidx_label, typename Trfm>
-std::vector<singStrat<typename Telt::Tidx>> StratMeetPartition(rbaseType<Telt,Tidx_label,Trfm> & rbase, Partition<typename Telt::Tidx> & P, Partition<typename Telt::Tidx> const& S, Telt const& g)
+std::vector<singStrat<typename Telt::Tidx>> StratMeetPartition_r_p_p_e(rbaseType<Telt,Tidx_label,Trfm> & rbase, Partition<typename Telt::Tidx> & P, Partition<typename Telt::Tidx> const& S, Telt const& g)
 {
   using Tidx=typename Telt::Tidx;
   std::vector<singStrat<Tidx>> strat;
@@ -609,7 +628,7 @@ std::vector<singStrat<typename Telt::Tidx>> StratMeetPartition(rbaseType<Telt,Ti
     for (Tidx i=0; i<NumberCells(P); i++) {
       std::vector<Tidx> cell = Cell( P, i );
       for (auto & eVal : cell) {
-        Tidx img=PowAct(eVal, g);
+        Tidx img = PowAct(eVal, g);
 	cellsP[img] = i;
       }
     }
@@ -637,7 +656,7 @@ std::vector<singStrat<typename Telt::Tidx>> StratMeetPartition(rbaseType<Telt,Ti
     }
     for (auto & pVal : splits) {
       // Last argument true means that the cell will split.
-      Tidx i = SplitCell_Partition(P, pVal, S, s, g, std::numeric_limits<Tidx>::max());
+      Tidx i = SplitCell_Partition_e(P, pVal, S, s, g, std::numeric_limits<Tidx>::max());
 #ifdef DEBUG_STBCBCKT
       std::cerr << "CPP g=" << g << " i=" << i << "\n";
 #endif
@@ -680,9 +699,175 @@ std::vector<singStrat<typename Telt::Tidx>> StratMeetPartition(rbaseType<Telt,Ti
 }
 
 
-// We need a refinement type that covers a number of possible scenario.
-// For each refinement type, we would have a different function.
-// In other words, we need a std::variant for handling the types.
+
+
+template<typename Telt, typename Tidx_label, typename Trfm>
+std::vector<singStrat<typename Telt::Tidx>> StratMeetPartition_p_p_e(Partition<typename Telt::Tidx> & P, Partition<typename Telt::Tidx> const& S, Telt const& g)
+{
+  using Tidx=typename Telt::Tidx;
+  std::vector<singStrat<Tidx>> strat;
+  std::vector<Tidx> cellsP = P.cellno;
+  if (!g.isIdentity()) {
+    for (Tidx i=0; i<NumberCells(P); i++) {
+      std::vector<Tidx> cell = Cell( P, i );
+      for (auto & eVal : cell) {
+        Tidx img = PowAct(eVal, g);
+	cellsP[img] = i;
+      }
+    }
+  }
+  // If <S> is just a set, it is interpreted as partition ( <S>|<S>^compl ).
+  Tidx nrcells = NumberCells(S) - 1;
+
+  for (Tidx s=0; s<nrcells; s++) {
+    // now split with cell number s of S.
+    // Write here hackish code. Hopefully faster
+    Tidx cell_first = S.firsts[s];
+    Tidx cell_len = S.lengths[s];
+    std::map<Tidx,Tidx> p3;
+    for (Tidx u=0; u<cell_len; u++) {
+      Tidx eVal = S.points[cell_first + u];
+      Tidx mVal = cellsP[eVal];
+      p3[mVal] += 1;
+    }
+    std::vector<Tidx> splits;
+    splits.reserve(p3.size());
+    for (auto & kv : p3) {
+      // a cell will split iff it contains more points than are in the s-cell
+      if (P.lengths[kv.first] > kv.second)
+        splits.push_back(kv.first);
+    }
+    for (auto & pVal : splits) {
+      // Last argument true means that the cell will split.
+      Tidx i = SplitCell_Partition_e(P, pVal, S, s, g, std::numeric_limits<Tidx>::max());
+#ifdef DEBUG_STBCBCKT
+      std::cerr << "CPP g=" << g << " i=" << i << "\n";
+#endif
+      if (!g.isIdentity()) {
+	std::vector<Tidx> cell = Cell(P, NumberCells(P));
+	for (auto & eVal : cell) {
+	  Tidx img=PowAct(eVal, g);
+	  cellsP[img] = NumberCells(P);
+	}
+      }
+    }
+  }
+  return strat;
+}
+
+
+
+
+
+
+
+template<typename Telt, typename Tidx_label, typename Trfm>
+std::vector<singStrat<typename Telt::Tidx>> StratMeetPartition_r_p_p(rbaseType<Telt,Tidx_label,Trfm> & rbase, Partition<typename Telt::Tidx> & P, Partition<typename Telt::Tidx> const& S)
+{
+  using Tidx=typename Telt::Tidx;
+  std::vector<singStrat<Tidx>> strat;
+  std::vector<Tidx> cellsP = P.cellno;
+  // If <S> is just a set, it is interpreted as partition ( <S>|<S>^compl ).
+  Tidx nrcells = NumberCells(S) - 1;
+
+  for (Tidx s=0; s<nrcells; s++) {
+    // now split with cell number s of S.
+    // Write here hackish code. Hopefully faster
+    Tidx cell_first = S.firsts[s];
+    Tidx cell_len = S.lengths[s];
+    std::map<Tidx,Tidx> p3;
+    for (Tidx u=0; u<cell_len; u++) {
+      Tidx eVal = S.points[cell_first + u];
+      Tidx mVal = cellsP[eVal];
+      p3[mVal] += 1;
+    }
+    std::vector<Tidx> splits;
+    splits.reserve(p3.size());
+    for (auto & kv : p3) {
+      // a cell will split iff it contains more points than are in the s-cell
+      if (P.lengths[kv.first] > kv.second)
+        splits.push_back(kv.first);
+    }
+    for (auto & pVal : splits) {
+      // Last argument true means that the cell will split.
+      Tidx i = SplitCell_Partition(P, pVal, S, s, std::numeric_limits<Tidx>::max());
+      strat.push_back({pVal, s, i});
+      // If  we have one  or two  new fixpoints, put  them  into the base.
+      if (i == 1) {
+        Tidx iPart = NumberCells(P) - 1;
+#ifdef DEBUG_STBCBCKT
+        std::cerr << "CPP NumberCells=" << int(iPart+1) << "\n";
+#endif
+        Tidx pnt = FixpointCellNo(P, iPart);
+#ifdef DEBUG_STBCBCKT
+        std::cerr << "CPP FixpointCellNo - NumberCells\n";
+#endif
+	ProcessFixpoint_rbase(rbase, pnt);
+	strat.push_back({std::numeric_limits<Tidx>::max(), pnt, iPart});
+	if (IsTrivialRBase(rbase))
+	  return strat;
+      }
+      if (P.lengths[pVal] == 1) {
+        Tidx pnt = FixpointCellNo(P, pVal);
+#ifdef DEBUG_STBCBCKT
+        std::cerr << "CPP FixpointCellNo - pVal\n";
+#endif
+	ProcessFixpoint_rbase(rbase, pnt);
+	strat.push_back({std::numeric_limits<Tidx>::max(), pnt, pVal});
+	if (IsTrivialRBase(rbase))
+	  return strat;
+      }
+    }
+  }
+  return strat;
+}
+
+
+
+
+template<typename Telt, typename Tidx_label, typename Trfm>
+std::vector<singStrat<typename Telt::Tidx>> StratMeetPartition_p_p(Partition<typename Telt::Tidx> & P, Partition<typename Telt::Tidx> const& S)
+{
+  using Tidx=typename Telt::Tidx;
+  std::vector<singStrat<Tidx>> strat;
+  std::vector<Tidx> cellsP = P.cellno;
+  // If <S> is just a set, it is interpreted as partition ( <S>|<S>^compl ).
+  Tidx nrcells = NumberCells(S) - 1;
+
+  for (Tidx s=0; s<nrcells; s++) {
+    // now split with cell number s of S.
+    // Write here hackish code. Hopefully faster
+    Tidx cell_first = S.firsts[s];
+    Tidx cell_len = S.lengths[s];
+    std::map<Tidx,Tidx> p3;
+    for (Tidx u=0; u<cell_len; u++) {
+      Tidx eVal = S.points[cell_first + u];
+      Tidx mVal = cellsP[eVal];
+      p3[mVal] += 1;
+    }
+    std::vector<Tidx> splits;
+    splits.reserve(p3.size());
+    for (auto & kv : p3) {
+      // a cell will split iff it contains more points than are in the s-cell
+      if (P.lengths[kv.first] > kv.second)
+        splits.push_back(kv.first);
+    }
+    for (auto & pVal : splits) {
+      // Last argument true means that the cell will split.
+      Tidx i = SplitCell_Partition(P, pVal, S, s, std::numeric_limits<Tidx>::max());
+    }
+  }
+  return strat;
+}
+
+
+
+
+
+
+
+
+
 
 
 
@@ -709,7 +894,7 @@ void AddRefinement(rbaseType<Telt,Tidx_label,Trfm> & rbase, size_t const& pos, T
 
 
 template<typename Telt, typename Tidx_label, typename Trfm>
-void RegisterRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_label,Trfm> & rbase, typename Telt::Tidx const& pnt, Telt const& TheId)
+void RegisterRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_label,Trfm> & rbase, typename Telt::Tidx const& pnt)
 {
   using Tidx=typename Telt::Tidx;
   if (rbase.level2.status != int_true && rbase.level2.status != int_false) {
@@ -790,7 +975,7 @@ void RegisterRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_
 	NicePrintPartition("CPP Before StratMeetPartition O", O);
         KeyUpdatingRbase("RegisterRBasePoint 2.1", rbase);
 #endif
-	std::vector<singStrat<Tidx>> strat = StratMeetPartition(rbase, P, O, TheId);
+	std::vector<singStrat<Tidx>> strat = StratMeetPartition_r_p_p(rbase, P, O);
 #ifdef DEBUG_STBCBCKT
         KeyUpdatingRbase("RegisterRBasePoint 2.2", rbase);
 #endif
@@ -821,7 +1006,7 @@ void RegisterRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_
 
 
 template<typename Telt, typename Tidx_label, typename Trfm>
-void NextRBasePoint_no_order(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_label,Trfm> & rbase, Telt const& TheId)
+void NextRBasePoint_no_order(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_label,Trfm> & rbase)
 {
   using Tidx=typename Telt::Tidx;
   std::vector<Tidx> lens = P.lengths; // Copy is needed as the lens is changed in the sortparallel
@@ -858,13 +1043,13 @@ void NextRBasePoint_no_order(Partition<typename Telt::Tidx> & P, rbaseType<Telt,
   NicePrintPartition("CPP Before RegisterRBasePoint P", P);
   PrintRBaseLevel(rbase, "CPP Before RegisterRBasePoint");
 #endif
-  RegisterRBasePoint(P, rbase, p, TheId);
+  RegisterRBasePoint(P, rbase, p);
 }
 
 
 
 template<typename Telt, typename Tidx_label, typename Trfm>
-void NextRBasePoint_order(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_label,Trfm> & rbase, const std::vector<typename Telt::Tidx>& order, Telt const& TheId)
+void NextRBasePoint_order(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_label,Trfm> & rbase, const std::vector<typename Telt::Tidx>& order)
 {
   using Tidx=typename Telt::Tidx;
   const std::vector<Tidx>& lens = P.lengths; // Copy is needed as the lens is changed in the sortparallel
@@ -877,9 +1062,9 @@ void NextRBasePoint_order(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tid
   }
   if (p != miss_val) {
     p = order[p];
-    RegisterRBasePoint(P, rbase, p, TheId);
+    RegisterRBasePoint(P, rbase, p);
   } else {
-    NextRBasePoint_no_order<Telt,Tidx_label,Trfm>(P, rbase, TheId);
+    NextRBasePoint_no_order<Telt,Tidx_label,Trfm>(P, rbase);
   }
 }
 
@@ -1967,6 +2152,9 @@ ResultPBT<Telt,Tidx_label> RepOpSetsPermGroup(StabChain<Telt,Tidx_label> const& 
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Orders: |R|=" << SizeStabChain<Telt,Tidx_label,Tint>(R) << " |L|=" << SizeStabChain<Telt,Tidx_label,Tint>(L) << "\n";
 #endif
+  // We need a refinement type that covers a number of possible scenario.
+  // For each refinement type, we would have a different function.
+  // In other words, we need a std::variant for handling the types.
   using Trfm = std::variant<Trfm_processfixpoint<Tidx>,Trfm_intersection<Tidx>>;
 
   rbaseType<Telt,Tidx_label,Trfm> rbase = EmptyRBase<Telt,Tidx_label,Trfm>({G, G}, true, Omega, P);
@@ -1988,7 +2176,7 @@ ResultPBT<Telt,Tidx_label> RepOpSetsPermGroup(StabChain<Telt,Tidx_label> const& 
   using Tdata = dataType_opset<Tidx>;
   Tdata data(Q);
   auto nextLevel=[&](Partition<Tidx> & P, rbaseType<Telt,Tidx_label,Trfm> & rbase, Telt const& TheId) -> void {
-    NextRBasePoint_no_order<Telt,Tidx_label,Trfm>(P, rbase, TheId);
+    NextRBasePoint_no_order<Telt,Tidx_label,Trfm>(P, rbase);
   };
   return PartitionBacktrack<Telt,Tidx_label,Tdata,Trfm,Tint,repr,decltype(Pr),decltype(nextLevel)>( G, Pr, nextLevel, rbase, data, L, R );
 }
@@ -2266,7 +2454,7 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
   Partition<Tidx> cycles;
   for (size_t i=0; i<e_siz; i++) {
       cycles = Partition( Cycles( e[i], Omega ) );
-      StratMeetPartition( P, CollectedPartition( cycles, size ) );
+      StratMeetPartition_p_p( P, CollectedPartition( cycles, size ) );
   }
 
   // Find the order in which to process the points in the base choice.
@@ -2293,20 +2481,21 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
     lengths_v.push_back( - cycles.lengths[i] );
     order_v.push_back(cycles.points[i]);
   }
-  SortParallel(lengths_v, order_v);
+  SortParallel_PairList(lengths_v, order_v);
 
   using Trfm = std::variant<Trfm_centralizer<Tidx>,Trfm_processfixpoint<Tidx>,Trfm_intersection<Tidx>>;
   rbaseType<Telt,Tidx_label,Trfm> rbase = EmptyRBase<Telt,Tidx_label,Trfm>({G,G}, true, Omega, P);
 
   // Loop over the stabilizer chain of <G>.
   auto nextLevel=[&](Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_label,Trfm> & rbase, Telt const& TheId) -> void {
-    NextRBasePoint_order<Telt,Tidx_label,Trfm>(P, rbase, order_v );
+    NextRBasePoint_order<Telt,Tidx_label,Trfm>(P, rbase, order_v);
 
     // Centralizer refinement.
     std::vector<Tidx> fix = Fixcells( P );
     for (size_t i_pnt=0; i_pnt<fix.size(); i_pnt++) { // fix is changing, so we need to keep it here.
       Tidx pnt = fix[i_pnt];
-      for (size_t g=0; g<e_siz; g++) {
+      Tidx e_siz_i = Tidx(e_siz);
+      for (Tidx g=0; g<e_siz_i; g++) {
         Tidx img = PowAct(pnt, e[g]);
         Tidx strat = IsolatePoint( P, img );
         if (strat != miss_val) {
