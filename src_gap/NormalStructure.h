@@ -103,10 +103,10 @@ std::vector<Telt> Kernel_SmallGeneratingSet(const StabChain<Telt,Tidx_label>& G)
   using Tidx = typename Telt::Tidx;
   Tidx n = G->comm->n;
   std::unordered_set<Telt> gens_set;
-  for (auto & eGen : Kernel_GeneratorsOfGroup(G)) {
+  for (auto & eGen : Kernel_GeneratorsOfGroup(G))
     if (!eGen.isIdentity())
       gens_set.insert(eGen);
-  }
+  std::vector<Tidx> bas = BasePoint(G);
   std::vector<Telt> gens;
   for (auto & eGen : gens_set)
     gens.push_back(eGen);
@@ -157,7 +157,7 @@ std::vector<Telt> Kernel_SmallGeneratingSet(const StabChain<Telt,Tidx_label>& G)
 
   // Computing the lower bound on the number of generators
   size_t min = 1;
-  if (!Kernel_IsCommutativeGenerators(gens2))
+  if (!Kernel_IsCommutativeGenerators(gens2, bas))
     min = 2;
 
   // Generating elements at
