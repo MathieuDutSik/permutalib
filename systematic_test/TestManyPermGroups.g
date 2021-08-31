@@ -337,6 +337,91 @@ end;
 
 
 
+
+
+
+TestDerivedSubgroup:=function(nbMov, eGRP)
+    local eDir, FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, Result1, Result2, test;
+    Print("Checking DerivedSubgroup feature\n");
+    eDir:="/tmp/DebugDerivedSubgroup_datarun/";
+    eCommand:=Concatenation("mkdir -p ", eDir);
+    Exec(eCommand);
+    #
+    FileName:=Concatenation(eDir, "Input");
+    MyRemoveFileIfExist(FileName);
+    output:=OutputTextFile(FileName, true);
+    LGen:=GeneratorsOfGroup(eGRP);
+    AppendTo(output, Length(LGen), " ", nbMov, "\n");
+    for eGen in LGen
+    do
+        for iMov in [1..nbMov]
+        do
+            eImg:=OnPoints(iMov, eGen);
+            AppendTo(output, " ", eImg-1);
+        od;
+        AppendTo(output, "\n");
+    od;
+    CloseStream(output);
+    #
+    eBinary:="../src_gap/GapDerivedSubgroup";
+    FileErr:=Concatenation(eDir, "CppError");
+    FileRes:=Concatenation(eDir, "GapOutput");
+    eCommand:=Concatenation(eBinary, " ", FileName, " ", FileRes, " 2> ", FileErr);
+    Exec(eCommand);
+    #
+    eGRP_der:=ReadAsFunction(FileRes)();
+    if eGRP_der <> DerivedSubgroup(eGRP) then
+        Error("Found some error. Please debug");
+    fi;
+    MyRemoveFileIfExist(FileName);
+    MyRemoveFileIfExist(FileErr);
+    MyRemoveFileIfExist(FileRes);
+end;
+
+
+
+TestCentreSubgroup:=function(nbMov, eGRP)
+    local eDir, FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, Result1, Result2, test;
+    Print("Checking CentreSubgroup feature\n");
+    eDir:="/tmp/DebugCentreSubgroup_datarun/";
+    eCommand:=Concatenation("mkdir -p ", eDir);
+    Exec(eCommand);
+    #
+    FileName:=Concatenation(eDir, "Input");
+    MyRemoveFileIfExist(FileName);
+    output:=OutputTextFile(FileName, true);
+    LGen:=GeneratorsOfGroup(eGRP);
+    AppendTo(output, Length(LGen), " ", nbMov, "\n");
+    for eGen in LGen
+    do
+        for iMov in [1..nbMov]
+        do
+            eImg:=OnPoints(iMov, eGen);
+            AppendTo(output, " ", eImg-1);
+        od;
+        AppendTo(output, "\n");
+    od;
+    CloseStream(output);
+    #
+    eBinary:="../src_gap/GapCentreSubgroup";
+    FileErr:=Concatenation(eDir, "CppError");
+    FileRes:=Concatenation(eDir, "GapOutput");
+    eCommand:=Concatenation(eBinary, " ", FileName, " ", FileRes, " 2> ", FileErr);
+    Exec(eCommand);
+    #
+    eGRP_cent:=ReadAsFunction(FileRes)();
+    if eGRP_cent <> Centre(eGRP) then
+        Error("Found some error. Please debug");
+    fi;
+    MyRemoveFileIfExist(FileName);
+    MyRemoveFileIfExist(FileErr);
+    MyRemoveFileIfExist(FileRes);
+end;
+
+
+
+
+
 TestSpecificGroup:=function(method, size_opt, nbMov, eGRP)
     local iMov, sizSet, i, eSet, fSet, eElt;
     Print("ListGens(eGRP)=", GeneratorsOfGroup(eGRP), "\n");
@@ -387,13 +472,19 @@ TestSpecificGroup:=function(method, size_opt, nbMov, eGRP)
                 TestSpecificGroupSet_Canonical(nbMov, eGRP, eSet);
             od;
         fi;
-        if method="properties" then
-            TestPropertiesGroup(nbMov, eGRP);
-        fi;
-        if method="smallgeneratingset" then
-            TestSmallGeneratingSet(nbMov, eGRP);
-        fi;
     od;
+    if method="properties" then
+        TestPropertiesGroup(nbMov, eGRP);
+    fi;
+    if method="smallgeneratingset" then
+        TestSmallGeneratingSet(nbMov, eGRP);
+    fi;
+    if method="derivedsubgroup" then
+        TestDerivedSubgroup(nbMov, eGRP);
+    fi;
+    if method="centresubgroup" then
+        TestCentreSubgroup(nbMov, eGRP);
+    fi;
 end;
 
 
@@ -439,7 +530,9 @@ WriteAllGroupsInFile:=function(eFile)
 end;
 
 
-TestAllGroups("smallgeneratingset", 1);
+TestAllGroups("derivedsubgroup", 1);
+#TestAllGroups("centresubgroup", 1);
+#TestAllGroups("smallgeneratingset", 1);
 #TestAllGroups("properties", 1);
 #TestAllGroups("stabilizer", 1);
 #TestAllGroups("equivalence", 2);

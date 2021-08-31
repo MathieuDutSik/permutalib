@@ -25,6 +25,9 @@ struct Partition {
   std::vector<Tidx> cellno;
 };
 
+//
+// Print functionality
+//
 
 template<typename Tidx>
 void NicePrintPartition(std::string const& str, Partition<Tidx> const& P)
@@ -139,6 +142,9 @@ void CheckConsistencyPartition(std::string const& str, Partition<Tidx> const& P)
   }
 }
 
+//
+// The real functionality
+//
 
 template<typename Tidx>
 Partition<Tidx> GetPartition(std::vector<std::vector<Tidx>> const& list)

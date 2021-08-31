@@ -100,9 +100,7 @@ permPlusBool<Telt> ExtendedT(Telt const& t, typename Telt::Tidx const& pnt, type
 template<typename Telt, typename Tidx_label>
 bool IsBool(StabChainPlusLev<Telt,Tidx_label> const& S)
 {
-  if (S.status == int_true || S.status == int_false)
-    return true;
-  return false;
+  return S.status == int_true || S.status == int_false;
 }
 
 
