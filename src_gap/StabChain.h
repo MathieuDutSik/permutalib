@@ -666,9 +666,7 @@ Telt SiftedPermutation(StabChain<Telt,Tidx_label> const& S, Telt const& g)
     Tidx img = PowAct(bpt, gW);
     if (Sptr->transversal[img] == std::numeric_limits<Tidx_label>::max())
       return gW;
-    while(true) {
-      if (img == bpt)
-	break;
+    while(img != bpt) {
       Tidx_label idx = Sptr->transversal[img];
       gW *= Sptr->comm->labels[idx];
       img = PowAct(bpt, gW);
@@ -829,9 +827,7 @@ Telt LargestElementStabChain(StabChain<Telt,Tidx_label> const& S)
 	val=img;
       }
     }
-    while(true) {
-      if (pnt == min)
-	break;
+    while (pnt != min) {
       Tidx_label idx=Sptr->transversal[min];
       const Telt& gen=Sptr->comm->labels[idx];
       rep = LeftQuotient(gen, rep);
@@ -1030,23 +1026,21 @@ StabChain<Telt,Tidx_label> StabChainBaseStrongGenerators(std::vector<typename Te
   StabChain<Telt,Tidx_label> S = EmptyStabChain<Telt,Tidx_label>(n);
   size_t nbGen = sgs.size();
   Face status(nbGen);
-  for (size_t i=0; i<nbGen; i++)
-    status[i] = 1;
   size_t basSiz=base.size();
   for (size_t iBas=0; iBas<basSiz; iBas++) {
     Tidx pnt=base[iBas];
     std::vector<Telt> sgsFilt;
     for (size_t i=0; i<nbGen; i++)
-      if (status[i] == 1)
+      if (status[i] == 0)
 	sgsFilt.push_back(sgs[i]);
     InsertTrivialStabilizer(S, pnt);
 #ifdef DEBUG
     std::cerr << "CPP Before call to AddGeneratorsExtendSchreierTree from StabChainStrongGenerators\n";
 #endif
-    AddGeneratorsExtendSchreierTree(S, iBas, sgsFilt);
+    AddGeneratorsExtendSchreierTree(S, sgsFilt);
     for (size_t iGen=0; iGen<nbGen; iGen++)
-      if (status[iGen] == 1 && PowAct(pnt, sgs[iGen]) != pnt)
-	status[iGen] = 0;
+      if (status[iGen] == 0 && PowAct(pnt, sgs[iGen]) != pnt)
+	status[iGen] = 1;
   }
   return S;
 }
