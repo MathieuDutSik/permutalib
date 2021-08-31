@@ -163,29 +163,28 @@ struct Trfm_intersection {
 
 
 
-template<typename Tidx>
-bool IsInsertableRefinement(Refinement<Tidx> const& eRfm)
+template<typename Trfm, typename Tidx>
+bool IsInsertableRefinement(Trfm const& eRfm)
 {
-  if (eRfm.nature == 0)
-    return true;
-  if (eRfm.nature == 1) {
-    if (eRfm.inputIntersection.second.size() == 0)
-      return false;
-    return true;
-  }
-#ifdef DEBUG
-  std::cerr << "We should never reach that stage\n";
-  throw PermutalibException{1};
-#endif
-  return true;
+  return std::visit([&](auto&& arg) -> bool {
+    static_assert(is_one_of<decltype(arg), Trfm_processfixpoint<Tidx>, Trfm_intersection<Tidx>, Trfm_centralizer<Tidx>>{}, "Non matching type.");
+    using T = std::decay_t<decltype(arg)>;
+    if constexpr (std::is_same_v<T, Trfm_processfixpoint<Tidx>>)
+      return true;
+    else if constexpr (std::is_same_v<T, Trfm_intersection<Tidx>>)
+      return arg.strat.size() > 0;
+    else if constexpr (std::is_same_v<T, Trfm_centralizer<Tidx>>)
+      return true;
+  }, eRfm);
 }
 
 
 // The underscore nature of a function can be seen in stbcbckt top.
 // Since we did not implement all the algorithms of stbcbckt, the value is always 0.
-int UnderscoreNature(int const& nature)
+template<typename Trfm>
+bool UnderscoreNature(Trfm const& rfm)
 {
-  return 0;
+  return false;
 }
 
 
@@ -690,10 +689,11 @@ std::vector<singStrat<typename Telt::Tidx>> StratMeetPartition(rbaseType<Telt,Ti
 template<typename Telt, typename Tidx_label, typename Trfm>
 void AddRefinement(rbaseType<Telt,Tidx_label,Trfm> & rbase, size_t const& pos, Trfm const& eRfm)
 {
+  using Tidx=typename Telt::Tidx;
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP beginning of AddRefinement\n";
 #endif
-  if (IsInsertableRefinement(eRfm)) {
+  if (IsInsertableRefinement<Trfm,Tidx>(eRfm)) {
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP Doing RFM insertion\n";
 #endif
@@ -764,7 +764,7 @@ void RegisterRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_
     KeyUpdatingRbase("RegisterRBasePoint 1.4", rbase);
     std::cerr << "CPP Section P.lengths after ProcessFixpoint_rbase\n";
 #endif
-    AddRefinement(rbase, len, Trfm_processfixpoint<Tidx>({pnt,k}));
+    AddRefinement(rbase, len, Trfm(Trfm_processfixpoint<Tidx>({pnt,k})));
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP After AddRefinement 1\n";
     KeyUpdatingRbase("RegisterRBasePoint 1.5", rbase);
@@ -794,7 +794,7 @@ void RegisterRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_
 #ifdef DEBUG_STBCBCKT
         KeyUpdatingRbase("RegisterRBasePoint 2.2", rbase);
 #endif
-        AddRefinement(rbase, len, Trfm_intersection<Tidx>({O,strat}));
+        AddRefinement(rbase, len, Trfm(Trfm_intersection<Tidx>({O,strat})));
 #ifdef DEBUG_STBCBCKT
         std::cerr << "CPP After AddRefinement 2\n";
 #endif
@@ -988,7 +988,7 @@ int RRefine(rbaseType<Telt,Tidx_label,Trfm> & rbase, imageType<Telt,Tidx_label,T
 #ifdef DEBUG_STBCBCKT
       std::cerr << "CPP Doing one CallFuncList 2\n";
 #endif
-      if (UnderscoreNature(Rf.nature)) {
+      if (UnderscoreNature(Rf)) {
 	bool t = Evaluation(Rf);
 	if (!t) {
 #ifdef DEBUG_STBCBCKT
@@ -1144,9 +1144,9 @@ template<typename Telt, typename Tidx_label, typename Tdata, typename Trfm, bool
 imageType<Telt,Tidx_label,Tdata> BuildInitialImage(rbaseType<Telt,Tidx_label,Trfm> & rbase, Tdata & data)
 {
   if (repr) {
-    return imageType<Telt,Tidx_label,Tdata>(data.P);
+    return imageType<Telt,Tidx_label,Tdata>(data.P, data);
   } else {
-    return imageType<Telt,Tidx_label,Tdata>(rbase.partition);
+    return imageType<Telt,Tidx_label,Tdata>(rbase.partition, data);
   }
 };
 
@@ -1167,7 +1167,7 @@ ResultPBT<Telt,Tidx_label> PartitionBacktrack(StabChain<Telt,Tidx_label> const& 
   std::cerr << "CPP INIT sgs(L)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(L))) << "\n";
   std::cerr << "CPP INIT sgs(R)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(R))) << "\n";
 #endif
-  imageType<Telt,Tidx_label,Tdata> image = BuildInitialImage<Telt,Tidx_label,repr>(rbase, data);
+  imageType<Telt,Tidx_label,Tdata> image = BuildInitialImage<Telt,Tidx_label,Tdata,Trfm,repr>(rbase, data);
   std::vector<Face> orB; // backup of <orb>.
   std::vector<Face> orb;
   std::vector<std::vector<Tidx>> org; // intersected (mapped) basic orbits of <G>
@@ -2212,12 +2212,12 @@ std::vector<typename Telt::Tidx> CycleStructurePerm(const Telt& x)
 }
 
 
-  /*
+/*
 #############################################################################
 ##
 #F  RepOpElmTuplesPermGroup( <repr>, <G>, <e>, <f>, <L>, <R> )  on elm tuples
 ##
-  */
+*/
 template<typename Telt, typename Tidx_label, typename Tint, bool repr>
 ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_label>& G, const std::vector<Telt>& e, const std::vector<Telt>& f, const StabChain<Telt,Tidx_label> & L, const StabChain<Telt,Tidx_label> & R)
 {
@@ -2286,9 +2286,9 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
   std::vector<Tidx> order = cycles.points{ cycles.firsts{i} };
   SortParallel( -(cycles.lengths{i}), order );
 
-  rbaseType<Telt,Tidx_label> rbase = EmptyRBase({G,G}, bool, Omega, P);
-
   using Trfm = std::variant<Trfm_centralizer<Tidx>,Trfm_processfixpoint<Tidx>,Trfm_intersection<Tidx>>;
+  rbaseType<Telt,Tidx_label,Trfm> rbase = EmptyRBase({G,G}, true, Omega, P);
+
   // Loop over the stabilizer chain of <G>.
   auto nextLevel=[&](Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_label,Trfm> & rbase, Telt const& TheId) -> void {
     NextRBasePoint_order(P, rbase, order );
@@ -2304,11 +2304,11 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
           fix.push_back(img);
           ProcessFixpoint_rbase(rbase, img);
           size_t len=rbase.rfm.size();
-          AddRefinement(rbase, len, Trfm_centralizer<Tidx>({CellNoPoint(P,pnt), g, img, strat}) );
+          AddRefinement(rbase, len, Trfm(Trfm_centralizer<Tidx>({CellNoPoint(P,pnt), g, img, strat})) );
           if (P.lengths[ strat ] == 1) {
             Tidx pnt_b = FixpointCellNo(P, strat);
             ProcessFixpoint_rbase( rbase, pnt );
-            AddRefinement(rbase, len, Trfm_processfixpoint<Tidx>({pnt, strat}) );
+            AddRefinement(rbase, len, Trfm(Trfm_processfixpoint<Tidx>({pnt, strat})) );
           }
         }
       }
@@ -2372,6 +2372,7 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
 template<typename Telt, typename Tidx_label, typename Tint>
 StabChain<Telt,Tidx_label> Centralizer_elt(const StabChain<Telt,Tidx_label>& G, const Telt& e) {
   using Tidx=typename Telt::Tidx;
+  Tidx n=G->comm->n;
   std::vector<Telt> e_v{e};
   std::vector<Telt> LGen;
   for (auto & eGen : Kernel_GeneratorsOfGroup(G))
@@ -2386,6 +2387,7 @@ StabChain<Telt,Tidx_label> Centralizer_elt(const StabChain<Telt,Tidx_label>& G, 
 template<typename Telt, typename Tidx_label, typename Tint>
 StabChain<Telt,Tidx_label> Centralizer_elt(const StabChain<Telt,Tidx_label>& G, const StabChain<Telt,Tidx_label>& U) {
   using Tidx=typename Telt::Tidx;
+  Tidx n=G->comm->n;
   std::vector<Telt> LGen_U = Kernel_GeneratorsOfGroup(U);
   auto is_ok_gen=[&](auto & eGen) -> bool {
     for (auto & e : LGen_U)
