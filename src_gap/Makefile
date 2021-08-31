@@ -1,4 +1,4 @@
-#PROGRAM	= GapRepresentativeActionOnSet GapStabilizerOnSet GapEquivalenceOnSet GapCanonicalImage BenchmarkingPermutalib Factorize TestPermutationProduct TestSymmetricGroup GroupProperties EqSymmGroup TestSerialization GapDerivedSubgroup GapSmallGeneratingSet TestEnumerationElement GapCentreSubgroup
+PROGRAM	= GapRepresentativeActionOnSet GapStabilizerOnSet GapEquivalenceOnSet GapCanonicalImage BenchmarkingPermutalib Factorize TestPermutationProduct TestSymmetricGroup GroupProperties EqSymmGroup TestSerialization GapDerivedSubgroup GapSmallGeneratingSet TestEnumerationElement GapCentreSubgroup GapCentralizerElt
 #PROGRAM	= EqSymmGroup
 #PROGRAM	= GapStabilizerOnSet
 #PROGRAM	= GapRepresentativeActionOnSet
@@ -15,7 +15,7 @@
 #PROGRAM	= Factorize
 #PROGRAM	= TestSerialization
 #PROGRAM	= TestEnumerationElement
-PROGRAM	= GapCentralizerElt
+#PROGRAM	= GapCentralizerElt
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
