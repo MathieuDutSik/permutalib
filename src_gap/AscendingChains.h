@@ -1,6 +1,282 @@
 #ifndef INCLUDE_PERMUTALIB_ASCENDING_CHAIN_H
 #define INCLUDE_PERMUTALIB_ASCENDING_CHAIN_H
 
+
+
+
+
+
+
+#############################################################################
+##
+#F  MinimizeExplicitTransversal( <U>, <maxmoved> )  . . . . . . . . . . local
+##
+InstallGlobalFunction( MinimizeExplicitTransversal, function( U, maxmoved )
+    local   explicit,  lenflock,  flock,  lenblock,  index,  s;
+
+    if     IsBound( U.explicit )
+       and IsBound( U.stabilizer )  then
+        explicit := U.explicit;
+        lenflock := U.stabilizer.index * U.lenblock / Length( U.orbit );
+        flock    := U.flock;
+        lenblock := U.lenblock;
+        index    := U.index;
+        ChangeStabChain( U, [ 1 .. maxmoved ] );
+        for s  in [ 1 .. Length( explicit ) ]  do
+            explicit[ s ] := MinimalElementCosetStabChain( U, explicit[ s ] );
+        od;
+        Sort( explicit );
+        U.explicit := explicit;
+        U.lenflock := lenflock;
+        U.flock    := flock;
+        U.lenblock := lenblock;
+        U.index    := index;
+    fi;
+end );
+InstallGlobalFunction( AddCosetInfoStabChain, function( G, U, maxmoved )
+    local   orb,  pimg,  img,  vert,  s,  t,  index,
+            block,  B,  blist,  pos,  sliced,  lenflock,  i,  j,
+            ss,  tt,t1,t1lim;
+
+    Info(InfoCoset,5,"AddCosetInfoStabChain [",
+          SizeStabChain(G),",",SizeStabChain(U),"]");
+    if IsEmpty( G.genlabels )  then
+        U.index    := 1;
+        U.explicit := [ U.identity ];
+        U.lenflock := 1;
+        U.flock    := U.explicit;
+    else
+        AddCosetInfoStabChain( G.stabilizer, U.stabilizer, maxmoved );
+
+        # U.index := [G_1:U_1];
+        U.index := U.stabilizer.index * Length( G.orbit ) / Length( U.orbit );
+	Info(InfoCoset,5,"U.index=",U.index);
+
+        # block := 1 ^ <U,G_1>; is a block for G.
+        block := OrbitPerms( Concatenation( U.generators,
+                 G.stabilizer.generators ), G.orbit[ 1 ] );
+        U.lenblock := Length( block );
+        lenflock := Length( G.orbit ) / U.lenblock;
+
+        # For small indices,  permutations   are multiplied,  so  we  need  a
+        # multiplied transversal.
+        if     IsBound( U.stabilizer.explicit )
+           and U.lenblock * maxmoved <= MAX_SIZE_TRANSVERSAL
+           and U.index    * maxmoved <= MAX_SIZE_TRANSVERSAL * lenflock  then
+            U.explicit := [  ];
+            U.flock    := [ G.identity ];
+            tt := [  ];  tt[ G.orbit[ 1 ] ] := G.identity;
+            for t  in G.orbit  do
+                tt[ t ] := tt[ t ^ G.transversal[ t ] ] /
+                           G.transversal[ t ];
+            od;
+        fi;
+
+        # flock := { G.transversal[ B[1] ] | B in block system };
+        blist := BlistList( G.orbit, block );
+        pos := Position( blist, false );
+        while pos <> fail  do
+            img := G.orbit[ pos ];
+            B := block{ [ 1 .. U.lenblock ] };
+            sliced := [  ];
+            while img <> G.orbit[ 1 ]  do
+                Add( sliced, G.transversal[ img ] );
+                img := img ^ G.transversal[ img ];
+            od;
+            for i  in Reversed( [ 1 .. Length( sliced ) ] )  do
+                for j  in [ 1 .. Length( B ) ]  do
+                    B[ j ] := B[ j ] / sliced[ i ];
+                od;
+            od;
+            Append( block, B );
+            if IsBound( U.explicit )  then
+                Add( U.flock, tt[ B[ 1 ] ] );
+            fi;
+            #UniteBlist( blist, BlistList( G.orbit, B ) );
+            UniteBlistList(G.orbit, blist, B );
+            pos := Position( blist, false, pos );
+        od;
+        G.orbit := block;
+
+        # Let <s> loop over the transversal elements in the stabilizer.
+        U.repsStab := List( [ 1 .. U.lenblock ], x ->
+                           BlistList( [ 1 .. U.stabilizer.index ], [  ] ) );
+        U.repsStab[ 1 ] := BlistList( [ 1 .. U.stabilizer.index ],
+                                      [ 1 .. U.stabilizer.index ] );
+        index := U.stabilizer.index * lenflock;
+        s := 1;
+
+        # For  large  indices, store only   the  numbers of  the  transversal
+        # elements needed.
+        if not IsBound( U.explicit )  then
+
+            # If  the   stabilizer   is the   topmost  level   with  explicit
+            # transversal, this must contain minimal coset representatives.
+            MinimizeExplicitTransversal( U.stabilizer, maxmoved );
+
+	    # if there are over 200 points, do a cheap test first.
+	    t1lim:=Length(G.orbit);
+	    if t1lim>200 then
+	      t1lim:=50;
+	    fi;
+
+            orb := G.orbit{ [ 1 .. U.lenblock ] };
+            pimg := [  ];
+            while index < U.index  do
+                pimg{ orb } := CosetNumber( G.stabilizer, U.stabilizer, s,
+                                       orb );
+                t := 2;
+                while t <= U.lenblock  and  index < U.index  do
+
+		    # do not test all points first if not necessary
+		    # (test only at most t1lim points, if the test succeeds,
+		    # test the rest)
+		    # this gives a major speedup.
+		    t1:=Minimum(t-1,t1lim);
+                    # For this point  in the  block,  find the images  of the
+                    # earlier points under the representative.
+                    vert := G.orbit{ [ 1 .. t1 ] };
+                    img := G.orbit[ t ];
+                    while img <> G.orbit[ 1 ]  do
+                        vert := OnTuples( vert, G.transversal[ img ] );
+                        img  := img           ^ G.transversal[ img ];
+                    od;
+
+                    # If $Ust = Us't'$ then $1t'/t/s in 1U$. Also if $1t'/t/s
+                    # in 1U$ then $st/t' =  u.g_1$ with $u  in U, g_1 in G_1$
+                    # and $g_1  =  u_1.s'$ with $u_1  in U_1,  s' in S_1$, so
+                    # $Ust = Us't'$.
+                    if ForAll( [ 1 .. t1 ], i -> not IsBound
+                       ( U.translabels[ pimg[ vert[ i ] ] ] ) )  then
+
+		      # do all points
+		      if t1<t-1 then
+			vert := G.orbit{ [ 1 .. t - 1 ] };
+			img := G.orbit[ t ];
+			while img <> G.orbit[ 1 ]  do
+			    vert := OnTuples( vert, G.transversal[ img ] );
+			    img  := img           ^ G.transversal[ img ];
+			od;
+			if ForAll( [ t1+1 .. t - 1 ], i -> not IsBound
+			  ( U.translabels[ pimg[ vert[ i ] ] ] ) )  then
+			    U.repsStab[ t ][ s ] := true;
+			    index := index + lenflock;
+			fi;
+		      else
+                        U.repsStab[ t ][ s ] := true;
+                        index := index + lenflock;
+		      fi;
+                    fi;
+
+                    t := t + 1;
+                od;
+                s := s + 1;
+            od;
+
+        # For small indices, store a transversal explicitly.
+        else
+            for ss  in U.stabilizer.flock  do
+                Append( U.explicit, U.stabilizer.explicit * ss );
+            od;
+            while index < U.index  do
+                t := 2;
+                while t <= U.lenblock  and  index < U.index  do
+                    ss := U.explicit[ s ] * tt[ G.orbit[ t ] ];
+                    if ForAll( [ 1 .. t - 1 ], i -> not IsBound
+                           ( U.translabels[ G.orbit[ i ] / ss ] ) )  then
+                        U.repsStab[ t ][ s ] := true;
+                        Add( U.explicit, ss );
+                        index := index + lenflock;
+                    fi;
+                    t := t + 1;
+                od;
+                s := s + 1;
+            od;
+            Unbind( U.stabilizer.explicit );
+            Unbind( U.stabilizer.flock    );
+        fi;
+
+    fi;
+end );
+
+#############################################################################
+##
+#F  RightTransversalPermGroupConstructor( <filter>, <G>, <U> )  . constructor
+##
+MAX_SIZE_TRANSVERSAL := 100000;
+
+BindGlobal( "RightTransversalPermGroupConstructor", function( filter, G, U )
+  local GC, UC, noyet, orbs, domain, GCC, UCC, ac, nc, bpt, enum, i;
+
+    GC := CopyStabChain( StabChainImmutable( G ) );
+    UC := CopyStabChain( StabChainImmutable( U ) );
+    noyet:=ValueOption("noascendingchain")<>true;
+    if not IsTrivial( G )  then
+        orbs := ShallowCopy( OrbitsDomain( U, MovedPoints( G ) ) );
+        Sort( orbs, function( o1, o2 )
+            return Length( o1 ) < Length( o2 ); end );
+        domain := Concatenation( orbs );
+	GCC:=GC;
+	UCC:=UC;
+        while    Length( GCC.genlabels ) <> 0
+              or Length( UCC.genlabels ) <> 0  do
+#Print(SizeStabChain(GCC),"/",SizeStabChain(UCC),":",
+#  SizeStabChain(GCC)/SizeStabChain(UCC),"\n");
+          if noyet and (
+	  (SizeStabChain(GCC)/SizeStabChain(UCC)*10 >MAX_SIZE_TRANSVERSAL) or
+	  (Length(UCC.genlabels)=0 and
+	    SizeStabChain(GCC)>MAX_SIZE_TRANSVERSAL)
+	    ) then
+	    # we potentially go through many steps, making it expensive
+	    ac:=AscendingChain(G,U:cheap);
+	    # go in biggish steps through the chain
+	    nc:=[ac[1]];
+	    for i in [3..Length(ac)] do
+	      if Size(ac[i])/Size(nc[Length(nc)])>MAX_SIZE_TRANSVERSAL then
+		Add(nc,ac[i-1]);
+	      fi;
+	    od;
+	    Add(nc,ac[Length(ac)]);
+	    if Length(nc)>2 then
+	      ac:=[];
+	      for i in [Length(nc),Length(nc)-1..2] do
+		Info(InfoCoset,4,"Recursive [",Size(nc[i]),",",Size(nc[i-1]));
+		Add(ac,RightTransversal(nc[i],nc[i-1]
+		      # do not try to factor again
+		      :noascendingchain));
+	      od;
+	      return FactoredTransversal(G,U,ac);
+	    fi;
+	    noyet:=false;
+
+	  fi;
+	  bpt := First( domain, p -> not IsFixedStabilizer( GCC, p ) );
+	  ChangeStabChain( GCC, [ bpt ], true  );  GCC := GCC.stabilizer;
+	  ChangeStabChain( UCC, [ bpt ], false );  UCC := UCC.stabilizer;
+        od;
+    fi;
+
+    AddCosetInfoStabChain(GC,UC,LargestMovedPoint(G));
+    MinimizeExplicitTransversal(UC,LargestMovedPoint(G));
+
+    enum := Objectify( NewType( FamilyObj( G ),
+                           filter and IsList and IsDuplicateFreeList
+                           and IsAttributeStoringRep ),
+          rec( group := G,
+            subgroup := U,
+      stabChainGroup := GC,
+   stabChainSubgroup := UC ) );
+
+    return enum;
+end );
+
+
+
+
+
+
+
+
 /*
 #############################################################################
 ##
