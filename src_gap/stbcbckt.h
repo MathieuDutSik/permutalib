@@ -24,6 +24,12 @@
 
 namespace permutalib {
 
+
+template <typename T, typename... Args>
+struct is_one_of:
+  std::disjunction<std::is_same<std::decay_t<T>, Args>...> {};
+
+
 template<typename Telt>
 struct permPlusBool {
   int status; // values in {int_false, int_true, int_perm}
@@ -206,7 +212,7 @@ struct dataType_opperm {
   dataType_opperm(Partition<typename Telt::Tidx>& _P, std::vector<Telt>& _f) : P(_P), f(_f)
   {
   }
-  dataType_opperm<Tidx> operator=(dataType_opperm<Tidx>& data)
+  dataType_opperm<Telt> operator=(dataType_opperm<Telt>& data)
   {
     return dataType_opperm(data.P, data.f);
   }
@@ -865,9 +871,9 @@ void NextRBasePoint_order(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tid
   Tidx miss_val = std::numeric_limits<Tidx>::max();
   Tidx p = miss_val;
   if (rbase.level.status == int_int) {
-    p = PositionProperty(order, [&](const Tidx& p_i) -> bool { return lens[ CellNoPoint(P,p_i ) ] != 1});
+    p = PositionProperty(order, [&](const Tidx& p_i) -> bool { return lens[ CellNoPoint(P, p_i) ] != 1; });
   } else {
-    p = PositionProperty(order, [&](const T_i& p_i) -> bool { return lens[ CellNoPoint(P,p_i ) ] != 1 && !IsFixedStabilizer(rbase.level.Stot, p_i); });
+    p = PositionProperty(order, [&](const Tidx& p_i) -> bool { return lens[ CellNoPoint(P, p_i) ] != 1 && !IsFixedStabilizer(rbase.level.Stot, p_i); });
   }
   if (p != miss_val) {
     p = order[p];
@@ -910,8 +916,9 @@ bool Refinements_Intersection(rbaseType<Telt,Tidx_label,Trfm> & rbase, imageType
 }
 
 template<typename Telt, typename Tidx_label, typename Tdata, typename Trfm>
-bool Refinements_Centralizer(rbaseType<Telt,Tidx_label,Trfm> & rbase, imageType<Telt,Tidx_label,Tdata> & image, const Tidx& cellnum, const Tidx& g, const Tidx& pnt, const Tidx& strat)
+bool Refinements_Centralizer(rbaseType<Telt,Tidx_label,Trfm> & rbase, imageType<Telt,Tidx_label,Tdata> & image, const typename Telt::Tidx& cellnum, const typename Telt::Tidx& g, const typename Telt::Tidx& pnt, const typename Telt::Tidx& strat)
 {
+  using Tidx=typename Telt::Tidx;
   Partition<Tidx>& P = image.partition;
   Tidx img = PowAct(FixpointCellNo( P, cellnum ), image.data.f[g]);
   return IsolatePoint(P, img) == strat && ProcessFixpoint(image, pnt, img);
@@ -935,7 +942,7 @@ int RRefine(rbaseType<Telt,Tidx_label,Trfm> & rbase, imageType<Telt,Tidx_label,T
     return int_false;
   };
   auto Evaluation=[&](Trfm const& eRef) -> bool {
-    std::visit([&](auto&& arg) {
+    return std::visit([&](auto&& arg) -> bool {
       static_assert(is_one_of<decltype(arg), Trfm_processfixpoint<Tidx>, Trfm_intersection<Tidx>, Trfm_centralizer<Tidx>>{}, "Non matching type.");
       using T = std::decay_t<decltype(arg)>;
       if constexpr (std::is_same_v<T, Trfm_processfixpoint<Tidx>>)
@@ -1137,9 +1144,9 @@ template<typename Telt, typename Tidx_label, typename Tdata, typename Trfm, bool
 imageType<Telt,Tidx_label,Tdata> BuildInitialImage(rbaseType<Telt,Tidx_label,Trfm> & rbase, Tdata & data)
 {
   if (repr) {
-    return imageType<Telt,Tidx_label>(data.P);
+    return imageType<Telt,Tidx_label,Tdata>(data.P);
   } else {
-    return imageType<Telt,Tidx_label>(rbase.partition);
+    return imageType<Telt,Tidx_label,Tdata>(rbase.partition);
   }
 };
 
@@ -1980,7 +1987,7 @@ ResultPBT<Telt,Tidx_label> RepOpSetsPermGroup(StabChain<Telt,Tidx_label> const& 
 #endif
   using Tdata = dataType_opset<Tidx>;
   Tdata data(Q);
-  auto nextLevel=[&](Partition<Tidx> & P, rbaseType<Telt,Tidx_label> & rbase, Telt const& TheId) -> void {
+  auto nextLevel=[&](Partition<Tidx> & P, rbaseType<Telt,Tidx_label,Trfm> & rbase, Telt const& TheId) -> void {
     NextRBasePoint_no_order(P, rbase, TheId);
   };
   return PartitionBacktrack<Telt,Tidx_label,Tdata,Trfm,Tint,repr,decltype(Pr),decltype(nextLevel)>( G, Pr, nextLevel, rbase, data, L, R );
@@ -2214,6 +2221,9 @@ std::vector<typename Telt::Tidx> CycleStructurePerm(const Telt& x)
 template<typename Telt, typename Tidx_label, typename Tint, bool repr>
 ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_label>& G, const std::vector<Telt>& e, const std::vector<Telt>& f, const StabChain<Telt,Tidx_label> & L, const StabChain<Telt,Tidx_label> & R)
 {
+  using Tidx=typename Telt::Tidx;
+  Tidx n=G->comm->n;
+  Tidx miss_val = std::numeric_limits<Tidx>::max();
   size_t e_siz = e.size();
 
   // Central elements and trivial subgroups.
@@ -2236,7 +2246,7 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
   if (repr) {
     for (size_t i=0; i<e_siz; i++) {
       std::vector<Tidx> V_e = CycleStructurePerm(e[i]);
-      std::vector<Tidx> V_f = CycleStructurePerm(e[j]);
+      std::vector<Tidx> V_f = CycleStructurePerm(e[i]);
       if (V_e != V_f)
         return {int_fail, {}, {}};
     }
