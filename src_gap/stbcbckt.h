@@ -133,6 +133,31 @@ public:
 
 
 template<typename Tidx>
+struct Trfm_centralizer {
+  Tidx cellnum;
+  Tidx g;
+  Tidx img;
+  Tidx strat;
+};
+
+template<typename Tidx>
+struct Trfm_processfixpoint {
+  Tidx pnt;
+  Tidx strat;
+};
+
+
+
+template<typename Tidx>
+struct Trfm_intersection {
+  Partition<Tidx> Q;
+  std::vector<singStrat<Tidx>> strat;
+};
+
+
+
+
+template<typename Tidx>
 bool IsInsertableRefinement(Refinement<Tidx> const& eRfm)
 {
   if (eRfm.nature == 0)
@@ -161,16 +186,34 @@ int UnderscoreNature(int const& nature)
 
 
 template<typename Tidx>
-struct dataType {
+struct dataType_opset {
   Partition<Tidx>& P;
-  dataType(Partition<Tidx>& _P) : P(_P)
+  dataType_opset(Partition<Tidx>& _P) : P(_P)
   {
   }
-  dataType<Tidx> operator=(dataType<Tidx>& data)
+  dataType_opset<Tidx> operator=(dataType_opset<Tidx>& data)
   {
-    return dataType(data.P);
+    return dataType_opset(data.P);
   }
 };
+
+
+
+template<typename Telt>
+struct dataType_opperm {
+  Partition<typename Telt::Tidx> & P;
+  std::vector<Telt> & f;
+  dataType_opperm(Partition<typename Telt::Tidx>& _P, std::vector<Telt>& _f) : P(_P), f(_f)
+  {
+  }
+  dataType_opperm<Tidx> operator=(dataType_opperm<Tidx>& data)
+  {
+    return dataType_opperm(data.P, data.f);
+  }
+};
+
+
+
 
 
 // The rbase if the main data type in the work
@@ -214,7 +257,7 @@ struct dataType {
 //    But S does not show up later on.
 // ---So we need to find an adequate mechanism for dealing with the problem
 //    of pointers.
-template<typename Telt, typename Tidx_label>
+template<typename Telt, typename Tidx_label, typename Trfm>
 struct rbaseType {
   std::vector<typename Telt::Tidx> domain;
   std::vector<typename Telt::Tidx> base;
@@ -223,7 +266,7 @@ struct rbaseType {
   StabChain<Telt,Tidx_label> chain;
   std::vector<std::vector<typename Telt::Tidx>> fix;
   //
-  std::vector<std::vector<Refinement<typename Telt::Tidx>>> rfm;
+  std::vector<std::vector<Trfm>> rfm;
   Partition<typename Telt::Tidx> partition;
   std::vector<StabChainPlusLev<Telt,Tidx_label>> lev;
   StabChainPlusLev<Telt,Tidx_label> level;
@@ -235,8 +278,8 @@ struct rbaseType {
 };
 
 
-template<typename Telt, typename Tidx_label>
-void KeyUpdatingRbase(std::string const& str, rbaseType<Telt,Tidx_label> & rbase)
+template<typename Telt, typename Tidx_label, typename Trfm>
+void KeyUpdatingRbase(std::string const& str, rbaseType<Telt,Tidx_label,Trfm> & rbase)
 {
   bool DoPrint=false;
   std::vector<std::string> ListKey;
@@ -265,8 +308,8 @@ void KeyUpdatingRbase(std::string const& str, rbaseType<Telt,Tidx_label> & rbase
 }
 
 
-template<typename Telt, typename Tidx_label>
-std::string ListOrbitOfRbaseLEV(rbaseType<Telt,Tidx_label> const& rbase)
+template<typename Telt, typename Tidx_label, typename Trfm>
+std::string ListOrbitOfRbaseLEV(rbaseType<Telt,Tidx_label,Trfm> const& rbase)
 {
   std::string str = "[ ";
   size_t sizLev=rbase.lev.size();
@@ -289,8 +332,8 @@ std::string ListOrbitOfRbaseLEV(rbaseType<Telt,Tidx_label> const& rbase)
 
 
 
-template<typename Telt, typename Tidx_label>
-void PrintRBaseLevel(rbaseType<Telt,Tidx_label> const& rbase, std::string const& str)
+template<typename Telt, typename Tidx_label, typename Trfm>
+void PrintRBaseLevel(rbaseType<Telt,Tidx_label,Trfm> const& rbase, std::string const& str)
 {
   if (rbase.level.status == int_int) {
     std::cerr << str << " PRBL rbase.level, integer : " << rbase.level.value_int << "\n";
@@ -313,8 +356,8 @@ void PrintRBaseLevel(rbaseType<Telt,Tidx_label> const& rbase, std::string const&
 
 
 
-template<typename Telt, typename Tidx_label>
-bool ProcessFixpoint_rbase(rbaseType<Telt,Tidx_label> & rbase, typename Telt::Tidx const& pnt)
+template<typename Telt, typename Tidx_label, typename Trfm>
+bool ProcessFixpoint_rbase(rbaseType<Telt,Tidx_label,Trfm> & rbase, typename Telt::Tidx const& pnt)
 {
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP ProcessFixpoint_rbase beginning pnt=" << int(pnt+1) << "\n";
@@ -363,24 +406,25 @@ bool ProcessFixpoint_rbase(rbaseType<Telt,Tidx_label> & rbase, typename Telt::Ti
 
 
 
-template<typename Telt, typename Tidx_label>
+template<typename Telt, typename Tidx_label, typename Tdata>
 struct imageType {
   size_t depth;
   Partition<typename Telt::Tidx>& partition;
+  Tdata & data;
   permPlusBool<Telt> perm;
   StabChainPlusLev<Telt,Tidx_label> level;
   std::vector<typename Telt::Tidx> bimg;
   //
   permPlusBool<Telt> perm2;
   StabChainPlusLev<Telt,Tidx_label> level2;
-  imageType(Partition<typename Telt::Tidx>& _partition) : partition(_partition)
+  imageType(Partition<typename Telt::Tidx>& _partition, Tdata & _data) : partition(_partition), data(_data)
   {
   }
 };
 
 
-template<typename Telt, typename Tidx_label>
-bool ProcessFixpoint_image(imageType<Telt,Tidx_label> & image, typename Telt::Tidx const& pnt, typename Telt::Tidx & img, typename Telt::Tidx const& simg)
+template<typename Telt, typename Tidx_label, typename Tdata>
+bool ProcessFixpoint_image(imageType<Telt,Tidx_label,Tdata> & image, typename Telt::Tidx const& pnt, typename Telt::Tidx & img, typename Telt::Tidx const& simg)
 {
   using Tidx=typename Telt::Tidx;
   if (image.perm.status != int_true) {
@@ -425,8 +469,8 @@ bool ProcessFixpoint_image(imageType<Telt,Tidx_label> & image, typename Telt::Ti
 }
 
 
-template<typename Telt, typename Tidx_label>
-bool IsTrivialRBase(rbaseType<Telt,Tidx_label> const& rbase)
+template<typename Telt, typename Tidx_label,typename Trfm>
+bool IsTrivialRBase(rbaseType<Telt,Tidx_label,Trfm> const& rbase)
 {
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP IsTrivialRBase : IsInt()=";
@@ -471,11 +515,11 @@ bool IsTrivialRBase(rbaseType<Telt,Tidx_label> const& rbase)
 
 
 
-template<typename Telt, typename Tidx_label>
-rbaseType<Telt,Tidx_label> EmptyRBase(std::vector<StabChain<Telt,Tidx_label>> const& G, bool const& IsId, std::vector<typename Telt::Tidx> const& Omega, Partition<typename Telt::Tidx> const& P)
+template<typename Telt, typename Tidx_label,typename Trfm>
+rbaseType<Telt,Tidx_label,Trfm> EmptyRBase(std::vector<StabChain<Telt,Tidx_label>> const& G, bool const& IsId, std::vector<typename Telt::Tidx> const& Omega, Partition<typename Telt::Tidx> const& P)
 {
   using Tidx = typename Telt::Tidx;
-  rbaseType<Telt,Tidx_label> rbase;
+  rbaseType<Telt,Tidx_label,Trfm> rbase;
   rbase.domain = Omega;
   rbase.base = {};
   rbase.where = {};
@@ -513,8 +557,8 @@ rbaseType<Telt,Tidx_label> EmptyRBase(std::vector<StabChain<Telt,Tidx_label>> co
 
 
 
-template<typename Telt, typename Tidx_label>
-bool MeetPartitionStrat(rbaseType<Telt,Tidx_label> const& rbase, imageType<Telt,Tidx_label> & image, Partition<typename Telt::Tidx> const& S, Telt const& g, std::vector<singStrat<typename Telt::Tidx>> const& strat)
+template<typename Telt, typename Tidx_label, typename Tdata, typename Trfm>
+bool MeetPartitionStrat(rbaseType<Telt,Tidx_label,Trfm> const& rbase, imageType<Telt,Tidx_label,Tdata> & image, Partition<typename Telt::Tidx> const& S, Telt const& g, std::vector<singStrat<typename Telt::Tidx>> const& strat)
 {
   using Tidx=typename Telt::Tidx;
 #ifdef DEBUG_STBCBCKT
@@ -550,8 +594,8 @@ bool MeetPartitionStrat(rbaseType<Telt,Tidx_label> const& rbase, imageType<Telt,
 ##            i.e., `P[p]' has become a one-point cell.
 ##
 */
-template<typename Telt, typename Tidx_label>
-std::vector<singStrat<typename Telt::Tidx>> StratMeetPartition(rbaseType<Telt,Tidx_label> & rbase, Partition<typename Telt::Tidx> & P, Partition<typename Telt::Tidx> const& S, Telt const& g)
+template<typename Telt, typename Tidx_label, typename Trfm>
+std::vector<singStrat<typename Telt::Tidx>> StratMeetPartition(rbaseType<Telt,Tidx_label,Trfm> & rbase, Partition<typename Telt::Tidx> & P, Partition<typename Telt::Tidx> const& S, Telt const& g)
 {
   using Tidx=typename Telt::Tidx;
   std::vector<singStrat<Tidx>> strat;
@@ -631,9 +675,14 @@ std::vector<singStrat<typename Telt::Tidx>> StratMeetPartition(rbaseType<Telt,Ti
 }
 
 
+// We need a refinement type that covers a number of possible scenario.
+// For each refinement type, we would have a different function.
+// In other words, we need a std::variant for handling the types.
 
-template<typename Telt, typename Tidx_label>
-void AddRefinement(rbaseType<Telt,Tidx_label> & rbase, size_t const& pos, Refinement<typename Telt::Tidx> const& eRfm)
+
+
+template<typename Telt, typename Tidx_label, typename Trfm>
+void AddRefinement(rbaseType<Telt,Tidx_label,Trfm> & rbase, size_t const& pos, Trfm const& eRfm)
 {
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP beginning of AddRefinement\n";
@@ -653,8 +702,8 @@ void AddRefinement(rbaseType<Telt,Tidx_label> & rbase, size_t const& pos, Refine
 
 
 
-template<typename Telt, typename Tidx_label>
-void RegisterRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_label> & rbase, typename Telt::Tidx const& pnt, Telt const& TheId)
+template<typename Telt, typename Tidx_label, typename Trfm>
+void RegisterRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_label,Trfm> & rbase, typename Telt::Tidx const& pnt, Telt const& TheId)
 {
   using Tidx=typename Telt::Tidx;
   if (rbase.level2.status != int_true && rbase.level2.status != int_false) {
@@ -709,7 +758,7 @@ void RegisterRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_
     KeyUpdatingRbase("RegisterRBasePoint 1.4", rbase);
     std::cerr << "CPP Section P.lengths after ProcessFixpoint_rbase\n";
 #endif
-    AddRefinement(rbase, len, Refinement<Tidx>({pnt,k}));
+    AddRefinement(rbase, len, Trfm_processfixpoint<Tidx>({pnt,k}));
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP After AddRefinement 1\n";
     KeyUpdatingRbase("RegisterRBasePoint 1.5", rbase);
@@ -739,7 +788,7 @@ void RegisterRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_
 #ifdef DEBUG_STBCBCKT
         KeyUpdatingRbase("RegisterRBasePoint 2.2", rbase);
 #endif
-        AddRefinement(rbase, len, Refinement<Tidx>({O,strat}));
+        AddRefinement(rbase, len, Trfm_intersection<Tidx>({O,strat}));
 #ifdef DEBUG_STBCBCKT
         std::cerr << "CPP After AddRefinement 2\n";
 #endif
@@ -765,8 +814,8 @@ void RegisterRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_
 
 
 
-template<typename Telt, typename Tidx_label>
-void NextRBasePoint_no_order(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_label> & rbase, Telt const& TheId)
+template<typename Telt, typename Tidx_label, typename Trfm>
+void NextRBasePoint_no_order(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_label,Trfm> & rbase, Telt const& TheId)
 {
   using Tidx=typename Telt::Tidx;
   std::vector<Tidx> lens = P.lengths; // Copy is needed as the lens is changed in the sortparallel
@@ -808,8 +857,8 @@ void NextRBasePoint_no_order(Partition<typename Telt::Tidx> & P, rbaseType<Telt,
 
 
 
-template<typename Telt, typename Tidx_label>
-void NextRBasePoint_order(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_label> & rbase, const std::vector<typename Telt::Tidx>& order, Telt const& TheId)
+template<typename Telt, typename Tidx_label, typename Trfm>
+void NextRBasePoint_order(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_label,Trfm> & rbase, const std::vector<typename Telt::Tidx>& order, Telt const& TheId)
 {
   using Tidx=typename Telt::Tidx;
   const std::vector<Tidx>& lens = P.lengths; // Copy is needed as the lens is changed in the sortparallel
@@ -834,8 +883,8 @@ void NextRBasePoint_order(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tid
 
 
 
-template<typename Telt, typename Tidx_label>
-bool Refinements_ProcessFixpoint(rbaseType<Telt,Tidx_label> & rbase, imageType<Telt,Tidx_label> & image, typename Telt::Tidx const& pnt, typename Telt::Tidx const& cellnum)
+template<typename Telt, typename Tidx_label, typename Tdata, typename Trfm>
+bool Refinements_ProcessFixpoint(rbaseType<Telt,Tidx_label,Trfm> & rbase, imageType<Telt,Tidx_label,Tdata> & image, typename Telt::Tidx const& pnt, typename Telt::Tidx const& cellnum)
 {
   using Tidx=typename Telt::Tidx;
   Tidx img = FixpointCellNo(image.partition, cellnum);
@@ -847,8 +896,8 @@ bool Refinements_ProcessFixpoint(rbaseType<Telt,Tidx_label> & rbase, imageType<T
 
 
 
-template<typename Telt, typename Tidx_label>
-bool Refinements_Intersection(rbaseType<Telt,Tidx_label> & rbase, imageType<Telt,Tidx_label> & image, Partition<typename Telt::Tidx> const& Q, std::vector<singStrat<typename Telt::Tidx>> const& strat)
+template<typename Telt, typename Tidx_label, typename Tdata, typename Trfm>
+bool Refinements_Intersection(rbaseType<Telt,Tidx_label,Trfm> & rbase, imageType<Telt,Tidx_label,Tdata> & image, Partition<typename Telt::Tidx> const& Q, std::vector<singStrat<typename Telt::Tidx>> const& strat)
 {
   Telt t;
   if (image.level2.status == int_false) {
@@ -860,12 +909,21 @@ bool Refinements_Intersection(rbaseType<Telt,Tidx_label> & rbase, imageType<Telt
   return MeetPartitionStrat(rbase, image, Q, tinv, strat);
 }
 
+template<typename Telt, typename Tidx_label, typename Tdata, typename Trfm>
+bool Refinements_Centralizer(rbaseType<Telt,Tidx_label,Trfm> & rbase, imageType<Telt,Tidx_label,Tdata> & image, const Tidx& cellnum, const Tidx& g, const Tidx& pnt, const Tidx& strat)
+{
+  Partition<Tidx>& P = image.partition;
+  Tidx img = PowAct(FixpointCellNo( P, cellnum ), image.data.f[g]);
+  return IsolatePoint(P, img) == strat && ProcessFixpoint(image, pnt, img);
+}
+
+
 // The function RRefine is doing the computation using CallFuncList
 // It processes a number of refinement strategies.
 // The functions Refinements used return only booleans
 //
-template<typename Telt, typename Tidx_label>
-int RRefine(rbaseType<Telt,Tidx_label> & rbase, imageType<Telt,Tidx_label> & image, bool const& uscore)
+template<typename Telt, typename Tidx_label, typename Tdata, typename Trfm>
+int RRefine(rbaseType<Telt,Tidx_label,Trfm> & rbase, imageType<Telt,Tidx_label,Tdata> & image, bool const& uscore)
 {
   using Tidx=typename Telt::Tidx;
 #ifdef DEBUG_STBCBCKT
@@ -876,12 +934,17 @@ int RRefine(rbaseType<Telt,Tidx_label> & rbase, imageType<Telt,Tidx_label> & ima
       return int_true;
     return int_false;
   };
-  auto Evaluation=[&](Refinement<Tidx> const& eRef) -> bool {
-    if (eRef.nature == int_false)
-      return Refinements_ProcessFixpoint(rbase, image, eRef.inputProcessfix.first, eRef.inputProcessfix.second);
-    if (eRef.nature == int_true)
-      return Refinements_Intersection(rbase, image, eRef.inputIntersection.first, eRef.inputIntersection.second);
-    return true;
+  auto Evaluation=[&](Trfm const& eRef) -> bool {
+    std::visit([&](auto&& arg) {
+      static_assert(is_one_of<decltype(arg), Trfm_processfixpoint<Tidx>, Trfm_intersection<Tidx>, Trfm_centralizer<Tidx>>{}, "Non matching type.");
+      using T = std::decay_t<decltype(arg)>;
+      if constexpr (std::is_same_v<T, Trfm_processfixpoint<Tidx>>)
+        return Refinements_ProcessFixpoint(rbase, image, arg.pnt, arg.strat);
+      else if constexpr (std::is_same_v<T, Trfm_intersection<Tidx>>)
+        return Refinements_Intersection(rbase, image, arg.Q, arg.strat);
+      else if constexpr (std::is_same_v<T, Trfm_centralizer<Tidx>>)
+        return Refinements_Centralizer(rbase, image, arg.cellnum, arg.g, arg.img, arg.strat);
+    }, eRef);
   };
   if (!uscore) {
 #ifdef DEBUG_STBCBCKT
@@ -1070,8 +1133,8 @@ std::string GetStringGAP(Face const& f)
   return str;
 }
 
-template<typename Telt, typename Tidx_label, bool repr>
-imageType<Telt,Tidx_label> BuildInitialImage(rbaseType<Telt,Tidx_label> & rbase, dataType<typename Telt::Tidx> & data)
+template<typename Telt, typename Tidx_label, typename Tdata, typename Trfm, bool repr>
+imageType<Telt,Tidx_label,Tdata> BuildInitialImage(rbaseType<Telt,Tidx_label,Trfm> & rbase, Tdata & data)
 {
   if (repr) {
     return imageType<Telt,Tidx_label>(data.P);
@@ -1081,8 +1144,8 @@ imageType<Telt,Tidx_label> BuildInitialImage(rbaseType<Telt,Tidx_label> & rbase,
 };
 
 
-template<typename Telt, typename Tidx_label, typename Tint, bool repr, typename F_pr, typename F_nextLevel>
-ResultPBT<Telt,Tidx_label> PartitionBacktrack(StabChain<Telt,Tidx_label> const& G, const F_pr& Pr, F_nextLevel nextLevel, rbaseType<Telt,Tidx_label> & rbase, dataType<typename Telt::Tidx> & data, StabChain<Telt,Tidx_label> & L, StabChain<Telt,Tidx_label> & R)
+template<typename Telt, typename Tidx_label, typename Tdata, typename Trfm, typename Tint, bool repr, typename F_pr, typename F_nextLevel>
+ResultPBT<Telt,Tidx_label> PartitionBacktrack(StabChain<Telt,Tidx_label> const& G, const F_pr& Pr, F_nextLevel nextLevel, rbaseType<Telt,Tidx_label,Trfm> & rbase, Tdata & data, StabChain<Telt,Tidx_label> & L, StabChain<Telt,Tidx_label> & R)
 {
   using Tidx=typename Telt::Tidx;
   Tidx n = G->comm->n;
@@ -1097,7 +1160,7 @@ ResultPBT<Telt,Tidx_label> PartitionBacktrack(StabChain<Telt,Tidx_label> const& 
   std::cerr << "CPP INIT sgs(L)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(L))) << "\n";
   std::cerr << "CPP INIT sgs(R)=" << GapStringTVector(SortVector(StrongGeneratorsStabChain(R))) << "\n";
 #endif
-  imageType<Telt,Tidx_label> image = BuildInitialImage<Telt,Tidx_label,repr>(rbase, data);
+  imageType<Telt,Tidx_label,Tdata> image = BuildInitialImage<Telt,Tidx_label,repr>(rbase, data);
   std::vector<Face> orB; // backup of <orb>.
   std::vector<Face> orb;
   std::vector<std::vector<Tidx>> org; // intersected (mapped) basic orbits of <G>
@@ -1897,7 +1960,9 @@ ResultPBT<Telt,Tidx_label> RepOpSetsPermGroup(StabChain<Telt,Tidx_label> const& 
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Orders: |R|=" << SizeStabChain<Telt,Tidx_label,Tint>(R) << " |L|=" << SizeStabChain<Telt,Tidx_label,Tint>(L) << "\n";
 #endif
-  rbaseType<Telt,Tidx_label> rbase = EmptyRBase<Telt,Tidx_label>({G, G}, true, Omega, P);
+  using Trfm = std::variant<Trfm_processfixpoint<Tidx>,Trfm_intersection<Tidx>>;
+
+  rbaseType<Telt,Tidx_label,Trfm> rbase = EmptyRBase<Telt,Tidx_label,Trfm>({G, G}, true, Omega, P);
   //#ifdef DEBUG_STBCBCKT
   //  std::cerr << "CPP RepOpSetsPermGroup rbase.level2.status=" << GetIntTypeNature(rbase.level2.status) << "\n";
   //#endif
@@ -1913,11 +1978,12 @@ ResultPBT<Telt,Tidx_label> RepOpSetsPermGroup(StabChain<Telt,Tidx_label> const& 
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Before call to PartitionBacktrack\n";
 #endif
-  dataType<Tidx> data(Q);
+  using Tdata = dataType_opset<Tidx>;
+  Tdata data(Q);
   auto nextLevel=[&](Partition<Tidx> & P, rbaseType<Telt,Tidx_label> & rbase, Telt const& TheId) -> void {
     NextRBasePoint_no_order(P, rbase, TheId);
   };
-  return PartitionBacktrack<Telt,Tidx_label,Tint,repr,decltype(Pr),decltype(nextLevel)>( G, Pr, nextLevel, rbase, data, L, R );
+  return PartitionBacktrack<Telt,Tidx_label,Tdata,Trfm,Tint,repr,decltype(Pr),decltype(nextLevel)>( G, Pr, nextLevel, rbase, data, L, R );
 }
 
 // Stabilizer part
@@ -2153,7 +2219,7 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
   // Central elements and trivial subgroups.
   auto test_gen=[&](auto & g) -> bool {
     for (size_t i=0; i<e_siz; i++)
-      if (LeftQuotient(e[i], g) != e[i])
+      if (Conjugation(e[i], g) != e[i])
         return false;
     return true;
   };
@@ -2210,10 +2276,11 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
   std::vector<Tidx> order = cycles.points{ cycles.firsts{i} };
   SortParallel( -(cycles.lengths{i}), order );
 
-  rbaseType<Telt,Tidx_label> rbase := EmptyRBase({G,G}, Omega, P );
+  rbaseType<Telt,Tidx_label> rbase = EmptyRBase({G,G}, bool, Omega, P);
 
+  using Trfm = std::variant<Trfm_centralizer<Tidx>,Trfm_processfixpoint<Tidx>,Trfm_intersection<Tidx>>;
   // Loop over the stabilizer chain of <G>.
-  auto nextLevel=[&](Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_label> & rbase, Telt const& TheId) -> void {
+  auto nextLevel=[&](Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_label,Trfm> & rbase, Telt const& TheId) -> void {
     NextRBasePoint_order(P, rbase, order );
 
     // Centralizer refinement.
@@ -2226,12 +2293,12 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
         if (strat != miss_val) {
           fix.push_back(img);
           ProcessFixpoint_rbase(rbase, img);
-          AddRefinement( rbase, STBBCKT_STRING_CENTRALIZER,
-                         [ CellNoPoint(P,pnt), g, img, strat ] );
+          size_t len=rbase.rfm.size();
+          AddRefinement(rbase, len, Trfm_centralizer<Tidx>({CellNoPoint(P,pnt), g, img, strat}) );
           if (P.lengths[ strat ] == 1) {
             Tidx pnt_b = FixpointCellNo(P, strat);
             ProcessFixpoint_rbase( rbase, pnt );
-            AddRefinement( rbase, "ProcessFixpoint", [ pnt, strat ] );
+            AddRefinement(rbase, len, Trfm_processfixpoint<Tidx>({pnt, strat}) );
           }
         }
       }
@@ -2248,7 +2315,7 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
     }
     return Q;
   };
-  Q = get_Q();
+  Partition<Tidx> Q = get_Q();
 
   //Pr:=gen -> gen!.lftObj = gen!.rgtObj;
   std::vector<Tidx> baspts = BaseStabChain(G);
@@ -2280,9 +2347,9 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
       }
     }
   };
-  return PartitionBacktrack( G, Pr, nextLevel,
-                             repr, rbase, Concatenation( [ Q ], f ),
-                             L, R );
+  using Tdata = dataType_opperm<Telt>;
+  Tdata data(Q, f);
+  return PartitionBacktrack<Telt,Tidx_label,Tdata,Trfm,Tint,repr,decltype(Pr),decltype(nextLevel)>( G, Pr, nextLevel, rbase, data, L, R );
 }
 
 
@@ -2294,16 +2361,35 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
 */
 template<typename Telt, typename Tidx_label, typename Tint>
 StabChain<Telt,Tidx_label> Centralizer_elt(const StabChain<Telt,Tidx_label>& G, const Telt& e) {
+  using Tidx=typename Telt::Tidx;
   std::vector<Telt> e_v{e};
-  StabChain<Telt,Tidx_label> Triv_G = TrivialGroup(G->comm->n);
-  return RepOpElmTuplesPermGroup<Telt,Tidx_label,Tint,false>(G, e_v, e_v, Triv_G, Triv_G);
+  std::vector<Telt> LGen;
+  for (auto & eGen : Kernel_GeneratorsOfGroup(G))
+    if (Conjugation(e, eGen) == e)
+      LGen.push_back(eGen);
+  StabChainOptions<Tint,Tidx> options = GetStandardOptions<Tint,Tidx>(n);
+  StabChain<Telt,Tidx_label> LR_grp = StabChainOp_listgen<Telt,Tidx_label,Tint>(LGen, options);
+  return RepOpElmTuplesPermGroup<Telt,Tidx_label,Tint,false>(G, e_v, e_v, LR_grp, LR_grp);
 }
 
 
 template<typename Telt, typename Tidx_label, typename Tint>
 StabChain<Telt,Tidx_label> Centralizer_elt(const StabChain<Telt,Tidx_label>& G, const StabChain<Telt,Tidx_label>& U) {
+  using Tidx=typename Telt::Tidx;
   std::vector<Telt> LGen_U = Kernel_GeneratorsOfGroup(U);
-  return RepOpElmTuplesPermGroup<Telt,Tidx_label,Tint,false>(G, LGen_U, LGen_U, Triv_G, Triv_G);
+  auto is_ok_gen=[&](auto & eGen) -> bool {
+    for (auto & e : LGen_U)
+      if (Conjugation(e, eGen) != e)
+        return false;
+    return true;
+  };
+  std::vector<Telt> LGen;
+  for (auto & eGen : Kernel_GeneratorsOfGroup(G))
+    if (is_ok_gen(eGen))
+      LGen.push_back(eGen);
+  StabChainOptions<Tint,Tidx> options = GetStandardOptions<Tint,Tidx>(n);
+  StabChain<Telt,Tidx_label> LR_grp = StabChainOp_listgen<Telt,Tidx_label,Tint>(LGen, options);
+  return RepOpElmTuplesPermGroup<Telt,Tidx_label,Tint,false>(G, LGen_U, LGen_U, LR_grp, LR_grp);
 }
 
 
@@ -2312,7 +2398,6 @@ StabChain<Telt,Tidx_label> Centralizer_elt(const StabChain<Telt,Tidx_label>& G, 
 ##
 #F  ConjugatorPermGroup( <arg> )  . . . . isomorphism / conjugating element
 ##
-*/
 template<typename Telt, typename Tidx_label, typename Tint>
 std::optional<Telt> ConjugatorPermGroup(const StabChain<Telt,Tidx_label>&G, const StabChain<Telt,Tidx_label>& E, const StabChain<Telt,Tidx_label>& F)
 {
