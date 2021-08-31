@@ -389,10 +389,9 @@ typename Telt::Tidx SplitCell_Partition_e(Partition<typename Telt::Tidx> & P, ty
   return SplitCell_Kernel(P, i, test, out);
 }
 
-template<typename Telt>
-typename Telt::Tidx SplitCell_Partition(Partition<typename Telt::Tidx> & P, typename Telt::Tidx const& i, Partition<typename Telt::Tidx> const& Q, typename Telt::Tidx const& j, typename Telt::Tidx const& out)
+template<typename Tidx>
+Tidx SplitCell_Partition(Partition<Tidx> & P, Tidx const& i, Partition<Tidx> const& Q, Tidx const& j, Tidx const& out)
 {
-  using Tidx = typename Telt::Tidx;
 #ifdef DEBUG_PARTITION
   std::cerr << "CPP Q=\n";
   RawPrintPartition(Q);
@@ -572,7 +571,7 @@ typeFixcellsCell<Tidx> FixcellsCell(Partition<Tidx> const& P, Partition<Tidx> co
 template<typename Tidx>
 Partition<Tidx> TrivialPartition(std::vector<Tidx> const& Omega)
 {
-  return GetPartition({Omega});
+  return GetPartition(std::vector<std::vector<Tidx>>({Omega}));
 }
 
 
@@ -657,7 +656,7 @@ int SmallestPrimeDivisor(Tarith const& size)
     return 1;
   int i=2;
   while(true) {
-    int res=size % i;
+    Tarith res=size % Tarith(i);
     if (res == 0)
       return i;
     i++;

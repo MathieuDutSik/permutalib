@@ -281,6 +281,11 @@ struct rbaseType {
 };
 
 
+//
+// Print functionality
+//
+
+
 template<typename Telt, typename Tidx_label, typename Trfm>
 void KeyUpdatingRbase(std::string const& str, rbaseType<Telt,Tidx_label,Trfm> & rbase)
 {
@@ -357,7 +362,9 @@ void PrintRBaseLevel(rbaseType<Telt,Tidx_label,Trfm> const& rbase, std::string c
   }
 }
 
-
+//
+// The remaining code.
+//
 
 template<typename Telt, typename Tidx_label, typename Trfm>
 bool ProcessFixpoint_rbase(rbaseType<Telt,Tidx_label,Trfm> & rbase, typename Telt::Tidx const& pnt)
@@ -578,7 +585,7 @@ bool MeetPartitionStrat(rbaseType<Telt,Tidx_label,Trfm> const& rbase, imageType<
       if (!ProcessFixpoint_image(image, pRec.s, eFix, std::numeric_limits<Tidx>::max()))
         return false;
     }
-    if (pRec.p != std::numeric_limits<Tidx>::max() && SplitCell_Partition(image.partition, pRec.p, S, pRec.s, g, pRec.i ) != pRec.i)
+    if (pRec.p != std::numeric_limits<Tidx>::max() && SplitCell_Partition_e(image.partition, pRec.p, S, pRec.s, g, pRec.i ) != pRec.i)
       return false;
   }
   return true;
@@ -851,7 +858,7 @@ std::vector<singStrat<Tidx>> StratMeetPartition_p_p(Partition<Tidx> & P, Partiti
     }
     for (auto & pVal : splits) {
       // Last argument true means that the cell will split.
-      Tidx i = SplitCell_Partition(P, pVal, S, s, std::numeric_limits<Tidx>::max());
+      (void)SplitCell_Partition(P, pVal, S, s, std::numeric_limits<Tidx>::max());
     }
   }
   return strat;
@@ -1053,9 +1060,9 @@ void NextRBasePoint_order(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tid
   Tidx miss_val = std::numeric_limits<Tidx>::max();
   Tidx p = miss_val;
   if (rbase.level.status == int_int) {
-    p = PositionProperty(order, [&](const Tidx& p_i) -> bool { return lens[ CellNoPoint(P, p_i) ] != 1; });
+    p = PositionProperty<Tidx>(order, [&](const Tidx& p_i) -> bool { return lens[ CellNoPoint(P, p_i) ] != 1; });
   } else {
-    p = PositionProperty(order, [&](const Tidx& p_i) -> bool { return lens[ CellNoPoint(P, p_i) ] != 1 && !IsFixedStabilizer(rbase.level.Stot, p_i); });
+    p = PositionProperty<Tidx>(order, [&](const Tidx& p_i) -> bool { return lens[ CellNoPoint(P, p_i) ] != 1 && !IsFixedStabilizer(rbase.level.Stot, p_i); });
   }
   if (p != miss_val) {
     p = order[p];
@@ -1103,7 +1110,7 @@ bool Refinements_Centralizer(rbaseType<Telt,Tidx_label,Trfm> & rbase, imageType<
   using Tidx=typename Telt::Tidx;
   Partition<Tidx>& P = image.partition;
   Tidx img = PowAct(FixpointCellNo( P, cellnum ), image.data.f[g]);
-  return IsolatePoint(P, img) == strat && ProcessFixpoint(image, pnt, img);
+  return IsolatePoint(P, img) == strat && ProcessFixpoint_image<Telt,Tidx_label,Tdata>(image, pnt, img, std::numeric_limits<Tidx>::max());
 }
 
 
@@ -2398,6 +2405,45 @@ std::vector<typename Telt::Tidx> CycleStructurePerm(const Telt& x)
 
 
 
+template<typename Telt>
+std::vector<std::vector<typename Telt::Tidx>> Cycles(const Telt& x, const std::vector<typename Telt::Tidx>& Omega)
+{
+  using Tidx=typename Telt::Tidx;
+  Tidx n = x.size();
+  Tidx len = Tidx(Omega.size());
+  Tidx miss_val = std::numeric_limits<Tidx>::max();
+  std::vector<Tidx> Omega_rev(n, miss_val);
+  for (Tidx i=0; i<len; i++)
+    Omega_rev[Omega[i]] = i;
+
+  Face f(len);
+  auto get_unset=[&]() -> Tidx {
+    for (Tidx u=0; u<len; u++)
+      if (f[u] == 0)
+        return Omega[u];
+    return miss_val;
+  };
+
+  std::vector<std::vector<Tidx>> orbs;
+  while(true) {
+    Tidx val = get_unset();
+    if (val == miss_val)
+      break;
+    std::vector<Tidx> orb;
+    while(true) {
+      orb.push_back(val);
+      Tidx pos = Omega_rev[val];
+      f[pos] = 1;
+      val = PowAct(val, x);
+      if (f[val] == 1)
+        break;
+    }
+    orbs.emplace_back(std::move(orb));
+  }
+  return orbs;
+}
+
+
 
 /*
 #############################################################################
@@ -2450,7 +2496,7 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
 
   Partition<Tidx> cycles;
   for (size_t i=0; i<e_siz; i++) {
-      cycles = Partition( Cycles( e[i], Omega ) );
+      cycles = GetPartition( Cycles( e[i], Omega ) );
       StratMeetPartition_p_p( P, CollectedPartition( cycles, size ) );
   }
 
@@ -2516,7 +2562,7 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
     }
     Partition<Tidx> Q = TrivialPartition(Omega);
     for (size_t i=0; i<e_siz; i++) {
-      StratMeetPartition_p_p( Q, CollectedPartition( Partition( Cycles( f[ i ], Omega ) ), 1 ) );
+      StratMeetPartition_p_p( Q, CollectedPartition( GetPartition( Cycles( f[ i ], Omega ) ), 1 ) );
     }
     return Q;
   };
@@ -2551,6 +2597,7 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
           return false;
       }
     }
+    return true;
   };
   using Tdata = dataType_opperm<Telt>;
   Tdata data(Q, f);

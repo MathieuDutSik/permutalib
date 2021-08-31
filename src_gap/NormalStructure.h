@@ -106,7 +106,7 @@ std::vector<Telt> Kernel_SmallGeneratingSet(const StabChain<Telt,Tidx_label>& G)
   for (auto & eGen : Kernel_GeneratorsOfGroup(G))
     if (!eGen.isIdentity())
       gens_set.insert(eGen);
-  std::vector<Tidx> bas = BasePoint(G);
+  std::vector<Tidx> bas = BaseStabChain(G);
   std::vector<Telt> gens;
   for (auto & eGen : gens_set)
     gens.push_back(eGen);

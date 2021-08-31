@@ -13,6 +13,7 @@ namespace permutalib {
 template<typename Telt>
 bool Kernel_IsCommutativeGenerators(const std::vector<Telt>& LGen, const std::vector<typename Telt::Tidx>& bas)
 {
+  using Tidx=typename Telt::Tidx;
   size_t len = LGen.size();
   for (size_t i=0; i<len; i++) {
     for (size_t j=i+1; j<len; j++) {
@@ -21,6 +22,7 @@ bool Kernel_IsCommutativeGenerators(const std::vector<Telt>& LGen, const std::ve
         Tidx img2 = PowAct(PowAct(x, LGen[j]), LGen[i]);
         if (img1 != img2)
           return false;
+      }
     }
   }
   return true;
@@ -30,7 +32,7 @@ template<typename Telt, typename Tidx_label>
 bool Kernel_IsCommutative(const StabChain<Telt,Tidx_label>& S)
 {
   using Tidx=typename Telt::Tidx;
-  std::vector<Tidx> bas = BasePoint(S);
+  std::vector<Tidx> bas = BaseStabChain(S);
   std::vector<Telt> LGen = Kernel_GeneratorsOfGroup(S);
   return Kernel_IsCommutativeGenerators(LGen, bas);
 }
