@@ -83,8 +83,9 @@ template<typename Telt, typename Tidx_label, typename Tint>
 bool Kernel_IsCyclic(const StabChain<Telt,Tidx_label>& S)
 {
   using Tidx=typename Telt::Tidx;
+  std::vector<Tidx> bas = BaseStabChain(S);
   std::vector<Telt> acts = Kernel_GeneratorsOfGroup(S);
-  if (!Kernel_IsCommutativeGenerators(acts))
+  if (!Kernel_IsCommutativeGenerators(acts, bas))
     return false;
   Tidx n = S->comm->n;
   std::map<Tidx,int> LFact = FactorsSizeStabChain(S);

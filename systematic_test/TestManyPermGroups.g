@@ -420,6 +420,50 @@ end;
 
 
 
+TestCentralizedElt:=function(nbMov, eGRP, g)
+    local eDir, FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, Result1, Result2, test;
+    Print("Checking CentralizerElt feature\n");
+    eDir:="/tmp/DebugCentralizerElt_datarun/";
+    eCommand:=Concatenation("mkdir -p ", eDir);
+    Exec(eCommand);
+    #
+    FileName:=Concatenation(eDir, "Input");
+    MyRemoveFileIfExist(FileName);
+    output:=OutputTextFile(FileName, true);
+    LGen:=GeneratorsOfGroup(eGRP);
+    AppendTo(output, Length(LGen), " ", nbMov, "\n");
+    PrtElement:=function(u)
+        for iMov in [1..nbMov]
+        do
+            eImg:=OnPoints(iMov, eGen);
+            AppendTo(output, " ", eImg-1);
+        od;
+        AppendTo(output, "\n");
+    end;
+    for eGen in LGen
+    do
+        PrtElement(eGen);
+    od;
+    PrtElement(g);
+    CloseStream(output);
+    #
+    eBinary:="../src_gap/GapCentreSubgroup";
+    FileErr:=Concatenation(eDir, "CppError");
+    FileRes:=Concatenation(eDir, "GapOutput");
+    eCommand:=Concatenation(eBinary, " ", FileName, " ", FileRes, " 2> ", FileErr);
+    Exec(eCommand);
+    #
+    eCentrElt:=ReadAsFunction(FileRes)();
+    if eCentrElt <> Centralizer(eGRP, g) then
+        Error("Found some error. Please debug");
+    fi;
+    MyRemoveFileIfExist(FileName);
+    MyRemoveFileIfExist(FileErr);
+    MyRemoveFileIfExist(FileRes);
+end;
+
+
+
 
 
 TestSpecificGroup:=function(method, size_opt, nbMov, eGRP)
@@ -485,6 +529,15 @@ TestSpecificGroup:=function(method, size_opt, nbMov, eGRP)
     if method="centresubgroup" then
         TestCentreSubgroup(nbMov, eGRP);
     fi;
+    if method="centralizerelt" then
+        for iter in [1..50]
+        do
+            g:=Random(eGRP);
+            TestCentralizerElt(2*nbMov, eGRP, g);
+            g:=Random(SymmetricGroup(2*nbMov));
+            TestCentralizerElt(2*nbMov, eGRP, g);
+        od;
+    fi;
 end;
 
 
@@ -530,7 +583,8 @@ WriteAllGroupsInFile:=function(eFile)
 end;
 
 
-TestAllGroups("derivedsubgroup", 1);
+TestAllGroups("centralizerelt", 1);
+#TestAllGroups("derivedsubgroup", 1);
 #TestAllGroups("centresubgroup", 1);
 #TestAllGroups("smallgeneratingset", 1);
 #TestAllGroups("properties", 1);
