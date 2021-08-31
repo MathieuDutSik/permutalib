@@ -825,10 +825,9 @@ std::vector<singStrat<typename Telt::Tidx>> StratMeetPartition_r_p_p(rbaseType<T
 
 
 
-template<typename Telt, typename Tidx_label, typename Trfm>
-std::vector<singStrat<typename Telt::Tidx>> StratMeetPartition_p_p(Partition<typename Telt::Tidx> & P, Partition<typename Telt::Tidx> const& S)
+template<typename Tidx>
+std::vector<singStrat<Tidx>> StratMeetPartition_p_p(Partition<Tidx> & P, Partition<Tidx> const& S)
 {
-  using Tidx=typename Telt::Tidx;
   std::vector<singStrat<Tidx>> strat;
   std::vector<Tidx> cellsP = P.cellno;
   // If <S> is just a set, it is interpreted as partition ( <S>|<S>^compl ).
@@ -2519,7 +2518,7 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
     }
     Partition<Tidx> Q = TrivialPartition(Omega);
     for (size_t i=0; i<e_siz; i++) {
-      StratMeetPartition( Q, CollectedPartition( Partition( Cycles( f[ i ], Omega ) ), 1 ) );
+      StratMeetPartition_p_p( Q, CollectedPartition( Partition( Cycles( f[ i ], Omega ) ), 1 ) );
     }
     return Q;
   };
