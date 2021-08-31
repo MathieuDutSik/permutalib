@@ -94,7 +94,7 @@ Telt PermListList(std::vector<T> const& list1, std::vector<T> const& list2)
   std::vector<Tidx> eList(siz);
   for (size_t i=0; i<siz; i++)
     eList[i] = eMap[list2[i]];
-  return Telt(eList);
+  return Telt(std::move(eList));
 }
 
 
@@ -119,8 +119,8 @@ StabChain<Telt,Tidx_label> Action(StabChain<Telt,Tidx_label> const& S, std::vect
       Tidx j = map_idx[fPt];
       eList[i] = j;
     }
-    Telt ePerm = Telt(eList);
-    LGen.emplace_back(ePerm);
+    Telt ePerm = Telt(std::move(eList));
+    LGen.emplace_back(std::move(ePerm));
   }
   return FCT_Group<Telt,Tidx_label,Tint>(LGen, siz);
 }

@@ -26,14 +26,14 @@ int main(int argc, char *argv[])
     is >> n_i;
     Tidx n = Tidx(n_i);
     std::vector<Telt> LGen(nbGen);
-    auto read_elt=[&] -> Telt {
+    auto read_elt=[&]() -> Telt {
       std::vector<Tidx> ePermV(n);
       for (Tidx i=0; i<n; i++) {
 	int eVal_i;
 	is >> eVal_i;
 	ePermV[i]=Tidx(eVal_i);
       }
-      Telt ePerm(std::move(ePermV));
+      return Telt(std::move(ePermV));
     };
     for (size_t iGen=0; iGen<nbGen; iGen++)
       LGen[iGen] = read_elt();

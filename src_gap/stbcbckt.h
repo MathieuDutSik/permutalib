@@ -207,8 +207,8 @@ struct dataType_opset {
 template<typename Telt>
 struct dataType_opperm {
   Partition<typename Telt::Tidx> & P;
-  std::vector<Telt> & f;
-  dataType_opperm(Partition<typename Telt::Tidx>& _P, std::vector<Telt>& _f) : P(_P), f(_f)
+  const std::vector<Telt> & f;
+  dataType_opperm(Partition<typename Telt::Tidx>& _P, const std::vector<Telt>& _f) : P(_P), f(_f)
   {
   }
   dataType_opperm<Telt> operator=(dataType_opperm<Telt>& data)
@@ -879,7 +879,7 @@ void NextRBasePoint_order(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tid
     p = order[p];
     RegisterRBasePoint(P, rbase, p, TheId);
   } else {
-    NextRBasePoint_no_order(P, rbase, TheId);
+    NextRBasePoint_no_order<Telt,Tidx_label,Trfm>(P, rbase, TheId);
   }
 }
 
@@ -1119,7 +1119,7 @@ Telt MappingPermListList(typename Telt::Tidx const& n, std::vector<typename Telt
     posSrc=StatusSrc.find_next(posSrc);
     posDst=StatusDst.find_next(posDst);
   }
-  return Telt(ListImage);
+  return Telt(std::move(ListImage));
 }
 
 
@@ -1988,7 +1988,7 @@ ResultPBT<Telt,Tidx_label> RepOpSetsPermGroup(StabChain<Telt,Tidx_label> const& 
   using Tdata = dataType_opset<Tidx>;
   Tdata data(Q);
   auto nextLevel=[&](Partition<Tidx> & P, rbaseType<Telt,Tidx_label,Trfm> & rbase, Telt const& TheId) -> void {
-    NextRBasePoint_no_order(P, rbase, TheId);
+    NextRBasePoint_no_order<Telt,Tidx_label,Trfm>(P, rbase, TheId);
   };
   return PartitionBacktrack<Telt,Tidx_label,Tdata,Trfm,Tint,repr,decltype(Pr),decltype(nextLevel)>( G, Pr, nextLevel, rbase, data, L, R );
 }
@@ -2212,6 +2212,8 @@ std::vector<typename Telt::Tidx> CycleStructurePerm(const Telt& x)
 }
 
 
+
+
 /*
 #############################################################################
 ##
@@ -2219,7 +2221,7 @@ std::vector<typename Telt::Tidx> CycleStructurePerm(const Telt& x)
 ##
 */
 template<typename Telt, typename Tidx_label, typename Tint, bool repr>
-ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_label>& G, const std::vector<Telt>& e, const std::vector<Telt>& f, const StabChain<Telt,Tidx_label> & L, const StabChain<Telt,Tidx_label> & R)
+ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_label>& G, const std::vector<Telt>& e, const std::vector<Telt>& f, StabChain<Telt,Tidx_label> & L, StabChain<Telt,Tidx_label> & R)
 {
   using Tidx=typename Telt::Tidx;
   Tidx n=G->comm->n;
@@ -2283,19 +2285,22 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
   //    i:=[1..Length(cycles.firsts)];
   //    i:=FLOYDS_ALGORITHM(RandomSource(IsMersenneTwister), Length(cycles.firsts),false);
 
-  std::vector<Tidx> lengths_v = - cycles.lengths;
+  std::vector<Tidx> lengths_v;
   std::vector<Tidx> order_v;
+  lengths_v.reserve(cycles.firsts.size());
   order_v.reserve(cycles.firsts.size());
-  for (auto & i : cycles.firsts)
+  for (auto & i : cycles.firsts) {
+    lengths_v.push_back( - cycles.lengths[i] );
     order_v.push_back(cycles.points[i]);
+  }
   SortParallel(lengths_v, order_v);
 
   using Trfm = std::variant<Trfm_centralizer<Tidx>,Trfm_processfixpoint<Tidx>,Trfm_intersection<Tidx>>;
-  rbaseType<Telt,Tidx_label,Trfm> rbase = EmptyRBase({G,G}, true, Omega, P);
+  rbaseType<Telt,Tidx_label,Trfm> rbase = EmptyRBase<Telt,Tidx_label,Trfm>({G,G}, true, Omega, P);
 
   // Loop over the stabilizer chain of <G>.
   auto nextLevel=[&](Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_label,Trfm> & rbase, Telt const& TheId) -> void {
-    NextRBasePoint_order(P, rbase, order_v );
+    NextRBasePoint_order<Telt,Tidx_label,Trfm>(P, rbase, order_v );
 
     // Centralizer refinement.
     std::vector<Tidx> fix = Fixcells( P );
@@ -2311,7 +2316,7 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
           AddRefinement(rbase, len, Trfm(Trfm_centralizer<Tidx>({CellNoPoint(P,pnt), g, img, strat})) );
           if (P.lengths[ strat ] == 1) {
             Tidx pnt_b = FixpointCellNo(P, strat);
-            ProcessFixpoint_rbase( rbase, pnt );
+            ProcessFixpoint_rbase(rbase, pnt_b);
             AddRefinement(rbase, len, Trfm(Trfm_processfixpoint<Tidx>({pnt, strat})) );
           }
         }
@@ -2335,7 +2340,7 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
   std::vector<Tidx> baspts = BaseStabChain(G);
 
   auto test_isin=[&](const Telt& g) -> bool {
-    return SiftedPermutation(G).isIdentity();
+    return SiftedPermutation(G, g).isIdentity();
   };
   auto is_corr=[&]() -> bool {
     for (auto & i : e)
@@ -2347,7 +2352,7 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
     return true;
   };
   if (!is_corr()) {
-    std::vector<Tidx> V = MovedPoints(Concatenation(e,f));
+    std::vector<Tidx> V = MovedPoints(Concatenation(e,f), n);
     baspts.insert(baspts.end(), V.begin(), V.end());
   }
 
@@ -2384,7 +2389,7 @@ StabChain<Telt,Tidx_label> Kernel_Centralizer_elt(const StabChain<Telt,Tidx_labe
       LGen.push_back(eGen);
   StabChainOptions<Tint,Tidx> options = GetStandardOptions<Tint,Tidx>(n);
   StabChain<Telt,Tidx_label> LR_grp = StabChainOp_listgen<Telt,Tidx_label,Tint>(LGen, options);
-  return RepOpElmTuplesPermGroup<Telt,Tidx_label,Tint,false>(G, e_v, e_v, LR_grp, LR_grp);
+  return RepOpElmTuplesPermGroup<Telt,Tidx_label,Tint,false>(G, e_v, e_v, LR_grp, LR_grp).stab;
 }
 
 
@@ -2405,7 +2410,7 @@ StabChain<Telt,Tidx_label> Kernel_Centralizer_grp(const StabChain<Telt,Tidx_labe
       LGen.push_back(eGen);
   StabChainOptions<Tint,Tidx> options = GetStandardOptions<Tint,Tidx>(n);
   StabChain<Telt,Tidx_label> LR_grp = StabChainOp_listgen<Telt,Tidx_label,Tint>(LGen, options);
-  return RepOpElmTuplesPermGroup<Telt,Tidx_label,Tint,false>(G, LGen_U, LGen_U, LR_grp, LR_grp);
+  return RepOpElmTuplesPermGroup<Telt,Tidx_label,Tint,false>(G, LGen_U, LGen_U, LR_grp, LR_grp).stab;
 }
 
 
@@ -2446,9 +2451,9 @@ std::optional<Telt> ConjugatorPermGroup(const StabChain<Telt,Tidx_label>&G, cons
       return fail;
     fi;
     # `Suborbits' uses all points. (AH, 7/17/02)
-    mpG:=MovedPoints(GeneratorsOfGroup(G));
-    mpE:=MovedPoints(GeneratorsOfGroup(E));
-    mpF:=MovedPoints(GeneratorsOfGroup(F));
+    mpG:=MovedPoints(GeneratorsOfGroup(G), n);
+    mpE:=MovedPoints(GeneratorsOfGroup(E), n);
+    mpF:=MovedPoints(GeneratorsOfGroup(F), n);
 
     map:=false;
     Omega := [1..Maximum(Maximum(mpG),Maximum(mpE),Maximum(mpF))];
