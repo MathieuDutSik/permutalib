@@ -2283,15 +2283,19 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
   //    i:=[1..Length(cycles.firsts)];
   //    i:=FLOYDS_ALGORITHM(RandomSource(IsMersenneTwister), Length(cycles.firsts),false);
 
-  std::vector<Tidx> order = cycles.points{ cycles.firsts{i} };
-  SortParallel( -(cycles.lengths{i}), order );
+  std::vector<Tidx> lengths_v = - cycles.lengths;
+  std::vector<Tidx> order_v;
+  order_v.reserve(cycles.firsts.size());
+  for (auto & i : cycles.firsts)
+    order_v.push_back(cycles.points[i]);
+  SortParallel(lengths_v, order_v);
 
   using Trfm = std::variant<Trfm_centralizer<Tidx>,Trfm_processfixpoint<Tidx>,Trfm_intersection<Tidx>>;
   rbaseType<Telt,Tidx_label,Trfm> rbase = EmptyRBase({G,G}, true, Omega, P);
 
   // Loop over the stabilizer chain of <G>.
   auto nextLevel=[&](Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_label,Trfm> & rbase, Telt const& TheId) -> void {
-    NextRBasePoint_order(P, rbase, order );
+    NextRBasePoint_order(P, rbase, order_v );
 
     // Centralizer refinement.
     std::vector<Tidx> fix = Fixcells( P );
@@ -2370,7 +2374,7 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
 ##
 */
 template<typename Telt, typename Tidx_label, typename Tint>
-StabChain<Telt,Tidx_label> Centralizer_elt(const StabChain<Telt,Tidx_label>& G, const Telt& e) {
+StabChain<Telt,Tidx_label> Kernel_Centralizer_elt(const StabChain<Telt,Tidx_label>& G, const Telt& e) {
   using Tidx=typename Telt::Tidx;
   Tidx n=G->comm->n;
   std::vector<Telt> e_v{e};
@@ -2385,7 +2389,7 @@ StabChain<Telt,Tidx_label> Centralizer_elt(const StabChain<Telt,Tidx_label>& G, 
 
 
 template<typename Telt, typename Tidx_label, typename Tint>
-StabChain<Telt,Tidx_label> Centralizer_elt(const StabChain<Telt,Tidx_label>& G, const StabChain<Telt,Tidx_label>& U) {
+StabChain<Telt,Tidx_label> Kernel_Centralizer_grp(const StabChain<Telt,Tidx_label>& G, const StabChain<Telt,Tidx_label>& U) {
   using Tidx=typename Telt::Tidx;
   Tidx n=G->comm->n;
   std::vector<Telt> LGen_U = Kernel_GeneratorsOfGroup(U);

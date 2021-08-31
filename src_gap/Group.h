@@ -149,6 +149,12 @@ public:
   Group<Telt,Tint> CentreSubgroup() const {
     return Group<Telt,Tint>(Kernel_CentreSubgroup<Telt,Tidx_label,Tint>(S));
   }
+  Group<Telt,Tint> Centralizer_elt(const Telt& x) const {
+    return Group<Telt,Tint>(Kernel_Centralizer_elt<Telt,Tidx_label,Tint>(S, x));
+  }
+  Group<Telt,Tint> Centralizer_grp(const Group<Telt,Tint>& H) const {
+    return Group<Telt,Tint>(Kernel_Centralizer_grp<Telt,Tidx_label,Tint>(S, H.S));
+  }
 private:
   struct IteratorType {
   private:
