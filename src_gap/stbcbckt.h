@@ -262,15 +262,16 @@ struct dataType_opperm {
 //    of pointers.
 template<typename Telt, typename Tidx_label, typename Trfm>
 struct rbaseType {
-  std::vector<typename Telt::Tidx> domain;
-  std::vector<typename Telt::Tidx> base;
-  std::vector<typename Telt::Tidx> where;
+  using Tidx=typename Telt::Tidx;
+  std::vector<Tidx> domain;
+  std::vector<Tidx> base;
+  std::vector<Tidx> where;
   //
   StabChain<Telt,Tidx_label> chain;
-  std::vector<std::vector<typename Telt::Tidx>> fix;
+  std::vector<std::vector<Tidx>> fix;
   //
   std::vector<std::vector<Trfm>> rfm;
-  Partition<typename Telt::Tidx> partition;
+  Partition<Tidx> partition;
   std::vector<StabChainPlusLev<Telt,Tidx_label>> lev;
   StabChainPlusLev<Telt,Tidx_label> level;
   //
