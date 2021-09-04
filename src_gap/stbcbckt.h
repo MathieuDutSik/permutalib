@@ -887,6 +887,7 @@ void AddRefinement(rbaseType<Telt,Tidx_label,Trfm> & rbase, size_t const& pos, T
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP Doing RFM insertion\n";
 #endif
+    std::cerr << "pos=" << pos << " |rbase.rfm|=" << rbase.rfm.size() << "\n";
     rbase.rfm[pos].emplace_back(eRfm);
   }
 #ifdef DEBUG_STBCBCKT
@@ -2516,14 +2517,14 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
   # purposes.*/
   //    i:=[1..Length(cycles.firsts)];
   //    i:=FLOYDS_ALGORITHM(RandomSource(IsMersenneTwister), Length(cycles.firsts),false);
-
+  Tidx n_part = Tidx(cycles.firsts.size());
   std::vector<Tidx> lengths_v;
   std::vector<Tidx> order_v;
-  lengths_v.reserve(cycles.firsts.size());
-  order_v.reserve(cycles.firsts.size());
-  for (auto & i : cycles.firsts) {
+  lengths_v.reserve(n_part);
+  order_v.reserve(n_part);
+  for (Tidx i=0; i<n_part; i++) {
     lengths_v.push_back( - cycles.lengths[i] );
-    order_v.push_back(cycles.points[i]);
+    order_v.push_back(cycles.points[ cycles.firsts[i] ]);
   }
   SortParallel_PairList(lengths_v, order_v);
 

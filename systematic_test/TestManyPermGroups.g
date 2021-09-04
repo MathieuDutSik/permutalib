@@ -498,7 +498,7 @@ end;
 
 
 TestSpecificGroup:=function(method, size_opt, nbMov, eGRP)
-    local iMov, sizSet, i, eSet, fSet, eElt, iter, g;
+    local iMov, sizSet, i, eSet, fSet, eElt, iter, g, idx1, idx2;
     Print("ListGens(eGRP)=", GeneratorsOfGroup(eGRP), "\n");
     for iMov in [1..5]
     do
@@ -567,6 +567,12 @@ TestSpecificGroup:=function(method, size_opt, nbMov, eGRP)
             TestCentralizerElt(2*nbMov, eGRP, g);
             g:=Random(SymmetricGroup(2*nbMov));
             TestCentralizerElt(2*nbMov, eGRP, g);
+            idx1:=Random([1..nbMov]);
+            idx2:=Random([1..nbMov]);
+            if idx1<>idx2 then
+                g:=(idx1,idx2);
+                TestCentralizerElt(nbMov, eGRP, g);
+            fi;
         od;
     fi;
 end;
@@ -614,9 +620,9 @@ WriteAllGroupsInFile:=function(eFile)
 end;
 
 
-#TestAllGroups("centralizerelt", 1);
+TestAllGroups("centralizerelt", 1);
 #TestAllGroups("derivedsubgroup", 1);
-TestAllGroups("centresubgroup", 1);
+#TestAllGroups("centresubgroup", 1);
 #TestAllGroups("smallgeneratingset", 1);
 #TestAllGroups("properties", 1);
 #TestAllGroups("stabilizer", 1);

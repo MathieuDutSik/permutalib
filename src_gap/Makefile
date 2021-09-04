@@ -8,14 +8,14 @@
 #PROGRAM	= GroupProperties
 #PROGRAM	= GapSmallGeneratingSet
 #PROGRAM	= GapDerivedSubgroup
-PROGRAM	= GapCentreSubgroup
+#PROGRAM	= GapCentreSubgroup
+PROGRAM	= GapCentralizerElt
 #PROGRAM	= BenchmarkingPermutalib
 #PROGRAM	= MinimalExample
 #PROGRAM	= BenchmarkingPermutalib GapCanonicalImage
 #PROGRAM	= Factorize
 #PROGRAM	= TestSerialization
 #PROGRAM	= TestEnumerationElement
-#PROGRAM	= GapCentralizerElt
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
