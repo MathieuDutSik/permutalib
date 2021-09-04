@@ -584,10 +584,10 @@ end;
 
 
 #TestAllGroups("centralizerelt", 1);
-#TestAllGroups("derivedsubgroup", 1);
+TestAllGroups("derivedsubgroup", 1);
 #TestAllGroups("centresubgroup", 1);
 #TestAllGroups("smallgeneratingset", 1);
-TestAllGroups("properties", 1);
+#TestAllGroups("properties", 1);
 #TestAllGroups("stabilizer", 1);
 #TestAllGroups("equivalence", 2);
 #TestAllGroups("canonical", 3);

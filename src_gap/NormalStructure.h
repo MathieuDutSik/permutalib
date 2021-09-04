@@ -58,7 +58,7 @@ StabChain<Telt,Tidx_label> Kernel_DerivedSubgroup(const StabChain<Telt,Tidx_labe
   using Tidx = typename Telt::Tidx;
   Tidx n = G->comm->n;
   StabChain<Telt,Tidx_label> S = EmptyStabChain<Telt,Tidx_label>(n);
-  std::vector<Telt> LGen = Kernel_GeneratorsOfGroup(S);
+  std::vector<Telt> LGen = Kernel_GeneratorsOfGroup(G);
   size_t n_gen = LGen.size();
   for (size_t i=0; i<n_gen; i++) {
     const Telt& g1 = LGen[i];

@@ -5,11 +5,11 @@
 #PROGRAM	= TestSymmetricGroup
 #PROGRAM	= TestPermutationProduct
 #PROGRAM	= GapCanonicalImage
-PROGRAM	= GroupProperties
+#PROGRAM	= GroupProperties
 #PROGRAM	= GapSmallGeneratingSet
-#PROGRAM	= GapDerivedSubgroup
-#PROGRAM	= BenchmarkingPermutalib
+PROGRAM	= GapDerivedSubgroup
 #PROGRAM	= GapCentreSubgroup
+#PROGRAM	= BenchmarkingPermutalib
 #PROGRAM	= MinimalExample
 #PROGRAM	= BenchmarkingPermutalib GapCanonicalImage
 #PROGRAM	= Factorize
