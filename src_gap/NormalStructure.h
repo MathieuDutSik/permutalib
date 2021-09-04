@@ -402,7 +402,7 @@ struct InjectiveRestrictionHomomorphism_base {
       eList[i] = i;
     Tidx n_restr = S_restr->comm->n;
     for (Tidx i=0; i<n_restr; i++) {
-      eList[subset[i]] = PowAct(i, eElt);
+      eList[subset[i]] = subset[PowAct(i, eElt)];
     }
     Telt g(eList); // Build g, but keep eList separately for further use.
     Telt res = SiftedPermutation(G, g);
@@ -553,7 +553,6 @@ StabChain<Telt,Tidx_label> Kernel_CentreSubgroup(const StabChain<Telt,Tidx_label
 
   auto compute_centr=[&](const StabChain<Telt,Tidx_label>& GG, const std::vector<std::vector<Tidx>>& orbits) -> StabChain<Telt,Tidx_label> {
     // handle case of transitive GG directly
-    std::cerr << "|orbits|=" << orbits.size() << "\n";
     if (orbits.size() == 1) {
       return get_centralizer_transitive_case(GG);
     }
@@ -613,7 +612,6 @@ StabChain<Telt,Tidx_label> Kernel_CentreSubgroup(const StabChain<Telt,Tidx_label
 
   // We restrict G to significant orbits
   std::vector<std::vector<Tidx>> orbits_red;
-  std::cerr << "n=" << n << " len=" << len << "\n";
   if (n == len) {
     for (auto & eVal : significant)
       orbits_red.emplace_back(std::move(orbits[eVal]));
