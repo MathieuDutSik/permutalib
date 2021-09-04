@@ -553,6 +553,7 @@ StabChain<Telt,Tidx_label> Kernel_CentreSubgroup(const StabChain<Telt,Tidx_label
 
   auto compute_centr=[&](const StabChain<Telt,Tidx_label>& GG, const std::vector<std::vector<Tidx>>& orbits) -> StabChain<Telt,Tidx_label> {
     // handle case of transitive GG directly
+    std::cerr << "|orbits|=" << orbits.size() << "\n";
     if (orbits.size() == 1) {
       return get_centralizer_transitive_case(GG);
     }
@@ -571,7 +572,7 @@ StabChain<Telt,Tidx_label> Kernel_CentreSubgroup(const StabChain<Telt,Tidx_label
       std::vector<Tidx> orbit_rev(len,miss_val);
       for (Tidx i=0; i<len_o; i++)
         orbit_rev[orbit[i]] = i;
-      StabChainOptions<Tint,Tidx> options1 = GetStandardOptions<Tint,Tidx>(len);
+      StabChainOptions<Tint,Tidx> options1 = GetStandardOptions<Tint,Tidx>(len_o);
       options1.base.push_back(0);
       std::vector<Telt> LGen_o;
       for (auto & eGen : LGen_GG) {
@@ -582,7 +583,8 @@ StabChain<Telt,Tidx_label> Kernel_CentreSubgroup(const StabChain<Telt,Tidx_label
           Tidx j = orbit_rev[j_big];
           eList[i] = j;
         }
-        LGen_o.emplace_back(std::move(Telt(std::move(eList))));
+        Telt x = Telt(std::move(eList));
+        LGen_o.emplace_back(std::move(x));
       }
       StabChain<Telt,Tidx_label> GGG = StabChainOp_listgen<Telt,Tidx_label,Tint>(LGen_o, options1);
       std::pair<std::vector<Telt>,Tidx> pair_centr = CentralizerTransSymmCSPG_direct(GGG);
@@ -594,7 +596,8 @@ StabChain<Telt,Tidx_label> Kernel_CentreSubgroup(const StabChain<Telt,Tidx_label
             eList[i] = i;
           for (Tidx i=0; i<len_o; i++)
             eList[orbit[i]] = orbit[ PowAct(i, eGen) ];
-          hgens.emplace_back(std::move(Telt(std::move(eList))));
+          Telt x = Telt(std::move(eList));
+          hgens.emplace_back(std::move(x));
         }
       }
     }
@@ -610,6 +613,7 @@ StabChain<Telt,Tidx_label> Kernel_CentreSubgroup(const StabChain<Telt,Tidx_label
 
   // We restrict G to significant orbits
   std::vector<std::vector<Tidx>> orbits_red;
+  std::cerr << "n=" << n << " len=" << len << "\n";
   if (n == len) {
     for (auto & eVal : significant)
       orbits_red.emplace_back(std::move(orbits[eVal]));

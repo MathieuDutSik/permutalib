@@ -28,8 +28,30 @@ end;
 
 
 
+MergeTransitiveGroup:=function(GRP1, GRP2)
+    local LMoved1, LMoved2, n1, n2, LGens, eGen, eList;
+    LMoved1:=MovedPoints(GRP1);
+    LMoved2:=MovedPoints(GRP2);
+    n1:=Maximum(LMoved1);
+    n2:=Maximum(LMoved2);
+    LGens:=[];
+    for eGen in GeneratorsOfGroup(GRP1)
+    do
+        Add(LGens, eGen);
+    od;
+    for eGen in GeneratorsOfGroup(GRP2)
+    do
+        eList:=Concatenation([1..n1], List([1..n2], x->n1 + OnPoints(x, eGen)));
+        Add(LGens, PermList(eList));
+    od;
+    return Group(LGens);
+end;
+
+
+
+
 GetListCandidateGroups:=function()
-    local ListGroup, n, ePow, siz, eNB, i;
+    local ListGroup, n, ePow, siz, eNB, i, j;
     ListGroup:=[];
     for n in [3..8]
     do
@@ -52,6 +74,15 @@ GetListCandidateGroups:=function()
         for i in [1..eNB]
         do
             Add(ListGroup, TransitiveGroup(siz, i));
+        od;
+    od;
+    # Some non-transitive cases
+    for i in [2..6]
+    do
+        for j in [2..6]
+        do
+            Add(ListGroup, MergeTransitiveGroup(SymmetricGroup(i), SymmetricGroup(j)));
+            Add(ListGroup, MergeTransitiveGroup(SymmetricGroup([3..i+2]), SymmetricGroup(j)));
         od;
     od;
     return ListGroup;
