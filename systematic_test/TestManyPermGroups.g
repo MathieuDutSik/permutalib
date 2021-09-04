@@ -584,8 +584,8 @@ end;
 
 
 #TestAllGroups("centralizerelt", 1);
-TestAllGroups("derivedsubgroup", 1);
-#TestAllGroups("centresubgroup", 1);
+#TestAllGroups("derivedsubgroup", 1);
+TestAllGroups("centresubgroup", 1);
 #TestAllGroups("smallgeneratingset", 1);
 #TestAllGroups("properties", 1);
 #TestAllGroups("stabilizer", 1);

@@ -7,8 +7,8 @@
 #PROGRAM	= GapCanonicalImage
 #PROGRAM	= GroupProperties
 #PROGRAM	= GapSmallGeneratingSet
-PROGRAM	= GapDerivedSubgroup
-#PROGRAM	= GapCentreSubgroup
+#PROGRAM	= GapDerivedSubgroup
+PROGRAM	= GapCentreSubgroup
 #PROGRAM	= BenchmarkingPermutalib
 #PROGRAM	= MinimalExample
 #PROGRAM	= BenchmarkingPermutalib GapCanonicalImage

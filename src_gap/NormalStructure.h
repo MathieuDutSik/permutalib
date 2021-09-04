@@ -337,7 +337,10 @@ StabChain<Telt,Tidx_label> Kernel_IntersectionNormalClosurePermGroup_LGen(const 
   const std::vector<Tidx> & tuple = options2.base;
   StabChain<Telt,Tidx_label> S = StabChainOp_listgen<Telt,Tidx_label,Tint>(newgens, options2);
   StabChain<Telt,Tidx_label> S_red = Stabilizer_OnTuples_CorrectStabChain(S, tuple);
-  return SubsetStabChain<Telt,Tidx_label,Tint>(S_red, tuple);
+  std::vector<Tidx> subset(n);
+  for (Tidx i=0; i<n; i++)
+    subset[i] = i;
+  return SubsetStabChain<Telt,Tidx_label,Tint>(S_red, subset);
 }
 
 
