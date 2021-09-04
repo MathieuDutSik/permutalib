@@ -341,7 +341,7 @@ end;
 
 
 TestDerivedSubgroup:=function(nbMov, eGRP)
-    local eDir, FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, Result1, Result2, test;
+    local eDir, FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, Result1, Result2, test, eGRP_der;
     Print("Checking DerivedSubgroup feature\n");
     eDir:="/tmp/DebugDerivedSubgroup_datarun/";
     eCommand:=Concatenation("mkdir -p ", eDir);
@@ -381,7 +381,7 @@ end;
 
 
 TestCentreSubgroup:=function(nbMov, eGRP)
-    local eDir, FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, Result1, Result2, test;
+    local eDir, FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, Result1, Result2, test, eGRP_cent;
     Print("Checking CentreSubgroup feature\n");
     eDir:="/tmp/DebugCentreSubgroup_datarun/";
     eCommand:=Concatenation("mkdir -p ", eDir);
@@ -420,8 +420,8 @@ end;
 
 
 
-TestCentralizedElt:=function(nbMov, eGRP, g)
-    local eDir, FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, Result1, Result2, test;
+TestCentralizerElt:=function(nbMov, eGRP, g)
+    local eDir, FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, Result1, Result2, test, PrtElement, eCentrElt;
     Print("Checking CentralizerElt feature\n");
     eDir:="/tmp/DebugCentralizerElt_datarun/";
     eCommand:=Concatenation("mkdir -p ", eDir);
@@ -467,7 +467,7 @@ end;
 
 
 TestSpecificGroup:=function(method, size_opt, nbMov, eGRP)
-    local iMov, sizSet, i, eSet, fSet, eElt;
+    local iMov, sizSet, i, eSet, fSet, eElt, iter, g;
     Print("ListGens(eGRP)=", GeneratorsOfGroup(eGRP), "\n");
     for iMov in [1..5]
     do
@@ -583,11 +583,11 @@ WriteAllGroupsInFile:=function(eFile)
 end;
 
 
-TestAllGroups("centralizerelt", 1);
+#TestAllGroups("centralizerelt", 1);
 #TestAllGroups("derivedsubgroup", 1);
 #TestAllGroups("centresubgroup", 1);
 #TestAllGroups("smallgeneratingset", 1);
-#TestAllGroups("properties", 1);
+TestAllGroups("properties", 1);
 #TestAllGroups("stabilizer", 1);
 #TestAllGroups("equivalence", 2);
 #TestAllGroups("canonical", 3);

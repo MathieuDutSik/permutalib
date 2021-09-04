@@ -718,7 +718,9 @@ std::vector<typename Telt::Tidx> BaseStabChain(StabChain<Telt,Tidx_label> const&
   using Tidx=typename Telt::Tidx;
   StabChain<Telt,Tidx_label> Sptr = S;
   std::vector<Tidx> base;
-  while (Sptr != nullptr) {
+  while (true) {
+    if (Sptr == nullptr || Sptr->orbit.size() == 0)
+      break;
     base.push_back(Sptr->orbit[0]);
     Sptr = Sptr->stabilizer;
   }
