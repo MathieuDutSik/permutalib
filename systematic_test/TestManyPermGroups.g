@@ -454,6 +454,7 @@ end;
 TestCentralizerElt:=function(nbMov, eGRP, g)
     local eDir, FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, Result1, Result2, test, PrtElement, eCentrElt;
     Print("Checking CentralizerElt feature\n");
+    Print("eGRP=", eGRP, " g=", g, "\n");
     eDir:="/tmp/DebugCentralizerElt_datarun/";
     eCommand:=Concatenation("mkdir -p ", eDir);
     Exec(eCommand);
