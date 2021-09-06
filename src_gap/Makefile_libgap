@@ -1,20 +1,4 @@
-#PROGRAM	= GapRepresentativeActionOnSet GapStabilizerOnSet GapEquivalenceOnSet GapCanonicalImage BenchmarkingPermutalib Factorize TestPermutationProduct TestSymmetricGroup GroupProperties EqSymmGroup TestSerialization GapDerivedSubgroup GapSmallGeneratingSet TestEnumerationElement GapCentreSubgroup GapCentralizerElt
-#PROGRAM	= EqSymmGroup
-#PROGRAM	= GapStabilizerOnSet
-#PROGRAM	= GapRepresentativeActionOnSet
-#PROGRAM	= TestSymmetricGroup
-#PROGRAM	= TestPermutationProduct
-#PROGRAM	= GapCanonicalImage
-#PROGRAM	= GroupProperties
-#PROGRAM	= GapSmallGeneratingSet
-#PROGRAM	= GapDerivedSubgroup
-#PROGRAM	= GapCentreSubgroup
-#PROGRAM	= GapCentralizerElt
-PROGRAM	= BenchmarkingPermutalib
-#PROGRAM	= BenchmarkingPermutalib GapCanonicalImage
-#PROGRAM	= Factorize
-#PROGRAM	= TestSerialization
-#PROGRAM	= TestEnumerationElement
+PROGRAM	= BenchmarkingPermutalib_libgap MinimalExample
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
@@ -50,9 +34,9 @@ CLOCAL          =
 
 
 #CFLAGS 		= -I$(BOOST_INCDIR) -I$(GMP_INCDIR) 
-CFLAGS 		= -I$(BOOST_INCDIR)
+CFLAGS 		= -I$(BOOST_INCDIR) $(LIBGAP_INCLUDE)
 
-LIBS		= $(GMP_CXX_LINK) $(BOOST_LINK)
+LIBS		= $(GMP_CXX_LINK) $(BOOST_LINK) $(LIBGAP_LINK)
 
 %.o: %.cpp
 	@echo
