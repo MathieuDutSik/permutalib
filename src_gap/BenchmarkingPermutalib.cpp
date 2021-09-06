@@ -10,6 +10,7 @@
 
 int main(int argc, char *argv[])
 {
+  try {
     //    using Tidx = int16_t;
     using Tidx = uint8_t;
     //using Telt = permutalib::DoubleSidedPerm<Tidx>;
@@ -193,8 +194,4 @@ int main(int argc, char *argv[])
     std::cerr << "Erroneous completion of the program\n";
     exit(e.eVal);
   }
-#ifdef USE_LIBGAP
-  GAP_Leave();
-  free_argc_argv_gap(&argc_gap, &argv_gap);
-#endif
 }
