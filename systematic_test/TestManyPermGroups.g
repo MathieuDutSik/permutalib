@@ -599,6 +599,9 @@ end;
 WriteAllGroupsInFile:=function(eFile)
     local ListGroups, output, eGRP, LGen, nbMov, eGen, iMov, eImg;
     ListGroups:=GetListCandidateGroups();
+    if IsExistingFile(eFile) then
+        RemoveFile(eFile);
+    fi;
     output:=OutputTextFile(eFile, true);
     AppendTo(output, Length(ListGroups), "\n");
     for eGRP in ListGroups
@@ -620,7 +623,7 @@ WriteAllGroupsInFile:=function(eFile)
 end;
 
 
-TestAllGroups("centralizerelt", 1);
+#TestAllGroups("centralizerelt", 1);
 #TestAllGroups("derivedsubgroup", 1);
 #TestAllGroups("centresubgroup", 1);
 #TestAllGroups("smallgeneratingset", 1);
@@ -629,5 +632,5 @@ TestAllGroups("centralizerelt", 1);
 #TestAllGroups("equivalence", 2);
 #TestAllGroups("canonical", 3);
 
-#WriteAllGroupsInFile("AllFileTest");
+WriteAllGroupsInFile("AllFileTest");
 
