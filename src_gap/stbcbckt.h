@@ -877,13 +877,14 @@ std::vector<singStrat<Tidx>> StratMeetPartition_p_p(Partition<Tidx> & P, Partiti
 
 
 template<typename Telt, typename Tidx_label, typename Trfm>
-void AddRefinement(rbaseType<Telt,Tidx_label,Trfm> & rbase, size_t const& pos, Trfm const& eRfm)
+void AddRefinement(rbaseType<Telt,Tidx_label,Trfm> & rbase, Trfm const& eRfm)
 {
   using Tidx=typename Telt::Tidx;
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP beginning of AddRefinement\n";
 #endif
   if (IsInsertableRefinement<Trfm,Tidx>(eRfm)) {
+    size_t pos = rbase.rfm.size() - 1;
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP Doing RFM insertion\n";
 #endif
@@ -933,7 +934,6 @@ void RegisterRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_
   PrintRBaseLevel(rbase, "CPP RegisterRBasePoint 2");
 #endif
   rbase.where.push_back(k);
-  size_t len=rbase.rfm.size();
   rbase.rfm.push_back({});
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Before P.lengths test k=" << int(k+1) << " len=" << rbase.rfm.size() << "\n";
@@ -954,7 +954,7 @@ void RegisterRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_
     KeyUpdatingRbase("RegisterRBasePoint 1.4", rbase);
     std::cerr << "CPP Section P.lengths after ProcessFixpoint_rbase\n";
 #endif
-    AddRefinement(rbase, len, Trfm(Trfm_processfixpoint<Tidx>({pnt,k})));
+    AddRefinement(rbase, Trfm(Trfm_processfixpoint<Tidx>({pnt,k})));
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP After AddRefinement 1\n";
     KeyUpdatingRbase("RegisterRBasePoint 1.5", rbase);
@@ -984,7 +984,7 @@ void RegisterRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_
 #ifdef DEBUG_STBCBCKT
         KeyUpdatingRbase("RegisterRBasePoint 2.2", rbase);
 #endif
-        AddRefinement(rbase, len, Trfm(Trfm_intersection<Tidx>({O,strat})));
+        AddRefinement(rbase, Trfm(Trfm_intersection<Tidx>({O,strat})));
 #ifdef DEBUG_STBCBCKT
         std::cerr << "CPP After AddRefinement 2\n";
 #endif
@@ -2545,12 +2545,11 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
         if (strat != miss_val) {
           fix.push_back(img);
           ProcessFixpoint_rbase(rbase, img);
-          size_t len=rbase.rfm.size();
-          AddRefinement(rbase, len, Trfm(Trfm_centralizer<Tidx>({CellNoPoint(P,pnt), g, img, strat})) );
+          AddRefinement(rbase, Trfm(Trfm_centralizer<Tidx>({CellNoPoint(P,pnt), g, img, strat})) );
           if (P.lengths[ strat ] == 1) {
             Tidx pnt_b = FixpointCellNo(P, strat);
             ProcessFixpoint_rbase(rbase, pnt_b);
-            AddRefinement(rbase, len, Trfm(Trfm_processfixpoint<Tidx>({pnt, strat})) );
+            AddRefinement(rbase, Trfm(Trfm_processfixpoint<Tidx>({pnt, strat})) );
           }
         }
       }
