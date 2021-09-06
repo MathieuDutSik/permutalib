@@ -231,7 +231,7 @@ StabChain<Telt,Tidx_label> SubsetStabChain(const StabChain<Telt,Tidx_label>& S, 
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
       if (j == miss_val) {
         std::cerr << "The subset is not stabilized. Clear bug\n";
-        throw TerminalException{1};
+        throw PermutalibException{1};
       }
 #endif
       eList[i] = j;

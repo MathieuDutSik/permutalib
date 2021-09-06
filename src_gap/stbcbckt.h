@@ -887,7 +887,6 @@ void AddRefinement(rbaseType<Telt,Tidx_label,Trfm> & rbase, size_t const& pos, T
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP Doing RFM insertion\n";
 #endif
-    std::cerr << "pos=" << pos << " |rbase.rfm|=" << rbase.rfm.size() << "\n";
     rbase.rfm[pos].emplace_back(eRfm);
   }
 #ifdef DEBUG_STBCBCKT

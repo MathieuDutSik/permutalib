@@ -1499,7 +1499,7 @@ bool StabChainSwap(StabChain<Telt,Tidx_label> & Stot)
 #endif
 	Tidx_label posGen=Stot->transversal[pnt_gen];
 #ifdef DEBUG_STABCHAIN
-        std::cerr << "DEBUG posGen=" << posGen << "\n";
+        std::cerr << "DEBUG 1 posGen=" << posGen << "\n";
 #endif
 	gen *= Stot->comm->labels[posGen];
       }
@@ -1508,14 +1508,14 @@ bool StabChainSwap(StabChain<Telt,Tidx_label> & Stot)
 #endif
       while (true) {
         Tidx b_gen = PowAct(b, gen);
-        if (b_gen != b)
+        if (b_gen == b)
           break;
 #ifdef DEBUG_STABCHAIN
         std::cerr << "CPP b^gen=" << int(b_gen+1) << "\n";
 #endif
 	Tidx_label posGen=Stot->stabilizer->transversal[b_gen];
 #ifdef DEBUG_STABCHAIN
-        std::cerr << "DEBUG posGen=" << posGen << "\n";
+        std::cerr << "DEBUG 2 posGen=" << posGen << "\n";
 #endif
 	gen *= Stot->stabilizer->comm->labels[posGen];
       }
