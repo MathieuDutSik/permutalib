@@ -466,7 +466,7 @@ TestCentralizerElt:=function(nbMov, eGRP, g)
     PrtElement:=function(u)
         for iMov in [1..nbMov]
         do
-            eImg:=OnPoints(iMov, eGen);
+            eImg:=OnPoints(iMov, u);
             AppendTo(output, " ", eImg-1);
         od;
         AppendTo(output, "\n");
@@ -478,7 +478,7 @@ TestCentralizerElt:=function(nbMov, eGRP, g)
     PrtElement(g);
     CloseStream(output);
     #
-    eBinary:="../src_gap/GapCentreSubgroup";
+    eBinary:="../src_gap/GapCentralizerElt";
     FileErr:=Concatenation(eDir, "CppError");
     FileRes:=Concatenation(eDir, "GapOutput");
     eCommand:=Concatenation(eBinary, " ", FileName, " ", FileRes, " 2> ", FileErr);
@@ -564,9 +564,14 @@ TestSpecificGroup:=function(method, size_opt, nbMov, eGRP)
         for iter in [1..50]
         do
             g:=Random(eGRP);
+            TestCentralizerElt(nbMov, eGRP, g);
             TestCentralizerElt(2*nbMov, eGRP, g);
+            #
             g:=Random(SymmetricGroup(2*nbMov));
             TestCentralizerElt(2*nbMov, eGRP, g);
+            g:=Random(SymmetricGroup(nbMov));
+            TestCentralizerElt(nbMov, eGRP, g);
+            #
             idx1:=Random([1..nbMov]);
             idx2:=Random([1..nbMov]);
             if idx1<>idx2 then
@@ -623,7 +628,7 @@ WriteAllGroupsInFile:=function(eFile)
 end;
 
 
-#TestAllGroups("centralizerelt", 1);
+TestAllGroups("centralizerelt", 1);
 #TestAllGroups("derivedsubgroup", 1);
 #TestAllGroups("centresubgroup", 1);
 #TestAllGroups("smallgeneratingset", 1);
@@ -632,5 +637,5 @@ end;
 #TestAllGroups("equivalence", 2);
 #TestAllGroups("canonical", 3);
 
-WriteAllGroupsInFile("AllFileTest");
+#WriteAllGroupsInFile("AllFileTest");
 

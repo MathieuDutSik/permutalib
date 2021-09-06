@@ -9,8 +9,8 @@
 #PROGRAM	= GapSmallGeneratingSet
 #PROGRAM	= GapDerivedSubgroup
 #PROGRAM	= GapCentreSubgroup
-#PROGRAM	= GapCentralizerElt
-PROGRAM	= BenchmarkingPermutalib
+PROGRAM	= GapCentralizerElt
+#PROGRAM	= BenchmarkingPermutalib
 #PROGRAM	= BenchmarkingPermutalib GapCanonicalImage
 #PROGRAM	= Factorize
 #PROGRAM	= TestSerialization
