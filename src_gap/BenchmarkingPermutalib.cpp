@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     }
     //
     std::ifstream is(InputFile);
-    int siz_control = 0;
+    size_t siz_control = 0;
     int nGroup;
     is >> nGroup;
     for (int iGroup=0; iGroup<nGroup; iGroup++) {
@@ -101,14 +101,14 @@ int main(int argc, char *argv[])
         for (long iter=0; iter<n_iter; iter++) {
           permutalib::Face eFace = random_face(n);
           Tgroup eG2 = eG.Stabilizer_OnSets(eFace);
-          siz_control += eG2.n_act();
+          siz_control += eFace.count();
         }
       };
       auto bench_pointstabilizer=[&]() -> void {
         for (long iter=0; iter<n_iter; iter++) {
           Tidx pos = Tidx(rand()) % n;
           Tgroup eG2 = eG.Stabilizer_OnPoints(pos);
-          siz_control += eG2.n_act();
+          siz_control += size_t(pos);
         }
       };
       auto bench_pointrepresentative=[&]() -> void {
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
           Tidx pos1 = Tidx(rand()) % n;
           Tidx pos2 = Tidx(rand()) % n;
           std::pair<bool,Telt> eP = eG.RepresentativeAction_OnPoints(pos1, pos2);
-          siz_control += int(eP.first);
+          siz_control += size_t(pos1) + size_t(pos2);
         }
       };
       auto check_canonical=[&]() -> void {
@@ -132,6 +132,7 @@ int main(int argc, char *argv[])
               throw PermutalibException{1};
             }
           }
+          siz_control += eFace1.count();
         }
       };
       auto check_representative=[&]() -> void {
@@ -144,6 +145,7 @@ int main(int argc, char *argv[])
             std::cerr << "RepresentativeAction_OnSets error\n";
             throw PermutalibException{1};
           }
+          siz_control += eFace1.count();
         }
       };
       auto check_stabilizer=[&]() -> void {
@@ -159,6 +161,7 @@ int main(int argc, char *argv[])
               throw PermutalibException{1};
             }
           }
+          siz_control += eFace1.count();
         }
       };
       //
@@ -188,6 +191,7 @@ int main(int argc, char *argv[])
       }
     }
     //
+    std::cerr << "Control values (should stay the same because we do deterministic random sets)=" << siz_control << "\n";
     std::cerr << "CPP Normal completion of the program\n";
   }
   catch (PermutalibException const& e) {
