@@ -255,19 +255,29 @@ public:
     }
     return IteratorType({}, ListPos, {}, {});
   }
-
 private:
   StabChain<Telt,Tidx_label> S;
   Tint size_tint;
 };
 
 
-
-
-
-
-
+template<typename Tgroup>
+std::ostream& operator<<(std::ostream& os, const Tgroup& grp)
+{
+  boost::archive::text_oarchive oa(os);
+  os << grp;
+  return os;
 }
 
 
+template<typename Tgroup>
+std::istream& operator>>(std::istream& is, Tgroup& grp)
+{
+  boost::archive::text_iarchive ia(is);
+  is >> grp;
+  return is;
+}
+
+
+}
 #endif
