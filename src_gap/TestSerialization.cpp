@@ -3,7 +3,6 @@
 #include <fstream>
 
 #include "Group.h"
-#include "Group_serialization.h"
 
 
 int main(int argc, char *argv[])

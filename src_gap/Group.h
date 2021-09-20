@@ -279,23 +279,6 @@ private:
 };
 
 
-template<typename Tgroup>
-std::ostream& operator<<(std::ostream& os, const Tgroup& grp)
-{
-  boost::archive::text_oarchive oa(os);
-  os << grp;
-  return os;
-}
-
-
-template<typename Tgroup>
-std::istream& operator>>(std::istream& is, Tgroup& grp)
-{
-  boost::archive::text_iarchive ia(is);
-  is >> grp;
-  return is;
-}
-
 
 }
 
@@ -352,6 +335,25 @@ namespace boost::serialization {
 }
 
 
+namespace permutalib {
+
+  template<typename Telt, typename Tint>
+  std::ostream& operator<<(std::ostream& os, const permutalib::Group<Telt,Tint>& grp)
+  {
+    boost::archive::text_oarchive oa(os);
+    os << grp;
+    return os;
+  }
+
+  template<typename Telt, typename Tint>
+  std::istream& operator>>(std::istream& is, permutalib::Group<Telt,Tint>& grp)
+  {
+    boost::archive::text_iarchive ia(is);
+    is >> grp;
+    return is;
+  }
+
+}
 
 
 #endif
