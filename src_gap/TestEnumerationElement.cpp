@@ -18,7 +18,6 @@ int main(int argc, char *argv[])
     std::string InputFile = argv[1];
     int limit_i;
     (void)sscanf(argv[2], "%d", &limit_i);
-    
     Tint limit = limit_i;
     //
     std::ifstream is(InputFile);
@@ -52,7 +51,7 @@ int main(int argc, char *argv[])
       }
       Tgroup eG(LGen, n);
       std::cerr << "|eG|=" << eG.size() << " limit=" << limit << "\n";
-      if (eG.size() <= limit) { // Some groups can be too large to iterate over their elements.
+      if (eG.size() <= limit || limit < 0) { // Some groups can be too large to iterate over their elements.
         std::unordered_set<Telt> ListElt;
         size_t n_iter=0;
         for (auto & elt : eG) {

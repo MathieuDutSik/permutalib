@@ -155,6 +155,9 @@ public:
   Group<Telt,Tint> Centralizer_grp(const Group<Telt,Tint>& H) const {
     return Group<Telt,Tint>(Kernel_Centralizer_grp<Telt,Tidx_label,Tint>(S, H.S));
   }
+  bool isin(const Telt& x) const {
+    return IsElementInStabChain(S, x);
+  }
 private:
   struct IteratorType {
   private:

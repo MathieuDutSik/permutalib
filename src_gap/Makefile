@@ -9,12 +9,12 @@
 #PROGRAM	= GapSmallGeneratingSet
 #PROGRAM	= GapDerivedSubgroup
 #PROGRAM	= GapCentreSubgroup
-PROGRAM	= GapCentralizerElt
+#PROGRAM	= GapCentralizerElt
 #PROGRAM	= BenchmarkingPermutalib
 #PROGRAM	= BenchmarkingPermutalib GapCanonicalImage
 #PROGRAM	= Factorize
 #PROGRAM	= TestSerialization
-#PROGRAM	= TestEnumerationElement
+PROGRAM	= TestEnumerationElement
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
@@ -39,7 +39,7 @@ CC		= g++-11 -std=c++17 -Wall -O3
 NOLINKFLAG 	= -c
 OUTPUTFLAG 	= -o
 
-CLOCAL          = 
+CLOCAL          =
 #CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK
 #CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK -DSYNCHRONIZED_DEBUG_GAP478
 #CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK -DSYNCHRONIZED_DEBUG_GAP478 -DDEBUG -DDEBUG_ADD_GEN_SCH -DDEBUG_CHANGE_STAB_CHAIN -DDEBUG_EQUALITY -DDEBUG_INV_REP -DDEBUG_STABCHAIN
