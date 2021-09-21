@@ -18,6 +18,9 @@ int main(int argc, char *argv[])
     int n_i;
     (void)sscanf(argv[1], "%d", &n_i);
     Tidx n = Tidx(n_i);
+    // Testing initializer_list
+    //
+    Telt p = {1,0,2,3};
     //
     std::vector<Tidx> ePermV1(n);
     for (Tidx i=0; i<n; i++) {

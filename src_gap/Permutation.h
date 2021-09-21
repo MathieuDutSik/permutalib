@@ -525,6 +525,9 @@ public:
     ListVal = std::move(ePerm.ListVal);
     ePerm.siz = 0;
   }
+  SingleSidedPerm(std::initializer_list<Tidx> l) : siz(Tidx(l.size())), ListVal(l)
+  {
+  }
   //
   // Copy operator
   //
