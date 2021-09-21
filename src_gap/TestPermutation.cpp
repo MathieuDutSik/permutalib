@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     using Tint = mpz_class;
     if (argc != 2) {
       std::cerr << "The program is used as\n";
-      std::cerr << "TestSymmetricGroup [n]\n";
+      std::cerr << "TestPermutation [n]\n";
       throw PermutalibException{1};
     }
     int n_i;
@@ -48,12 +48,21 @@ int main(int argc, char *argv[])
         std::cerr << "Error in the product operator\n";
         throw PermutalibException{1};
       }
+      for (Tidx i=0; i<n; i++) {
+        Tidx img1 = SlashAct(i, elt1);
+        Tidx img2 = PowAct(img1, elt1);
+        if (img2 != i) {
+          std::cerr << "We have i=" << i << " but img2=" << img2 << "\n";
+          std::cerr << "Please correct the bug\n";
+          throw PermutalibException{1};
+        }
+      }
     }
 
     std::cerr << "Normal completion of the program\n";
   }
   catch (PermutalibException const& e) {
-    std::cerr << "An exception was reached\n";
+    std::cerr << "Something wrong happened\n";
     exit(e.eVal);
   }
 }

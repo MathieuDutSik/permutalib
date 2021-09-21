@@ -563,10 +563,19 @@ public:
   }
   Tidx atRev(Tidx const& i) const
   {
+    Tidx i1 = i, i2 = ListVal[i];
+    while(true) {
+      if (i2 == i)
+        return i1;
+      i1 = i2;
+      i2 = ListVal[i2];
+    }
+    /*
     for (Tidx j=0; j<siz; j++)
       if (ListVal[j] == i)
         return j;
     return std::numeric_limits<Tidx>::max();
+    */
   }
   const Tidx* getPtr() const
   {
