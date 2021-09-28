@@ -340,16 +340,18 @@ namespace permutalib {
   template<typename Telt, typename Tint>
   std::ostream& operator<<(std::ostream& os, const permutalib::Group<Telt,Tint>& grp)
   {
+    std::cerr << "Beginning of operator<< for group\n";
     boost::archive::text_oarchive oa(os);
-    os << grp;
+    oa << grp;
     return os;
   }
 
   template<typename Telt, typename Tint>
   std::istream& operator>>(std::istream& is, permutalib::Group<Telt,Tint>& grp)
   {
+    std::cerr << "Beginning of operator>> for group\n";
     boost::archive::text_iarchive ia(is);
-    is >> grp;
+    ia >> grp;
     return is;
   }
 
