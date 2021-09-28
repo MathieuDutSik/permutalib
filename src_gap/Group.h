@@ -288,7 +288,6 @@ namespace boost::serialization {
   template<class Archive, typename Telt, typename Tint>
   inline void load(Archive & ar, permutalib::Group<Telt,Tint> & val, const unsigned int version) {
     using Tidx = typename Telt::Tidx;
-    std::cerr << "load(Tgroup), step 1\n";
     Tidx n_act;
     size_t n_gen;
     ar & make_nvp("n_act", n_act);
@@ -304,13 +303,11 @@ namespace boost::serialization {
       LGen.emplace_back(std::move(eGen));
     }
     val = permutalib::Group<Telt,Tint>(LGen, n_act);
-    std::cerr << "load(Tgroup), step 2\n";
   }
 
   template<class Archive, typename Telt, typename Tint>
   inline void save(Archive & ar, permutalib::Group<Telt,Tint> const& val, const unsigned int version) {
     using Tidx = typename Telt::Tidx;
-    std::cerr << "save(Tgroup), step 1\n";
     Tidx n_act = val.n_act();
     ar & make_nvp("n_act", n_act);
     std::vector<Telt> LGen = val.GeneratorsOfGroup();
@@ -323,14 +320,11 @@ namespace boost::serialization {
         ar & make_nvp("val", pnt);
       }
     }
-    std::cerr << "save(Tgroup), step 2\n";
   }
 
   template<class Archive, typename Telt, typename Tint>
   inline void serialize(Archive & ar, permutalib::Group<Telt,Tint> & val, const unsigned int version) {
-    std::cerr << "split_free(Tgroup), step 1\n";
     split_free(ar, val, version);
-    std::cerr << "split_free(Tgroup), step 2\n";
   }
 }
 
@@ -340,7 +334,6 @@ namespace permutalib {
   template<typename Telt, typename Tint>
   std::ostream& operator<<(std::ostream& os, const permutalib::Group<Telt,Tint>& grp)
   {
-    std::cerr << "Beginning of operator<< for group\n";
     boost::archive::text_oarchive oa(os);
     oa << grp;
     return os;
@@ -349,7 +342,6 @@ namespace permutalib {
   template<typename Telt, typename Tint>
   std::istream& operator>>(std::istream& is, permutalib::Group<Telt,Tint>& grp)
   {
-    std::cerr << "Beginning of operator>> for group\n";
     boost::archive::text_iarchive ia(is);
     ia >> grp;
     return is;
