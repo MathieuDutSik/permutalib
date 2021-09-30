@@ -278,7 +278,7 @@ template<typename Tidx>
 DoubleSidedPerm<Tidx> operator*(DoubleSidedPerm<Tidx> const& v1, DoubleSidedPerm<Tidx> const& v2)
 {
   size_t siz=v1.size();
-#ifdef DEBUG
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   if (siz != v2.size() ) {
     std::cerr << "Error in the DoubleSidedPerm product\n";
     throw PermutalibException{1};
@@ -326,7 +326,7 @@ template<typename Tidx>
 DoubleSidedPerm<Tidx> Conjugation(DoubleSidedPerm<Tidx> const& v1, DoubleSidedPerm<Tidx> const& v2)
 {
   size_t siz=v1.size();
-#ifdef DEBUG
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   if (siz != v2.size() ) {
     std::cerr << "Error in the DoubleSidedPerm conjugation\n";
     throw PermutalibException{1};
@@ -666,7 +666,7 @@ template<typename Tidx>
 SingleSidedPerm<Tidx> operator*(SingleSidedPerm<Tidx> const& v1, SingleSidedPerm<Tidx> const& v2)
 {
   Tidx siz=v1.size();
-#ifdef DEBUG
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   if (siz != v2.size() ) {
     std::cerr << "Error in the DoubleSidedPerm product\n";
     throw PermutalibException{1};
@@ -705,7 +705,7 @@ template<typename Tidx>
 SingleSidedPerm<Tidx> Conjugation(SingleSidedPerm<Tidx> const& v1, SingleSidedPerm<Tidx> const& v2)
 {
   Tidx siz=v1.size();
-#ifdef DEBUG
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   if (siz != v2.size() ) {
     std::cerr << "Error in the DoubleSidedPerm conjugation\n";
     throw PermutalibException{1};

@@ -484,7 +484,7 @@ StabChain<Telt,Tidx_label> StructuralCopy(StabChain<Telt,Tidx_label> const& S)
     S2->comm = get_comm(ListPtr[j]->comm);
     Sret = S2;
   }
-#ifdef DEBUG
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   std::string str1 = GetStringExpressionOfStabChain(S);
   std::string str2 = GetStringExpressionOfStabChain(Sret);
   if (str1 != str2) {
@@ -984,7 +984,7 @@ template<typename Telt, typename Tidx_label, typename Tint>
 StabChain<Telt,Tidx_label> StabChainOp_trivial_group(StabChain<Telt,Tidx_label> const& Stot, StabChainOptions<Tint, typename Telt::Tidx> const& options)
 {
   using Tidx = typename Telt::Tidx;
-#ifdef DEBUG
+#ifdef DEBUG_STABCHAIN
   std::cerr << "CPP Call to StabChainOp (trivial group)\n";
 #endif
   StabChain<Telt,Tidx_label> S = EmptyStabChain<Telt,Tidx_label>(Stot->comm->n);
