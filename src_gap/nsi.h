@@ -203,6 +203,7 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt,Tidx_label> cons
         for (Tidx idx=0; idx<a.orbSize; idx++)
           pow2 *= eV;
         //
+        //        std::cerr << "a.orbSize=" << size_t(a.orbSize) << " b.orbSize=" << size_t(b.orbSize) << "\n";
 #ifdef DEBUG_NSI
         std::cerr << "CPP pow1=" << pow1 << " pow2=" << pow2 << "\n";
 #endif
