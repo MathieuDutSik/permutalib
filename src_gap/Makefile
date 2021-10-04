@@ -10,10 +10,10 @@
 #PROGRAM	= GapDerivedSubgroup
 #PROGRAM	= GapCentreSubgroup
 #PROGRAM	= GapCentralizerElt
-#PROGRAM	= BenchmarkingPermutalib
+PROGRAM	= BenchmarkingPermutalib
 #PROGRAM	= BenchmarkingPermutalib GapCanonicalImage
 #PROGRAM	= Factorize
-PROGRAM	= TestSerialization
+#PROGRAM	= TestSerialization
 #PROGRAM	= TestEnumerationElement
 
 OBJECTS		= $(PROGRAM:%=%.o)

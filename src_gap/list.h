@@ -97,10 +97,11 @@ size_t SizeBlist(Face const& blist)
 
 bool IsSubsetBlist(Face const& a, Face const& b)
 {
-  size_t siz=a.size();
-  for (size_t i=0; i<siz; i++) {
-    if (b[i] == 1 && a[i] == 0)
+  boost::dynamic_bitset<>::size_type pos=b.find_first();
+  while (pos != boost::dynamic_bitset<>::npos) {
+    if (a[pos] == 0)
       return false;
+    pos = b.find_next(pos);
   }
   return true;
 }
@@ -109,10 +110,10 @@ bool IsSubsetBlist(Face const& a, Face const& b)
 
 void UniteBlist(Face & a, Face const& b)
 {
-  size_t siz=a.size();
-  for (size_t i=0; i<siz; i++) {
-    if (b[i] == 1)
-      a[i]=1;
+  boost::dynamic_bitset<>::size_type pos=b.find_first();
+  while (pos != boost::dynamic_bitset<>::npos) {
+    a[pos] = 1;
+    pos = b.find_next(pos);
   }
 }
 
@@ -120,22 +121,16 @@ void UniteBlist(Face & a, Face const& b)
 
 void IntersectBlist(Face & a, Face const& b)
 {
-  size_t siz=a.size();
-  for (size_t i=0; i<siz; i++) {
-    int val=0;
-    if (a[i] == 1 && b[i] == 1)
-      val=1;
-    a[i]=val;
-  }
+  a &= b;
 }
 
 
 void SubtractBlist(Face & a, Face const& b)
 {
-  size_t siz=a.size();
-  for (size_t i=0; i<siz; i++) {
-    if (b[i] == 1)
-      a[i]=0;
+  boost::dynamic_bitset<>::size_type pos=b.find_first();
+  while (pos != boost::dynamic_bitset<>::npos) {
+    a[pos] = 0;
+    pos = b.find_next(pos);
   }
 }
 
