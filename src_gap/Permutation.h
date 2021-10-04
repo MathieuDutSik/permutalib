@@ -195,11 +195,11 @@ public:
   {
     return ListVal.data();
   }
-  std::vector<Tidx> getListVal() const
+  const std::vector<Tidx>& getListVal() const
   {
     return ListVal;
   }
-  std::vector<Tidx> getListRev() const
+  const std::vector<Tidx>& getListRev() const
   {
     return ListRev;
   }
