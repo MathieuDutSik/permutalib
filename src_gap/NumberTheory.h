@@ -1,6 +1,8 @@
 #ifndef INCLUDE_PERMUTALIB_NUMBER_THEORY
 #define INCLUDE_PERMUTALIB_NUMBER_THEORY
 
+#include "gmpxx.h"
+
 
 namespace permutalib {
 
