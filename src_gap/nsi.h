@@ -3,6 +3,7 @@
 
 #include "StabChain.h"
 #include "stbcbckt.h"
+#include "NumberTheory.h"
 #include <unordered_map>
 
 
@@ -193,17 +194,10 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt,Tidx_label> cons
       } else {
         if (b.orbSize == 1)
           return false;
-        Tint pow1 = 1;
-        Tint eV = a.orbCount;
-        for (Tidx idx=0; idx<b.orbSize; idx++)
-          pow1 *= eV;
-        //
-        Tint pow2 = 1;
-        eV = b.orbCount;
-        for (Tidx idx=0; idx<a.orbSize; idx++)
-          pow2 *= eV;
-        //
-        //        std::cerr << "a.orbSize=" << size_t(a.orbSize) << " b.orbSize=" << size_t(b.orbSize) << "\n";
+        Tint pow1 = ComputePower(Tint(a.orbCount), b.orbSize);
+        //        std::cerr << "pow1=" << pow1 << " a.orbCount=" << Tidx(a.orbCount) << " b.orbSize=" << size_t(b.orbSize) << "\n";
+        Tint pow2 = ComputePower(Tint(b.orbCount), a.orbSize);
+        //        std::cerr << "pow2=" << pow2 << " b.orbCount=" << Tidx(b.orbCount) << " a.orbSize=" << size_t(a.orbSize) << "\n";
 #ifdef DEBUG_NSI
         std::cerr << "CPP pow1=" << pow1 << " pow2=" << pow2 << "\n";
 #endif
@@ -223,16 +217,10 @@ std::vector<typename Telt::Tidx> NewCanonicImage(StabChain<Telt,Tidx_label> cons
       } else {
         if (b.orbSize == 1)
           return false;
-        Tint pow1 = 1;
-        Tint eV = a.orbCount;
-        for (Tidx idx=0; idx<b.orbSize; idx++)
-          pow1 *= eV;
-        //
-        Tint pow2 = 1;
-        eV = b.orbCount;
-        for (Tidx idx=0; idx<a.orbSize; idx++)
-          pow2 *= eV;
-        //
+        Tint pow1 = ComputePower(Tint(a.orbCount), b.orbSize);
+        //        std::cerr << "pow1=" << pow1 << " a.orbCount=" << Tidx(a.orbCount) << " b.orbSize=" << size_t(b.orbSize) << "\n";
+        Tint pow2 = ComputePower(Tint(b.orbCount), a.orbSize);
+        //        std::cerr << "pow2=" << pow2 << " b.orbCount=" << Tidx(b.orbCount) << " a.orbSize=" << size_t(a.orbSize) << "\n";
         return pow1 == pow2;
       }
     };
