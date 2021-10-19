@@ -13,6 +13,36 @@ namespace permutalib {
 
 
 template<typename Tidx>
+bool CheckList(const std::vector<Tidx>& l)
+{
+  size_t len = l.size();
+  if (len >= size_t(std::numeric_limits<Tidx>::max())) {
+    std::cerr << "Number of rows is higher than expected\n";
+    return false;
+  }
+  Face f(len);
+  for (size_t i=0; i<len; i++) {
+    if (size_t(l[i]) >= len) {
+      std::cerr << "The value of l is too high\n";
+      return false;
+    }
+    f[l[i]] = 1;
+  }
+  size_t covered = 0;
+  for (size_t i=0; i<len; i++)
+    covered += f[i];
+  if (covered != len) {
+    std::cerr << "covering errors\n";
+    return false;
+  }
+  return true;
+}
+
+
+
+
+
+template<typename Tidx>
 std::pair<std::vector<Tidx>, std::vector<Tidx>> GetListValRev(std::string const& estr)
 {
   size_t maxlen = 0;
