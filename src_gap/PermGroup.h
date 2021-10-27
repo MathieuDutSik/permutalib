@@ -292,30 +292,28 @@ template<typename Telt, typename Tobj, typename Tact>
 std::vector<Tobj> Orbit(std::vector<Telt> const& ListGen, Tobj const& x, Tact act)
 {
   std::vector<Tobj> ListObj{x};
-  std::vector<uint8_t> ListStat(0);
   std::unordered_set<Tobj> SetObj{x};
+  size_t curr_pos = 0;
   while(true) {
-    bool IsFinished=true;
     size_t len=ListObj.size();
-    for (size_t u=0; u<len; u++) {
-      if (ListStat[u] == 0) {
-	IsFinished=false;
-	ListStat[u]=1;
-	for (auto & eElt : ListGen) {
-	  Tobj eImg = act(ListObj[u], eElt);
-	  if (SetObj.count(eImg) == 0) {
-	    ListObj.push_back(eImg);
-	    ListStat.push_back(0);
-	    SetObj.insert(eImg);
-	  }
-	}
+    if (curr_pos == len)
+      break;
+    for (size_t u=curr_pos; u<len; u++) {
+      for (auto & eElt : ListGen) {
+        Tobj eImg = act(ListObj[u], eElt);
+        if (SetObj.count(eImg) == 0) {
+          ListObj.push_back(eImg);
+          SetObj.insert(eImg);
+        }
       }
     }
-    if (IsFinished)
-      break;
+    curr_pos = len;
   }
   return ListObj;
 }
+
+
+
 
 
 template<typename Telt>
