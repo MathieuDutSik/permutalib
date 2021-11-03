@@ -503,11 +503,23 @@ public:
   SingleSidedPerm(std::string const& estr)
   {
     std::pair<std::vector<Tidx>, std::vector<Tidx>> epair = GetListValRev<Tidx>(estr);
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+    if (epair.first.size() >= std::numeric_limits<Tidx>::max() - 1) {
+      std::cerr << "Tidx is too small for representing the vector\n";
+      throw PermutalibException{1};
+    }
+#endif
     ListVal = epair.first;
     siz = ListVal.size();
   }
   SingleSidedPerm(SingleSidedPerm const& ePerm, int const& n)
   {
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+    if (n >= std::numeric_limits<Tidx>::max() - 1) {
+      std::cerr << "Tidx is too small for representing the vector\n";
+      throw PermutalibException{1};
+    }
+#endif
     if (ePerm.size() > n) {
       std::cerr << "ePerm.size()=" << ePerm.size() << " n=" << n << "\n";
       std::cerr << "ExtendPermutation to a size that is lower than the current size\n";
@@ -524,6 +536,12 @@ public:
   }
   SingleSidedPerm (Tidx const& n)
   {
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+    if (n >= std::numeric_limits<Tidx>::max() - 1) {
+      std::cerr << "Tidx is too small for representing the vector\n";
+      throw PermutalibException{1};
+    }
+#endif
     siz = n;
     ListVal = std::vector<Tidx>(n);
     for (Tidx i=0; i<n; i++)
@@ -531,16 +549,34 @@ public:
   }
   SingleSidedPerm(std::vector<Tidx> && v)
   {
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+    if (v.size() >= std::numeric_limits<Tidx>::max() - 1) {
+      std::cerr << "Tidx is too small for representing the vector\n";
+      throw PermutalibException{1};
+    }
+#endif
     ListVal=v;
     siz=Tidx(v.size());
   }
   SingleSidedPerm(std::vector<Tidx> const& v)
   {
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+    if (v.size() >= std::numeric_limits<Tidx>::max() - 1) {
+      std::cerr << "Tidx is too small for representing the vector\n";
+      throw PermutalibException{1};
+    }
+#endif
     ListVal=v;
     siz=Tidx(v.size());
   }
   SingleSidedPerm(std::vector<Tidx> const& v1, std::vector<Tidx> const& v2)
   {
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+    if (v1.size() >= std::numeric_limits<Tidx>::max() - 1) {
+      std::cerr << "Tidx is too small for representing the vector\n";
+      throw PermutalibException{1};
+    }
+#endif
     siz=v1.size();
     ListVal=v1;
   }
@@ -557,6 +593,12 @@ public:
   }
   SingleSidedPerm(std::initializer_list<Tidx> l) : siz(Tidx(l.size())), ListVal(l)
   {
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+    if (ListVal.size() >= std::numeric_limits<Tidx>::max() - 1) {
+      std::cerr << "Tidx is too small for representing the vector\n";
+      throw PermutalibException{1};
+    }
+#endif
   }
   //
   // Copy operator
