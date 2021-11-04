@@ -59,22 +59,21 @@ int main(int argc, char *argv[])
       is >> eVal;
       f2[i] = eVal;
     }
-    std::pair<bool,Telt> ePair = eG.RepresentativeAction_OnSets(f1, f2);
+    std::optional<Telt> test = eG.RepresentativeAction_OnSets(f1, f2);
     //
-    if (argc == 3) {
-      std::string OutputFile = argv[2];
-      std::ofstream os(OutputFile);
-      if (ePair.first) {
-        os << "return " << ePair.second << ";\n";
+    auto do_print=[&](std::ostream & os) -> void {
+      if (test) {
+        os << "return " << *test << ";\n";
       } else {
         os << "return fail;\n";
       }
+    };
+    if (argc == 3) {
+      std::string OutputFile = argv[2];
+      std::ofstream os(OutputFile);
+      do_print(os);
     } else {
-      if (ePair.first) {
-        std::cerr << "CPP test=" << ePair.second << "\n";
-      } else {
-        std::cerr << "CPP test=fail\n";
-      }
+      do_print(std::cerr);
     }
     std::cerr << "CPP Normal completion of the program\n";
   }

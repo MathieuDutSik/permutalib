@@ -115,8 +115,10 @@ int main(int argc, char *argv[])
         for (long iter=0; iter<n_iter; iter++) {
           Tidx pos1 = Tidx(rand()) % n;
           Tidx pos2 = Tidx(rand()) % n;
-          std::pair<bool,Telt> eP = eG.RepresentativeAction_OnPoints(pos1, pos2);
+          std::optional<Telt> eP = eG.RepresentativeAction_OnPoints(pos1, pos2);
           siz_control += size_t(pos1) + size_t(pos2);
+          if (eP)
+            siz_control++;
         }
       };
       auto check_canonical=[&]() -> void {
@@ -140,7 +142,7 @@ int main(int argc, char *argv[])
           permutalib::Face eFace1 = random_face(n);
           Telt u = eG.rand();
           permutalib::Face eFace2 = OnSets(eFace1, u);
-          bool test = eG.RepresentativeAction_OnSets(eFace1, eFace2).first;
+          std::optional<Telt> test = eG.RepresentativeAction_OnSets(eFace1, eFace2);
           if (!test) {
             std::cerr << "RepresentativeAction_OnSets error\n";
             throw PermutalibException{1};

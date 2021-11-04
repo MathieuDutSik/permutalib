@@ -5,6 +5,7 @@
 #include "partition.h"
 #include "Combinatorics.h"
 #include "plus_infinity.h"
+#include <optional>
 
 /*
 #############################################################################
@@ -2319,7 +2320,7 @@ StabChain<Telt,Tidx_label> Kernel_Stabilizer_OnPoints_backtrack(StabChain<Telt,T
 
 
 template<typename Telt, typename Tidx_label, typename Tint>
-std::pair<bool,Telt> Kernel_RepresentativeAction_OnSets(StabChain<Telt,Tidx_label> const& G, Face const& f1, Face const& f2)
+std::optional<Telt> Kernel_RepresentativeAction_OnSets(StabChain<Telt,Tidx_label> const& G, Face const& f1, Face const& f2)
 {
   size_t n = size_t(G->comm->n);
 #ifdef DEBUG_STBCBCKT
@@ -2333,13 +2334,13 @@ std::pair<bool,Telt> Kernel_RepresentativeAction_OnSets(StabChain<Telt,Tidx_labe
   }
 #endif
   if (f1.count() != f2.count())
-    return {false, {}};
+    return {};
   if (f1 == f2)
-    return {true, G->comm->identity};
-  auto Process_ResultPBT=[&](ResultPBT<Telt,Tidx_label> const& eRec) -> std::pair<bool,Telt> {
+    return G->comm->identity;
+  auto Process_ResultPBT=[&](ResultPBT<Telt,Tidx_label> const& eRec) -> std::optional<Telt> {
     if (eRec.nature == int_fail)
-      return {false, {}};
-    return {true, eRec.res};
+      return {};
+    return eRec.res;
   };
   // Put the false for debugging.
   if (2 * f1.count() > n) {
@@ -2359,7 +2360,7 @@ std::pair<bool,Telt> Kernel_RepresentativeAction_OnSets(StabChain<Telt,Tidx_labe
 
 
 template<typename Telt, typename Tidx_label, typename Tint>
-std::pair<bool,Telt> Kernel_RepresentativeAction_OnPoints(StabChain<Telt,Tidx_label> const& G, typename Telt::Tidx const& x1, typename Telt::Tidx const& x2)
+std::optional<Telt> Kernel_RepresentativeAction_OnPoints(StabChain<Telt,Tidx_label> const& G, typename Telt::Tidx const& x1, typename Telt::Tidx const& x2)
 {
   using Tidx=typename Telt::Tidx;
   Tidx n = G->comm->n;
@@ -2374,8 +2375,8 @@ std::pair<bool,Telt> Kernel_RepresentativeAction_OnPoints(StabChain<Telt,Tidx_la
   f2[x2] = 1;
   ResultPBT<Telt,Tidx_label> eRec = RepOpSetsPermGroup<Telt,Tidx_label,Tint,true>(G, f1, f2);
   if (eRec.nature == int_fail)
-    return {false, {}};
-  return {true, eRec.res};
+    return {};
+  return eRec.res;
 }
 
 

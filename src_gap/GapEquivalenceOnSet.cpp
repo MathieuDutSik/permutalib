@@ -55,11 +55,11 @@ int main(int argc, char *argv[])
       is >> eVal;
       f2[i] = eVal;
     }
-    std::pair<bool,Telt> epair = eG.RepresentativeAction_OnSets(f1, f2);
+    std::optional<Telt> test = eG.RepresentativeAction_OnSets(f1, f2);
     //
     std::ofstream os(argv[2]);
-    if (epair.first) {
-      os << "return " << epair.second << ";\n";
+    if (test) {
+      os << "return " << *test << ";\n";
     } else {
       os << "return fail;\n";
     }

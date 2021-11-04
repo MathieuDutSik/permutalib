@@ -121,13 +121,13 @@ public:
   Group<Telt,Tint> Stabilizer_OnPoints(const Tidx& x) const {
     return Group(Kernel_Stabilizer_OnPoints<Telt,Tidx_label,Tint>(S, x));
   }
-  std::pair<bool,Telt> RepresentativeAction_OnPoints(const Tidx& x1, const Tidx& x2) const {
+  std::optional<Telt> RepresentativeAction_OnPoints(const Tidx& x1, const Tidx& x2) const {
     return Kernel_RepresentativeAction_OnPoints<Telt,Tidx_label,Tint>(S, x1, x2);
   }
   Group<Telt,Tint> Stabilizer_OnSets(const Face& f) const {
     return Group(Kernel_Stabilizer_OnSets<Telt,Tidx_label,Tint>(S, f));
   }
-  std::pair<bool,Telt> RepresentativeAction_OnSets(const Face& f1, const Face& f2) const {
+  std::optional<Telt> RepresentativeAction_OnSets(const Face& f1, const Face& f2) const {
     return Kernel_RepresentativeAction_OnSets<Telt,Tidx_label,Tint>(S, f1, f2);
   }
   bool operator==(const Group& g) const {
