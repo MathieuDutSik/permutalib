@@ -522,7 +522,7 @@ std::vector<Telt> GetWpair(std::vector<Telt> const& Saux, int const& k, paramOpt
 
 
 template<typename Telt, typename Tidx_label>
-Telt SCRStrongGenTest(StabChain<Telt,Tidx_label> const& S, paramOpt const& param, std::vector<std::vector<int>> const& orbits, std::vector<size_t> const& basesize, std::vector<int> const& base, bool const& correct, std::vector<int> const& missing)
+Telt SCRStrongGenTest(StabChain<Telt,Tidx_label> const& S, paramOpt const& param, std::vector<std::vector<int>> const& orbits, std::vector<size_t> const& basesize, [[maybe_unused]] std::vector<int> const& base, bool const& correct, std::vector<int> const& missing)
 {
   int k = 0;
   size_t l;
@@ -803,7 +803,7 @@ Telt VerifyStabilizer(StabChain<Telt,Tidx_label> const& S, Telt const& z, std::v
 
 
 template<typename Telt, typename Tidx_label, typename Tint>
-StabChain<Telt,Tidx_label> StabChainRandomPermGroup(std::vector<Telt> const& gens, Telt const& id, StabChainOptions<Tint, typename Telt::Tidx> const& options)
+StabChain<Telt,Tidx_label> StabChainRandomPermGroup(std::vector<Telt> const& gens, [[maybe_unused]] Telt const& id, StabChainOptions<Tint, typename Telt::Tidx> const& options)
 {
   using Tidx=typename Telt::Tidx;
   int k;

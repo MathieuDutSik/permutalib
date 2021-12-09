@@ -286,7 +286,7 @@ private:
 namespace boost::serialization {
 
   template<class Archive, typename Telt, typename Tint>
-  inline void load(Archive & ar, permutalib::Group<Telt,Tint> & val, const unsigned int version) {
+  inline void load(Archive & ar, permutalib::Group<Telt,Tint> & val, [[maybe_unused]] const unsigned int version) {
     using Tidx = typename Telt::Tidx;
     Tidx n_act;
     size_t n_gen;
@@ -306,7 +306,7 @@ namespace boost::serialization {
   }
 
   template<class Archive, typename Telt, typename Tint>
-  inline void save(Archive & ar, permutalib::Group<Telt,Tint> const& val, const unsigned int version) {
+  inline void save(Archive & ar, permutalib::Group<Telt,Tint> const& val, [[maybe_unused]] const unsigned int version) {
     using Tidx = typename Telt::Tidx;
     Tidx n_act = val.n_act();
     ar & make_nvp("n_act", n_act);

@@ -173,7 +173,7 @@ std::pair<std::vector<typename Telt::Tidx>,Face> OrbitPerms(std::vector<Telt> co
 
 
 template<typename Telt>
-std::vector<std::vector<typename Telt::Tidx>> Kernel_OrbitsPerms(const std::vector<Telt>& gens, const typename Telt::Tidx&n, Face & dom)
+std::vector<std::vector<typename Telt::Tidx>> Kernel_OrbitsPerms(const std::vector<Telt>& gens, Face & dom)
 {
   using Tidx=typename Telt::Tidx;
   std::vector<std::vector<Tidx>> orbs;
@@ -213,7 +213,7 @@ std::vector<std::vector<typename Telt::Tidx>> OrbitsPerms(const std::vector<Telt
   Face dom(n);
   for (auto & eV : D)
     dom[eV]=1;
-  return Kernel_OrbitsPerms(gens, n, dom);
+  return Kernel_OrbitsPerms(gens, dom);
 }
 
 template<typename Telt>
@@ -223,7 +223,7 @@ std::vector<std::vector<typename Telt::Tidx>> OrbitsPerms(const std::vector<Telt
   Face dom(n);
   for (Tidx i=0; i<n; i++)
     dom[i] = 1;
-  return Kernel_OrbitsPerms(gens, n, dom);
+  return Kernel_OrbitsPerms(gens, dom);
 }
 
 

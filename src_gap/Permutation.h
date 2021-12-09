@@ -569,7 +569,7 @@ public:
     ListVal=v;
     siz=Tidx(v.size());
   }
-  SingleSidedPerm(std::vector<Tidx> const& v1, std::vector<Tidx> const& v2)
+  SingleSidedPerm(std::vector<Tidx> const& v1, [[maybe_unused]] std::vector<Tidx> const& v2)
   {
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
     if (v1.size() >= std::numeric_limits<Tidx>::max() - 1) {

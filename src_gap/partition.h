@@ -639,7 +639,7 @@ std::vector<std::vector<typename Telt::Tidx>> OrbitsPermsB(std::vector<Telt> con
 
 
 template<typename Telt>
-Partition<typename Telt::Tidx> OrbitsPartition(std::vector<Telt> const& gens, typename Telt::Tidx const&n, std::vector<typename Telt::Tidx> const& Omega)
+Partition<typename Telt::Tidx> OrbitsPartition(std::vector<Telt> const& gens, std::vector<typename Telt::Tidx> const& Omega)
 {
 #ifdef DEBUG_PARTITION
   std::cerr << "CPP OrbitsPartition, using OrbitsPerms\n";

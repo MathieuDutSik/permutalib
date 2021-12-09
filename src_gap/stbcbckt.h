@@ -181,7 +181,7 @@ bool IsInsertableRefinement(Trfm const& eRfm)
 // The underscore nature of a function can be seen in stbcbckt top.
 // Since we did not implement all the algorithms of stbcbckt, the value is always 0.
 template<typename Trfm>
-bool UnderscoreNature(Trfm const& rfm)
+bool UnderscoreNature([[maybe_unused]] Trfm const& rfm)
 {
   return false;
 }
@@ -570,7 +570,7 @@ rbaseType<Telt,Tidx_label,Trfm> EmptyRBase(std::vector<StabChain<Telt,Tidx_label
 
 
 template<typename Telt, typename Tidx_label, typename Tdata, typename Trfm>
-bool MeetPartitionStrat(rbaseType<Telt,Tidx_label,Trfm> const& rbase, imageType<Telt,Tidx_label,Tdata> & image, Partition<typename Telt::Tidx> const& S, Telt const& g, std::vector<singStrat<typename Telt::Tidx>> const& strat)
+bool MeetPartitionStrat([[maybe_unused]] rbaseType<Telt,Tidx_label,Trfm> const& rbase, imageType<Telt,Tidx_label,Tdata> & image, Partition<typename Telt::Tidx> const& S, Telt const& g, std::vector<singStrat<typename Telt::Tidx>> const& strat)
 {
   using Tidx=typename Telt::Tidx;
 #ifdef DEBUG_STBCBCKT
@@ -976,7 +976,7 @@ void RegisterRBasePoint(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_
 	std::cerr << "CPP StrongGeneratorsStabChain(lev) = " << GapStringTVector(SortVector(LGenStrong)) << "\n";
 #endif
         std::vector<Telt> LGen = GeneratorsStabChain(lev.Stot);
-	Partition<Tidx> O = OrbitsPartition(LGen, lev.Stot->comm->n, rbase.domain);
+	Partition<Tidx> O = OrbitsPartition(LGen, rbase.domain);
 #ifdef DEBUG_STBCBCKT
 	NicePrintPartition("CPP Before StratMeetPartition O", O);
         KeyUpdatingRbase("RegisterRBasePoint 2.1", rbase);
@@ -1081,7 +1081,7 @@ void NextRBasePoint_order(Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tid
 
 
 template<typename Telt, typename Tidx_label, typename Tdata, typename Trfm>
-bool Refinements_ProcessFixpoint(rbaseType<Telt,Tidx_label,Trfm> & rbase, imageType<Telt,Tidx_label,Tdata> & image, typename Telt::Tidx const& pnt, typename Telt::Tidx const& cellnum)
+bool Refinements_ProcessFixpoint([[maybe_unused]] rbaseType<Telt,Tidx_label,Trfm> & rbase, imageType<Telt,Tidx_label,Tdata> & image, typename Telt::Tidx const& pnt, typename Telt::Tidx const& cellnum)
 {
   using Tidx=typename Telt::Tidx;
   Tidx img = FixpointCellNo(image.partition, cellnum);
@@ -1107,7 +1107,7 @@ bool Refinements_Intersection(rbaseType<Telt,Tidx_label,Trfm> & rbase, imageType
 }
 
 template<typename Telt, typename Tidx_label, typename Tdata, typename Trfm>
-bool Refinements_Centralizer(rbaseType<Telt,Tidx_label,Trfm> & rbase, imageType<Telt,Tidx_label,Tdata> & image, const typename Telt::Tidx& cellnum, const typename Telt::Tidx& g, const typename Telt::Tidx& pnt, const typename Telt::Tidx& strat)
+bool Refinements_Centralizer([[maybe_unused]] rbaseType<Telt,Tidx_label,Trfm> & rbase, imageType<Telt,Tidx_label,Tdata> & image, const typename Telt::Tidx& cellnum, const typename Telt::Tidx& g, const typename Telt::Tidx& pnt, const typename Telt::Tidx& strat)
 {
   using Tidx=typename Telt::Tidx;
   Partition<Tidx>& P = image.partition;
@@ -2181,7 +2181,7 @@ ResultPBT<Telt,Tidx_label> RepOpSetsPermGroup(StabChain<Telt,Tidx_label> const& 
 #endif
   using Tdata = dataType_opset<Tidx>;
   Tdata data(Q);
-  auto nextLevel=[&](Partition<Tidx> & P, rbaseType<Telt,Tidx_label,Trfm> & rbase, Telt const& TheId) -> void {
+  auto nextLevel=[&](Partition<Tidx> & P, rbaseType<Telt,Tidx_label,Trfm> & rbase, [[maybe_unused]] Telt const& TheId) -> void {
     NextRBasePoint_no_order<Telt,Tidx_label,Trfm>(P, rbase);
   };
   return PartitionBacktrack<Telt,Tidx_label,Tdata,Trfm,Tint,repr,decltype(Pr),decltype(nextLevel)>( G, Pr, nextLevel, rbase, data, L, R );
@@ -2532,7 +2532,7 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
   rbaseType<Telt,Tidx_label,Trfm> rbase = EmptyRBase<Telt,Tidx_label,Trfm>({G,G}, true, Omega, P);
 
   // Loop over the stabilizer chain of <G>.
-  auto nextLevel=[&](Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_label,Trfm> & rbase, Telt const& TheId) -> void {
+  auto nextLevel=[&](Partition<typename Telt::Tidx> & P, rbaseType<Telt,Tidx_label,Trfm> & rbase, [[maybe_unused]] Telt const& TheId) -> void {
     NextRBasePoint_order<Telt,Tidx_label,Trfm>(P, rbase, order_v);
 
     // Centralizer refinement.
