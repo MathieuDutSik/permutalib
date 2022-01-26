@@ -133,6 +133,9 @@ public:
   bool operator==(const Group& g) const {
     return EqualityTest(S, g.S);
   }
+  bool operator!=(const Group& g) const {
+    return !EqualityTest(S, g.S);
+  }
   Face CanonicalImage(const Face& f) const {
     return Kernel_CanonicalImage<Telt,Tidx_label,Tint>(S, f);
   }
