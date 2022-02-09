@@ -246,8 +246,9 @@ private:
     }
   };
 public:
-  using iterator=IteratorType;
-  using const_iterator=IteratorType;
+  using iterator = IteratorType;
+  using const_iterator = IteratorType;
+  using value_type = Telt;
   const_iterator begin() const {
     Tidx n = S->comm->n;
     std::vector<StabChain<Telt,Tidx_label>> ListS;
