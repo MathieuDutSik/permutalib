@@ -36,7 +36,8 @@ int main(int argc, char *argv[])
     //
     std::vector<Telt> LGen{ePerm1, ePerm2};
     //
-    permutalib::StabChain<Telt,Tidx_label> S = permutalib::MinimalStabChain<Telt,Tidx_label,Tint>(LGen, n);
+    Telt id(n);
+    permutalib::StabChain<Telt,Tidx_label> S = permutalib::MinimalStabChain<Telt,Tidx_label,Tint>(LGen, id);
     std::cerr << "S=" << S << "\n";
   }
   catch (PermutalibException const& e) {

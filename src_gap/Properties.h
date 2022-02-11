@@ -87,13 +87,13 @@ bool Kernel_IsCyclic(const StabChain<Telt,Tidx_label>& S)
   std::vector<Telt> acts = Kernel_GeneratorsOfGroup(S);
   if (!Kernel_IsCommutativeGenerators(acts, bas))
     return false;
-  Tidx n = S->comm->n;
+  Telt id = S->comm->identity;
   std::map<Tidx,int> LFact = FactorsSizeStabChain(S);
   for (auto & kv : LFact) {
     std::vector<Telt> GenPow;
     for (auto & eGen : acts)
       GenPow.push_back(ElementPower(eGen, kv.first));
-    StabChainOptions<Tint,Tidx> options = GetStandardOptions<Tint,Tidx>(n);
+    StabChainOptions<Tint,Telt> options = GetStandardOptions<Tint,Telt>(id);
     StabChain<Telt,Tidx_label> Spow = StabChainOp_listgen<Telt,Tidx_label,Tint>(GenPow, options);
     std::map<Tidx,int> LFactPow = FactorsSizeStabChain(Spow);
     std::map<Tidx,int> Quot1 = QuotientMapMultiplicity(LFact, LFactPow);

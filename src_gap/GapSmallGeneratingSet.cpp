@@ -39,7 +39,8 @@ int main(int argc, char *argv[])
     }
     std::cerr.setf(std::ios::boolalpha);
     //
-    permutalib::Group<Telt,Tint> eG = permutalib::Group<Telt,Tint>(LGen, n);
+    Telt id(n);
+    permutalib::Group<Telt,Tint> eG(LGen, id);
     //
     std::vector<Telt> Sma = eG.SmallGeneratingSet();
     //

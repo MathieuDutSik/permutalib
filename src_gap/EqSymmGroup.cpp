@@ -37,7 +37,8 @@ int main(int argc, char *argv[])
     Telt ePerm2(ePermV2);
     //
     std::vector<Telt> LGen_A{ePerm1, ePerm2};
-    permutalib::Group<Telt,Tint> eG_A = permutalib::Group<Telt,Tint>(LGen_A, n);
+    Telt id(n);
+    permutalib::Group<Telt,Tint> eG_A(LGen_A, id);
     //
     // Second set of generators
     //
@@ -51,7 +52,7 @@ int main(int argc, char *argv[])
       Telt eElt(ePerm);
       LGen_B.push_back(eElt);
     }
-    permutalib::Group<Telt,Tint> eG_B = permutalib::Group<Telt,Tint>(LGen_B, n);
+    permutalib::Group<Telt,Tint> eG_B(LGen_B, id);
     //
     // Now testing for equality
     //

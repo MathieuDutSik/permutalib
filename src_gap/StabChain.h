@@ -524,18 +524,20 @@ StabLevel<Telt,Tidx_label> EmptyStabLevel(std::shared_ptr<CommonStabInfo<Telt>> 
 
 
 template<typename Telt, typename Tidx_label>
-StabChain<Telt,Tidx_label> EmptyStabChain(typename Telt::Tidx const& n)
+StabChain<Telt,Tidx_label> EmptyStabChain(Telt const& id)
 {
-  Telt id(n);
+  using Tidx = typename Telt::Tidx;
+  Tidx n = id.size();
   std::shared_ptr<CommonStabInfo<Telt>> comm = std::make_shared<CommonStabInfo<Telt>>(CommonStabInfo<Telt>({n, id, {id}}));
   return std::make_shared<StabLevel<Telt,Tidx_label>>(EmptyStabLevel<Telt,Tidx_label>(comm));
 }
 
 
 template<typename Telt, typename Tidx_label>
-StabChain<Telt,Tidx_label> EmptyStabChainPlusNode(typename Telt::Tidx const& n, typename Telt::Tidx const& bas)
+StabChain<Telt,Tidx_label> EmptyStabChainPlusNode(Telt const& id, typename Telt::Tidx const& bas)
 {
-  StabChain<Telt,Tidx_label> S = EmptyStabChain<Telt,Tidx_label>(n);
+  //  using Tidx = typename Telt::Tidx;
+  StabChain<Telt,Tidx_label> S = EmptyStabChain<Telt,Tidx_label>(id);
   InitializeSchreierTree(S, bas);
   return S;
 }
@@ -643,7 +645,7 @@ std::vector<Telt> InverseRepresentativeWord(StabChain<Telt,Tidx_label> const& S,
   Tidx bpt=S->orbit[0];
   std::vector<Telt> word;
   Tidx pntw=pnt;
-  while(pntw != bpt) {
+  while (pntw != bpt) {
     Tidx_label idx=S->transversal[pntw];
     const Telt& te=S->comm->labels[idx];
     pntw = PowAct(pntw, te);
@@ -843,11 +845,11 @@ Telt LargestElementStabChain(StabChain<Telt,Tidx_label> const& S)
 
 
 // is base is empty then this just replaces the IsBound(options.base)
-template<typename Tint, typename Tidx>
+template<typename Tint, typename Telt>
 struct StabChainOptions {
-  Tidx n;
-  std::vector<Tidx> base;
-  std::vector<Tidx> knownBase;
+  Telt id;
+  std::vector<typename Telt::Tidx> base;
+  std::vector<typename Telt::Tidx> knownBase;
   int random;
   bool reduced;
   Tint size;
@@ -855,16 +857,17 @@ struct StabChainOptions {
 };
 
 
-template<typename Tint, typename Tidx>
-StabChainOptions<Tint,Tidx> GetStandardOptions(Tidx const& n)
+template<typename Tint, typename Telt>
+StabChainOptions<Tint,Telt> GetStandardOptions(Telt const& id)
 {
+  using Tidx=typename Telt::Tidx;
   std::vector<Tidx> base;
   std::vector<Tidx> knownBase;
   int random = 1000;
   bool reduced=true;
   Tint size=0;
   Tint limit=0;
-  return {n, std::move(base), std::move(knownBase), random, reduced, size, limit};
+  return {id, std::move(base), std::move(knownBase), random, reduced, size, limit};
 }
 
 
@@ -981,7 +984,7 @@ void InsertTrivialStabilizer(StabChain<Telt,Tidx_label> & Stot, typename Telt::T
 
 
 template<typename Telt, typename Tidx_label, typename Tint>
-StabChain<Telt,Tidx_label> StabChainOp_trivial_group(StabChain<Telt,Tidx_label> const& Stot, StabChainOptions<Tint, typename Telt::Tidx> const& options)
+StabChain<Telt,Tidx_label> StabChainOp_trivial_group(StabChain<Telt,Tidx_label> const& Stot, StabChainOptions<Tint, Telt> const& options)
 {
   using Tidx = typename Telt::Tidx;
 #ifdef DEBUG_STABCHAIN
@@ -1247,7 +1250,7 @@ void ChooseNextBasePoint(StabChain<Telt,Tidx_label> & S, std::vector<typename Te
 
 
 template<typename Telt, typename Tidx_label, typename Tint>
-void StabChainStrong(StabChain<Telt,Tidx_label> & S, std::vector<Telt> const& newgens, StabChainOptions<Tint, typename Telt::Tidx> const& options)
+void StabChainStrong(StabChain<Telt,Tidx_label> & S, std::vector<Telt> const& newgens, StabChainOptions<Tint, Telt> const& options)
 {
   using Tidx = typename Telt::Tidx;
 #ifdef DEBUG_STABCHAIN
@@ -1333,7 +1336,7 @@ void StabChainStrong(StabChain<Telt,Tidx_label> & S, std::vector<Telt> const& ne
 
 
 template<typename Telt, typename Tidx_label, typename Tint>
-void ClosureGroup_options(StabChain<Telt,Tidx_label> & S, Telt const& g, StabChainOptions<Tint, typename Telt::Tidx> const& options)
+void ClosureGroup_options(StabChain<Telt,Tidx_label> & S, Telt const& g, StabChainOptions<Tint, Telt> const& options)
 {
   Telt sch = SiftedPermutation(S, g);
   if (!sch.isIdentity())
@@ -1346,7 +1349,7 @@ void ClosureGroup(StabChain<Telt,Tidx_label> & S, Telt const& g)
 {
   using Tidx = typename Telt::Tidx;
   Tidx n = S->comm->n;
-  StabChainOptions<Tint,Tidx> options = GetStandardOptions<Tint,Tidx>(n);
+  StabChainOptions<Tint,Telt> options = GetStandardOptions<Tint,Telt>(n);
   ClosureGroup_options(S, g, options);
 }
 

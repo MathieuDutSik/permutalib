@@ -43,7 +43,8 @@ int main(int argc, char *argv[])
         Telt ePerm(ePermV);
         LGen[iGen] = ePerm;
       }
-      Tgroup eG(LGen, n);
+      Telt id(n);
+      Tgroup eG(LGen, id);
       //
       // Setting the archives
       //

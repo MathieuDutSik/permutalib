@@ -101,7 +101,8 @@ template<typename Telt, typename Tidx_label, typename Tint>
 std::vector<Telt> Kernel_SmallGeneratingSet(const StabChain<Telt,Tidx_label>& G)
 {
   using Tidx = typename Telt::Tidx;
-  Tidx n = G->comm->n;
+  Telt id = G->comm->identity;
+  Tidx n = id.size();
   std::unordered_set<Telt> gens_set;
   for (auto & eGen : Kernel_GeneratorsOfGroup(G))
     if (!eGen.isIdentity())
@@ -149,7 +150,7 @@ std::vector<Telt> Kernel_SmallGeneratingSet(const StabChain<Telt,Tidx_label>& G)
     for (auto & i_orb : orp)
       if (!IsPrimitive_Subset(LGen, orb[i_orb], n))
         return false;
-    StabChainOptions<Tint,Tidx> options = GetStandardOptions<Tint,Tidx>(n);
+    StabChainOptions<Tint,Telt> options = GetStandardOptions<Tint,Telt>(id);
     StabChain<Telt,Tidx_label> U = StabChainOp_listgen<Telt,Tidx_label,Tint>(LGen, options);
     Tint order_U = Order<Telt,Tidx_label,Tint>(U);
     return order_G == order_U;
@@ -246,7 +247,7 @@ StabChain<Telt,Tidx_label> SubsetStabChain(const StabChain<Telt,Tidx_label>& S, 
   std::vector<Telt> LGenRed(n_gen);
   for (size_t i=0; i<n_gen; i++)
     LGenRed[i] = map(LGen[i]);
-  StabChainOptions<Tint,Tidx> options = GetStandardOptions<Tint,Tidx>(len);
+  StabChainOptions<Tint,Telt> options = GetStandardOptions<Tint,Telt>(Telt(len));
   return StabChainOp_listgen<Telt,Tidx_label,Tint>(LGenRed, options);
 }
 
@@ -307,7 +308,7 @@ StabChain<Telt,Tidx_label> Kernel_IntersectionNormalClosurePermGroup_LGen(const 
 {
   using Tidx = typename Telt::Tidx;
   if (IsTrivialListGen(LGen_G) || IsTrivialListGen(LGen_H)) {
-    StabChainOptions<Tint,Tidx> options1 = GetStandardOptions<Tint,Tidx>(n);
+    StabChainOptions<Tint,Telt> options1 = GetStandardOptions<Tint,Telt>(Telt(n));
     return StabChainOp_listgen<Telt,Tidx_label,Tint>({}, options1);
   }
   std::vector<Telt> newgens;
@@ -329,7 +330,7 @@ StabChain<Telt,Tidx_label> Kernel_IntersectionNormalClosurePermGroup_LGen(const 
     }
     newgens.emplace_back(std::move(Telt(std::move(eList))));
   }
-  StabChainOptions<Tint,Tidx> options2 = GetStandardOptions<Tint,Tidx>(2 * n);
+  StabChainOptions<Tint,Telt> options2 = GetStandardOptions<Tint,Telt>(Telt(2 * n));
   options2.size = size;
   options2.base.reserve(n);
   for (Tidx i=0; i<n; i++)
@@ -497,11 +498,12 @@ template<typename Telt, typename Tidx_label, typename Tint>
 StabChain<Telt,Tidx_label> Kernel_CentreSubgroup(const StabChain<Telt,Tidx_label>& G)
 {
   using Tidx=typename Telt::Tidx;
+  Telt id = G->comm->identity;
   Tidx n = G->comm->n;
   Tidx miss_val = std::numeric_limits<Tidx>::max();
   std::vector<Telt> LGen = Kernel_GeneratorsOfGroup(G);
   if (IsTrivialListGen(LGen)) {
-    StabChainOptions<Tint,Tidx> options1 = GetStandardOptions<Tint,Tidx>(n);
+    StabChainOptions<Tint,Telt> options1 = GetStandardOptions<Tint,Telt>(n);
     return StabChainOp_listgen<Telt,Tidx_label,Tint>({}, options1);
   }
   std::vector<Tidx> base = BaseStabChain(G);
@@ -512,7 +514,7 @@ StabChain<Telt,Tidx_label> Kernel_CentreSubgroup(const StabChain<Telt,Tidx_label
     Tidx len = U->comm->n;
     std::pair<std::vector<Telt>,Tidx> pair_centr = CentralizerTransSymmCSPG_direct(U);
     if (IsTrivialListGen(pair_centr.first)) {
-      StabChainOptions<Tint,Tidx> options1 = GetStandardOptions<Tint,Tidx>(len);
+      StabChainOptions<Tint,Telt> options1 = GetStandardOptions<Tint,Telt>(Telt(len));
       return StabChainOp_listgen<Telt,Tidx_label,Tint>({}, options1);
     } else {
       Tint order_p_size = pair_centr.second * Order<Telt,Tidx_label,Tint>(U);
@@ -571,7 +573,7 @@ StabChain<Telt,Tidx_label> Kernel_CentreSubgroup(const StabChain<Telt,Tidx_label
       std::vector<Tidx> orbit_rev(len,miss_val);
       for (Tidx i=0; i<len_o; i++)
         orbit_rev[orbit[i]] = i;
-      StabChainOptions<Tint,Tidx> options1 = GetStandardOptions<Tint,Tidx>(len_o);
+      StabChainOptions<Tint,Telt> options1 = GetStandardOptions<Tint,Telt>(Telt(len_o));
       options1.base.push_back(0);
       std::vector<Telt> LGen_o;
       for (auto & eGen : LGen_GG) {
@@ -601,7 +603,7 @@ StabChain<Telt,Tidx_label> Kernel_CentreSubgroup(const StabChain<Telt,Tidx_label
       }
     }
     if (order == 1) {
-      StabChainOptions<Tint,Tidx> options1 = GetStandardOptions<Tint,Tidx>(len);
+      StabChainOptions<Tint,Telt> options1 = GetStandardOptions<Tint,Telt>(Telt(len));
       return StabChainOp_listgen<Telt,Tidx_label,Tint>({}, options1);
     } else {
       Tint order_p_size = order * Order<Telt,Tidx_label,Tint>(GG);

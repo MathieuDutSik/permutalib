@@ -60,11 +60,11 @@ public:
   // constructors
   Group(const StabChain<Telt,Tidx_label>& _S) : S(_S), size_tint(Order<Telt,Tidx_label,Tint>(_S)) {
   }
-  Group(const std::vector<Telt>& LGen, const Tidx& n) {
+  Group(const std::vector<Telt>& LGen, const Telt& id) {
 #ifdef DEBUG_STABCHAINMAIN
     std::cerr << "CPP Beginning of MinimalStabChain\n";
 #endif
-    StabChainOptions<Tint,Tidx> options = GetStandardOptions<Tint,Tidx>(n);
+    StabChainOptions<Tint,Telt> options = GetStandardOptions<Tint,Telt>(id);
 #ifdef DEBUG_STABCHAINMAIN
     std::cerr << "CPP Before StabChainOp_listgen\n";
 #endif
