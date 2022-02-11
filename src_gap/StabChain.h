@@ -1410,7 +1410,7 @@ bool StabChainSwap(StabChain<Telt,Tidx_label> & Stot)
   std::cerr << "CPP Beginning of StabChainSwap\n";
   PrintStabChain(Stot);
 #endif
-  Tidx n = Stot->comm->n;
+  Telt id = Stot->comm->identity;
   Tidx a = Stot->orbit[0];
   Tidx b = Stot->stabilizer->orbit[0];
 #ifdef DEBUG_STABCHAIN
@@ -1431,7 +1431,7 @@ bool StabChainSwap(StabChain<Telt,Tidx_label> & Stot)
   std::cerr << "CPP StabChainSwap : after first AGEST\n";
 #endif
   //
-  StabChain<Telt,Tidx_label> Tstab = EmptyStabChainPlusNode<Telt,Tidx_label>(n, a);
+  StabChain<Telt,Tidx_label> Tstab = EmptyStabChainPlusNode<Telt,Tidx_label>(id, a);
   if (Stot->stabilizer != nullptr) {
     if (Stot->stabilizer->stabilizer != nullptr) {
       std::vector<Telt> LGensB = GetListGenerators(Stot->stabilizer->stabilizer);
