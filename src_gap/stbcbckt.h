@@ -4,7 +4,7 @@
 #include "StabChainMain.h"
 #include "partition.h"
 #include "Combinatorics.h"
-#include "plus_infinity.h"
+//#include "plus_infinity.h"
 #include <optional>
 
 /*
@@ -1362,7 +1362,7 @@ ResultPBT<Telt,Tidx_label> PartitionBacktrack(StabChain<Telt,Tidx_label> const& 
   std::vector<Face> orB; // backup of <orb>.
   std::vector<Face> orb;
   std::vector<std::vector<Tidx>> org; // intersected (mapped) basic orbits of <G>
-  Tplusinfinity<size_t> blen(true, 0);
+  size_t blen = std::numeric_limits<size_t>::max();
   size_t dd, branch; // branch is level where $Lstab\ne Rstab$ starts
   std::vector<Tidx> range;    // range for construction of <orb>
   Tidx lenD=rbase.domain[rbase.domain.size()-1];
@@ -1447,7 +1447,7 @@ ResultPBT<Telt,Tidx_label> PartitionBacktrack(StabChain<Telt,Tidx_label> const& 
 #endif
 	  // In the subgroup case, assign to  <L> and <R> stabilizer
 	  // chains when the R-base is complete.
-	  StabChainOptions<Tint,Tidx> options = GetStandardOptions<Tint,Tidx>(n);
+	  StabChainOptions<Tint,Telt> options = GetStandardOptions<Tint,Telt>(n);
 	  options.base = rbase.base;
 	  options.reduced = false;
 #ifdef DEBUG_STBCBCKT
@@ -2089,7 +2089,7 @@ ResultPBT<Telt,Tidx_label> RepOpSetsPermGroup(StabChain<Telt,Tidx_label> const& 
   std::cerr << "CPP Beginning of RepOpSetsPermGroup\n";
   PrintStabChain(G);
 #endif
-  Tidx n=G->comm->n;
+  Telt id=G->comm->identity;
   std::vector<Tidx> Omega = MovedPoints(G);
   //  int n_phi = Phi.size();
   //  std::cerr << "n_phi=" << n_phi << " n=" << n << "\n";
@@ -2145,7 +2145,7 @@ ResultPBT<Telt,Tidx_label> RepOpSetsPermGroup(StabChain<Telt,Tidx_label> const& 
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP SelectedGens=" << GapStringTVector(SortVector(sgs)) << "\n";
 #endif
-    return MinimalStabChain<Telt,Tidx_label,Tint>(SortVector(sgs), n);
+    return MinimalStabChain<Telt,Tidx_label,Tint>(SortVector(sgs), id);
   };
 
 
@@ -2196,7 +2196,7 @@ StabChain<Telt,Tidx_label> Kernel_Stabilizer_OnPoints(StabChain<Telt,Tidx_label>
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Beginning of Stabilizer_OnSets\n";
 #endif
-  Tidx n = G->comm->n;
+  Telt id = G->comm->identity;
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   if (x >= n) {
     std::cerr << "1 : We should have x < n\n";
@@ -2208,7 +2208,7 @@ StabChain<Telt,Tidx_label> Kernel_Stabilizer_OnPoints(StabChain<Telt,Tidx_label>
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP x=" << int(x+1) << "\n";
 #endif
-  StabChainOptions<Tint,Tidx> options = GetStandardOptions<Tint,Tidx>(n);
+  StabChainOptions<Tint,Telt> options = GetStandardOptions<Tint,Telt>(id);
   options.base = base;
   std::vector<Telt> Lgen = Kernel_GeneratorsOfGroup(G);
   StabChain<Telt,Tidx_label> K = StabChainOp_listgen<Telt,Tidx_label,Tint>(Lgen, options);
@@ -2614,14 +2614,13 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
 */
 template<typename Telt, typename Tidx_label, typename Tint>
 StabChain<Telt,Tidx_label> Kernel_Centralizer_elt(const StabChain<Telt,Tidx_label>& G, const Telt& e) {
-  using Tidx=typename Telt::Tidx;
-  Tidx n=G->comm->n;
+  Telt id=G->comm->identity;
   std::vector<Telt> e_v{e};
   std::vector<Telt> LGen;
   for (auto & eGen : Kernel_GeneratorsOfGroup(G))
     if (Conjugation(e, eGen) == e)
       LGen.push_back(eGen);
-  StabChainOptions<Tint,Tidx> options = GetStandardOptions<Tint,Tidx>(n);
+  StabChainOptions<Tint,Telt> options = GetStandardOptions<Tint,Telt>(id);
   StabChain<Telt,Tidx_label> LR_grp = StabChainOp_listgen<Telt,Tidx_label,Tint>(LGen, options);
   return RepOpElmTuplesPermGroup<Telt,Tidx_label,Tint,false>(G, e_v, e_v, LR_grp, LR_grp).stab;
 }
@@ -2630,7 +2629,8 @@ StabChain<Telt,Tidx_label> Kernel_Centralizer_elt(const StabChain<Telt,Tidx_labe
 template<typename Telt, typename Tidx_label, typename Tint>
 StabChain<Telt,Tidx_label> Kernel_Centralizer_grp(const StabChain<Telt,Tidx_label>& G, const StabChain<Telt,Tidx_label>& U) {
   using Tidx=typename Telt::Tidx;
-  Tidx n=G->comm->n;
+  Telt id=G->comm->id;
+  Tidx n=id.size();
   std::vector<Telt> LGen_U = Kernel_GeneratorsOfGroup(U);
   auto is_ok_gen=[&](auto & eGen) -> bool {
     for (auto & e : LGen_U)
@@ -2642,7 +2642,7 @@ StabChain<Telt,Tidx_label> Kernel_Centralizer_grp(const StabChain<Telt,Tidx_labe
   for (auto & eGen : Kernel_GeneratorsOfGroup(G))
     if (is_ok_gen(eGen))
       LGen.push_back(eGen);
-  StabChainOptions<Tint,Tidx> options = GetStandardOptions<Tint,Tidx>(n);
+  StabChainOptions<Tint,Telt> options = GetStandardOptions<Tint,Telt>(id);
   StabChain<Telt,Tidx_label> LR_grp = StabChainOp_listgen<Telt,Tidx_label,Tint>(LGen, options);
   return RepOpElmTuplesPermGroup<Telt,Tidx_label,Tint,false>(G, LGen_U, LGen_U, LR_grp, LR_grp).stab;
 }

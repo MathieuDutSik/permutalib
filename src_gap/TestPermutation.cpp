@@ -39,7 +39,8 @@ int main(int argc, char *argv[])
     Telt ePerm2(ePermV2);
     //
     std::vector<Telt> LGen{ePerm1, ePerm2};
-    permutalib::Group<Telt,Tint> SymmGrp = permutalib::Group<Telt,Tint>(LGen, n);
+    Telt id(n);
+    permutalib::Group<Telt,Tint> SymmGrp(LGen, id);
     //
     for (int i=0; i<400; i++) {
       std::cerr << "i=" << i << "\n";

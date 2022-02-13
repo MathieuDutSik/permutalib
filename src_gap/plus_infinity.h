@@ -27,12 +27,14 @@ struct Tplusinfinity {
     value = x.value;
     return *this;
   }
+  /*
   Tplusinfinity<T> operator=(T const& val)
   {
     IsInf = false;
     value = val;
     return *this;
   }
+  */
   bool IsInfinity() const
   {
     return IsInf;

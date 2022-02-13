@@ -39,7 +39,8 @@ int main(int argc, char *argv[])
       LGen[iGen] = read_elt();
     Telt g = read_elt();
     //
-    permutalib::Group<Telt,Tint> eG = permutalib::Group<Telt,Tint>(LGen, n);
+    Telt id(n);
+    permutalib::Group<Telt,Tint> eG(LGen, id);
     //
     permutalib::Group<Telt,Tint> eG2 = eG.Centralizer_elt(g);
     //

@@ -15,9 +15,9 @@ namespace permutalib {
 // Right now we do not implement the PCGS algorithm
 // It is adapted from "StabChainOp (group and option)"
 template<typename Telt, typename Tidx_label, typename Tint>
-StabChain<Telt,Tidx_label> StabChainOp_listgen(std::vector<Telt> const& Lgen, StabChainOptions<Tint, typename Telt::Tidx> const& options)
+StabChain<Telt,Tidx_label> StabChainOp_listgen(std::vector<Telt> const& Lgen, StabChainOptions<Tint, Telt> const& options)
 {
-  using Tidx=typename Telt::Tidx;
+  //  using Tidx=typename Telt::Tidx;
 #ifdef DEBUG_STABCHAINMAIN
   Tidx degree = LargestMovedPoint( Lgen );
   std::cerr << "CPP Beginning of StabChainOp_listgen\n";
@@ -28,8 +28,8 @@ StabChain<Telt,Tidx_label> StabChainOp_listgen(std::vector<Telt> const& Lgen, St
   //  }
   std::cerr << "CPP SEARCH : Doing the ordinary Schreier Sims\n";
 #endif
-  Tidx n=options.n;
-  StabChain<Telt,Tidx_label> S = EmptyStabChain<Telt,Tidx_label>(n);
+  Telt id=options.id;
+  StabChain<Telt,Tidx_label> S = EmptyStabChain<Telt,Tidx_label>(id);
   if (!IsTrivial_ListGen(Lgen)) {
     S->IsBoundCycle = true;
 #ifdef DEBUG_STABCHAINMAIN
@@ -59,7 +59,7 @@ StabChain<Telt,Tidx_label> StabChainOp_listgen(std::vector<Telt> const& Lgen, St
 
 
 template<typename Telt, typename Tidx_label, typename Tint>
-std::pair<bool, StabChain<Telt,Tidx_label>> StabChainOp_stabchain(StabChain<Telt,Tidx_label> const& G, StabChainOptions<Tint, typename Telt::Tidx> const& options)
+std::pair<bool, StabChain<Telt,Tidx_label>> StabChainOp_stabchain(StabChain<Telt,Tidx_label> const& G, StabChainOptions<Tint, Telt> const& options)
 {
   StabChain<Telt,Tidx_label> S = StructuralCopy(G);
   if (options.base.size() > 0) {
@@ -76,7 +76,7 @@ std::pair<bool, StabChain<Telt,Tidx_label>> StabChainOp_stabchain(StabChain<Telt
 
 
 template<typename Telt, typename Tidx_label, typename Tint>
-StabChain<Telt,Tidx_label> StabChainOp_stabchain_nofalse(StabChain<Telt,Tidx_label> const& G, StabChainOptions<Tint, typename Telt::Tidx> const& options)
+StabChain<Telt,Tidx_label> StabChainOp_stabchain_nofalse(StabChain<Telt,Tidx_label> const& G, StabChainOptions<Tint, Telt> const& options)
 {
   if (IsTrivial(G)) {
     return StabChainOp_trivial_group(G, options);
@@ -104,13 +104,13 @@ Tint Order(StabChain<Telt,Tidx_label> const& G)
 
 
 template<typename Telt, typename Tidx_label, typename Tint>
-StabChain<Telt,Tidx_label> MinimalStabChain(std::vector<Telt> const& LGen, typename Telt::Tidx const& n)
+StabChain<Telt,Tidx_label> MinimalStabChain(std::vector<Telt> const& LGen, Telt const& id)
 {
+  using Tidx=typename Telt::Tidx;
 #ifdef DEBUG_STABCHAINMAIN
   std::cerr << "CPP Beginning of MinimalStabChain\n";
 #endif
-  using Tidx = typename Telt::Tidx;
-  StabChainOptions<Tint,Tidx> options = GetStandardOptions<Tint,Tidx>(n);
+  StabChainOptions<Tint,Telt> options = GetStandardOptions<Tint,Telt>(id);
   Tidx largMov=LargestMovedPoint(LGen);
   options.base = ClosedInterval<Tidx>(0, largMov);
 #ifdef DEBUG_STABCHAINMAIN
@@ -130,8 +130,7 @@ StabChain<Telt,Tidx_label> FCT_Group(std::vector<Telt> const& LGen, typename Tel
 #ifdef DEBUG_STABCHAINMAIN
   std::cerr << "CPP Beginning of MinimalStabChain\n";
 #endif
-  using Tidx = typename Telt::Tidx;
-  StabChainOptions<Tint,Tidx> options = GetStandardOptions<Tint,Tidx>(n);
+  StabChainOptions<Tint,Telt> options = GetStandardOptions<Tint,Telt>(n);
   options.base = {};
 #ifdef DEBUG_STABCHAINMAIN
   std::cerr << "CPP Before StabChainOp_listgen\n";

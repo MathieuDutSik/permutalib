@@ -49,7 +49,8 @@ int main(int argc, char *argv[])
         Telt ePerm(ePermV);
         LGen[iGen] = ePerm;
       }
-      Tgroup eG(LGen, n);
+      Telt id(n);
+      Tgroup eG(LGen, id);
       std::cerr << "|eG|=" << eG.size() << " limit=" << limit << "\n";
       if (eG.size() <= limit || limit < 0) { // Some groups can be too large to iterate over their elements.
         std::unordered_set<Telt> ListElt;

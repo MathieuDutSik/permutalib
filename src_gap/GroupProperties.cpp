@@ -38,7 +38,8 @@ int main(int argc, char *argv[])
       LGen[iGen] = ePerm;
     }
     //
-    permutalib::Group<Telt,Tint> eG = permutalib::Group<Telt,Tint>(LGen, n);
+    Telt id(n);
+    permutalib::Group<Telt,Tint> eG(LGen, id);
     bool IsPrimitive = eG.IsPrimitive();
     bool IsTransitive = eG.IsTransitive();
     bool IsCommutative = eG.IsCommutative();

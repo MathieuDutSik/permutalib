@@ -228,7 +228,8 @@ int main(int argc, char *argv[])
         Telt ePerm(ePermV);
         LGen[iGen] = ePerm;
       }
-      Tgroup eG(LGen, n);
+      Telt id(n);
+      Tgroup eG(LGen, id);
       std::cerr << "  |eG|=" << eG.size() << "\n";
       //
       auto random_face=[](const Tidx& len) -> permutalib::Face {
