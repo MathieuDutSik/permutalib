@@ -23,7 +23,22 @@
 #include <boost/serialization/split_member.hpp>
 #include <boost/serialization/split_free.hpp>
 
+/*
+  The Group class is far too rigid for us.
+  ---We cannot handle different sizes occurring in some algorithm like Centering.
+  This would require having the SingleSidedPerm in the code directly.
+  ---Should we have a notion of trivial group? NO.
+     ---PRO: Simpler constructor. But giving the number of elements is never qn issue really.
+     ---CON: A complications of the code.
+     ---CON: When returning an equivalence, what to do? All kinds of type problem will show up.
+  ---We need to have constructor using identity element. This will be needed for the construction
+  of the Kernel and the PreImages.
+  ---The API of the GAP with ListMatrGens, ListPermGens should be used as well in this case.
+  ---
 
+
+  We want to handle different 
+ */
 
 
 
