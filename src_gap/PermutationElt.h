@@ -17,7 +17,7 @@ template<typename Tidx_inp, typename Telt_impl>
 struct PermutationElt {
 public:
   using Tidx = Tidx_inp;
-  using Telt = T_impl;
+  using Telt = Telt_impl;
   //
   // The constructors
   //
@@ -49,7 +49,7 @@ public:
   {
     siz     = ePermElt.siz;
     ListVal = ePermElt.ListVal;
-    M       = ePermElt.M;
+    elt     = ePermElt.elt;
   }
   PermutationElt(PermutationElt&& ePermElt)
   {
@@ -120,9 +120,9 @@ public:
   {
     return ListVal;
   }
-  const MyMatrix<T>& getMatrix() const
+  const Telt& getElt() const
   {
-    return M;
+    return elt;
   }
   Tidx operator[](Tidx const& i) const
   {
@@ -220,7 +220,7 @@ PermutationElt<Tidx,Telt> operator*(PermutationElt<Tidx,Telt> const& v1, Permuta
   }
   //  return SingleSidedPerm<Tidx>(vVal);
   Telt Mprod = v1.elt * v2.elt;
-  return PermutationElt<Tidx,T>(std::move(vVal), std::move(Mprod));
+  return PermutationElt<Tidx,Telt>(std::move(vVal), std::move(Mprod));
 }
 
 
@@ -259,7 +259,7 @@ PermutationElt<Tidx,Telt> Conjugation(PermutationElt<Tidx,Telt> const& v1, Permu
     v[i2]=j2;
   }
   Telt Mret = Inverse(v2.elt) * v1.elt * v2.elt;
-  return PermutationElt<Tidx,T>(std::move(v), std::move(Mret));
+  return PermutationElt<Tidx,Telt>(std::move(v), std::move(Mret));
 }
 
 
@@ -290,7 +290,7 @@ PermutationElt<Tidx,Telt> LeftQuotient(PermutationElt<Tidx,Telt> const& a, Permu
   for (Tidx i=0; i<siz; i++)
     ListVal[Val_A[i]] = Val_B[i];
   Telt Mret = Inverse(a.elt) * b.elt;
-  return PermutationElt<Tidx,T>(std::move(ListVal), std::move(Mret));
+  return PermutationElt<Tidx,Telt>(std::move(ListVal), std::move(Mret));
 }
 
 

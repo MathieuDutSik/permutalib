@@ -2198,6 +2198,7 @@ StabChain<Telt,Tidx_label> Kernel_Stabilizer_OnPoints(StabChain<Telt,Tidx_label>
 #endif
   Telt id = G->comm->identity;
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+  Tidx n = id.size();
   if (x >= n) {
     std::cerr << "1 : We should have x < n\n";
     std::cerr << "x=" << int(x) << " n=" << int(n) << "\n";

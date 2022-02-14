@@ -314,8 +314,8 @@ std::vector<Tobj> Orbit(std::vector<Telt> const& ListGen, Tobj const& x, Tact ac
 
 
 
-template<typename Telt, typename Tobj, typename Tact>
-std::vector<std::pair<Tobj,Telt>> OrbitPairEltRepr(std::vector<Telt> const& ListGen, Telt const& id, Tobj const& x, Tact act)
+template<typename Telt, typename Tobj, typename Fprod, typename Fact>
+std::vector<std::pair<Tobj,Telt>> OrbitPairEltRepr(std::vector<Telt> const& ListGen, Telt const& id, Tobj const& x, Fprod f_prod, Fact f_act)
 {
   std::vector<std::pair<Tobj,Telt>> ListPair{ {x,id} };
   std::unordered_set<Tobj> SetObj{x};
@@ -326,9 +326,9 @@ std::vector<std::pair<Tobj,Telt>> OrbitPairEltRepr(std::vector<Telt> const& List
       break;
     for (size_t u=curr_pos; u<len; u++) {
       for (auto & eElt : ListGen) {
-        Tobj eImg = act(ListPair[u].first, eElt);
+        Tobj eImg = f_act(ListPair[u].first, eElt);
         if (SetObj.count(eImg) == 0) {
-          Telt eProd = ListPair[u].second * eElt;
+          Telt eProd = f_prod(ListPair[u].second, eElt);
           ListPair.push_back({eImg,eProd});
           SetObj.insert(eImg);
         }

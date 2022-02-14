@@ -7,6 +7,7 @@
 #include "nsi.h"
 #include "Properties.h"
 #include "NormalStructure.h"
+#include "PermutationElt.h"
 #include <map>
 
 #include <boost/archive/tmpdir.hpp>
@@ -339,17 +340,19 @@ std::vector<TeltMatr> StabilizerMatrixPermSubset(std::vector<TeltMatr> const& Li
   using Tidx = typename TeltPerm::Tidx;
   using Tgroup = Group<TeltPerm,Tint>;
   using Telt = std::pair<TeltMatr,TeltPerm>;
-  Telt operator*(Telt const& x, Telt const& y) {
+  auto f_prod=[](Telt const& x, Telt const& y) -> Telt {
     return {x.first * y.first, x.second * y.second};
   };
   //
   Tidx len = f.size();
   Tgroup GRP(ListPermGens, len);
   Tgroup stab = GRP.Stabilizer_OnSets(f);
-  auto act=[](Face const& x, Telt const& u) -> Face {
+  auto f_act=[](Face const& x, Telt const& u) -> Face {
     return OnFace(x, u.second);
   };
-  std::vector<std::pair<Face,Telt>> ListPair = OrbitPairEltRepr(ListPermGens, id, f, act);
+  TeltPerm id_perm(len);
+  Telt id{id_matr, id_perm};
+  std::vector<std::pair<Face,Telt>> ListPair = OrbitPairEltRepr(ListPermGens, id, f, f_prod, f_act);
   std::unordered_map<Face, Telt> map;
   for (auto& kv : ListPair)
     map[kv.first] = kv.second;
@@ -367,15 +370,14 @@ std::vector<TeltMatr> StabilizerMatrixPermSubset(std::vector<TeltMatr> const& Li
       Face f_img = OnFace(f, ListPermGens[iGen]);
       Telt eElt = map[f_img];
       TeltMatr eGenMatr_new = eGenMatr * Inverse(eElt.second);
-      if (!IsIdentity(eGenMatr_new)) {
-        ListMatrGens.insert(eGenMatr
-      }
+      if (!IsIdentity(eGenMatr_new))
+        SetMatrGens.insert(eGenMatr);
     }
   }
-  std::vector<TeltMatr> ListMatrGens;
+  std::vector<TeltMatr> ListMatrGens_ret;
   for (auto & eGen : SetMatrGens)
-    ListMatrGens.push_back(eGen);
-  return ListMatrGens;
+    ListMatrGens_ret.push_back(eGen);
+  return ListMatrGens_ret;
 }
 
 template<typename TeltPerm, typename TeltMatr, typename Tint>
@@ -384,14 +386,13 @@ std::optional<TeltMatr> RepresentativeActionMatrixPermSubset(std::vector<TeltMat
   using Tidx = typename TeltPerm::Tidx;
   using Tgroup = Group<TeltPerm,Tint>;
   //
-  Tidx len = f.size();
+  Tidx len = f1.size();
   Tgroup GRP(ListPermGens, len);
   std::optional<TeltPerm> opt = GRP.RepresentativeAction_OnSets(f1, f2);
   if (!opt)
     return {};
   TeltPerm const& elt = *opt;
   //
-  Tidx len = f1.size();
   TeltPerm id_perm(len);
   using Telt = PermutationElt<Tidx,TeltMatr>;
   using TgroupB = Group<Telt,Tint>;
@@ -399,7 +400,7 @@ std::optional<TeltMatr> RepresentativeActionMatrixPermSubset(std::vector<TeltMat
   Telt idB(id_perm.getListVal(), id_matr);
   std::vector<Telt> ListGensB;
   for (size_t iGen=0; iGen<ListPermGens.size(); iGen++) {
-    Telt fPair(ListPermGenselt[iGen].getListVal(), ListMatrGens[iGen]);
+    Telt fPair(ListPermGens[iGen].getListVal(), ListMatrGens[iGen]);
     ListGensB.push_back(fPair);
   }
   TgroupB GRP_B(ListGensB, idB);
@@ -409,7 +410,7 @@ std::optional<TeltMatr> RepresentativeActionMatrixPermSubset(std::vector<TeltMat
   for (Tidx u=0; u<len; u++) {
     if (V[u] != u) {
       std::cerr << "The permutation residue is not the idenity at u=" << u << "\n";
-      throw TerminalException{1};
+      throw PermutalibException{1};
     }
   }
 #endif
