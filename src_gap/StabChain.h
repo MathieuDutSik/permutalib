@@ -661,14 +661,14 @@ Telt SiftedPermutation(StabChain<Telt,Tidx_label> const& S, Telt const& g)
   using Tidx=typename Telt::Tidx;
   Telt gW = g;
   StabChain<Telt,Tidx_label> Sptr = S;
-  while(true) {
+  while (true) {
     if (Sptr->stabilizer == nullptr || gW.isIdentity())
       return gW;
     Tidx bpt = Sptr->orbit[0];
     Tidx img = PowAct(bpt, gW);
     if (Sptr->transversal[img] == std::numeric_limits<Tidx_label>::max())
       return gW;
-    while(img != bpt) {
+    while (img != bpt) {
       Tidx_label idx = Sptr->transversal[img];
       gW *= Sptr->comm->labels[idx];
       img = PowAct(bpt, gW);

@@ -17,8 +17,8 @@ namespace permutalib {
 template<typename Telt, typename Tidx_label, typename Tint>
 StabChain<Telt,Tidx_label> StabChainOp_listgen(std::vector<Telt> const& Lgen, StabChainOptions<Tint, Telt> const& options)
 {
-  //  using Tidx=typename Telt::Tidx;
 #ifdef DEBUG_STABCHAINMAIN
+  using Tidx=typename Telt::Tidx;
   Tidx degree = LargestMovedPoint( Lgen );
   std::cerr << "CPP Beginning of StabChainOp_listgen\n";
   std::cerr << "CPP degree=" << degree << " base = " << GapStringIntVector(options.base) << "\n";

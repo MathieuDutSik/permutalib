@@ -32,12 +32,46 @@
      ---CON: A complications of the code.
      ---CON: When returning an equivalence, what to do? All kinds of type problem will show up.
   ---We need to have constructor using identity element. This will be needed for the construction
-  of the Kernel and the PreImages.
+  of the Kernel and the PreImages. So, that part of the changes is not under discussions.
   ---The API of the GAP with ListMatrGens, ListPermGens should be used as well in this case.
-  ---
+  ---When implementing (for example MyMatrix), we need to have a custom type that allows for
+     ---isIdentity
+     ---Default constructor that gives the right entry (e.g. the IdentityMat<T>(dim))
+     ---The inverse
+     ---The product, the *= and other operators.
+     So, for example the MyMatrix will have to be contained in some Singleton class.
+     But is that ok? The dimension n is only known dynamically, so cannot be part of the template
+     parameter of the class.
 
+  ---For computing PreImage, we have to use the Sifted permutation.
+  ---For the Kernel, when we work only with permutations, things are clear. But for general case,
+  we have serious thinking to do.
 
-  We want to handle different 
+  Kernel computation:
+  ---The command for getting the stab chain is StabChainStrong.
+  ---The ExtendStabChain depends on ChangeStabChain and others.
+  ---Maybe better is to encode our own function for finding that Kernel.
+  ---In all objectivity, Schreier lemma provide a solution to our problem.
+  However, there are several issues:
+      ---The generating set is large.
+      ---It requires us to work with the right cosets, which we do not have right now
+      as functionality.
+      ---On the contrary, the algorithm for finding the StrongStabChain, works with orbits
+      and do not require this.
+  So, further thinking is needed.
+
+  Thinking:
+  ---It seems sure that we cannot use the StabChainStrong algorithm. This is because that
+  algorithm eventually has to find a base point. And precisely, we will not find a base point.
+  ---When building the Kernel, if a stabchain algorithm can be applied, GAP would probably
+  use it. So, it makes sense to look at the code.
+     ---The algorithm is pretty complicated
+     ---It uses the KernelOfMultiplicativeGeneralMapping and then CoKernelOfMultiplicativeGeneralMapping
+     ---Two algorithms are used: NormalClosure   and   CoKernelGensPermHom.
+     ---NormalClosure (code is in grp.gi) depends on the testing that an element belongs to the group.
+  ---NormalClosure algorithm dependence on testing membership. This is actually an expensive algorithm.
+     So, maybe the algorithm 
+
  */
 
 
@@ -299,7 +333,96 @@ private:
 
 
 
+template<typename TeltPerm, typename TeltMatr, typename Tint>
+std::vector<TeltMatr> StabilizerMatrixPermSubset(std::vector<TeltMatr> const& ListMatrGens, std::vector<TeltPerm> const& ListPermGens, TeltMatr const& id_matr, Face const& f)
+{
+  using Tidx = typename TeltPerm::Tidx;
+  using Tgroup = Group<TeltPerm,Tint>;
+  using Telt = std::pair<TeltMatr,TeltPerm>;
+  Telt operator*(Telt const& x, Telt const& y) {
+    return {x.first * y.first, x.second * y.second};
+  };
+  //
+  Tidx len = f.size();
+  Tgroup GRP(ListPermGens, len);
+  Tgroup stab = GRP.Stabilizer_OnSets(f);
+  auto act=[](Face const& x, Telt const& u) -> Face {
+    return OnFace(x, u.second);
+  };
+  std::vector<std::pair<Face,Telt>> ListPair = OrbitPairEltRepr(ListPermGens, id, f, act);
+  std::unordered_map<Face, Telt> map;
+  for (auto& kv : ListPair)
+    map[kv.first] = kv.second;
+  size_t nCoset = ListPair.size();
+  //
+  // We are using the Schreier lemma
+  // See https://en.wikipedia.org/wiki/Schreier%27s_lemma
+  //
+  std::unordered_set<TeltMatr> SetMatrGens;
+  for (size_t iCoset=0; iCoset<nCoset; iCoset++) {
+    Face const& f = ListPair[iCoset].first;
+    TeltMatr const& eGenMatr = ListPair[iCoset].second.first;
+    TeltPerm const& eGenPerm = ListPair[iCoset].second.second;
+    for (size_t iGen=0; iGen<ListMatrGens.size(); iGen++) {
+      Face f_img = OnFace(f, ListPermGens[iGen]);
+      Telt eElt = map[f_img];
+      TeltMatr eGenMatr_new = eGenMatr * Inverse(eElt.second);
+      if (!IsIdentity(eGenMatr_new)) {
+        ListMatrGens.insert(eGenMatr
+      }
+    }
+  }
+  std::vector<TeltMatr> ListMatrGens;
+  for (auto & eGen : SetMatrGens)
+    ListMatrGens.push_back(eGen);
+  return ListMatrGens;
 }
+
+template<typename TeltPerm, typename TeltMatr, typename Tint>
+std::optional<TeltMatr> RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const& ListMatrGens, std::vector<TeltPerm> const& ListPermGens, TeltMatr const& id_matr, Face const& f1, Face const& f2)
+{
+  using Tidx = typename TeltPerm::Tidx;
+  using Tgroup = Group<TeltPerm,Tint>;
+  //
+  Tidx len = f.size();
+  Tgroup GRP(ListPermGens, len);
+  std::optional<TeltPerm> opt = GRP.RepresentativeAction_OnSets(f1, f2);
+  if (!opt)
+    return {};
+  TeltPerm const& elt = *opt;
+  //
+  Tidx len = f1.size();
+  TeltPerm id_perm(len);
+  using Telt = PermutationElt<Tidx,TeltMatr>;
+  using TgroupB = Group<Telt,Tint>;
+  Telt ePair(elt.getListVal(), id_matr);
+  Telt idB(id_perm.getListVal(), id_matr);
+  std::vector<Telt> ListGensB;
+  for (size_t iGen=0; iGen<ListPermGens.size(); iGen++) {
+    Telt fPair(ListPermGenselt[iGen].getListVal(), ListMatrGens[iGen]);
+    ListGensB.push_back(fPair);
+  }
+  TgroupB GRP_B(ListGensB, idB);
+  Telt res = GRP_B.SiftedPermutation(ePair);
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+  std::vector<Tidx> const& V = res.getListVal();
+  for (Tidx u=0; u<len; u++) {
+    if (V[u] != u) {
+      std::cerr << "The permutation residue is not the idenity at u=" << u << "\n";
+      throw TerminalException{1};
+    }
+  }
+#endif
+  TeltMatr ret = Inverse(res.getElt());
+  return ret;
+}
+
+}
+
+
+
+
+
 
 
 namespace boost::serialization {
