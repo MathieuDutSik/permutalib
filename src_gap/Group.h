@@ -71,7 +71,7 @@
      ---Two algorithms are used: NormalClosure   and   CoKernelGensPermHom.
      ---NormalClosure (code is in grp.gi) depends on the testing that an element belongs to the group.
   ---NormalClosure algorithm dependence on testing membership. This is actually an expensive algorithm.
-     So, maybe the algorithm 
+     So, maybe the algorithm of GAP is not adequate for us.
 
  */
 
@@ -348,11 +348,15 @@ std::vector<TeltMatr> StabilizerMatrixPermSubset(std::vector<TeltMatr> const& Li
   Tgroup GRP(ListPermGens, len);
   Tgroup stab = GRP.Stabilizer_OnSets(f);
   auto f_act=[](Face const& x, Telt const& u) -> Face {
-    return OnFace(x, u.second);
+    return OnSets(x, u.second);
   };
   TeltPerm id_perm(len);
   Telt id{id_matr, id_perm};
-  std::vector<std::pair<Face,Telt>> ListPair = OrbitPairEltRepr(ListPermGens, id, f, f_prod, f_act);
+  std::vector<Telt> ListGens;
+  for (size_t iGen=0; iGen<ListMatrGens.size(); iGen++) {
+    ListGens.push_back({ListMatrGens[iGen], ListPermGens[iGen]});
+  }
+  std::vector<std::pair<Face,Telt>> ListPair = OrbitPairEltRepr(ListGens, id, f, f_prod, f_act);
   std::unordered_map<Face, Telt> map;
   for (auto& kv : ListPair)
     map[kv.first] = kv.second;
@@ -365,11 +369,11 @@ std::vector<TeltMatr> StabilizerMatrixPermSubset(std::vector<TeltMatr> const& Li
   for (size_t iCoset=0; iCoset<nCoset; iCoset++) {
     Face const& f = ListPair[iCoset].first;
     TeltMatr const& eGenMatr = ListPair[iCoset].second.first;
-    TeltPerm const& eGenPerm = ListPair[iCoset].second.second;
+    //    TeltPerm const& eGenPerm = ListPair[iCoset].second.second;
     for (size_t iGen=0; iGen<ListMatrGens.size(); iGen++) {
-      Face f_img = OnFace(f, ListPermGens[iGen]);
-      Telt eElt = map[f_img];
-      TeltMatr eGenMatr_new = eGenMatr * Inverse(eElt.second);
+      Face f_img = OnSets(f, ListPermGens[iGen]);
+      Telt const& eElt = map[f_img];
+      TeltMatr eGenMatr_new = eGenMatr * Inverse(eElt.first);
       if (!IsIdentity(eGenMatr_new))
         SetMatrGens.insert(eGenMatr);
     }
@@ -417,6 +421,10 @@ std::optional<TeltMatr> RepresentativeActionMatrixPermSubset(std::vector<TeltMat
   TeltMatr ret = Inverse(res.getElt());
   return ret;
 }
+
+
+
+
 
 }
 
