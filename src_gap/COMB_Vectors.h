@@ -115,7 +115,7 @@ std::map<T,Tidx> Collected(const std::vector<T>& eVect)
 
 
 template<typename T, class UnaryPredicate>
-bool ForAll(std::vector<T> const& V, UnaryPredicate const& f)
+bool PML_ForAll(std::vector<T> const& V, UnaryPredicate const& f)
 {
   for (auto & eVal : V)
     if (!f(eVal))
@@ -124,7 +124,7 @@ bool ForAll(std::vector<T> const& V, UnaryPredicate const& f)
 }
 
 template<typename T, class UnaryPredicate>
-std::vector<T> Filtered(std::vector<T> const& V, UnaryPredicate const& f)
+std::vector<T> PML_Filtered(std::vector<T> const& V, UnaryPredicate const& f)
 {
   std::vector<T> LRet;
   for (auto & eVal : V)
@@ -145,7 +145,7 @@ Tidx PositionProperty(std::vector<T> const& V, UnaryPredicate const& f)
 }
 
 template<typename T, class UnaryPredicate>
-std::vector<T> ListT(std::vector<T> const& V, UnaryPredicate const& f)
+std::vector<T> PML_ListT(std::vector<T> const& V, UnaryPredicate const& f)
 {
   size_t len = V.size();
   std::vector<T> retV(len);

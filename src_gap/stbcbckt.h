@@ -1616,7 +1616,7 @@ ResultPBT<Telt,Tidx_label> PartitionBacktrack(StabChain<Telt,Tidx_label> const& 
     std::cerr << "CPP PBEnumerate, step 6 orb=" << GapStringListBoolVector(orb) << "\n";
     PrintRBaseLevel(rbase, "CPP Step 6");
 #endif
-    if (d == 0 && ForAll(G->comm->labels, [&](Telt const& x){return PowAct(a, x) == a;})) {
+    if (d == 0 && PML_ForAll(G->comm->labels, [&](Telt const& x){return PowAct(a, x) == a;})) {
       orb[d][a]=true; // ensure a is a possible image (can happen if acting on permutations with more points)
 #ifdef DEBUG_STBCBCKT
       std::cerr << "CPP ORB: After assignation d=" << int(d+1) << " orb[d]=" << GetStringGAP(orb[d]) << "\n";
@@ -1861,7 +1861,7 @@ ResultPBT<Telt,Tidx_label> PartitionBacktrack(StabChain<Telt,Tidx_label> const& 
             std::cerr << "CPP LGen=" << GapStringTVector(LGen) << "\n";
             std::cerr << "CPP First generating step done b=" << int(b_int+1) << "\n";
 #endif
-	    std::vector<Telt> LGenB = Filtered(LGen, [&](Telt const& gen) -> bool {return PowAct(b_int, gen) == b_int;});
+	    std::vector<Telt> LGenB = PML_Filtered(LGen, [&](Telt const& gen) -> bool {return PowAct(b_int, gen) == b_int;});
 #ifdef DEBUG_STBCBCKT
             std::cerr << "CPP LGenB=" << GapStringTVector(LGenB) << "\n";
             std::cerr << "XXX ELIMINATE begin\n";
@@ -2098,7 +2098,7 @@ ResultPBT<Telt,Tidx_label> RepOpSetsPermGroup(StabChain<Telt,Tidx_label> const& 
 #endif
   if (repr && Phi.size() != Psi.size())
     return {int_fail, {}, {}};
-  if (IsSubset(Phi, Omega) || ForAll(Omega, [&](Tidx const &p) -> bool {return !Phi[p];})) {
+  if (IsSubset(Phi, Omega) || PML_ForAll(Omega, [&](Tidx const &p) -> bool {return !Phi[p];})) {
     if (repr) {
       if (Difference_face(Phi, Omega) != Difference_face(Psi, Omega))
 	return {int_fail, {}, {}};
@@ -2108,7 +2108,7 @@ ResultPBT<Telt,Tidx_label> RepOpSetsPermGroup(StabChain<Telt,Tidx_label> const& 
       return {int_group, G, {}};
     }
   } else {
-    if (repr && (IsSubset(Psi, Omega) || ForAll(Omega, [&](Tidx const& p) -> bool {return !Psi[p];})))
+    if (repr && (IsSubset(Psi, Omega) || PML_ForAll(Omega, [&](Tidx const& p) -> bool {return !Psi[p];})))
       return {int_fail, {}, {}};
   }
   auto GetPartitionFromPair=[&](Face const& Ph) -> Partition<Tidx> {
@@ -2141,7 +2141,7 @@ ResultPBT<Telt,Tidx_label> RepOpSetsPermGroup(StabChain<Telt,Tidx_label> const& 
 #endif
 
   auto GetSubgroup=[&](Face const& Ph) -> StabChain<Telt,Tidx_label> {
-    std::vector<Telt> sgs=Filtered(LGen, [&](Telt const& g)->bool {return OnSets(Ph, g) == Ph;});
+    std::vector<Telt> sgs=PML_Filtered(LGen, [&](Telt const& g)->bool {return OnSets(Ph, g) == Ph;});
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP SelectedGens=" << GapStringTVector(SortVector(sgs)) << "\n";
 #endif
@@ -2469,7 +2469,7 @@ ResultPBT<Telt,Tidx_label> RepOpElmTuplesPermGroup(const StabChain<Telt,Tidx_lab
         return false;
     return true;
   };
-  if (ForAll(Kernel_GeneratorsOfGroup(G), [&](const Telt& gen) -> bool { return test_gen(gen); })) {
+  if (PML_ForAll(Kernel_GeneratorsOfGroup(G), [&](const Telt& gen) -> bool { return test_gen(gen); })) {
     if (!repr) {
       return {int_group, G, {}};
     } else {

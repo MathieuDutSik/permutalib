@@ -1607,7 +1607,7 @@ StabChain<Telt,Tidx_label> ConjugateStabChain(StabChain<Telt,Tidx_label> & Stot,
       if (e_comm == ListLabels[iLabel])
         return ListLabelsImg[iLabel];
     }
-    std::vector<Telt> labels = ListT(e_comm->labels, hom);
+    std::vector<Telt> labels = PML_ListT(e_comm->labels, hom);
     Tcomm comm_new = std::make_shared<CommonStabInfo<Telt>>(CommonStabInfo<Telt>({n, id, labels}));
     ListLabels.push_back(e_comm);
     ListLabelsImg.push_back(comm_new);
@@ -1626,7 +1626,7 @@ StabChain<Telt,Tidx_label> ConjugateStabChain(StabChain<Telt,Tidx_label> & Stot,
     }
     Tptr->comm = get_comm(Sptr->comm);
     Tptr->genlabels = Sptr->genlabels;
-    Tptr->orbit = ListT(Sptr->orbit, map);
+    Tptr->orbit = PML_ListT(Sptr->orbit, map);
 
     // Going to the next level.
     Sptr = Sptr->stabilizer;
