@@ -358,26 +358,57 @@ std::vector<TeltMatr> StabilizerMatrixPermSubset(std::vector<TeltMatr> const& Li
   }
   std::vector<std::pair<Face,Telt>> ListPair = OrbitPairEltRepr(ListGens, id, f, f_prod, f_act);
   std::unordered_map<Face, Telt> map;
-  for (auto& kv : ListPair)
+  //  std::cerr << "f=" << f << "\n";
+  for (auto& kv : ListPair) {
     map[kv.first] = kv.second;
+    //    std::cerr << "kv.first=" << kv.first << "kv.second.second=" << kv.second.second << "\n";
+  }
   size_t nCoset = ListPair.size();
   //
   // We are using the Schreier lemma
   // See https://en.wikipedia.org/wiki/Schreier%27s_lemma
   //
+  // The formula is the following for right coset. A right coset is something like H r.
+  // If H is a subgroup of finite index and r1, ...., rN such that
+  // G = H r1  \cup  .....  \cup  H rN
+  // If we are doing the action on the right and H is the stabilizer then we get
+  // O = x G = { x r1 , ..... , x rN }
+  //
+  //
+  //
+  //
   std::unordered_set<TeltMatr> SetMatrGens;
+  size_t nGen=ListMatrGens.size();
+  std::cerr << "nCoset=" << nCoset << " |ListMatrGens|=" << nGen << "\n";
   for (size_t iCoset=0; iCoset<nCoset; iCoset++) {
-    Face const& f = ListPair[iCoset].first;
+    Face const& f_cos = ListPair[iCoset].first;
     TeltMatr const& eGenMatr = ListPair[iCoset].second.first;
-    //    TeltPerm const& eGenPerm = ListPair[iCoset].second.second;
-    for (size_t iGen=0; iGen<ListMatrGens.size(); iGen++) {
-      Face f_img = OnSets(f, ListPermGens[iGen]);
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+    TeltPerm const& eGenPerm = ListPair[iCoset].second.second;
+#endif
+    for (size_t iGen=0; iGen<nGen; iGen++) {
+      TeltMatr const& eGenMatr_B = ListMatrGens[iGen];
+      TeltPerm const& eGenPerm_B = ListPermGens[iGen];
+      Face f_img = OnSets(f_cos, eGenPerm_B);
       Telt const& eElt = map[f_img];
-      TeltMatr eGenMatr_new = eGenMatr * Inverse(eElt.first);
+      TeltMatr eGenMatr_new = eGenMatr * eGenMatr_B * Inverse(eElt.first);
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+      TeltPerm eGenPerm_new = eGenPerm * eGenPerm_B * Inverse(eElt.second);
+      Face f_test = OnSets(f, eGenPerm_new);
+      if (f_test != f) {
+        std::cerr << "iGen=" << iGen << " / " << nGen << "  iCoset=" << iCoset << " / " << nCoset << "\n";
+        std::cerr << "f_test=" << f_test << " f=" << f << "\n";
+        std::cerr << "eGenPerm=" << eGenPerm << "\n";
+        std::cerr << "eElt.second=" << eElt.second << "\n";
+        std::cerr << "eGenPerm_new=" << eGenPerm_new << "\n";
+        throw PermutalibException{1};
+      }
+#endif
       if (!IsIdentity(eGenMatr_new))
-        SetMatrGens.insert(eGenMatr);
+        SetMatrGens.insert(eGenMatr_new);
     }
   }
+  std::cerr << "|SetMatrGens|=" << SetMatrGens.size() << "\n";
   std::vector<TeltMatr> ListMatrGens_ret;
   for (auto & eGen : SetMatrGens)
     ListMatrGens_ret.push_back(eGen);

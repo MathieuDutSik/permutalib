@@ -336,6 +336,7 @@ std::vector<std::pair<Tobj,Telt>> OrbitPairEltRepr(std::vector<Telt> const& List
     }
     curr_pos = len;
   }
+  std::cerr << "OrbitPairEltRepr |ListPair|=" << ListPair.size() << "\n";
   return ListPair;
 }
 
