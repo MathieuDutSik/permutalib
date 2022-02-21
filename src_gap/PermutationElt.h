@@ -21,6 +21,9 @@ public:
   //
   // The constructors
   //
+  PermutationElt() : siz(0), ListVal(), elt()
+  {
+  }
   PermutationElt(std::vector<Tidx> && v, Telt && _elt)
   {
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
@@ -90,7 +93,7 @@ public:
     for (Tidx i=0; i<siz; i++)
       if (ListVal[i] != i)
 	return false;
-    return elt.isIdentity();
+    return true;
   }
   Tidx at(Tidx const& i) const
   {

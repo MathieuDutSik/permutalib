@@ -229,6 +229,9 @@ public:
   bool isin(const Telt& x) const {
     return IsElementInStabChain(S, x);
   }
+  Telt Sift(Telt const& x) const {
+    return SiftedPermutation(S, x);
+  }
 private:
   struct IteratorType {
   private:
@@ -439,7 +442,7 @@ std::optional<TeltMatr> RepresentativeActionMatrixPermSubset(std::vector<TeltMat
     ListGensB.push_back(fPair);
   }
   TgroupB GRP_B(ListGensB, idB);
-  Telt res = GRP_B.SiftedPermutation(ePair);
+  Telt res = GRP_B.Sift(ePair);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   std::vector<Tidx> const& V = res.getListVal();
   for (Tidx u=0; u<len; u++) {
