@@ -11,6 +11,23 @@
 
 namespace permutalib {
 
+template<typename Tidx_inp, typename Telt_impl>
+struct PermutationElt;
+
+template<typename Tidx, typename Telt>
+void NicePrint(std::string const& name, PermutationElt<Tidx,Telt> const& ePermElt)
+{
+  //  Tidx siz = ePermElt.size();
+  const std::vector<Tidx>& LVal = ePermElt.getListVal();
+  std::cerr << "name=" << name << " : V =";
+  for (auto & val : LVal)
+    std::cerr << " " << val;
+  std::cerr << "\n";
+  //
+  std::cerr << "M =";
+  WriteMatrix(std::cerr, ePermElt.getElt());
+}
+
 
 
 template<typename Tidx_inp, typename Telt_impl>
@@ -23,9 +40,14 @@ public:
   //
   PermutationElt() : siz(0), ListVal(), elt()
   {
+    //    std::cerr << "PermutationElt 1\n";
+    //    NicePrint("Constructor 1", *this);
   }
   PermutationElt(std::vector<Tidx> && v, Telt && _elt)
   {
+    //    std::cerr << "PermutationElt 2\n";
+    //    std::cerr << "_elt=";
+    //    WriteMatrix(std::cerr, _elt);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
     if (v.size() >= std::numeric_limits<Tidx>::max() - 1) {
       std::cerr << "Tidx is too small for representing the vector\n";
@@ -35,9 +57,11 @@ public:
     ListVal = v;
     siz = Tidx(v.size());
     elt = std::move(_elt);
+    //    NicePrint("Constructor 2", *this);
   }
   PermutationElt(std::vector<Tidx> const& v, Telt const& _elt)
   {
+    //    std::cerr << "PermutationElt 3\n";
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
     if (v.size() >= std::numeric_limits<Tidx>::max() - 1) {
       std::cerr << "Tidx is too small for representing the vector\n";
@@ -47,19 +71,24 @@ public:
     ListVal = v;
     siz = Tidx(v.size());
     elt = _elt;
+    //    NicePrint("Constructor 3", *this);
   }
   PermutationElt(PermutationElt const& ePermElt)
   {
+    //    std::cerr << "PermutationElt 4\n";
     siz     = ePermElt.siz;
     ListVal = ePermElt.ListVal;
     elt     = ePermElt.elt;
+    //    NicePrint("Constructor 4", *this);
   }
   PermutationElt(PermutationElt&& ePermElt)
   {
+    //    std::cerr << "PermutationElt 5\n";
     siz       = ePermElt.siz;
     ListVal   = std::move(ePermElt.ListVal);
     elt       = std::move(ePermElt.elt);
     ePermElt.siz = 0;
+    //    NicePrint("Constructor 5", *this);
   }
   //
   // Copy operator
@@ -184,28 +213,51 @@ bool operator<(PermutationElt<Tidx,Telt> const& v1, PermutationElt<Tidx,Telt> co
   return v1.elt < v2.elt;
 }
 
+//
+// Operations
+//
+
+
+template<typename Tidx, typename Telt>
+bool CoherencyCheck(PermutationElt<Tidx,Telt> const& ePermElt)
+{
+  Tidx siz=ePermElt.size();
+  const std::vector<Tidx>& LVal = ePermElt.getListVal();
+  Telt elt = ePermElt.getElt();
+  bool is_ok=true;
+  if (int(siz) == elt.rows() && int(siz) == elt.cols()) {
+    for (Tidx iLine=0; iLine<siz; iLine++) {
+      Tidx pos = LVal[iLine];
+      if (elt(iLine, pos) != 1)
+        is_ok=false;
+    }
+  }
+  return is_ok;
+}
+
+
 template<typename Tidx, typename Telt>
 PermutationElt<Tidx,Telt> operator~(PermutationElt<Tidx,Telt> const& ePermElt)
 {
+  //  NicePrint("operatorInverse : ePermElt", ePermElt);
   Tidx siz = ePermElt.size();
   const std::vector<Tidx>& LVal = ePermElt.getListVal();
   std::vector<Tidx> v(siz);
   for (Tidx i=0; i<siz; i++)
     v[LVal[i]] = i;
   Telt Minv = Inverse(ePermElt.elt);
+  //  NicePrint("eInv", PermutationElt<Tidx,Telt>(v, Minv));
+  //  std::cerr << "operatorInverse status=" << CoherencyCheck(ePermElt) << "\n";
   return PermutationElt<Tidx,Telt>(std::move(v), std::move(Minv));
 }
-
-
-
-
-
 
 
 // Form the product v1 * v2
 template<typename Tidx, typename Telt>
 PermutationElt<Tidx,Telt> operator*(PermutationElt<Tidx,Telt> const& v1, PermutationElt<Tidx,Telt> const& v2)
 {
+  //  NicePrint("operator* : v1", v1);
+  //  NicePrint("operator* : v2", v2);
   Tidx siz=v1.size();
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   if (siz != v2.size() ) {
@@ -223,6 +275,8 @@ PermutationElt<Tidx,Telt> operator*(PermutationElt<Tidx,Telt> const& v1, Permuta
   }
   //  return SingleSidedPerm<Tidx>(vVal);
   Telt Mprod = v1.elt * v2.elt;
+  //  NicePrint("prod", PermutationElt<Tidx,Telt>(vVal, Mprod));
+  //  std::cerr << "operator* status=" << CoherencyCheck(PermutationElt<Tidx,Telt>(vVal, Mprod)) << "\n";
   return PermutationElt<Tidx,Telt>(std::move(vVal), std::move(Mprod));
 }
 
@@ -247,6 +301,8 @@ void operator*=(PermutationElt<Tidx,Telt> & v1, PermutationElt<Tidx,Telt> const&
 template<typename Tidx, typename Telt>
 PermutationElt<Tidx,Telt> Conjugation(PermutationElt<Tidx,Telt> const& v1, PermutationElt<Tidx,Telt> const& v2)
 {
+  //  NicePrint("Conjugation : v1", v1);
+  //  NicePrint("Conjugation : v2", v2);
   Tidx siz=v1.size();
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   if (siz != v2.size() ) {
@@ -261,7 +317,10 @@ PermutationElt<Tidx,Telt> Conjugation(PermutationElt<Tidx,Telt> const& v1, Permu
     Tidx j2=v2[j];
     v[i2]=j2;
   }
+  // That formula is the correct one
   Telt Mret = Inverse(v2.elt) * v1.elt * v2.elt;
+  //  NicePrint("res", PermutationElt<Tidx,Telt>(v, Mret));
+  //  std::cerr << "Conjugation status=" << CoherencyCheck(PermutationElt<Tidx,Telt>(v, Mret)) << "\n";
   return PermutationElt<Tidx,Telt>(std::move(v), std::move(Mret));
 }
 
@@ -286,6 +345,8 @@ Tidx SlashAct(Tidx const& i, PermutationElt<Tidx,Telt> const& g)
 template<typename Tidx, typename Telt>
 PermutationElt<Tidx,Telt> LeftQuotient(PermutationElt<Tidx,Telt> const& a, PermutationElt<Tidx,Telt> const& b)
 {
+  //  NicePrint("LeftQuotient : a", a);
+  //  NicePrint("LeftQuotient : b", b);
   Tidx siz=Tidx(a.size());
   const std::vector<Tidx>& Val_A = a.getListVal();
   const std::vector<Tidx>& Val_B = b.getListVal();
@@ -293,6 +354,8 @@ PermutationElt<Tidx,Telt> LeftQuotient(PermutationElt<Tidx,Telt> const& a, Permu
   for (Tidx i=0; i<siz; i++)
     ListVal[Val_A[i]] = Val_B[i];
   Telt Mret = Inverse(a.elt) * b.elt;
+  //  NicePrint("res", PermutationElt<Tidx,Telt>(ListVal, Mret));
+  //  std::cerr << "LeftQuotient status=" << CoherencyCheck(PermutationElt<Tidx,Telt>(ListVal, Mret)) << "\n";
   return PermutationElt<Tidx,Telt>(std::move(ListVal), std::move(Mret));
 }
 
@@ -307,6 +370,10 @@ PermutationElt<Tidx,Telt> Inverse(PermutationElt<Tidx,Telt> const& ePermElt)
 }
 
 
+
+//
+// Prinouts and other operations
+//
 
 
 template<typename Tidx, typename Telt>
@@ -356,6 +423,8 @@ template<typename Tidx, typename T>
 std::ostream& operator<<(std::ostream& os, PermutationElt<Tidx,T> const& ePermElt)
 {
   os << GapStyleStringShift(ePermElt, 1);
+  //  os << "M =";
+  //  os << ePermElt.getElt();
   return os;
 }
 
@@ -384,10 +453,7 @@ namespace std {
       return hash1;
     }
   };
-
 }
-
-
 
 
 

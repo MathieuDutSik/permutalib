@@ -39,8 +39,12 @@
 
 // Needed for the comparison with
 #ifdef SYNCHRONIZED_DEBUG_GAP478
-# define DEBUG_STABCHAIN
-# define DEBUG_CHANGE_STAB_CHAIN
+# ifndef DEBUG_STABCHAIN
+#  define DEBUG_STABCHAIN
+# endif
+# ifndef DEBUG_CHANGE_STAB_CHAIN
+#  define DEBUG_CHANGE_STAB_CHAIN
+# endif
 #endif
 
 // Other debugging.(but not currently in the gap stuff)

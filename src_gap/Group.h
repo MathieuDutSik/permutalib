@@ -83,11 +83,11 @@ namespace permutalib {
 
 
 template<typename Telt>
-Telt RandomElement(const std::vector<Telt>& LGen, const typename Telt::Tidx& n)
+Telt RandomElement(const std::vector<Telt>& LGen, const Telt& id)
 {
   size_t len = rand() % 100;
   size_t n_gen = LGen.size();
-  Telt eElt(n);
+  Telt eElt = id;
   for (size_t iIter=0; iIter<len; iIter++) {
     size_t pos = size_t(rand()) % n_gen;
     eElt *= LGen[pos];
@@ -190,7 +190,7 @@ public:
     return Kernel_CanonicalImage<Telt,Tidx_label,Tint>(S, f);
   }
   Telt rand() const {
-    return RandomElement(Kernel_GeneratorsOfGroup(S), S->comm->n);
+    return RandomElement(Kernel_GeneratorsOfGroup(S), S->comm->identity);
   }
   bool IsCommutative() const {
     return Kernel_IsCommutative(S);
@@ -430,6 +430,9 @@ std::optional<TeltMatr> RepresentativeActionMatrixPermSubset(std::vector<TeltMat
   if (!opt)
     return {};
   TeltPerm const& elt = *opt;
+  //  std::cerr << "len=" << len << "  elt=" << elt << "\n";
+  //  std::cerr << "id_matr=";
+  //  WriteMatrix(std::cerr, id_matr);
   //
   TeltPerm id_perm(len);
   using Telt = PermutationElt<Tidx,TeltMatr>;
@@ -437,13 +440,38 @@ std::optional<TeltMatr> RepresentativeActionMatrixPermSubset(std::vector<TeltMat
   Telt ePair(elt.getListVal(), id_matr);
   Telt idB(id_perm.getListVal(), id_matr);
   std::vector<Telt> ListGensB;
-  for (size_t iGen=0; iGen<ListPermGens.size(); iGen++) {
+  size_t nGen=ListPermGens.size();
+  for (size_t iGen=0; iGen<nGen; iGen++) {
     Telt fPair(ListPermGens[iGen].getListVal(), ListMatrGens[iGen]);
+    //    std::string mesg = "fPair : iGen" + std::to_string(iGen);
+    //    NicePrint(mesg, fPair);
     ListGensB.push_back(fPair);
   }
   TgroupB GRP_B(ListGensB, idB);
+  /*
+  {
+    size_t nElt = 20;
+    std::vector<Telt> ListElt;
+    for (size_t iElt=0; iElt<nElt; iElt++)
+      ListElt.push_back(GRP_B.rand());
+    std::vector<Telt> LGen;
+    for (size_t iElt=0; iElt<nElt; iElt++)
+      for (size_t jElt=0; jElt<nElt; jElt++) {
+        Telt v1 = ListElt[iElt];
+        Telt v2 = ListElt[jElt];
+        Telt trans1 = Conjugation(v1, v2);
+        Telt trans2 = LeftQuotient(v1, v2);
+        LGen.push_back(trans1);
+        LGen.push_back(trans2);
+      }
+    std::cerr << "|LGen|=" << LGen.size() << "\n";
+  }
+  */
+  //  NicePrint("ePair", ePair);
   Telt res = GRP_B.Sift(ePair);
+  //  NicePrint("res", res);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+  //  std::cerr << "Doing the check\n";
   std::vector<Tidx> const& V = res.getListVal();
   for (Tidx u=0; u<len; u++) {
     if (V[u] != u) {
@@ -453,6 +481,7 @@ std::optional<TeltMatr> RepresentativeActionMatrixPermSubset(std::vector<TeltMat
   }
 #endif
   TeltMatr ret = Inverse(res.getElt());
+  //  std::cerr << "Returning from RepresentativeActionMatrixPermSubset\n";
   return ret;
 }
 
