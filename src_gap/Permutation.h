@@ -491,8 +491,6 @@ std::ostream& operator<<(std::ostream& os, DoubleSidedPerm<Tidx> const& ePerm)
 }
 
 
-
-
 template<typename Tidx_inp>
 struct SingleSidedPerm {
 public:
@@ -908,12 +906,22 @@ std::ostream& operator<<(std::ostream& os, SingleSidedPerm<Tidx> const& ePerm)
 
 
 
-
-
 }
 
 
 
+namespace std {
+  template<typename Tidx>
+  std::string to_string(permutalib::DoubleSidedPerm<Tidx> const& ePerm)
+  {
+    return GapStyleStringShift(ePerm, 1);
+  }
+  template<typename Tidx>
+  std::string to_string(permutalib::SingleSidedPerm<Tidx> const& ePerm)
+  {
+    return GapStyleStringShift(ePerm, 1);
+  }
+}
 
 
 
