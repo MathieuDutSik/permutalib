@@ -3,7 +3,7 @@
 
 
 
-
+namespace permutalib {
 
 
 
@@ -33,13 +33,15 @@ InstallGlobalFunction( MinimizeExplicitTransversal, function( U, maxmoved )
         U.index    := index;
     fi;
 end );
+
+
+
+
 InstallGlobalFunction( AddCosetInfoStabChain, function( G, U, maxmoved )
     local   orb,  pimg,  img,  vert,  s,  t,  index,
             block,  B,  blist,  pos,  sliced,  lenflock,  i,  j,
             ss,  tt,t1,t1lim;
 
-    Info(InfoCoset,5,"AddCosetInfoStabChain [",
-          SizeStabChain(G),",",SizeStabChain(U),"]");
     if IsEmpty( G.genlabels )  then
         U.index    := 1;
         U.explicit := [ U.identity ];
@@ -50,7 +52,6 @@ InstallGlobalFunction( AddCosetInfoStabChain, function( G, U, maxmoved )
 
         # U.index := [G_1:U_1];
         U.index := U.stabilizer.index * Length( G.orbit ) / Length( U.orbit );
-	Info(InfoCoset,5,"U.index=",U.index);
 
         # block := 1 ^ <U,G_1>; is a block for G.
         block := OrbitPerms( Concatenation( U.generators,
@@ -220,16 +221,13 @@ BindGlobal( "RightTransversalPermGroupConstructor", function( filter, G, U )
 	UCC:=UC;
         while    Length( GCC.genlabels ) <> 0
               or Length( UCC.genlabels ) <> 0  do
-#Print(SizeStabChain(GCC),"/",SizeStabChain(UCC),":",
-#  SizeStabChain(GCC)/SizeStabChain(UCC),"\n");
           if noyet and (
-	  (SizeStabChain(GCC)/SizeStabChain(UCC)*10 >MAX_SIZE_TRANSVERSAL) or
-	  (Length(UCC.genlabels)=0 and
-	    SizeStabChain(GCC)>MAX_SIZE_TRANSVERSAL)
+	  (SizeStabChain(GCC)/SizeStabChain(UCC)*10 > MAX_SIZE_TRANSVERSAL) ||
+	  (Length(UCC.genlabels)=0 && SizeStabChain(GCC) > MAX_SIZE_TRANSVERSAL)
 	    ) then
-	    # we potentially go through many steps, making it expensive
+	    // we potentially go through many steps, making it expensive
 	    ac:=AscendingChain(G,U:cheap);
-	    # go in biggish steps through the chain
+	    // go in biggish steps through the chain
 	    nc:=[ac[1]];
 	    for i in [3..Length(ac)] do
 	      if Size(ac[i])/Size(nc[Length(nc)])>MAX_SIZE_TRANSVERSAL then
@@ -240,10 +238,8 @@ BindGlobal( "RightTransversalPermGroupConstructor", function( filter, G, U )
 	    if Length(nc)>2 then
 	      ac:=[];
 	      for i in [Length(nc),Length(nc)-1..2] do
-		Info(InfoCoset,4,"Recursive [",Size(nc[i]),",",Size(nc[i-1]));
-		Add(ac,RightTransversal(nc[i],nc[i-1]
-		      # do not try to factor again
-		      :noascendingchain));
+                // do not try to factor again
+		Add(ac,RightTransversal(nc[i],nc[i-1]:noascendingchain));
 	      od;
 	      return FactoredTransversal(G,U,ac);
 	    fi;
@@ -288,17 +284,19 @@ end );
 ##  the operation of G on the Right Cosets of U.
 ##
 */
+template<typename Telt, typename Tidx_label>
+std::optional<StabChain<Telt,Tidx_label>> IntermediateGroup(StabChain<Telt,Tidx_label> const& G_in, StabChain<Telt,Tidx_label> const& U)
+{
+  if (U.size() == G.size())
+    return {};
 
-InstallGlobalFunction( IntermediateGroup, function(G,U)
 
-  if U=G then
-    return fail;
-  fi;
 
+  
   intersize:=Size(G);
   m:=ValueOption("intersize");
   if IsInt(m) and m<=intersize then
-    return fail; # avoid infinite recursion
+                       return fail; // avoid infinite recursion
   fi;
 
   // use maximals, use `Try` as we call with limiting options
@@ -321,8 +319,7 @@ InstallGlobalFunction( IntermediateGroup, function(G,U)
     fi;
     G:=G1;
   fi;
-  o:=ActionHomomorphism(G,RightTransversal(G,U:noascendingchain),
-    OnRight,"surjective");
+  o:=ActionHomomorphism(G,RightTransversal(G,U:noascendingchain), OnRight,"surjective");
   img:=Range(o);
   b:=Blocks(img,MovedPoints(img));
   if Length(b)=1 then
@@ -332,15 +329,18 @@ InstallGlobalFunction( IntermediateGroup, function(G,U)
     b:=PreImage(o,b);
     return b;
   fi;
-end );
+}
 
 
+/*
 #############################################################################
 ##
 #F  RefinedChain(<G>,<c>) . . . . . . . . . . . . . . . .  refine chain links
 ##
-InstallGlobalFunction(RefinedChain,function(G,cc)
-local bound,a,b,c,cnt,r,i,j,bb,normalStep,gens,hardlimit,cheap,olda;
+*/
+template<typename Telt, typename Tidx_label>
+std::vector<StabChain<Telt,Tidx_label>> RefinedChain(StabChain<Telt,Tidx_label> const& G, std::vector<StabChain<Telt,Tidx_label>> const& cc)
+{
   bound:=(10*LogInt(Size(G),10)+1)*Maximum(Factors(Size(G)));
   bound:=Minimum(bound,20000);
   cheap:=ValueOption("cheap")=true;
@@ -357,10 +357,10 @@ local bound,a,b,c,cnt,r,i,j,bb,normalStep,gens,hardlimit,cheap,olda;
       olda:=TrivialSubgroup(a);
       while Index(cc[i],a)>bound and Size(a)>Size(olda) do
         olda:=a;
-        # try extension via normalizer
+        // try extension via normalizer
         b:=Normalizer(cc[i],a);
         if Size(b)>Size(a) then
-         # extension by normalizer surely is a normal step
+           // extension by normalizer surely is a normal step
           normalStep:=true;
           bb:=b;
         else
@@ -370,18 +370,18 @@ local bound,a,b,c,cnt,r,i,j,bb,normalStep,gens,hardlimit,cheap,olda;
         fi;
         if Size(b)=Size(a) or Index(b,a)>bound then
           cnt:=8+2^(LogInt(Index(bb,a),9));
-          #if cheap then cnt:=Minimum(cnt,50);fi;
+                      // if cheap then cnt:=Minimum(cnt,50);fi;
           cnt:=Minimum(cnt,40); # as we have better intermediate
           repeat
             if cnt<20 and not cheap then
-              # if random failed: do hard work
+                      // if random failed: do hard work
               b:=IntermediateGroup(bb,a);
               if b=fail then
                 b:=bb;
               fi;
               cnt:=0;
             else
-            # larger indices may take more tests...
+              // larger indices may take more tests...
               repeat
                 r:=Random(bb);
               until not(r in a);
@@ -389,8 +389,8 @@ local bound,a,b,c,cnt,r,i,j,bb,normalStep,gens,hardlimit,cheap,olda;
                 # NC is safe
                 b:=ClosureSubgroupNC(a,r);
               else
-                # self normalizing subgroup: thus every element not in <a>
-                     # will surely map one generator out
+                // self normalizing subgroup: thus every element not in <a>
+                // will surely map one generator out
                 j:=0;
                 gens:=GeneratorsOfGroup(a);
                 repeat
@@ -427,7 +427,7 @@ local bound,a,b,c,cnt,r,i,j,bb,normalStep,gens,hardlimit,cheap,olda;
   Add(c,cc[Length(cc)]);
   a:=c[Length(c)];
   for i in [Length(c)-1,Length(c)-2..1] do
-    #enforce parent relations
+          //  enforce parent relations
     if not HasParent(c[i]) then
       SetParent(c[i],a);
       a:=c[i];
@@ -437,19 +437,19 @@ local bound,a,b,c,cnt,r,i,j,bb,normalStep,gens,hardlimit,cheap,olda;
     fi;
   od;
   return c;
-end);
+}
 
 
 
-
+/*
 #############################################################################
 ##
 #M  AscendingChainOp(<G>,<pnt>) . . . approximation of
 ##
-InstallMethod( AscendingChainOp, "PermGroup", IsIdenticalObj,
-  [IsPermGroup,IsPermGroup],0,
-function(G,U)
-local s,c,mp,o,i,step,a;
+*/
+template<typename Telt, typename Tidx_label>
+std::vector<StabChain<Telt,typename Tidx_label>> AscendingChain(StabChain<Telt,typename Tidx_label> const& G, StabChain<Telt,typename Tidx_label> const& U)
+{
   s:=G;
   c:=[G];
   repeat
@@ -486,9 +486,13 @@ local s,c,mp,o,i,step,a;
     Add(c,U);
   fi;
   return RefinedChain(G,Reversed(c));
-end);
+}
 
 
+
+
+
+/*
 
 #############################################################################
 ##
@@ -1069,9 +1073,9 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
   return dcs;
 end);
 
+*/
 
 
-
-
+}
 
 #endif
