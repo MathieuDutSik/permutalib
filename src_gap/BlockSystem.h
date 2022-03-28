@@ -4,6 +4,7 @@
 #include "Face_basic.h"
 #include "GraphicFunctionality.h"
 #include "PermGroup.h"
+#include "factorize.h"
 
 namespace permutalib {
 

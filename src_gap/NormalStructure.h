@@ -161,7 +161,7 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
   auto get_and_test = [&](const size_t &i) -> bool {
     std::vector<Telt> gensB;
     for (size_t u = 0; u < i; u++) {
-      Telt g = RandomElement(gens2, n);
+      Telt g = RandomElement(gens2, id);
       gensB.push_back(std::move(g));
     }
     if (check_correctness_gens(gensB)) {
