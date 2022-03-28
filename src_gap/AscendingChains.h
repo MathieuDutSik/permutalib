@@ -220,6 +220,14 @@ end );
   //MAX_SIZE_TRANSVERSAL := 100000;
 
 
+
+
+
+
+
+
+
+  
   /*
 // If the option "noascendingchain" is selected then ValueOption("noascendingchain") = true
 // and thus noyet = false and so most of the text below does not apply
@@ -289,6 +297,14 @@ end );
 
 
 
+template<typename Telt, typename Tidx_label>
+std::vector<Telt> RightTransversal(StabChain<Telt,Tidx_label> const& G_in, StabChain<Telt,Tidx_label> const& U_in)
+{
+  std::vector<Telt> ListTransversal;
+
+  return ListTransversal;
+}
+
 
 /*
 #############################################################################
@@ -308,25 +324,18 @@ std::optional<StabChain<Telt,Tidx_label>> IntermediateGroup(StabChain<Telt,Tidx_
     return {};
 
   intersize:=Size(G);
-  m:=ValueOption("intersize");
-  if IsInt(m) and m<=intersize then
-                       return fail; // avoid infinite recursion
-  fi;
 
   // use maximals, use `Try` as we call with limiting options
   // We disable the code using the TryMaximalSubgroupClassReps
   // as it requires a lot of prerequisite.
 
-  c:=ValueOption("refineChainActionLimit");
-  if IsInt(c) then
-    hardlimit:=c;
-  else
-    hardlimit:=1000000;
-  fi;
+  Tidx_label hardlimit=1000000;
 
-  if Index(G,U)>hardlimit then return fail;fi;
+  if (Index(G,U) > hardlimit) {
+    return {};
+  }
 
-  if IsPermGroup(G) and Length(GeneratorsOfGroup(G))>3 then
+  if Length(GeneratorsOfGroup(G))>3 then
     G1:=Group(SmallGeneratingSet(G));
     if HasSize(G) then
       SetSize(G1,Size(G));
