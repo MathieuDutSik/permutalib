@@ -4,8 +4,7 @@
 
 #include "Group.h"
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   try {
     using Tidx = uint16_t;
     using Telt = permutalib::SingleSidedPerm<Tidx>;
@@ -26,35 +25,35 @@ int main(int argc, char *argv[])
     is >> n_i;
     Tidx n = Tidx(n_i);
     std::vector<Telt> LGen(nbGen);
-    for (size_t iGen=0; iGen<nbGen; iGen++) {
+    for (size_t iGen = 0; iGen < nbGen; iGen++) {
       std::vector<Tidx> ePermV(n);
-      for (Tidx i=0; i<n; i++) {
-	int eVal_i;
-	is >> eVal_i;
-	Tidx eVal = Tidx(eVal_i);
-	ePermV[i]=eVal;
+      for (Tidx i = 0; i < n; i++) {
+        int eVal_i;
+        is >> eVal_i;
+        Tidx eVal = Tidx(eVal_i);
+        ePermV[i] = eVal;
       }
       Telt ePerm(ePermV);
       LGen[iGen] = ePerm;
     }
     //
     Telt id(n);
-    permutalib::Group<Telt,Tint> eG(LGen, id);
+    permutalib::Group<Telt, Tint> eG(LGen, id);
     bool IsPrimitive = eG.IsPrimitive();
     bool IsTransitive = eG.IsTransitive();
     bool IsCommutative = eG.IsCommutative();
     bool IsCyclic = eG.IsCyclic();
     //
-    auto prt=[&](std::ostream & os) -> void {
-      auto fct=[&](const bool& val) -> std::string {
+    auto prt = [&](std::ostream &os) -> void {
+      auto fct = [&](const bool &val) -> std::string {
         if (val)
           return "true";
         return "false";
       };
-      os << "return rec(IsPrimitive:=" << fct(IsPrimitive) <<
-        ", IsTransitive:=" << fct(IsTransitive) <<
-        ", IsCommutative:=" << fct(IsCommutative) <<
-        ", IsCyclic:=" << fct(IsCyclic) << ");\n\n";
+      os << "return rec(IsPrimitive:=" << fct(IsPrimitive)
+         << ", IsTransitive:=" << fct(IsTransitive)
+         << ", IsCommutative:=" << fct(IsCommutative)
+         << ", IsCyclic:=" << fct(IsCyclic) << ");\n\n";
     };
 
     if (argc == 3) {
@@ -64,8 +63,7 @@ int main(int argc, char *argv[])
     } else {
       prt(std::cerr);
     }
-  }
-  catch (PermutalibException const& e) {
+  } catch (PermutalibException const &e) {
     std::cerr << "Erroneous completion of the program\n";
     exit(e.eVal);
   }

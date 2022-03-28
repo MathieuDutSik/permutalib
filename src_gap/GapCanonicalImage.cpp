@@ -4,8 +4,7 @@
 
 #include "Group.h"
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   try {
     using Tidx = uint16_t;
     //    using Telt = permutalib::DoubleSidedPerm<Tidx>;
@@ -26,39 +25,40 @@ int main(int argc, char *argv[])
     is >> n_i;
     Tidx n = Tidx(n_i);
     std::vector<Telt> LGen(nbGen);
-    for (size_t iGen=0; iGen<nbGen; iGen++) {
+    for (size_t iGen = 0; iGen < nbGen; iGen++) {
       std::vector<Tidx> ePermV(n);
-      for (Tidx i=0; i<n; i++) {
+      for (Tidx i = 0; i < n; i++) {
         int eVal_i;
-	is >> eVal_i;
-	Tidx eVal = Tidx(eVal_i);
-	ePermV[i] = eVal;
+        is >> eVal_i;
+        Tidx eVal = Tidx(eVal_i);
+        ePermV[i] = eVal;
       }
       Telt ePerm(ePermV);
       LGen[iGen] = ePerm;
     }
     std::cerr.setf(std::ios::boolalpha);
     //
-    //    permutalib::StabChain<Telt> eG = permutalib::MinimalStabChain<Telt,Tint>(LGen, n);
+    //    permutalib::StabChain<Telt> eG =
+    //    permutalib::MinimalStabChain<Telt,Tint>(LGen, n);
     Telt id(n);
-    permutalib::Group<Telt,Tint> eG(LGen, id);
+    permutalib::Group<Telt, Tint> eG(LGen, id);
     //    std::cerr << "CPP eG=" << eG << "\n";
     //
     std::cerr << "CPP |eG|=" << eG.size() << "\n";
     //
     permutalib::Face eFace(n);
-    for (Tidx i=0; i<n; i++) {
+    for (Tidx i = 0; i < n; i++) {
       int eVal;
       is >> eVal;
       eFace[i] = eVal;
     }
     permutalib::Face set_can = eG.CanonicalImage(eFace);
     //
-    auto prt=[&](std::ostream & os) -> void {
+    auto prt = [&](std::ostream &os) -> void {
       os << "return [";
       size_t siz = set_can.count();
       boost::dynamic_bitset<>::size_type aRow = set_can.find_first();
-      for (size_t i=0; i<siz; i++) {
+      for (size_t i = 0; i < siz; i++) {
         if (i > 0)
           os << ",";
         os << (int(aRow) + 1);
@@ -74,8 +74,7 @@ int main(int argc, char *argv[])
       prt(std::cerr);
     }
     std::cerr << "CPP Normal completion of the program\n";
-  }
-  catch (PermutalibException const& e) {
+  } catch (PermutalibException const &e) {
     std::cerr << "Erroneous completion of the program\n";
     exit(e.eVal);
   }

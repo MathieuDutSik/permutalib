@@ -1,9 +1,6 @@
 #ifndef DEFINE_PERMUTALIB_HASH_FCT_H
 #define DEFINE_PERMUTALIB_HASH_FCT_H
 
-
-
-
 namespace permutalib {
 
 static inline uint32_t murmur_32_scramble(uint32_t k) {
@@ -13,8 +10,7 @@ static inline uint32_t murmur_32_scramble(uint32_t k) {
   return k;
 }
 
-uint32_t murmur3_32(const uint8_t* key, size_t len, uint32_t seed)
-{
+uint32_t murmur3_32(const uint8_t *key, size_t len, uint32_t seed) {
   uint32_t h = seed;
   uint32_t k;
   /* Read in groups of 4. */
@@ -47,9 +43,7 @@ uint32_t murmur3_32(const uint8_t* key, size_t len, uint32_t seed)
   return h;
 }
 
-
-template<typename T>
-inline T unaligned_load(void const* ptr) noexcept {
+template <typename T> inline T unaligned_load(void const *ptr) noexcept {
   // using memcpy so we don't get into unaligned load problems.
   // compiler should optimize this very well anyways.
   T t;
@@ -57,14 +51,13 @@ inline T unaligned_load(void const* ptr) noexcept {
   return t;
 }
 
-
-
-inline size_t robin_hood_hash_bytes(void const* ptr, size_t len, const uint64_t& seed) noexcept {
+inline size_t robin_hood_hash_bytes(void const *ptr, size_t len,
+                                    const uint64_t &seed) noexcept {
   static constexpr uint64_t m = UINT64_C(0xc6a4a7935bd1e995);
   //    static constexpr uint64_t seed = UINT64_C(0xe17a1465);
   static constexpr unsigned int r = 47;
 
-  auto const* const data64 = static_cast<uint64_t const*>(ptr);
+  auto const *const data64 = static_cast<uint64_t const *>(ptr);
   uint64_t h = seed ^ (len * m);
 
   size_t const n_blocks = len / 8;
@@ -78,7 +71,8 @@ inline size_t robin_hood_hash_bytes(void const* ptr, size_t len, const uint64_t&
     h ^= k;
     h *= m;
   }
-  auto const* const data8 = reinterpret_cast<uint8_t const*>(data64 + n_blocks);
+  auto const *const data8 =
+      reinterpret_cast<uint8_t const *>(data64 + n_blocks);
   switch (len & 7U) {
   case 7:
     h ^= static_cast<uint64_t>(data8[6]) << 48U;
@@ -108,14 +102,11 @@ inline size_t robin_hood_hash_bytes(void const* ptr, size_t len, const uint64_t&
 
   h ^= h >> r;
 
-  // not doing the final step here, because this will be done by keyToIdx anyways
-  // h *= m;
-  // h ^= h >> r;
+  // not doing the final step here, because this will be done by keyToIdx
+  // anyways h *= m; h ^= h >> r;
   return static_cast<size_t>(h);
 }
 
-
-
-}
+} // namespace permutalib
 
 #endif

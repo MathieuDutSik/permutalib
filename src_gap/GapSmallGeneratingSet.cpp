@@ -4,8 +4,7 @@
 
 #include "Group.h"
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   try {
     using Tidx = uint16_t;
     using Telt = permutalib::SingleSidedPerm<Tidx>;
@@ -27,12 +26,12 @@ int main(int argc, char *argv[])
     is >> n_i;
     Tidx n = Tidx(n_i);
     std::vector<Telt> LGen(nbGen);
-    for (size_t iGen=0; iGen<nbGen; iGen++) {
+    for (size_t iGen = 0; iGen < nbGen; iGen++) {
       std::vector<Tidx> ePermV(n);
-      for (Tidx i=0; i<n; i++) {
-	int eVal_i;
-	is >> eVal_i;
-	ePermV[i]=Tidx(eVal_i);
+      for (Tidx i = 0; i < n; i++) {
+        int eVal_i;
+        is >> eVal_i;
+        ePermV[i] = Tidx(eVal_i);
       }
       Telt ePerm(ePermV);
       LGen[iGen] = ePerm;
@@ -40,7 +39,7 @@ int main(int argc, char *argv[])
     std::cerr.setf(std::ios::boolalpha);
     //
     Telt id(n);
-    permutalib::Group<Telt,Tint> eG(LGen, id);
+    permutalib::Group<Telt, Tint> eG(LGen, id);
     //
     std::vector<Telt> Sma = eG.SmallGeneratingSet();
     //
@@ -52,8 +51,7 @@ int main(int argc, char *argv[])
       std::cerr << "CPP Sma=" << GapStringTVector(Sma) << "\n";
     }
     std::cerr << "CPP Normal completion of the program\n";
-  }
-  catch (PermutalibException const& e) {
+  } catch (PermutalibException const &e) {
     std::cerr << "Erroneous completion of the program\n";
     exit(e.eVal);
   }

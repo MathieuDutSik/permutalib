@@ -3,8 +3,7 @@
 #include "gmpxx.h"
 #include <fstream>
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   try {
     using Tidx = uint16_t;
     using Tidx_label = uint16_t;
@@ -19,28 +18,28 @@ int main(int argc, char *argv[])
     (void)sscanf(argv[1], "%d", &n);
     //
     std::vector<Tidx> ePermV1(n);
-    for (int i=0; i<n; i++) {
-      int iNext=i+1;
+    for (int i = 0; i < n; i++) {
+      int iNext = i + 1;
       if (iNext == n)
-	iNext=0;
+        iNext = 0;
       ePermV1[i] = iNext;
     }
     Telt ePerm1(ePermV1);
     //
     std::vector<Tidx> ePermV2(n);
-    for (int i=0; i<n; i++)
+    for (int i = 0; i < n; i++)
       ePermV2[i] = i;
-    ePermV2[1]=0;
-    ePermV2[0]=1;
+    ePermV2[1] = 0;
+    ePermV2[0] = 1;
     Telt ePerm2(ePermV2);
     //
     std::vector<Telt> LGen{ePerm1, ePerm2};
     //
     Telt id(n);
-    permutalib::StabChain<Telt,Tidx_label> S = permutalib::MinimalStabChain<Telt,Tidx_label,Tint>(LGen, id);
+    permutalib::StabChain<Telt, Tidx_label> S =
+        permutalib::MinimalStabChain<Telt, Tidx_label, Tint>(LGen, id);
     std::cerr << "S=" << S << "\n";
-  }
-  catch (PermutalibException const& e) {
+  } catch (PermutalibException const &e) {
     exit(e.eVal);
   }
   std::cerr << "Completion of the program\n";

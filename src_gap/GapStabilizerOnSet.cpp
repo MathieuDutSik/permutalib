@@ -4,8 +4,7 @@
 
 #include "Group.h"
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   try {
     using Tidx = uint16_t;
     using Telt = permutalib::SingleSidedPerm<Tidx>;
@@ -26,13 +25,13 @@ int main(int argc, char *argv[])
     is >> n_i;
     Tidx n = Tidx(n_i);
     std::vector<Telt> LGen(nbGen);
-    for (size_t iGen=0; iGen<nbGen; iGen++) {
+    for (size_t iGen = 0; iGen < nbGen; iGen++) {
       std::vector<Tidx> ePermV(n);
-      for (Tidx i=0; i<n; i++) {
-	int eVal_i;
-	is >> eVal_i;
-	Tidx eVal = Tidx(eVal_i);
-	ePermV[i]=eVal;
+      for (Tidx i = 0; i < n; i++) {
+        int eVal_i;
+        is >> eVal_i;
+        Tidx eVal = Tidx(eVal_i);
+        ePermV[i] = eVal;
       }
       Telt ePerm(ePermV);
       LGen[iGen] = ePerm;
@@ -40,20 +39,21 @@ int main(int argc, char *argv[])
     std::cerr.setf(std::ios::boolalpha);
     //
     std::cerr << "CPP Before call to MinimalStabChain\n";
-    //    permutalib::StabChain<Telt> eG = permutalib::MinimalStabChain<Telt,Tint>(LGen, n);
+    //    permutalib::StabChain<Telt> eG =
+    //    permutalib::MinimalStabChain<Telt,Tint>(LGen, n);
     Telt id(n);
-    permutalib::Group<Telt,Tint> eG(LGen, id);
+    permutalib::Group<Telt, Tint> eG(LGen, id);
     std::cerr << "CPP After call to MinimalStabChain\n";
     //
     std::cerr << "CPP |eG|=" << eG.size() << "\n";
     //
     permutalib::Face eFace(n);
-    for (int i=0; i<n; i++) {
+    for (int i = 0; i < n; i++) {
       int eVal;
       is >> eVal;
       eFace[i] = eVal;
     }
-    permutalib::Group<Telt,Tint> eG2 = eG.Stabilizer_OnSets(eFace);
+    permutalib::Group<Telt, Tint> eG2 = eG.Stabilizer_OnSets(eFace);
     std::cerr << "CPP |eG2|=" << eG2.size() << "\n";
     std::cerr << "CPP Normal completion of the program\n";
     //
@@ -64,8 +64,7 @@ int main(int argc, char *argv[])
     } else {
       std::cerr << "CPP |eG2|=" << eG2.size() << "\n";
     }
-  }
-  catch (PermutalibException const& e) {
+  } catch (PermutalibException const &e) {
     std::cerr << "Erroneous completion of the program\n";
     exit(e.eVal);
   }
