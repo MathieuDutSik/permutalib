@@ -6,11 +6,23 @@
 namespace permutalib {
 
 
+  /*
+    Functions depending on special data types.
 
+    Those are
+    --- lenflock / flock / lenblock / index / respStab
+    --- group / subgroup / stabChainGroup / stabChainSubgroup
+
+   */
+
+
+  /*
 #############################################################################
 ##
 #F  MinimizeExplicitTransversal( <U>, <maxmoved> )  . . . . . . . . . . local
 ##
+  */
+  /*
 InstallGlobalFunction( MinimizeExplicitTransversal, function( U, maxmoved )
     local   explicit,  lenflock,  flock,  lenblock,  index,  s;
 
@@ -33,10 +45,9 @@ InstallGlobalFunction( MinimizeExplicitTransversal, function( U, maxmoved )
         U.index    := index;
     fi;
 end );
+  */
 
-
-
-
+  /*
 InstallGlobalFunction( AddCosetInfoStabChain, function( G, U, maxmoved )
     local   orb,  pimg,  img,  vert,  s,  t,  index,
             block,  B,  blist,  pos,  sliced,  lenflock,  i,  j,
@@ -50,12 +61,11 @@ InstallGlobalFunction( AddCosetInfoStabChain, function( G, U, maxmoved )
     else
         AddCosetInfoStabChain( G.stabilizer, U.stabilizer, maxmoved );
 
-        # U.index := [G_1:U_1];
+        // U.index := [G_1:U_1];
         U.index := U.stabilizer.index * Length( G.orbit ) / Length( U.orbit );
 
-        # block := 1 ^ <U,G_1>; is a block for G.
-        block := OrbitPerms( Concatenation( U.generators,
-                 G.stabilizer.generators ), G.orbit[ 1 ] );
+        // block := 1 ^ <U,G_1>; is a block for G.
+        block := OrbitPerms( Concatenation( U.generators, G.stabilizer.generators ), G.orbit[ 1 ] );
         U.lenblock := Length( block );
         lenflock := Length( G.orbit ) / U.lenblock;
 
@@ -73,7 +83,7 @@ InstallGlobalFunction( AddCosetInfoStabChain, function( G, U, maxmoved )
             od;
         fi;
 
-        # flock := { G.transversal[ B[1] ] | B in block system };
+        // flock := { G.transversal[ B[1] ] | B in block system };
         blist := BlistList( G.orbit, block );
         pos := Position( blist, false );
         while pos <> fail  do
@@ -93,7 +103,6 @@ InstallGlobalFunction( AddCosetInfoStabChain, function( G, U, maxmoved )
             if IsBound( U.explicit )  then
                 Add( U.flock, tt[ B[ 1 ] ] );
             fi;
-            #UniteBlist( blist, BlistList( G.orbit, B ) );
             UniteBlistList(G.orbit, blist, B );
             pos := Position( blist, false, pos );
         od;
@@ -174,7 +183,7 @@ InstallGlobalFunction( AddCosetInfoStabChain, function( G, U, maxmoved )
                 s := s + 1;
             od;
 
-        # For small indices, store a transversal explicitly.
+        // For small indices, store a transversal explicitly.
         else
             for ss  in U.stabilizer.flock  do
                 Append( U.explicit, U.stabilizer.explicit * ss );
@@ -199,13 +208,21 @@ InstallGlobalFunction( AddCosetInfoStabChain, function( G, U, maxmoved )
 
     fi;
 end );
+  */
 
+
+  /*
 #############################################################################
 ##
 #F  RightTransversalPermGroupConstructor( <filter>, <G>, <U> )  . constructor
 ##
-MAX_SIZE_TRANSVERSAL := 100000;
+  */
+  //MAX_SIZE_TRANSVERSAL := 100000;
 
+
+  /*
+// If the option "noascendingchain" is selected then ValueOption("noascendingchain") = true
+// and thus noyet = false and so most of the text below does not apply
 BindGlobal( "RightTransversalPermGroupConstructor", function( filter, G, U )
   local GC, UC, noyet, orbs, domain, GCC, UCC, ac, nc, bpt, enum, i;
 
@@ -265,7 +282,7 @@ BindGlobal( "RightTransversalPermGroupConstructor", function( filter, G, U )
 
     return enum;
 end );
-
+  */
 
 
 
@@ -290,9 +307,6 @@ std::optional<StabChain<Telt,Tidx_label>> IntermediateGroup(StabChain<Telt,Tidx_
   if (U.size() == G.size())
     return {};
 
-
-
-  
   intersize:=Size(G);
   m:=ValueOption("intersize");
   if IsInt(m) and m<=intersize then
