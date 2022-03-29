@@ -589,6 +589,7 @@ TestAllGroups:=function(method, size_opt)
     local ListGroups, nbGroups, eGRP, nMov, iGRP;
     ListGroups:=GetListCandidateGroups();
     ListGroups:=Filtered(ListGroups, x->IsSolvable(x)=false);
+    ListGroups:=Filtered(ListGroups, x->IsSymmetricGroup(x)=false);
     nbGroups:=Length(ListGroups);
     Print("|ListGroups|=", nbGroups, "\n");
 

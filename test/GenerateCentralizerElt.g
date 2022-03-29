@@ -46,15 +46,10 @@ end;
 
 
   eFile:="ExampleCentralizerElt";
-#  CreateExampleOnSetCase(eFile, Group([(1,2,3,4,5,6,7,8,9),(1,2)]), [1, 2, 3]);
-#  CreateExampleOnSetCase(eFile, Group([(1,2,3,4,5),(4,5)]), [1, 2, 3]);
-#  CreateExampleOnSetCase(eFile, Group([(1,2,3,4,5),(3,4,5)]), [1, 2, 3]);
-#  CreateExampleOnSetCase(eFile, Group([ (1,4,5,9,3)(2,8,10,7,6)(12,15,16,20,14)(13,19,21,18,17), (1,21,5,12,20)(2,16,3,4,17)(6,18,7,19,15)(8,13,9,14,11) ]), [ 2, 4, 5, 9, 11, 12, 13, 14, 18 ]);
-#  CreateExampleOnSetCase(eFile, Group([ (1,2,3,4,5,6,7,8,9,10,11)(12,13,14,15,16,17,18,19,20,21,22), (1,4,5,9,3)(2,8,10,7,6)(12,15,16,20,14)(13,19,21,18,17), (1,21)(2,10,8,6)(3,13,4,17)(5,19,9,18)(11,22)(12,14,16,20) ]), [ 1, 4, 5, 9, 14, 16 ]);
-#  CreateExampleOnSetCase(eFile, Group([ (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23), (3,17,10,7,9)(4,13,14,19,5)(8,18,11,12,23)(15,20,22,21,16), (1,24)(2,23)(3,12)(4,16)(5,18)(6,10)(7,20)(8,14)(9,21)(11,17)(13,22)(15,19) ]), [ 1, 2, 5, 6, 7, 9, 11, 12, 13, 16, 18, 20, 22, 23 ]); # strange things with newgens remain to be cleared
-#  CreateExampleOnSetCase(eFile, Group([ (1,2,3,4,5,6,7,8,9), (1,2) ]), [ 5, 9 ]);
-#CreateExampleOnSetCase(eFile, Group([ (2,4,6,8,10), (1,6)(2,5,10,7)(3,8)(4,9) ]), [ 1, 3, 4, 6, 7, 8, 9, 10 ]);
-  #CreateExampleOnSetCase(eFile, Group([ (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23), (3,17,10,7,9)(4,13,14,19,5)(8,18,11,12,23)(15,20,22,21,16) ]), [ 1, 6, 7, 8, 12, 13, 14, 16, 17, 20, 21, 22, 23 ]);
 
-GenerateCentralizerEltExample(eFile, SymmetricGroup(5), (1,5)(2,4));
+
+# inadequate since there are special method for symmetric group
+#GenerateCentralizerEltExample(eFile, SymmetricGroup(5), (1,5)(2,4)); 
+
+GenerateCentralizerEltExample(eFile, Group([(1,2,3,4,5), (3,4,5)]), (1,5)(2,4));
 Print("eFile=", eFile, "\n");
