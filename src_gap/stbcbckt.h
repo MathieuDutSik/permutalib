@@ -545,7 +545,8 @@ EmptyRBase(std::vector<StabChain<Telt, Tidx_label>> const &G, bool const &IsId,
   rbase.chain = CopyStabChain(G[0]);
   rbase.level = {int_stablev, -666, rbase.chain};
 #ifdef DEBUG_STBCBCKT
-  std::cerr << "CPP |Fixcells|=" << Fixcells(P).size() << "\n";
+  auto TheList = Fixcells(P);
+  std::cerr << "CPP |Fixcells|=" << TheList.size() << "\n";
 #endif
   for (auto &pnt : Fixcells(P)) {
 #ifdef DEBUG_STBCBCKT
@@ -2583,14 +2584,26 @@ RepOpElmTuplesPermGroup(const StabChain<Telt, Tidx_label> &G,
   std::vector<Telt> LGen = Concatenation(Kernel_GeneratorsOfGroup(G), e, f);
   std::vector<Tidx> Omega = MovedPoints(LGen, n);
 
+#ifdef DEBUG_STBCBCKT
+  std::cerr << "CPP creation of P\n";
+#endif
   Partition<Tidx> P = TrivialPartition(Omega);
   Tint size = 1;
   if (!repr)
     size = Order<Telt, Tidx_label, Tint>(G);
+#ifdef DEBUG_STBCBCKT
+  std::cerr << "CPP size=" << size << "\n";
+#endif
 
   Partition<Tidx> cycles;
   for (size_t i = 0; i < e_siz; i++) {
     cycles = GetPartition(Cycles(e[i], Omega));
+#ifdef DEBUG_STBCBCKT
+    std::cerr << "CPP cycles obtained from e_i\n";
+    RawPrintPartition(cycles);
+    std::cerr << "CPP CollectedPartition result\n";
+    RawPrintPartition(CollectedPartition(cycles, size));
+#endif
     StratMeetPartition_p_p(P, CollectedPartition(cycles, size));
   }
 

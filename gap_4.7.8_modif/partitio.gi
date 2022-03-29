@@ -167,6 +167,10 @@ end );
 ##
 InstallGlobalFunction( Fixcells, function( P )
     local   fix,  i;
+    if GetDebugPartition() then
+        Print("GAP beginning of Fixcells\n");
+        RawPrintPartition(P);
+    fi;
 
     fix := [  ];
     for i  in [ 1 .. Length( P.lengths ) ]  do
@@ -515,6 +519,7 @@ InstallGlobalFunction( CollectedPartition, function( P, size )
     lens := P.lengths;
     C    := [  ];
     div  := SmallestPrimeDivisor( size );
+    Print("GAP div=", div, "\n");
     for typ  in Collected( lens )  do
         p := [  ];
         for i  in [ 1 .. Length( lens ) ]  do

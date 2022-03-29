@@ -958,7 +958,8 @@ InstallGlobalFunction( EmptyRBase, function( G, Omega, P )
 #    fi;
 
     # Process all fixpoints in <P>.
-    Print("GAP |Fixcells|=", Length(Fixcells(P)), "\n");
+    TheList:=Fixcells(P);
+    Print("GAP |Fixcells|=", Length(TheList), "\n");
     for pnt  in Fixcells( P )  do
         Print("GAP Fixcells call ProcessFixpoint_rbase pnt=", pnt, "\n");
         ProcessFixpoint( rbase, pnt );
@@ -2790,11 +2791,17 @@ local  Omega,      # a common operation domain for <G>, <E> and <F>
 
   Omega := MovedPoints( Concatenation( GeneratorsOfGroup( G ), e, f ) );
 
+  Print("GAP creation of P\n");
   P := TrivialPartition( Omega );
   if repr  then  size := 1;
 	    else  size := Size( G );  fi;
+  Print("GAP size=", size, "\n");
   for i  in [ 1 .. Length( e ) ]  do
       cycles := Partition( Cycles( e[ i ], Omega ) );
+      Print("GAP cycles obtained from e_i\n");
+      RawPrintPartition(cycles);
+      Print("GAP CollectedPartition result\n");
+      RawPrintPartition(CollectedPartition( cycles, size ));
       StratMeetPartition( P, CollectedPartition( cycles, size ) );
   od;
 

@@ -251,6 +251,10 @@ bool PointInCellNo(Partition<Tidx> const &ePartition, Tidx const &pt,
 
 template <typename Tidx>
 std::vector<Tidx> Fixcells(Partition<Tidx> const &ePartition) {
+#ifdef DEBUG_PARTITION
+  std::cerr << "CPP beginning of Fixcells\n";
+  RawPrintPartition(ePartition);
+#endif
   std::vector<Tidx> fix;
   Tidx nbPart = Tidx(ePartition.firsts.size());
   for (Tidx iPart = 0; iPart < nbPart; iPart++) {
@@ -637,27 +641,33 @@ template <typename Tarith> int SmallestPrimeDivisor(Tarith const &size) {
 template <typename Tarith, typename Tidx>
 Partition<Tidx> CollectedPartition(Partition<Tidx> const &P,
                                    Tarith const &size) {
-  Partition<Tidx> C = P;
   Tidx div = SmallestPrimeDivisor(size);
+#ifdef DEBUG_PARTITION
+  std::cerr << "CPP div=" << div << "\n";
+#endif
   Tidx nbPart = P.firsts.size();
-  Tidx nbPartTot = nbPart;
+  std::unordered_map<Tidx,std::vector<Tidx>> map;
   for (Tidx iPart = 0; iPart < nbPart; iPart++) {
     Tidx sizPart = P.lengths[iPart];
-    if (sizPart < div) {
-      Tidx eFirst = P.firsts[iPart];
-      for (Tidx i = 0; i < sizPart; i++) {
-        Tidx ePt = P.points[eFirst + i];
-        if (i == 0) {
-          C.lengths[iPart] = 1;
-        } else {
-          C.cellno[ePt] = nbPartTot;
-          C.firsts.push_back(eFirst + i);
-          C.lengths.push_back(1);
-        }
+    map[sizPart].push_back(iPart);
+  }
+  std::vector<std::vector<Tidx>> C;
+  for (auto & kv: map) {
+    Tidx n_block = kv.second.size();
+    if (n_block < div) {
+      for (auto & iPart : kv.second) {
+        C.push_back(Cell(P, iPart));
       }
+    } else {
+      std::vector<Tidx> NewConn;
+      for (auto & iPart : kv.second) {
+        for (auto & val : Cell(P, iPart))
+          NewConn.push_back(val);
+      }
+      C.push_back(NewConn);
     }
   }
-  return C;
+  return GetPartition(C);
 }
 
 } // namespace permutalib
