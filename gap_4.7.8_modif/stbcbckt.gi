@@ -2855,6 +2855,7 @@ local  Omega,      # a common operation domain for <G>, <E> and <F>
 	  return true;
         end;
 
+    Print("GAP RepOpElmTuplesPermGroup : before PartitionBacktrack\n");
     map:=PartitionBacktrack( G, [ e, f, OnTuples,Pr],
                    repr, rbase, Concatenation( [ Q ], f ),
 		   L, R:bailout:=bailout );

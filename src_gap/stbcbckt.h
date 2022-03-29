@@ -2618,6 +2618,8 @@ RepOpElmTuplesPermGroup(const StabChain<Telt, Tidx_label> &G,
   rbaseType<Telt, Tidx_label, Trfm> rbase =
       EmptyRBase<Telt, Tidx_label, Trfm>({G, G}, true, Omega, P);
 
+  // In contrast to the GAP code, we do not have an infinite loop.
+  // because we do not limit the number of iterations.
   // Loop over the stabilizer chain of <G>.
   auto nextLevel = [&](Partition<typename Telt::Tidx> &P,
                        rbaseType<Telt, Tidx_label, Trfm> &rbase,
@@ -2695,6 +2697,9 @@ RepOpElmTuplesPermGroup(const StabChain<Telt, Tidx_label> &G,
   };
   using Tdata = dataType_opperm<Telt>;
   Tdata data(Q, f);
+#ifdef DEBUG_STBCBCKT
+  std::cerr << "CPP RepOpElmTuplesPermGroup : before PartitionBacktrack\n";
+#endif
   return PartitionBacktrack<Telt, Tidx_label, Tdata, Trfm, Tint, repr,
                             decltype(Pr), decltype(nextLevel)>(
       G, Pr, nextLevel, rbase, data, L, R);
@@ -2718,6 +2723,8 @@ Kernel_Centralizer_elt(const StabChain<Telt, Tidx_label> &G, const Telt &e) {
   for (auto &eGen : Kernel_GeneratorsOfGroup(G))
     if (Conjugation(e, eGen) == e)
       LGen.push_back(eGen);
+  if (IsElementInStabChain(G, e))
+    LGen.push_back(e);
   StabChainOptions<Tint, Telt> options = GetStandardOptions<Tint, Telt>(id);
   StabChain<Telt, Tidx_label> LR_grp =
       StabChainOp_listgen<Telt, Tidx_label, Tint>(LGen, options);
