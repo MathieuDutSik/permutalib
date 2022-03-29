@@ -329,7 +329,7 @@ void PrintRBaseLevel(rbaseType<Telt, Tidx_label, Trfm> const &rbase,
                          StrongGeneratorsStabChain(rbase.lev[eD].Stot)))
                   << "\n";
       }
-      std::cerr << "CPP rbase.level="
+      std::cerr << "CPP sgs(rbase.level)="
                 << GapStringTVector(
                        SortVector(StrongGeneratorsStabChain(rbase.level.Stot)))
                 << "\n";
@@ -1377,7 +1377,7 @@ ResultPBT<Telt, Tidx_label> PartitionBacktrack(
       [&](size_t const &d, bool const &wasTriv) -> permPlusBool<Telt> {
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP PBEnumerate, step 1, d=" << int(d + 1)
-              << " wasTriv=" << wasTriv << "\n";
+    << " wasTriv=" << GapStringBool(wasTriv) << "\n";
 #endif
     permPlusBool<Telt> oldprm, oldprm2;
     Tidx a;               // current R-base point
@@ -2719,6 +2719,7 @@ Kernel_Centralizer_elt(const StabChain<Telt, Tidx_label> &G, const Telt &e) {
 #endif
   Telt id = G->comm->identity;
   std::vector<Telt> e_v{e};
+  // We compute the L R before RepOpElmTuplesPermGroup in contrary to the GAP code.
   std::vector<Telt> LGen;
   for (auto &eGen : Kernel_GeneratorsOfGroup(G))
     if (Conjugation(e, eGen) == e)
