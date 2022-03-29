@@ -324,11 +324,12 @@ void PrintRBaseLevel(rbaseType<Telt, Tidx_label, Trfm> const &rbase,
       std::cerr << str << " |rbase.lev|=" << len << "\n";
       for (size_t eD = 0; eD < len; eD++) {
         PrintStabChain(rbase.lev[eD].Stot);
-        std::cerr << "CPP rbase.lev[" << int(eD + 1) << "]="
+        std::cerr << "CPP sgs(rbase.lev[" << int(eD + 1) << "])="
                   << GapStringTVector(SortVector(
                          StrongGeneratorsStabChain(rbase.lev[eD].Stot)))
                   << "\n";
       }
+      //      PrintStabChain(rbase.level.Stot);
       std::cerr << "CPP sgs(rbase.level)="
                 << GapStringTVector(
                        SortVector(StrongGeneratorsStabChain(rbase.level.Stot)))
@@ -2539,6 +2540,7 @@ RepOpElmTuplesPermGroup(const StabChain<Telt, Tidx_label> &G,
                         StabChain<Telt, Tidx_label> &R) {
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP RepOpElmTuplesPermGroup : beginning\n";
+  std::cerr << "CPP |G|=" << Order<Telt, Tidx_label, Tint>(G) << "\n";
 #endif
   using Tidx = typename Telt::Tidx;
   Tidx n = G->comm->n;
@@ -2617,6 +2619,9 @@ RepOpElmTuplesPermGroup(const StabChain<Telt, Tidx_label> &G,
                             Trfm_intersection<Tidx>>;
   rbaseType<Telt, Tidx_label, Trfm> rbase =
       EmptyRBase<Telt, Tidx_label, Trfm>({G, G}, true, Omega, P);
+#ifdef DEBUG_STBCBCKT
+  std::cerr << "CPP After EmptyRBase |G|=" << Order<Telt, Tidx_label, Tint>(G) << "\n";
+#endif
 
   // In contrast to the GAP code, we do not have an infinite loop.
   // because we do not limit the number of iterations.

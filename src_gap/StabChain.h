@@ -300,12 +300,14 @@ void PrintStabChain(StabChain<Telt, Tidx_label> const &S) {
     //
     std::cerr << "CPP   orbit=" << GapStringIntVector(Sptr->orbit) << "\n";
     std::cerr << "CPP   transversal=" << strTransversal << "\n";
+    std::cerr << "XXX ELIMINATE begin\n";
     if (Sptr->IsBoundCycle) {
       std::cerr << "CPP   cycles=" << GapStringBoolVectorB(Sptr->cycles)
                 << "\n";
     } else {
       std::cerr << "CPP   No cycles\n";
     }
+    std::cerr << "XXX ELIMINATE end\n";
     Sptr = Sptr->stabilizer;
     iLevel++;
   }

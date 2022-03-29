@@ -100,13 +100,13 @@ PrintStabChain:=function(eRec)
     else
       Print("GAP   transversal=[  ]\n");
     fi;
-#    Print("XXX ELIMINATE begin\n");
+    Print("XXX ELIMINATE begin\n");
     if IsBound(eStab.cycles) then
         Print("GAP   cycles=", eStab.cycles, "\n");
     else
         Print("GAP   No cycles\n");
     fi;
-#    Print("XXX ELIMINATE end\n");
+    Print("XXX ELIMINATE end\n");
     if IsBound(eStab.stabilizer) then
       eStab:=eStab.stabilizer;
     else

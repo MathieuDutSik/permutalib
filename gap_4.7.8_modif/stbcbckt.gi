@@ -70,9 +70,9 @@ PrintRBaseLevel:=function(rbase, str)
       for eD in [1..Length(rbase.lev)]
       do
         PrintStabChain(rbase.lev[eD]);
-        Print("GAP rbase.lev[", eD, "]=", SortVector(StrongGeneratorsStabChain(rbase.lev[eD])), "\n");
+        Print("GAP sgs(rbase.lev[", eD, "])=", SortVector(StrongGeneratorsStabChain(rbase.lev[eD])), "\n");
       od;
-      Print("XXX rbase.level=", rbase.level, "\n");
+#      Print("XXX rbase.level=", rbase.level, "\n");
       Print("GAP sgs(rbase.level)=", StrongGeneratorsStabChain(rbase.level), "\n");
       Print(str, " PRBL rbase.level, record, |genlabels|=", Length(rbase.level.genlabels), "\n");
       Print(str, " PRBL");
@@ -2742,6 +2742,7 @@ local  Omega,      # a common operation domain for <G>, <E> and <F>
 	bailout,
 	i,j, size; # loop/auxiliary variables
   Print("GAP RepOpElmTuplesPermGroup : beginning\n");
+  Print("GAP |G|=", Order(G), "\n");
 
   # Central elements and trivial subgroups.
   if ForAll( GeneratorsOfGroup( G ), gen -> OnTuples( e, gen ) = e )  then
@@ -2778,6 +2779,7 @@ local  Omega,      # a common operation domain for <G>, <E> and <F>
       R:=L;
     fi;
   fi;
+  Print("XXX |L|=", Order(L), " |R|=", Order(R), "\n");
 
   Omega := MovedPoints( Concatenation( GeneratorsOfGroup( G ), e, f ) );
 
@@ -2797,6 +2799,7 @@ local  Omega,      # a common operation domain for <G>, <E> and <F>
 
     # Construct an R-base.
     rbase := EmptyRBase( G, Omega, P );
+    Print("GAP After EmptyRBase |G|=", Order(G), "\n");
 
     # Loop over the stabilizer chain of <G>.
     rbase.nextLevel := function( P, rbase )

@@ -11,6 +11,7 @@ GenerateCentralizerEltExample:=function(FileName, GRP, eElt)
     local LGen, eGen, nbMov, output, iMov, eImg, pos, eVal, eCentrElt;
     nbMov:=LargestMovedPoint(GRP);
     #
+    Print("DEBUG |GRP|=", Order(GRP), "\n");
     Local_RemoveFileIfExist(FileName);
     output:=OutputTextFile(FileName, true);
     LGen:=GeneratorsOfGroup(GRP);
