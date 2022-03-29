@@ -950,15 +950,20 @@ InstallGlobalFunction( EmptyRBase, function( G, Omega, P )
 #        rbase.fix   := [  ];
 #        rbase.level := NrMovedPoints( G );
 #    else
-       rbase.chain := CopyStabChain( StabChainMutable( G ) );
-        rbase.level := rbase.chain;
+    rbase.chain := CopyStabChain( StabChainMutable( G ) );
+#    Print("DEBUG G=", G, "\n");
+#    Print("DEBUG rbase.chain=", rbase.chain, "\n");
+    rbase.level := rbase.chain;
+#    Print("DEBUG 1: sgs(rbase.level)=", StrongGeneratorsStabChain(rbase.level), "\n");
 #    fi;
 
     # Process all fixpoints in <P>.
+    Print("GAP |Fixcells|=", Length(Fixcells(P)), "\n");
     for pnt  in Fixcells( P )  do
-        Print("GAP Fixcells call ProcessFixpoint_rbase\n");
+        Print("GAP Fixcells call ProcessFixpoint_rbase pnt=", pnt, "\n");
         ProcessFixpoint( rbase, pnt );
     od;
+#    Print("DEBUG 2: sgs(rbase.level)=", StrongGeneratorsStabChain(rbase.level), "\n");
 
     return rbase;
 end );
@@ -1860,6 +1865,7 @@ InstallGlobalFunction( PartitionBacktrack,
         Print("GAP PBEnumerate, step 11, EXIT 10\n");
         return fail;
     end;
+    PrintRBaseLevel(rbase, "GAP start of PartitionBacktrack");
 
 ##
 #F      main function . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -2779,7 +2785,8 @@ local  Omega,      # a common operation domain for <G>, <E> and <F>
       R:=L;
     fi;
   fi;
-  Print("XXX |L|=", Order(L), " |R|=", Order(R), "\n");
+  # This is for forcing the computation of the stabilizer chain.
+  Print("DEBUG |L|=", Order(L), " |R|=", Order(R), "\n");
 
   Omega := MovedPoints( Concatenation( GeneratorsOfGroup( G ), e, f ) );
 
@@ -2798,12 +2805,15 @@ local  Omega,      # a common operation domain for <G>, <E> and <F>
   repeat
 
     # Construct an R-base.
+    Print("GAP Before EmptyRBase\n");
     rbase := EmptyRBase( G, Omega, P );
     Print("GAP After EmptyRBase |G|=", Order(G), "\n");
+    PrintRBaseLevel(rbase, "GAP rbase just after EmptyRBase");
 
     # Loop over the stabilizer chain of <G>.
     rbase.nextLevel := function( P, rbase )
         local   fix,  pnt,  img,  g,  strat;
+        Print("GAP Beginning of rbase.netLevel\n");
 
         NextRBasePoint( P, rbase, order );
 
@@ -2860,6 +2870,7 @@ local  Omega,      # a common operation domain for <G>, <E> and <F>
         end;
 
     Print("GAP RepOpElmTuplesPermGroup : before PartitionBacktrack\n");
+    PrintRBaseLevel(rbase, "GAP rbase before PartitionBacktrack");
     map:=PartitionBacktrack( G, [ e, f, OnTuples,Pr],
                    repr, rbase, Concatenation( [ Q ], f ),
 		   L, R:bailout:=bailout );

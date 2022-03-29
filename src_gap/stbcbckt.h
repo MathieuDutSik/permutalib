@@ -544,9 +544,12 @@ EmptyRBase(std::vector<StabChain<Telt, Tidx_label>> const &G, bool const &IsId,
   }
   rbase.chain = CopyStabChain(G[0]);
   rbase.level = {int_stablev, -666, rbase.chain};
+#ifdef DEBUG_STBCBCKT
+  std::cerr << "CPP |Fixcells|=" << Fixcells(P).size() << "\n";
+#endif
   for (auto &pnt : Fixcells(P)) {
 #ifdef DEBUG_STBCBCKT
-    std::cerr << "CPP Fixcells call ProcessFixpoint_rbase\n";
+    std::cerr << "CPP Fixcells call ProcessFixpoint_rbase pnt=" << (pnt+1) << "\n";
 #endif
     ProcessFixpoint_rbase(rbase, pnt);
   }
@@ -2055,6 +2058,9 @@ ResultPBT<Telt, Tidx_label> PartitionBacktrack(
 #endif
     return {int_fail, {}};
   };
+#ifdef DEBUG_STBCBCKT
+  PrintRBaseLevel(rbase, "CPP start of PartitionBacktrack");
+#endif
   // Trivial cases first.
   if (IsTrivial(G)) {
     if (!repr)
@@ -2617,10 +2623,14 @@ RepOpElmTuplesPermGroup(const StabChain<Telt, Tidx_label> &G,
 
   using Trfm = std::variant<Trfm_centralizer<Tidx>, Trfm_processfixpoint<Tidx>,
                             Trfm_intersection<Tidx>>;
+#ifdef DEBUG_STBCBCKT
+  std::cerr << "CPP Before EmptyRBase\n";
+#endif
   rbaseType<Telt, Tidx_label, Trfm> rbase =
       EmptyRBase<Telt, Tidx_label, Trfm>({G, G}, true, Omega, P);
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP After EmptyRBase |G|=" << Order<Telt, Tidx_label, Tint>(G) << "\n";
+  PrintRBaseLevel(rbase, "CPP rbase just after EmptyRBase");
 #endif
 
   // In contrast to the GAP code, we do not have an infinite loop.
@@ -2629,6 +2639,9 @@ RepOpElmTuplesPermGroup(const StabChain<Telt, Tidx_label> &G,
   auto nextLevel = [&](Partition<typename Telt::Tidx> &P,
                        rbaseType<Telt, Tidx_label, Trfm> &rbase,
                        [[maybe_unused]] Telt const &TheId) -> void {
+#ifdef DEBUG_STBCBCKT
+    std::cerr << "CPP Beginning of rbase.netLevel\n";
+#endif
     NextRBasePoint_order<Telt, Tidx_label, Trfm>(P, rbase, order_v);
 
     // Centralizer refinement.
@@ -2704,6 +2717,7 @@ RepOpElmTuplesPermGroup(const StabChain<Telt, Tidx_label> &G,
   Tdata data(Q, f);
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP RepOpElmTuplesPermGroup : before PartitionBacktrack\n";
+  PrintRBaseLevel(rbase, "CPP rbase before PartitionBacktrack");
 #endif
   return PartitionBacktrack<Telt, Tidx_label, Tdata, Trfm, Tint, repr,
                             decltype(Pr), decltype(nextLevel)>(
