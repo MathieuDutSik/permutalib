@@ -33,6 +33,7 @@ GenerateCentralizerEltExample:=function(FileName, GRP, eElt)
     AppendTo(output, "\n");
     CloseStream(output);
     #
+    Print("Before Centralizer\n");
     eCentrElt:=Centralizer(GRP, eElt);
     Print("|eCentrElt|=", Order(eCentrElt), "\n");
 end;

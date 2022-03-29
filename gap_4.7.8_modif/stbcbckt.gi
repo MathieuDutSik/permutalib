@@ -2740,6 +2740,7 @@ local  Omega,      # a common operation domain for <G>, <E> and <F>
 	pre,l,map,
 	bailout,
 	i,j, size; # loop/auxiliary variables
+  Print("GAP RepOpElmTuplesPermGroup : beginning\n");
 
   # Central elements and trivial subgroups.
   if ForAll( GeneratorsOfGroup( G ), gen -> OnTuples( e, gen ) = e )  then
@@ -3306,15 +3307,17 @@ end );
 ##
 InstallMethod( CentralizerOp, "perm group,elm",IsCollsElms,
   [ IsPermGroup, IsPerm ], 0,
-    function( G, e )
-    e := [ e ];
-    return RepOpElmTuplesPermGroup( false, G, e, e,
-                   TrivialSubgroup( G ), TrivialSubgroup( G ) );
+  function( G, e )
+      Print("GAP CentralizerElt : beginning\n");
+      e := [ e ];
+      return RepOpElmTuplesPermGroup( false, G, e, e,
+                                      TrivialSubgroup( G ), TrivialSubgroup( G ) );
 end );
 
 InstallMethod( CentralizerOp, "perm group, perm group", IsIdenticalObj,
   [ IsPermGroup, IsPermGroup ], 0,
     function( G, E )
+      Print("GAP CentralizerGroup : beginning\n");
     return RepOpElmTuplesPermGroup( false, G,
                    GeneratorsOfGroup( E ), GeneratorsOfGroup( E ),
                    TrivialSubgroup( G ), TrivialSubgroup( G ) );

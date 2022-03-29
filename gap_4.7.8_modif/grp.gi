@@ -2908,6 +2908,7 @@ InstallMethod( CentralizerOp,
     "generic method for group and object",
     IsCollsElms, [ IsGroup, IsObject ],
     function( G, elm )
+        Print("GAP CentralizerOp, before calling Stabilizer\n");
     return Stabilizer( G, elm, OnPoints );
     end );
 

@@ -2537,6 +2537,9 @@ RepOpElmTuplesPermGroup(const StabChain<Telt, Tidx_label> &G,
                         const std::vector<Telt> &e, const std::vector<Telt> &f,
                         StabChain<Telt, Tidx_label> &L,
                         StabChain<Telt, Tidx_label> &R) {
+#ifdef DEBUG_STBCBCKT
+  std::cerr << "CPP RepOpElmTuplesPermGroup : beginning\n";
+#endif
   using Tidx = typename Telt::Tidx;
   Tidx n = G->comm->n;
   Tidx miss_val = std::numeric_limits<Tidx>::max();
@@ -2706,6 +2709,9 @@ RepOpElmTuplesPermGroup(const StabChain<Telt, Tidx_label> &G,
 template <typename Telt, typename Tidx_label, typename Tint>
 StabChain<Telt, Tidx_label>
 Kernel_Centralizer_elt(const StabChain<Telt, Tidx_label> &G, const Telt &e) {
+#ifdef DEBUG_STBCBCKT
+  std::cerr << "CPP CentralizerElt : beginning\n";
+#endif
   Telt id = G->comm->identity;
   std::vector<Telt> e_v{e};
   std::vector<Telt> LGen;
