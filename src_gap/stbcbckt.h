@@ -2665,6 +2665,11 @@ RepOpElmTuplesPermGroup(const StabChain<Telt, Tidx_label> &G,
 
   Partition<Tidx> cycles;
   for (size_t i = 0; i < e_siz; i++) {
+#ifdef DEBUG_STBCBCKT
+    std::cerr << "DEBUG Before cycles computation\n";
+    (void)Cycles(e[i], Omega);
+    std::cerr << "DEBUG After cycles computation\n";
+#endif
     cycles = GetPartition(Cycles(e[i], Omega));
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP cycles obtained from e_i\n";

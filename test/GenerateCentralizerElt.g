@@ -8,8 +8,9 @@ end;
 
 
 GenerateCentralizerEltExample:=function(FileName, GRP, eElt)
-    local LGen, eGen, nbMov, output, iMov, eImg, pos, eVal, eCentrElt;
-    nbMov:=LargestMovedPoint(GRP);
+    local GRPbig, LGen, eGen, nbMov, output, iMov, eImg, pos, eVal, eCentrElt;
+    GRPbig:=Group(Concatenation(GeneratorsOfGroup(GRP), [eElt]));
+    nbMov:=LargestMovedPoint(GRPbig);
     #
     Print("DEBUG |GRP|=", Order(GRP), "\n");
     Local_RemoveFileIfExist(FileName);
@@ -50,8 +51,9 @@ end;
 
 
 # inadequate since there are special method for symmetric group
-#GenerateCentralizerEltExample(eFile, SymmetricGroup(5), (1,5)(2,4)); 
+#GenerateCentralizerEltExample(eFile, SymmetricGroup(5), (1,5)(2,4));
 
 #GenerateCentralizerEltExample(eFile, Group([(1,2,3,4,5), (3,4,5)]), (1,5)(2,4));
-GenerateCentralizerEltExample(eFile, Group([(1,2,3,4,5), (3,4,5)]), (1,4,5,2));
+#GenerateCentralizerEltExample(eFile, Group([(1,2,3,4,5), (3,4,5)]), (1,4,5,2));
+GenerateCentralizerEltExample(eFile, Group([ (1,2,3,4,5,6,7), (5,6,7) ]), (1,6)(2,5,11,14,10,13)(3,4,7)(9,12));
 Print("eFile=", eFile, "\n");
