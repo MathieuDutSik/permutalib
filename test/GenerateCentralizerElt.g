@@ -52,5 +52,6 @@ end;
 # inadequate since there are special method for symmetric group
 #GenerateCentralizerEltExample(eFile, SymmetricGroup(5), (1,5)(2,4)); 
 
-GenerateCentralizerEltExample(eFile, Group([(1,2,3,4,5), (3,4,5)]), (1,5)(2,4));
+#GenerateCentralizerEltExample(eFile, Group([(1,2,3,4,5), (3,4,5)]), (1,5)(2,4));
+GenerateCentralizerEltExample(eFile, Group([(1,2,3,4,5), (3,4,5)]), (1,4,5,2));
 Print("eFile=", eFile, "\n");

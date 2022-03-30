@@ -1476,6 +1476,7 @@ InstallGlobalFunction( PartitionBacktrack,
 
                 else
                     if image.perm = true  then
+                        Print("GAP Before prm / fix / Fixcells update\n");
                         prm := MappingPermListList
                                ( rbase.fix[ Length( rbase.base ) ],
                                  Fixcells( image.partition ) );
@@ -1511,6 +1512,7 @@ InstallGlobalFunction( PartitionBacktrack,
                 Print("GAP After NextRBasePoint image.p.c=", image.partition.cellno, "\n");
 		PrintRBaseLevel(rbase, "GAP After NextRBasePoint");
                 if image.perm = true  then
+                    Print("GAP Before rbase.fix update\n");
                     Add( rbase.fix, Fixcells( rbase.partition ) );
                 fi;
 		Print("GAP After Fixcells insert\n");
@@ -1941,6 +1943,7 @@ InstallGlobalFunction( PartitionBacktrack,
         if rbase.partition.lengths <> image.partition.lengths  then
             image.perm := false;
         else
+            Print("GAP Before fix / fixP\n");
             fix  := Fixcells( rbase.partition );
             fixP := Fixcells( image.partition );
             for i  in [ 1 .. Length( fix ) ]  do
@@ -2832,6 +2835,7 @@ local  Omega,      # a common operation domain for <G>, <E> and <F>
         NextRBasePoint( P, rbase, order );
 
         # Centralizer refinement.
+        Print("GAP Centralizer nextLevel Fixcells\n");
         fix := Fixcells( P );
         for pnt  in fix  do
             for g  in [ 1 .. Length( e ) ]  do

@@ -230,7 +230,7 @@ InstallMethod( StabChainOp,"trivial group",
     local   S,  T,  pnt;
     Print("GAP Call to StabChainOp (trivial group)\n");
 
-    Print(NullMat(67));
+#    Print(NullMat(67));
     
     S := EmptyStabChain( [  ], One( G ) );
     if     IsBound( options.base )

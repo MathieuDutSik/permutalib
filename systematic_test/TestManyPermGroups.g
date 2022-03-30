@@ -452,7 +452,7 @@ end;
 
 
 TestCentralizerElt:=function(nbMov, eGRP, g)
-    local eDir, FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, Result1, Result2, test, PrtElement, eCentrElt;
+    local eDir, FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, Result1, Result2, test, PrtElement, eCentrElt, fCentrElt;
     Print("Checking CentralizerElt feature\n");
     Print("eGRP=", eGRP, " g=", g, "\n");
     eDir:="/tmp/DebugCentralizerElt_datarun/";
@@ -486,7 +486,9 @@ TestCentralizerElt:=function(nbMov, eGRP, g)
     Exec(eCommand);
     #
     eCentrElt:=ReadAsFunction(FileRes)();
-    if eCentrElt <> Centralizer(eGRP, g) then
+    fCentrElt:=Centralizer(eGRP, g);
+    if eCentrElt <> fCentrElt then
+        Print("eCentrElt=", eCentrElt, " fCentrElt=", fCentrElt, "\n");
         Error("Found some error. Please debug");
     fi;
     MyRemoveFileIfExist(FileName);

@@ -1509,12 +1509,16 @@ ResultPBT<Telt, Tidx_label> PartitionBacktrack(
           return {int_fail, {}};
         } else {
           permPlusBool<Telt> prm;
-          if (image.perm.status == int_true)
+          if (image.perm.status == int_true) {
+#ifdef DEBUG_STBCBCKT
+            std::cerr << "CPP Before prm / fix / Fixcells update\n";
+#endif
             prm = {int_perm, MappingPermListList<Telt>(
                                  n, rbase.fix[rbase.base.size() - 1],
                                  Fixcells(image.partition))};
-          else
+          } else {
             prm = image.perm;
+          }
           if (image.level2.status != int_false) {
             if (SiftedPermutation(image.level2.Stot,
                                   prm.val * Inverse(image.perm2.val))
@@ -1552,8 +1556,12 @@ ResultPBT<Telt, Tidx_label> PartitionBacktrack(
                   << GapStringIntVector(image.partition.cellno) << "\n";
         PrintRBaseLevel(rbase, "CPP After NextRBasePoint");
 #endif
-        if (image.perm.status == int_true)
+        if (image.perm.status == int_true) {
+#ifdef DEBUG_STBCBCKT
+          std::cerr << "CPP Before rbase.fix update\n";
+#endif
           rbase.fix.emplace_back(Fixcells(rbase.partition));
+        }
 #ifdef DEBUG_STBCBCKT
         std::cerr << "CPP After Fixcells insert\n";
 #endif
@@ -2119,6 +2127,9 @@ ResultPBT<Telt, Tidx_label> PartitionBacktrack(
     if (rbase.partition.lengths != image.partition.lengths) {
       image.perm.status = int_false;
     } else {
+#ifdef DEBUG_STBCBCKT
+      std::cerr << "CPP Before fix / fixP\n";
+#endif
       std::vector<Tidx> fix = Fixcells(rbase.partition);
       std::vector<Tidx> fixP = Fixcells(image.partition);
       for (Tidx i = 0; i < Tidx(fix.size()); i++) {
@@ -2685,6 +2696,9 @@ RepOpElmTuplesPermGroup(const StabChain<Telt, Tidx_label> &G,
     NextRBasePoint_order<Telt, Tidx_label, Trfm>(P, rbase, order_v);
 
     // Centralizer refinement.
+#ifdef DEBUG_STBCBCKT
+    std::cerr << "CPP Centralizer nextLevel Fixcells\n";
+#endif
     std::vector<Tidx> fix = Fixcells(P);
     for (size_t i_pnt = 0; i_pnt < fix.size();
          i_pnt++) { // fix is changing, so we need to keep it here.
