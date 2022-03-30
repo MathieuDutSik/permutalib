@@ -2643,14 +2643,19 @@ RepOpElmTuplesPermGroup(const StabChain<Telt, Tidx_label> &G,
   if (repr) {
     for (size_t i = 0; i < e_siz; i++) {
       std::vector<Tidx> V_e = CycleStructurePerm(e[i]);
-      std::vector<Tidx> V_f = CycleStructurePerm(e[i]);
+      std::vector<Tidx> V_f = CycleStructurePerm(f[i]);
       if (V_e != V_f)
         return {int_fail, {}, {}};
     }
   }
 
   std::vector<Telt> LGen = Concatenation(Kernel_GeneratorsOfGroup(G), e, f);
-  std::vector<Tidx> Omega = MovedPoints(LGen, n);
+  // We do this because the code does not work wekk for sets Omega of the form
+  // [1, 3] that is with preserved elements in their vicinity.
+  //  std::vector<Tidx> Omega = MovedPoints(LGen, n);
+  std::vector<Tidx> Omega;
+  for (Tidx i=0; i<LargestMovedPoint(LGen); i++)
+    Omega.push_back(i);
 
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP creation of P\n";
