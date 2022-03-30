@@ -214,9 +214,9 @@ InstallGlobalFunction( ExtendedT, function( t, pnt, img, simg, G )
     # If <G> fixes <pnt>, nothing more can  be changed, so test whether <pnt>
     # = <img>.
     bpt := BasePoint( G );
-    Print("GAP img=", img, " bpt=", bpt, " pnt=", pnt, "\n");
+    Print("GAP ExtendedT img=", img, " bpt=", bpt, " pnt=", pnt, "\n");
     if bpt <> pnt  then
-        Print("GAP Case bpt != pnt\n");
+        Print("GAP ExtendedT Case bpt != pnt\n");
         if pnt <> img  then
 	    Print("GAP ExtendedT, return false 1\n");
             return false;
@@ -226,6 +226,7 @@ InstallGlobalFunction( ExtendedT, function( t, pnt, img, simg, G )
         Print("GAP ExtendedT, return false 2\n");
         return false;
     elif IsSlicedPerm( t )  then
+#        Print("GAP ExtendedT, IsSlicedPerm(t) t=", t, "\n");
         len := t!.length;
         while img <> bpt  do
             len := len + 1;
@@ -236,8 +237,8 @@ InstallGlobalFunction( ExtendedT, function( t, pnt, img, simg, G )
         od;
         t!.length := len;
     else
-        Print("GAP Final case t=", t, "\n");
-        Print("GAP sgs(S.Stot)=", StrongGeneratorsStabChain(G), "\n");
+#        Print("GAP Final case t=", t, "\n");
+#        Print("GAP sgs(S.Stot)=", StrongGeneratorsStabChain(G), "\n");
         t := LeftQuotient( InverseRepresentative( G, img ), t );
     fi;
 
@@ -1106,7 +1107,7 @@ InstallGlobalFunction( ProcessFixpoint, function( arg )
 	    Print("GAP Case image.perm.status = true\n");
             if Length( arg ) = 4  then  simg := arg[ 4 ];
                                   else  simg := 0;         fi;
-	    Print("GAP Before ExtendedT img=", img, "\n");
+	    Print("GAP PFI Before ExtendedT img=", img, " pnt=", pnt, "\n");
             t := ExtendedT( image.perm, pnt, img, simg, image.level );
 	    Print("GAP After ExtendedT img=", img, "\n");
             if t = false  then
@@ -1172,6 +1173,7 @@ InstallGlobalFunction( RegisterRBasePoint, function( P, rbase, pnt )
         PrintRBaseLevel(rbase, "GAP RegisterRBasePoint 2.2");
         KeyUpdatingRbase("RegisterRBasePoint 1.4", rbase);
 	Print("GAP Section P.lengths after ProcessFixpoint_rbase\n");
+        Print("GAP AddRefinement PROCESSFIX pnt=", pnt, "\n");
         AddRefinement( rbase, STBBCKT_STRING_PROCESSFIX, [ pnt, k ] );
         Print("GAP After AddRefinement 1\n");
         KeyUpdatingRbase("RegisterRBasePoint 1.5", rbase);
@@ -2005,7 +2007,7 @@ function( rbase, image, pnt, cellnum )
     local   img;
 
     img := FixpointCellNo( image.partition, cellnum );
-    Print("GAP ProcessFixpoint_image, Case Refinements_ProcessFixpoint\n");
+    Print("GAP ProcessFixpoint_image, Case Refinements_ProcessFixpoint pnt=", pnt, "\n");
     return ProcessFixpoint( image, pnt, img );
 end);
 Refinements.(STBBCKT_STRING_PROCESSFIX) := Refinements_ProcessFixpoint;
@@ -2026,6 +2028,7 @@ function( rbase, image, Q, strat )
     else
         t := t ^ -1;
     fi;
+    Print("GAP Refinements_Intersection\n");
     return MeetPartitionStrat( rbase, image, Q, t, strat );
 end);
 Refinements.(STBBCKT_STRING_INTERSECTION) := Refinements_Intersection;
@@ -2040,6 +2043,7 @@ function( rbase, image, cellnum, g, pnt, strat )
 
     P := image.partition;
     img := FixpointCellNo( P, cellnum ) ^ image.data[ g + 1 ];
+    Print("GAP Refinements_Centralizer\n");
     return     IsolatePoint( P, img ) = strat
            and ProcessFixpoint( image, pnt, img );
 end);
@@ -2867,6 +2871,7 @@ local  Omega,      # a common operation domain for <G>, <E> and <F>
                     if P.lengths[ strat ] = 1  then
                         pnt := FixpointCellNo( P, strat );
                         ProcessFixpoint( rbase, pnt );
+                        Print("GAP AddRefinement nextLevel PROCESSFIX pnt=", pnt, "\n");
                         AddRefinement( rbase, "ProcessFixpoint",
                                 [ pnt, strat ] );
                     fi;

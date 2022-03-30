@@ -66,12 +66,12 @@ permPlusBool<Telt> ExtendedT(Telt const &t, typename Telt::Tidx const &pnt,
   // = <img>.
   Tidx bpt = BasePoint(S.Stot);
 #ifdef DEBUG_STBCBCKT
-  std::cerr << "CPP img=" << int(img + 1) << " bpt=" << PosFalse_to_string(bpt)
+  std::cerr << "CPP ExtendedT img=" << int(img + 1) << " bpt=" << PosFalse_to_string(bpt)
             << " pnt=" << int(pnt + 1) << "\n";
 #endif
   if (bpt != pnt) {
 #ifdef DEBUG_STBCBCKT
-    std::cerr << "CPP Case bpt != pnt\n";
+    std::cerr << "CPP ExtendedT Case bpt != pnt\n";
 #endif
     if (pnt != img) {
 #ifdef DEBUG_STBCBCKT
@@ -89,10 +89,12 @@ permPlusBool<Telt> ExtendedT(Telt const &t, typename Telt::Tidx const &pnt,
     return {int_false, {}};
   }
 #ifdef DEBUG_STBCBCKT
+  /*
   std::cerr << "CPP Final case t=" << t << "\n";
   std::cerr << "CPP sgs(S.Stot)="
             << GapStringTVector(SortVector(StrongGeneratorsStabChain(S.Stot)))
             << "\n";
+  */
 #endif
   return {int_perm,
           std::move(LeftQuotient(InverseRepresentative(S.Stot, img), t))};
@@ -446,7 +448,7 @@ bool ProcessFixpoint_image(imageType<Telt, Tidx_label, Tdata> &image,
                      SortVector(StrongGeneratorsStabChain(image.level.Stot)))
               << "\n";
     std::cerr << "CPP Case image.perm.status = true\n";
-    std::cerr << "CPP Before ExtendedT img=" << int(img + 1) << "\n";
+    std::cerr << "CPP PFI Before ExtendedT img=" << int(img + 1) << " pnt=" << int(pnt+1) << "\n";
 #endif
     permPlusBool<Telt> t =
         ExtendedT(image.perm.val, pnt, img, simg, image.level);
@@ -974,6 +976,7 @@ void RegisterRBasePoint(Partition<typename Telt::Tidx> &P,
     PrintRBaseLevel(rbase, "CPP RegisterRBasePoint 2.2");
     KeyUpdatingRbase("RegisterRBasePoint 1.4", rbase);
     std::cerr << "CPP Section P.lengths after ProcessFixpoint_rbase\n";
+    std::cerr << "CPP AddRefinement PROCESSFIX pnt=" << int(pnt+1) << "\n";
 #endif
     AddRefinement(rbase, Trfm(Trfm_processfixpoint<Tidx>({pnt, k})));
 #ifdef DEBUG_STBCBCKT
@@ -1125,7 +1128,7 @@ bool Refinements_ProcessFixpoint(
   using Tidx = typename Telt::Tidx;
   Tidx img = FixpointCellNo(image.partition, cellnum);
 #ifdef DEBUG_STBCBCKT
-  std::cerr << "CPP ProcessFixpoint_image, Case Refinements_ProcessFixpoint\n";
+  std::cerr << "CPP ProcessFixpoint_image, Case Refinements_ProcessFixpoint pnt=" << int(pnt+1) << "\n";
 #endif
   return ProcessFixpoint_image(image, pnt, img,
                                std::numeric_limits<Tidx>::max());
@@ -1144,6 +1147,9 @@ bool Refinements_Intersection(
     t = image.perm2.val;
   }
   Telt tinv = Inverse(t);
+#ifdef DEBUG_STBCBCKT
+  std::cerr << "CPP Refinements_Intersection\n";
+#endif
   return MeetPartitionStrat(rbase, image, Q, tinv, strat);
 }
 
@@ -1156,6 +1162,9 @@ bool Refinements_Centralizer(
   using Tidx = typename Telt::Tidx;
   Partition<Tidx> &P = image.partition;
   Tidx img = PowAct(FixpointCellNo(P, cellnum), image.data.f[g]);
+#ifdef DEBUG_STBCBCKT
+  std::cerr << "CPP Refinements_Centralizer\n";
+#endif
   return IsolatePoint(P, img) == strat &&
          ProcessFixpoint_image<Telt, Tidx_label, Tdata>(
              image, pnt, img, std::numeric_limits<Tidx>::max());
@@ -1908,7 +1917,7 @@ ResultPBT<Telt, Tidx_label> PartitionBacktrack(
         bool val = ProcessFixpoint_image(image, a, b_int, org[d][b_int]);
 #ifdef DEBUG_STBCBCKT
         std::cerr << "CPP a=" << int(a + 1) << " b=" << int(b_int + 1)
-                  << " org[d][b]=" << int(org[d][b_int] + 1) << " val=" << val
+                  << " org[d][b]=" << int(org[d][b_int] + 1) << " val=" << GapStringBool(val)
                   << "\n";
 #endif
         if (val) {
@@ -2741,8 +2750,11 @@ RepOpElmTuplesPermGroup(const StabChain<Telt, Tidx_label> &G,
           if (P.lengths[strat] == 1) {
             Tidx pnt_b = FixpointCellNo(P, strat);
             ProcessFixpoint_rbase(rbase, pnt_b);
+#ifdef DEBUG_STBCBCKT
+            std::cerr << "CPP AddRefinement nextLevel PROCESSFIX pnt=" << int(pnt_b+1) << "\n";
+#endif
             AddRefinement(rbase,
-                          Trfm(Trfm_processfixpoint<Tidx>({pnt, strat})));
+                          Trfm(Trfm_processfixpoint<Tidx>({pnt_b, strat})));
           }
         }
       }
