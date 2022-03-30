@@ -125,14 +125,16 @@ std::string ConstrainedIntInfinity_to_string(int const &val, int const &n) {
   }
 }
 
-std::string PosFail_to_string(int const &pos) {
-  if (pos == -1)
+template<typename Tidx>
+std::string PosFail_to_string(Tidx const &pos) {
+  if (pos == std::numeric_limits<Tidx>::max())
     return std::string("fail");
   return std::to_string(pos + 1);
 }
 
-std::string PosFalse_to_string(int const &pos) {
-  if (pos == -1)
+template<typename Tidx>
+std::string PosFalse_to_string(Tidx const &pos) {
+  if (pos == std::numeric_limits<Tidx>::max())
     return std::string("false");
   return std::to_string(pos + 1);
 }

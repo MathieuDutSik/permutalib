@@ -1170,7 +1170,7 @@ int RRefine(rbaseType<Telt, Tidx_label, Trfm> &rbase,
             imageType<Telt, Tidx_label, Tdata> &image, bool const &uscore) {
   using Tidx = typename Telt::Tidx;
 #ifdef DEBUG_STBCBCKT
-  std::cerr << "CPP uscore=" << uscore << "\n";
+  std::cerr << "CPP uscore=" << GapStringBool(uscore) << "\n";
 #endif
   auto BoolToInt = [&](bool const &val) -> int {
     if (val)
@@ -1499,7 +1499,7 @@ ResultPBT<Telt, Tidx_label> PartitionBacktrack(
         blen = rbase.base.size();
 #ifdef DEBUG_STBCBCKT
         std::cerr << "CPP IsTrivialRBase matching test blen=" << blen
-                  << " wasTriv=" << wasTriv << "\n";
+                  << " wasTriv=" << GapStringBool(wasTriv) << "\n";
 #endif
         // Do     not  add the   identity    element  in the  subgroup
         // construction.
@@ -1721,7 +1721,7 @@ ResultPBT<Telt, Tidx_label> PartitionBacktrack(
     }
     AssignationVectorGapStyle(orB, d, orb[d]);
 #ifdef DEBUG_STBCBCKT
-    std::cerr << "CPP PBEnumerate, step 7, wasTriv=" << wasTriv << "\n";
+    std::cerr << "CPP PBEnumerate, step 7, wasTriv=" << GapStringBool(wasTriv) << "\n";
     PrintRBaseLevel(rbase, "CPP Step 7");
 #endif
 
@@ -1781,7 +1781,7 @@ ResultPBT<Telt, Tidx_label> PartitionBacktrack(
     max = PositionNthTrueBlist(orB[d], m - L_list[d]->orbit.size());
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP PBEnumerate, step 9\n";
-    std::cerr << "CPP wasTriv=" << wasTriv << " a=" << int(a + 1)
+    std::cerr << "CPP wasTriv=" << GapStringBool(wasTriv) << " a=" << int(a + 1)
               << " max=" << int(max + 1) << "\n";
 #endif
 
@@ -1940,7 +1940,7 @@ ResultPBT<Telt, Tidx_label> PartitionBacktrack(
           //   which until now is identical to  <L>, must be changed
           //   without affecting <L>, so take a copy.
 #ifdef DEBUG_STBCBCKT
-          std::cerr << "CPP wasTriv=" << wasTriv << " d=" << int(d + 1) << "\n";
+          std::cerr << "CPP wasTriv=" << GapStringBool(wasTriv) << " d=" << int(d + 1) << "\n";
           std::cerr << "CPP L[d]=\n";
           PrintStabChain(L_list[d]);
           std::cerr << "CPP R[d]=\n";
