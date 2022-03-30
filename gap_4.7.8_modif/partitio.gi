@@ -228,6 +228,7 @@ local   a,  b,  l,  B,  tmp,  m,  x, inflag, outflag,test,k,Pcop,acop,maxmov;
   # If none or  all  points are  moved out,  do  not change <P>  and return
   # 'false'.
   a := P.firsts[ i ];
+  Print("GAP SplitCell i=", i, " a=", a, "\n");
   b := a + P.lengths[ i ];
   l := b - 1;
 
@@ -261,6 +262,7 @@ local   a,  b,  l,  B,  tmp,  m,  x, inflag, outflag,test,k,Pcop,acop,maxmov;
     a := a - 1;
     # Points left of <a>  remain in the cell,   points right of  <b> move
     # out.
+    Print("GAP Before loop a=", a, " b=", b, "\n");
     while a < b  do
       Print("GAP     1 a=", a, " b=", b, "\n");
       # Decrease <b> until a point remains in the cell.

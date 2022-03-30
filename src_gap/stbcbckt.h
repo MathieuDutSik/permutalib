@@ -601,10 +601,10 @@ bool MeetPartitionStrat(
 ##
 
 ## The StratMeetPartition is a complex function with many different use cases
-(in its GAP code)
+## (in its GAP code)
 ## Number of arguments can be 2, 3 or 4.
 ## The argument S can be a partition or a single cell. Right now we only
-implement the partition case as it is the only one needed.
+## implement the partition case as it is the only one needed.
 ##
 ## Case 1: 4 arguments
 ## StratMeetPartition(rbase, P, S, g) : StratMeetPartition_r_p_p_e
@@ -619,7 +619,7 @@ implement the partition case as it is the only one needed.
 ## StratMeetPartition(P, S) : StratMeetPartition_p_p
 ##
 ## If we were to have a cell version it would be named "c" such as
-StratMeetPartition_r_p_c_e
+## StratMeetPartition_r_p_c_e
 
 */
 template <typename Telt, typename Tidx_label, typename Trfm>
@@ -832,6 +832,9 @@ std::vector<singStrat<Tidx>> StratMeetPartition_p_p(Partition<Tidx> &P,
   std::vector<Tidx> cellsP = P.cellno;
   // If <S> is just a set, it is interpreted as partition ( <S>|<S>^compl ).
   Tidx nrcells = NumberCells(S) - 1;
+#ifdef DEBUG_STBCBCKT
+  std::cerr << "CPP StratMeetPartition nrcells=" << nrcells << "\n";
+#endif
 
   for (Tidx s = 0; s < nrcells; s++) {
     // now split with cell number s of S.
@@ -851,6 +854,9 @@ std::vector<singStrat<Tidx>> StratMeetPartition_p_p(Partition<Tidx> &P,
       if (P.lengths[kv.first] > kv.second)
         splits.push_back(kv.first);
     }
+#ifdef DEBUG_STBCBCKT
+    std::cerr << "CPP splits=" << GapStringIntVector(splits) << " s=" << (s+1) << "\n";
+#endif
     for (auto &pVal : splits) {
       // Last argument true means that the cell will split.
       (void)SplitCell_Partition(P, pVal, S, s,
@@ -2603,9 +2609,14 @@ RepOpElmTuplesPermGroup(const StabChain<Telt, Tidx_label> &G,
     RawPrintPartition(cycles);
     std::cerr << "CPP CollectedPartition result\n";
     RawPrintPartition(CollectedPartition(cycles, size));
+    std::cerr << "CPP Before StratMeetPartition_p_p\n";
 #endif
     StratMeetPartition_p_p(P, CollectedPartition(cycles, size));
   }
+#ifdef DEBUG_STBCBCKT
+    std::cerr << "CPP After the construction we found that P=\n";
+    RawPrintPartition(cycles);
+#endif
 
   // Find the order in which to process the points in the base choice.
 

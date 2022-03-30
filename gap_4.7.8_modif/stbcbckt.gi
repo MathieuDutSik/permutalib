@@ -297,6 +297,7 @@ InstallGlobalFunction( StratMeetPartition, function( arg )
 
     if not IsPartition( arg[ 1 ] )  then  rbase := arg[ 1 ];  p := 2;
                                     else  rbase := false;     p := 1;  fi;
+    Print("DEBUG StratMeetPartition p=", p, "\n");
     P := arg[ p ];
     S := arg[ p + 1 ];
     if Length( arg ) = p + 2  then  g := arg[ p + 2 ];
@@ -333,6 +334,7 @@ InstallGlobalFunction( StratMeetPartition, function( arg )
 	lS:=S;
         S := false;
     fi;
+    Print("GAP StratMeetPartition nrcells=", nrcells, "\n");
 
     for s  in [ 1 .. nrcells ]  do
       # now split with cell number s of S.
@@ -351,6 +353,8 @@ InstallGlobalFunction( StratMeetPartition, function( arg )
 	  Add(splits,i[1]);
 	fi;
       od;
+      Print("GAP splits=", splits, " s=", s, "\n");
+      
 
       # this code is new, the extensive construction of blists in the old
       # version was awfully slow in larger degrees. ahulpke 11-aug-00
@@ -2802,8 +2806,11 @@ local  Omega,      # a common operation domain for <G>, <E> and <F>
       RawPrintPartition(cycles);
       Print("GAP CollectedPartition result\n");
       RawPrintPartition(CollectedPartition( cycles, size ));
+      Print("GAP Before StratMeetPartition_p_p\n");
       StratMeetPartition( P, CollectedPartition( cycles, size ) );
   od;
+  Print("GAP After the construction we found that P=\n");
+  RawPrintPartition(P);
 
   # Find the order in which to process the points in the base choice.
   order := cycles.points{ cycles.firsts };

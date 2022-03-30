@@ -278,7 +278,13 @@ Tidx SplitCell_Kernel(Partition<Tidx> &P, Tidx const &i, Ftest test,
 #ifdef CHECK_PARTITION
   CheckConsistencyPartition("Input SplitCell_Kernel", P);
 #endif
-  Tidx a = P.firsts[i];
+  // We need to shift the index by 1 because we are decreasing the index by 1
+  // with a--. Since we can have Tidx = uint32_t this gets us to a=65536
+  // and thus breaks a < b comparisons.
+  Tidx a = P.firsts[i] + 1;
+#ifdef DEBUG_PARTITION
+  std::cerr << "CPP SplitCell i=" << (i+1) << " a=" << int(a) << "\n";
+#endif
   Tidx b = a + P.lengths[i];
   Tidx l = b - 1;
 
@@ -289,12 +295,15 @@ Tidx SplitCell_Kernel(Partition<Tidx> &P, Tidx const &i, Ftest test,
     maxmov = P.lengths[i] - 1;
   Tidx B = l - maxmov;
 #ifdef DEBUG_PARTITION
-  std::cerr << "CPP maxmov=" << maxmov << " B=" << int(B + 1) << "\n";
+  std::cerr << "CPP maxmov=" << maxmov << " B=" << int(B) << "\n";
 #endif
   a--;
+#ifdef DEBUG_PARTITION
+  std::cerr << "CPP Before loop a=" << int(a) << " b=" << int(b) << "\n";
+#endif
   while (a < b) {
 #ifdef DEBUG_PARTITION
-    std::cerr << "CPP     1 a=" << int(a + 1) << " b=" << int(b + 1) << "\n";
+    std::cerr << "CPP     1 a=" << int(a) << " b=" << int(b) << "\n";
 #endif
     while (true) {
 #ifdef DEBUG_PARTITION
@@ -307,29 +316,29 @@ Tidx SplitCell_Kernel(Partition<Tidx> &P, Tidx const &i, Ftest test,
 #endif
         return std::numeric_limits<Tidx>::max();
       }
-      if (!test(b))
+      if (!test(b-1))
         break;
     }
 #ifdef DEBUG_PARTITION
-    std::cerr << "CPP     2 a=" << int(a + 1) << " b=" << int(b + 1) << "\n";
+    std::cerr << "CPP     2 a=" << int(a) << " b=" << int(b) << "\n";
 #endif
     while (true) {
 #ifdef DEBUG_PARTITION
       std::cerr << "CPP A LOOP\n";
 #endif
       a++;
-      if (a > b || test(a))
+      if (a > b || test(a-1))
         break;
     }
 #ifdef DEBUG_PARTITION
-    std::cerr << "CPP     3 a=" << int(a + 1) << " b=" << int(b + 1) << "\n";
+    std::cerr << "CPP     3 a=" << int(a) << " b=" << int(b) << "\n";
 #endif
     if (a < b) {
-      std::swap(P.points[a], P.points[b]);
+      std::swap(P.points[a-1], P.points[b-1]);
     }
   }
 #ifdef DEBUG_PARTITION
-  std::cerr << "CPP a=" << int(a + 1) << " l=" << int(l + 1) << "\n";
+  std::cerr << "CPP a=" << int(a) << " l=" << int(l) << "\n";
 #endif
   if (a > l) {
 #ifdef DEBUG_PARTITION
@@ -339,9 +348,9 @@ Tidx SplitCell_Kernel(Partition<Tidx> &P, Tidx const &i, Ftest test,
   }
   Tidx m = Tidx(P.firsts.size());
   for (Tidx idx = a; idx <= l; idx++)
-    P.cellno[P.points[idx]] = m;
-  P.firsts.push_back(a);
-  P.lengths.push_back(l - a + 1);
+    P.cellno[P.points[idx-1]] = m;
+  P.firsts.push_back(a-1);
+  P.lengths.push_back((1+l) - a);
   P.lengths[i] = P.lengths[i] - P.lengths[m];
 
 #ifdef DEBUG_PARTITION
@@ -383,6 +392,7 @@ Tidx SplitCell_Partition(Partition<Tidx> &P, Tidx const &i,
                          Partition<Tidx> const &Q, Tidx const &j,
                          Tidx const &out) {
 #ifdef DEBUG_PARTITION
+  std::cerr << "CPP SplitCell g=()\n";
   std::cerr << "CPP Q=\n";
   RawPrintPartition(Q);
 #endif
