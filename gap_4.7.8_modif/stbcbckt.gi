@@ -1205,7 +1205,7 @@ InstallGlobalFunction( NextRBasePoint, function( arg )
     # When  this is called,   there is  a point  that   is neither  fixed  by
     # <rbase.level> nor in <P>.
     lens := P.lengths;
-    Print("GAP lens=", lens, "\n");
+#    Print("GAP lens=", lens, "\n");
     p := fail;
     if order <> false  then
         if IsInt( rbase.level )  then
@@ -1238,9 +1238,9 @@ InstallGlobalFunction( NextRBasePoint, function( arg )
         od;
         p := P.points[ P.firsts[ order[ k - 1 ] ] - 1 + l ];
     fi;
-  Print("GAP p=", p, "\n");
-  NicePrintPartition("GAP Before RegisterRBasePoint P", P);
-  PrintRBaseLevel(rbase, "GAP Before RegisterRBasePoint");
+#  Print("GAP p=", p, "\n");
+#  NicePrintPartition("GAP Before RegisterRBasePoint P", P);
+#  PrintRBaseLevel(rbase, "GAP Before RegisterRBasePoint");
   RegisterRBasePoint( P, rbase, p );
 end );
 
@@ -2827,7 +2827,7 @@ local  Omega,      # a common operation domain for <G>, <E> and <F>
     # Loop over the stabilizer chain of <G>.
     rbase.nextLevel := function( P, rbase )
         local   fix,  pnt,  img,  g,  strat;
-        Print("GAP Beginning of rbase.netLevel\n");
+        Print("GAP Beginning of rbase.nextLevel\n");
 
         NextRBasePoint( P, rbase, order );
 

@@ -861,6 +861,9 @@ std::vector<singStrat<Tidx>> StratMeetPartition_p_p(Partition<Tidx> &P,
       // Last argument true means that the cell will split.
       (void)SplitCell_Partition(P, pVal, S, s,
                                 std::numeric_limits<Tidx>::max());
+#ifdef DEBUG_STBCBCKT
+      std::cerr << "CPP g=() i=" << int(pVal+1) << "\n";
+#endif
     }
   }
   return strat;
@@ -1011,6 +1014,7 @@ void NextRBasePoint_no_order(Partition<typename Telt::Tidx> &P,
       P.lengths; // Copy is needed as the lens is changed in the sortparallel
   std::vector<Tidx> order = ClosedInterval<Tidx>(0, NumberCells(P));
 #ifdef DEBUG_STBCBCKT
+  /*
   std::cerr << "CPP lens=[ ";
   for (size_t i = 0; i < lens.size(); i++) {
     if (i > 0)
@@ -1018,6 +1022,7 @@ void NextRBasePoint_no_order(Partition<typename Telt::Tidx> &P,
     std::cerr << lens[i];
   }
   std::cerr << " ]\n";
+  */
 #endif
   SortParallel_PairList(lens, order);
 
@@ -1041,9 +1046,9 @@ void NextRBasePoint_no_order(Partition<typename Telt::Tidx> &P,
   }
   Tidx p = P.points[P.firsts[order[k]] + l];
 #ifdef DEBUG_STBCBCKT
-  std::cerr << "CPP p=" << int(p + 1) << "\n";
-  NicePrintPartition("CPP Before RegisterRBasePoint P", P);
-  PrintRBaseLevel(rbase, "CPP Before RegisterRBasePoint");
+  //  std::cerr << "CPP p=" << int(p + 1) << "\n";
+  //  NicePrintPartition("CPP Before RegisterRBasePoint P", P);
+  //  PrintRBaseLevel(rbase, "CPP Before RegisterRBasePoint");
 #endif
   RegisterRBasePoint(P, rbase, p);
 }
@@ -1055,6 +1060,17 @@ void NextRBasePoint_order(Partition<typename Telt::Tidx> &P,
   using Tidx = typename Telt::Tidx;
   const std::vector<Tidx> &lens =
       P.lengths; // Copy is needed as the lens is changed in the sortparallel
+#ifdef DEBUG_STBCBCKT
+  /*
+  std::cerr << "CPP lens=[ ";
+  for (size_t i = 0; i < lens.size(); i++) {
+    if (i > 0)
+      std::cerr << ", ";
+    std::cerr << lens[i];
+  }
+  std::cerr << " ]\n";
+  */
+#endif
   Tidx miss_val = std::numeric_limits<Tidx>::max();
   Tidx p = miss_val;
   if (rbase.level.status == int_int) {
@@ -2614,8 +2630,8 @@ RepOpElmTuplesPermGroup(const StabChain<Telt, Tidx_label> &G,
     StratMeetPartition_p_p(P, CollectedPartition(cycles, size));
   }
 #ifdef DEBUG_STBCBCKT
-    std::cerr << "CPP After the construction we found that P=\n";
-    RawPrintPartition(cycles);
+  std::cerr << "CPP After the construction we found that P=\n";
+  RawPrintPartition(P);
 #endif
 
   // Find the order in which to process the points in the base choice.
@@ -2664,7 +2680,7 @@ RepOpElmTuplesPermGroup(const StabChain<Telt, Tidx_label> &G,
                        rbaseType<Telt, Tidx_label, Trfm> &rbase,
                        [[maybe_unused]] Telt const &TheId) -> void {
 #ifdef DEBUG_STBCBCKT
-    std::cerr << "CPP Beginning of rbase.netLevel\n";
+    std::cerr << "CPP Beginning of rbase.nextLevel\n";
 #endif
     NextRBasePoint_order<Telt, Tidx_label, Trfm>(P, rbase, order_v);
 
