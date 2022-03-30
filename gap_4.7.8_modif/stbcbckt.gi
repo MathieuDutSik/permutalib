@@ -86,6 +86,23 @@ PrintRBaseLevel:=function(rbase, str)
       Print(str, " PRBL rbase.level=", rbase.level, "\n");
     fi;
   fi;
+  if IsInt(rbase.level2) then
+    Print(str, " PRBL rbase.level2, integer : ", rbase.level2, "\n");
+  else
+    if IsRecord(rbase.level2) then
+      Print("GAP sgs(rbase.level2)=", StrongGeneratorsStabChain(rbase.level2), "\n");
+      Print(str, " PRBL rbase.level2, record, |genlabels|=", Length(rbase.level2.genlabels), "\n");
+      Print(str, " PRBL");
+      if IsBound(rbase.level2.orbit) then
+        Print(" orbit=", rbase.level2.orbit);
+      else
+        Print(" orbit=[  ]");
+      fi;
+      Print("\n");
+    else
+      Print(str, " PRBL rbase.level2=", rbase.level2, "\n");
+    fi;
+  fi;
 end;
 
 
@@ -939,6 +956,7 @@ InstallGlobalFunction( EmptyRBase, function( G, Omega, P )
                      lev := [  ],
 		     levkey := [ ]);
     if IsList( G )  then
+        Print("GAP EmptyRBase |G|=2\n");
         if IsIdenticalObj( G[ 1 ], G[ 2 ] )  then
             rbase.level2 := true;
         else
@@ -947,6 +965,7 @@ InstallGlobalFunction( EmptyRBase, function( G, Omega, P )
         fi;
         G := G[ 1 ];
     else
+        Print("GAP EmptyRBase level2 = false\n");
         rbase.level2 := false;
     fi;
 #    if IsSymmetricGroupQuick( G )  then
@@ -1047,6 +1066,7 @@ InstallGlobalFunction( ProcessFixpoint, function( arg )
         rbase := arg[ 1 ];
         pnt   := arg[ 2 ];
         Print("GAP ProcessFixpoint_rbase beginning pnt=", pnt, "\n");
+        PrintRBaseLevel(rbase, "GAP Beginning ProcessFixpoint_rbase");
         TestEqualityPointer:=function(str)
           local len;
           len:=Length(rbase.lev);
@@ -1069,8 +1089,6 @@ InstallGlobalFunction( ProcessFixpoint, function( arg )
 #            TestEqualityPointer("Before ChangeStabChain");
             ChangeStabChain( rbase.level, [ pnt ] );
             PrintRBaseLevel(rbase, "GAP After CSC level");
-#            TestEqualityPointer("After ChangeStabChain");
-	    Print("GAP After ChangeStabChain level\n");
             if BasePoint( rbase.level ) = pnt  then
                 Print("GAP Going to stabilizer of level\n");
                 rbase.level := rbase.level.stabilizer;

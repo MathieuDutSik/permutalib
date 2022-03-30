@@ -344,6 +344,27 @@ void PrintRBaseLevel(rbaseType<Telt, Tidx_label, Trfm> const &rbase,
                 << "\n";
     }
   }
+  // level2
+  if (rbase.level2.status == int_int) {
+    std::cerr << str << " PRBL rbase.level2, integer : " << rbase.level2.value_int
+              << "\n";
+  } else {
+    if (rbase.level2.status == int_stablev) {
+      std::cerr << "CPP sgs(rbase.level2)="
+                << GapStringTVector(
+                       SortVector(StrongGeneratorsStabChain(rbase.level2.Stot)))
+                << "\n";
+      std::cerr << str << " PRBL rbase.level2, record, |genlabels|="
+                << rbase.level2.Stot->genlabels.size() << "\n";
+      std::cerr << str << " PRBL orbit=" << PrintTopOrbit(rbase.level2.Stot)
+                << "\n";
+    } else {
+      std::cerr << str
+                << " PRBL rbase.level2=" << GetIntTypeNature(rbase.level2.status)
+                << "\n";
+    }
+  }
+
 }
 
 //
@@ -354,8 +375,8 @@ template <typename Telt, typename Tidx_label, typename Trfm>
 bool ProcessFixpoint_rbase(rbaseType<Telt, Tidx_label, Trfm> &rbase,
                            typename Telt::Tidx const &pnt) {
 #ifdef DEBUG_STBCBCKT
-  std::cerr << "CPP ProcessFixpoint_rbase beginning pnt=" << int(pnt + 1)
-            << "\n";
+  std::cerr << "CPP ProcessFixpoint_rbase beginning pnt=" << int(pnt + 1) << "\n";
+  PrintRBaseLevel(rbase, "CPP Beginning ProcessFixpoint_rbase");
 #endif
   if (rbase.level2.status != int_true && rbase.level2.status != int_false) {
 #ifdef DEBUG_STBCBCKT
@@ -382,7 +403,6 @@ bool ProcessFixpoint_rbase(rbaseType<Telt, Tidx_label, Trfm> &rbase,
     ChangeStabChain(rbase.level.Stot, {pnt}, int_true);
 #ifdef DEBUG_STBCBCKT
     PrintRBaseLevel(rbase, "CPP After CSC level");
-    std::cerr << "CPP After ChangeStabChain level\n";
 #endif
     if (BasePoint(rbase.level) == pnt) {
 #ifdef DEBUG_STBCBCKT
@@ -526,6 +546,9 @@ EmptyRBase(std::vector<StabChain<Telt, Tidx_label>> const &G, bool const &IsId,
   rbase.partition = P;
   rbase.lev = {};
   if (G.size() == 2) {
+#ifdef DEBUG_STBCBCKT
+    std::cerr << "CPP EmptyRBase |G|=2\n";
+#endif
     Tidx n = GetNumberPoint(P);
     if (IsId) {
       rbase.level2.status = int_true;
@@ -540,6 +563,9 @@ EmptyRBase(std::vector<StabChain<Telt, Tidx_label>> const &G, bool const &IsId,
       rbase.lev2 = {};
     }
   } else {
+#ifdef DEBUG_STBCBCKT
+    std::cerr << "CPP EmptyRBase level2 = false\n";
+#endif
     rbase.level2.status = int_false;
   }
   rbase.chain = CopyStabChain(G[0]);
@@ -2678,7 +2704,7 @@ RepOpElmTuplesPermGroup(const StabChain<Telt, Tidx_label> &G,
   std::cerr << "CPP Before EmptyRBase\n";
 #endif
   rbaseType<Telt, Tidx_label, Trfm> rbase =
-      EmptyRBase<Telt, Tidx_label, Trfm>({G, G}, true, Omega, P);
+      EmptyRBase<Telt, Tidx_label, Trfm>({G}, true, Omega, P);
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP After EmptyRBase |G|=" << Order<Telt, Tidx_label, Tint>(G) << "\n";
   PrintRBaseLevel(rbase, "CPP rbase just after EmptyRBase");
