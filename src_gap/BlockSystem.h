@@ -5,6 +5,7 @@
 #include "GraphicFunctionality.h"
 #include "PermGroup.h"
 #include "factorize.h"
+#include "GapPrint.h"
 
 namespace permutalib {
 
@@ -87,10 +88,18 @@ BlockDecomposition<Tidx> SpanBlockDecomposition(std::vector<Telt> const& LGen, s
   Tidx miss_val = std::numeric_limits<Tidx>::max();
   std::vector<std::vector<Tidx>> ListBlocks{eBlock};
   std::vector<Tidx> map_vert_block(n_vert, miss_val);
+  auto prt_status=[&](std::string const& s) -> void {
+    std::cerr << s << " ListBlocks =";
+    for (auto & eBlock : ListBlocks)
+      std::cerr << " " << GapStringIntVector(eBlock);
+    std::cerr << " map_v_b=" << GapStringIntVector(map_vert_block) << "\n";
+  };
   for (auto & val : eBlock)
     map_vert_block[val] = 0;
   std::unordered_set<Tidx> ListBlkMatch;
   auto insert=[&](std::vector<Tidx> const& vect) -> bool {
+    prt_status("begin");
+    std::cerr << "vect = " << GapStringIntVector(vect) << "\n";
     ListBlkMatch.clear();
     std::vector<Tidx> NewV;
     for (auto & val : vect) {
@@ -107,14 +116,16 @@ BlockDecomposition<Tidx> SpanBlockDecomposition(std::vector<Telt> const& LGen, s
       for (auto & val : NewV)
         map_vert_block[val] = pos;
       ListBlocks.emplace_back(std::move(NewV));
+      prt_status("1");
       return true; // We do something
     } else {
-      Tidx iBlock = *(ListBlkMatch.begin());
       if (ListBlkMatch.size() == 1) {
+        Tidx iBlock = *(ListBlkMatch.begin());
         for (auto & val : NewV) {
           ListBlocks[iBlock].push_back(val);
           map_vert_block[val] = iBlock;
         }
+        prt_status("2");
         return NewV.size() > 0; // return true if something is new.
       }
       std::vector<std::vector<Tidx>> NewListBlocks;
@@ -135,27 +146,35 @@ BlockDecomposition<Tidx> SpanBlockDecomposition(std::vector<Telt> const& LGen, s
         for (auto & val : NewListBlocks[jBlock])
           new_map_vert_block[val] = jBlock;
       }
-      ListBlocks = std::move(NewListBlocks);
-      map_vert_block = std::move(new_map_vert_block);
+      ListBlocks = NewListBlocks;
+      map_vert_block = new_map_vert_block;
+      prt_status("3");
       return true;
     }
   };
-  while(true) {
-    bool IsFinished = true;
+  auto merge_operation=[&]() -> bool {
     size_t n_block = ListBlocks.size();
+    std::cerr << "n_block=" << n_block << "\n";
     for (size_t iBlock=0; iBlock<n_block; iBlock++) {
+      std::cerr << "iBlock=" << iBlock << " / " << n_block << "\n";
       for (auto & eGen : LGen) {
+        std::cerr << "  eGen=" << eGen << "\n";
         std::vector<Tidx> BlockImg;
         BlockImg.reserve(ListBlocks[iBlock].size());
         for (auto & ePt : ListBlocks[iBlock]) {
           Tidx ePtImg = OnPoints(ePt, eGen);
           BlockImg.push_back(ePtImg);
         }
-        if (insert(BlockImg))
-          IsFinished = false;
+        if (insert(BlockImg)) {
+          prt_status("insert returns false");
+          return false;
+        }
       }
     }
-    if (IsFinished)
+    return true;
+  };
+  while(true) {
+    if (merge_operation())
       break;
   }
   return {std::move(ListBlocks), std::move(map_vert_block)};
@@ -211,11 +230,13 @@ std::vector<BlockDecomposition<typename Telt::Tidx>> ComputeSequenceBlockDecompo
   std::list<BlockDecomposition<Tidx>> ListBlk;
   ListBlk.push_back(SuperfineBlockDecomposition(n_vert));
   ListBlk.push_back(SupercoarseBlockDecomposition(n_vert));
-  std::vector<uint8_t> status(0);
+  std::vector<uint8_t> status{0};
   auto refine=[&]() -> bool {
     size_t len = ListBlk.size() - 1;
     auto iter = ListBlk.begin();
+    std::cerr << "|ListBlk|=" << ListBlk.size() << " |status|=" << status.size() << "\n";
     for (size_t i=0; i<len; i++) {
+      std::cerr << "i=" << i << " / " << len << "\n";
       if (status[i] == 0) {
         BlockDecomposition<Tidx> const& BlkDec1 = *iter;
         auto iterB = iter;

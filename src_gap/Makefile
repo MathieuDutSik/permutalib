@@ -26,8 +26,8 @@ OBJECTS		= $(PROGRAM:%=%.o)
 #CC		= g++ -std=c++14 -Wall -g -O2 -fsanitize=address -fsanitize=undefined -fstack-protector-all
 #CC		= g++ -std=c++14 -Wall -g -O2 -fsanitize=address -fsanitize=undefined -fsanitize=bool -fstack-protector-all
 #CC		= g++ -std=c++17 -Wall -g -O2 -fsanitize=address -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fstack-protector-all
-#CC		= g++-11 -std=c++17 -Wall -g -O2 -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=bounds-strict -fsanitize=alignment -fsanitize=leak -Wstrict-aliasing
-CC		= g++ -std=c++17 -Wall -Wextra -O3
+CC		= g++-11 -std=c++17 -Wall -g -O2 -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=bounds-strict -fsanitize=alignment -fsanitize=leak -Wstrict-aliasing
+#CC		= g++ -std=c++17 -Wall -Wextra -O3
 #CC		= g++ -pg -std=c++17 -Wall -g -O3
 #CC		= g++ -std=c++17 -Wall -g -O3
 #CC		= g++ -std=c++17 -Wall -Wconversion -g -O3
@@ -41,8 +41,8 @@ NOLINKFLAG 	= -c
 OUTPUTFLAG 	= -o
 
 #CLOCAL          =
-#CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK
-CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK -DSYNCHRONIZED_DEBUG_GAP478
+CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK
+#CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK -DSYNCHRONIZED_DEBUG_GAP478
 #CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK -DSYNCHRONIZED_DEBUG_GAP478 -DDEBUG -DDEBUG_ADD_GEN_SCH -DDEBUG_CHANGE_STAB_CHAIN -DDEBUG_EQUALITY -DDEBUG_INV_REP -DDEBUG_STABCHAIN
 
 
