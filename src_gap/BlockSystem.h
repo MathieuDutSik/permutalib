@@ -18,6 +18,17 @@ struct BlockDecomposition {
 };
 
 
+template<typename Tidx>
+std::ostream& operator<<(std::ostream& os, BlockDecomposition<Tidx> const& BlkDec)
+{
+  os << "ListBlocks = [";
+  for (auto & eBlock : BlkDec.ListBlocks)
+    os << " " << GapStringIntVector(eBlock);
+  os << " ] map_v_b=" << GapStringIntVector(BlkDec.map_vert_block);
+  return os;
+}
+
+
 /*
   Checks whether BlkDec1 is a finer decomposition than BlkDec2, that is if every block of BlkDec1
   is in only one Block of BlkDec2.
@@ -88,18 +99,20 @@ BlockDecomposition<Tidx> SpanBlockDecomposition(std::vector<Telt> const& LGen, s
   Tidx miss_val = std::numeric_limits<Tidx>::max();
   std::vector<std::vector<Tidx>> ListBlocks{eBlock};
   std::vector<Tidx> map_vert_block(n_vert, miss_val);
+  /*
   auto prt_status=[&](std::string const& s) -> void {
     std::cerr << s << " ListBlocks =";
     for (auto & eBlock : ListBlocks)
       std::cerr << " " << GapStringIntVector(eBlock);
     std::cerr << " map_v_b=" << GapStringIntVector(map_vert_block) << "\n";
   };
+  */
   for (auto & val : eBlock)
     map_vert_block[val] = 0;
   std::unordered_set<Tidx> ListBlkMatch;
   auto insert=[&](std::vector<Tidx> const& vect) -> bool {
-    prt_status("begin");
-    std::cerr << "vect = " << GapStringIntVector(vect) << "\n";
+    //    prt_status("begin");
+    //    std::cerr << "vect = " << GapStringIntVector(vect) << "\n";
     ListBlkMatch.clear();
     std::vector<Tidx> NewV;
     for (auto & val : vect) {
@@ -116,7 +129,7 @@ BlockDecomposition<Tidx> SpanBlockDecomposition(std::vector<Telt> const& LGen, s
       for (auto & val : NewV)
         map_vert_block[val] = pos;
       ListBlocks.emplace_back(std::move(NewV));
-      prt_status("1");
+      //      prt_status("1");
       return true; // We do something
     } else {
       if (ListBlkMatch.size() == 1) {
@@ -125,7 +138,7 @@ BlockDecomposition<Tidx> SpanBlockDecomposition(std::vector<Telt> const& LGen, s
           ListBlocks[iBlock].push_back(val);
           map_vert_block[val] = iBlock;
         }
-        prt_status("2");
+        //        prt_status("2");
         return NewV.size() > 0; // return true if something is new.
       }
       std::vector<std::vector<Tidx>> NewListBlocks;
@@ -148,17 +161,17 @@ BlockDecomposition<Tidx> SpanBlockDecomposition(std::vector<Telt> const& LGen, s
       }
       ListBlocks = NewListBlocks;
       map_vert_block = new_map_vert_block;
-      prt_status("3");
+      //      prt_status("3");
       return true;
     }
   };
   auto merge_operation=[&]() -> bool {
     size_t n_block = ListBlocks.size();
-    std::cerr << "n_block=" << n_block << "\n";
+    //    std::cerr << "n_block=" << n_block << "\n";
     for (size_t iBlock=0; iBlock<n_block; iBlock++) {
-      std::cerr << "iBlock=" << iBlock << " / " << n_block << "\n";
+      //      std::cerr << "iBlock=" << iBlock << " / " << n_block << "\n";
       for (auto & eGen : LGen) {
-        std::cerr << "  eGen=" << eGen << "\n";
+        //        std::cerr << "  eGen=" << eGen << "\n";
         std::vector<Tidx> BlockImg;
         BlockImg.reserve(ListBlocks[iBlock].size());
         for (auto & ePt : ListBlocks[iBlock]) {
@@ -166,7 +179,7 @@ BlockDecomposition<Tidx> SpanBlockDecomposition(std::vector<Telt> const& LGen, s
           BlockImg.push_back(ePtImg);
         }
         if (insert(BlockImg)) {
-          prt_status("insert returns false");
+          //          prt_status("insert returns false");
           return false;
         }
       }
@@ -231,23 +244,38 @@ std::vector<BlockDecomposition<typename Telt::Tidx>> ComputeSequenceBlockDecompo
   ListBlk.push_back(SuperfineBlockDecomposition(n_vert));
   ListBlk.push_back(SupercoarseBlockDecomposition(n_vert));
   std::vector<uint8_t> status{0};
+  auto prt_status=[&]() -> void {
+    std::cerr << "status =";
+    for (auto & val : status)
+      std::cerr << " " << int(val);
+    std::cerr << "\n";
+    size_t pos=0;
+    for (auto & blk : ListBlk) {
+      std::cerr << "pos=" << pos << " BlkDec=" << blk << "\n";
+      pos++;
+    }
+  };
+  prt_status();
   auto refine=[&]() -> bool {
     size_t len = ListBlk.size() - 1;
     auto iter = ListBlk.begin();
     std::cerr << "|ListBlk|=" << ListBlk.size() << " |status|=" << status.size() << "\n";
     for (size_t i=0; i<len; i++) {
-      std::cerr << "i=" << i << " / " << len << "\n";
+      std::cerr << "refine i=" << i << " / " << len << "\n";
       if (status[i] == 0) {
         BlockDecomposition<Tidx> const& BlkDec1 = *iter;
-        auto iterB = iter;
-        iterB++;
-        BlockDecomposition<Tidx> const& BlkDec2 = *iterB;
+        auto iterInc = iter;
+        iterInc++;
+        BlockDecomposition<Tidx> const& BlkDec2 = *iterInc;
         std::optional<BlockDecomposition<Tidx>> opt = FindIntermediateBlockDecomposition(LGen, BlkDec1, BlkDec2);
         if (!opt) {
           status[i] = 1;
         } else {
           status.insert(status.begin() + i, 0);
-          ListBlk.insert(iter, *opt);
+          ListBlk.insert(iterInc, *opt);
+          std::cerr << "  BlcDec1=" << BlkDec1 << "\n";
+          std::cerr << "  BlcDec2=" << BlkDec2 << "\n";
+          std::cerr << "  BlcDecS=" << *opt << "\n";
           return false;
         }
       }
@@ -258,6 +286,7 @@ std::vector<BlockDecomposition<typename Telt::Tidx>> ComputeSequenceBlockDecompo
   while(true) {
     if (refine())
       break;
+    prt_status();
   }
   std::vector<BlockDecomposition<Tidx>> l_Blk;
   for (auto & eBlkDec : ListBlk)
