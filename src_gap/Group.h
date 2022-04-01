@@ -209,6 +209,9 @@ public:
     return Group<Telt, Tint>(
         Kernel_Centralizer_grp<Telt, Tidx_label, Tint>(S, H.S));
   }
+  std::vector<BlockDecomposition<Tidx>> GetSequenceBlockDecomposition() const {
+    return ComputeSequenceBlockDecomposition(Kernel_GeneratorsOfGroup(S), size_tint);
+  }
   bool isin(const Telt &x) const { return IsElementInStabChain(S, x); }
   Telt Sift(Telt const &x) const { return SiftedPermutation(S, x); }
 

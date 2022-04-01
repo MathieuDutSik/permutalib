@@ -8,6 +8,251 @@
 
 namespace permutalib {
 
+
+
+template<typename Tidx>
+struct BlockDecomposition {
+  std::vector<std::vector<Tidx>> ListBlocks;
+  std::vector<Tidx> map_vert_block;
+};
+
+
+/*
+  Checks whether BlkDec1 is a finer decomposition than BlkDec2, that is if every block of BlkDec1
+  is in only one Block of BlkDec2.
+  We do not use symmetries here, which might speed up things as all blocks are equivalent.
+  Well, so much for that...
+*/
+template<typename Tidx>
+bool IsBlockDecompositionRefinement(BlockDecomposition<Tidx> const& BlkDec1, BlockDecomposition<Tidx> const& BlkDec2)
+{
+  for (auto & eBlock : BlkDec1) {
+    Tidx the_block2 = BlkDec2.map_vert_block[eBlock[0]];
+    for (auto & eVert : eBlock) {
+      if (the_block2 != BlkDec2.map_vert_block[eVert]) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+
+template<typename Tidx>
+bool TestEquality(BlockDecomposition<Tidx> const& BlkDec1, BlockDecomposition<Tidx> const& BlkDec2)
+{
+  if (!IsBlockDecompositionRefinement(BlkDec1, BlkDec2))
+    return false;
+  if (!IsBlockDecompositionRefinement(BlkDec2, BlkDec1))
+    return false;
+  return true;
+}
+
+
+
+
+
+
+  // Every vertex its own block.
+template<typename Tidx>
+BlockDecomposition<Tidx> SuperfineBlockDecomposition(Tidx const& n_vert)
+{
+  std::vector<std::vector<Tidx>> ListBlocks;
+  std::vector<Tidx> map_vert_block;
+  for (Tidx i=0; i<n_vert; i++) {
+    ListBlocks.push_back({i});
+    map_vert_block.push_back(i);
+  }
+  return {std::move(ListBlocks), std::move(map_vert_block)};
+}
+
+template<typename Tidx>
+BlockDecomposition<Tidx> SupercoarseBlockDecomposition(Tidx const& n_vert)
+{
+  std::vector<std::vector<Tidx>> ListBlocks;
+  std::vector<Tidx> eBlock;
+  std::vector<Tidx> map_vert_block;
+  for (Tidx i=0; i<n_vert; i++) {
+    eBlock.push_back(i);
+    map_vert_block.push_back(0);
+  }
+  ListBlocks.emplace_back(std::move(eBlock));
+  return {std::move(ListBlocks), std::move(map_vert_block)};
+}
+
+
+template<typename Telt, typename Tidx>
+BlockDecomposition<Tidx> SpanBlockDecomposition(std::vector<Telt> const& LGen, std::vector<Tidx> const& eBlock, Tidx const& n_vert)
+{
+  Tidx miss_val = std::numeric_limits<Tidx>::max();
+  std::vector<std::vector<Tidx>> ListBlocks{eBlock};
+  std::vector<Tidx> map_vert_block(n_vert, miss_val);
+  for (auto & val : eBlock)
+    map_vert_block[val] = 0;
+  std::unordered_set<Tidx> ListBlkMatch;
+  auto insert=[&](std::vector<Tidx> const& vect) -> bool {
+    ListBlkMatch.clear();
+    std::vector<Tidx> NewV;
+    size_t n_miss = 0;
+    for (auto & val : vect) {
+      Tidx iBlock = map_vert_block[val];
+      if (iBlock == miss_val) {
+        NewV.push_back(val);
+      } else {
+        ListBlkMatch.insert(iBlock);
+      }
+    }
+    if (ListBlkMatch.size() == 0) {
+      // All the points are new. So a new block is inserted.
+      Tidx pos = Tidx(ListBlocks.size());
+      for (auto & val : NewV)
+        map_vert_block[vect] = pos;
+      ListBlocks.emplace_back(std::move(NewV));
+      return true; // We do something
+    } else {
+      Tidx iBlock = *(ListBlkMatch.begin());
+      if (ListBlkMatch.size() == 1) {
+        for (auto & val : NewV) {
+          ListBlocks[iBlock].push_back(val);
+          map_vert_block[val] = iBlock;
+        }
+        return NewV.size() > 0; // return true if something is new.
+      }
+      std::vector<std::vector<Tidx>> NewListBlocks;
+      std::vector<Tidx> & NewBlock = NewV;
+      Tidx n_block = Tidx(ListBlocks.size());
+      for (Tidx jBlock=0; jBlock<n_block; jBlock++) {
+        if (ListBlkMatch.count(jBlock) == 1) {
+          for (auto & val : ListBlocks[jBlock])
+            NewBlock.push_back(val);
+        } else {
+          NewListBlocks.push_back(ListBlocks[jBlock]);
+        }
+      }
+      NewListBlocks.emplace_back(std::move(NewBlock));
+      std::vector<Tidx> new_map_vert_block(n_vert, miss_val);
+      n_block = Tidx(NewListBlocks.size());
+      for (Tidx jBlock=0; jBlock<n_block; jBlock++) {
+        for (auto & val : NewListBlocks[jBlock])
+          new_map_vert_block[val] = jBlock;
+      }
+      ListBlocks = std::move(NewListBlocks);
+      map_vert_block = std::move(new_map_vert_block);
+      return true;
+    }
+  };
+  while(true) {
+    bool IsFinished = true;
+    size_t n_block = ListBlocks.size();
+    for (size_t iBlock=0; iBlock<n_block; iBlock++) {
+      for (auto & eGen : LGen) {
+        std::vector<Tidx> BlockImg;
+        BlockImg.reserve(ListBlocks[iBlock].size());
+        for (auto & ePt : ListBlocks[iBlock]) {
+          Tidx ePtImg = OnPoints(eGen, ePt);
+          BlockImg.push_bqck(ePtImg);
+        }
+        if (insert(BlockImg))
+          IsFinished = false;
+      }
+    }
+    if (IsFinished)
+      break;
+  }
+  return {std::move(ListBlocks), std::move(map_vert_block)};
+}
+
+template<typename Telt, typename Tidx>
+std::optional<BlockDecomposition<Tidx>> FindIntermediateBlockDecomposition_choice(std::vector<Telt> const& LGen, BlockDecomposition<Tidx> const& BlkDec1, BlockDecomposition<Tidx> const& BlkDec2, Tidx const& iBlk1, Tidx const& jBlk1)
+{
+  std::vector<Tidx> eBlock;
+  for (auto & val : BlkDec1.ListBlocks[iBlk1])
+    eBlock.push_back(val);
+  for (auto & val : BlkDec1.ListBlocks[jBlk1])
+    eBlock.push_back(val);
+  Tidx n_vert = Tidx(BlkDec1.map_vert_block.size());
+  BlockDecomposition<Tidx> BlkDecSpann = SpanBlockDecomposition(LGen, eBlock, n_vert);
+  if (TestEquality(BlkDecSpann, BlkDec2))
+    return {};
+  return BlkDecSpann;
+}
+
+
+
+
+
+template<typename Telt, typename Tidx>
+std::optional<BlockDecomposition<Tidx>> FindIntermediateBlockDecomposition(std::vector<Telt> const& LGen, BlockDecomposition<Tidx> const& BlkDec1, BlockDecomposition<Tidx> const& BlkDec2)
+{
+  std::unordered_set<Tidx> set_blk1_poss;
+  for (auto & vert : BlkDec2.ListBlocks[0]) {
+    Tidx iBlk1 = BlkDec1.map_vert_block[vert];
+    set_blk1_poss.insert(iBlk1);
+  }
+  std::vector<Tidx> l_blk1_poss(l_blk1_poss.begin(), set_blk1_poss.begin(), set_blk1_poss.end());
+  for (size_t i=1; i<l_blk1_poss.size(); i++) {
+    Tidx iBlk1 = l_blk1_poss[0];
+    Tidx jBlk1 = l_blk1_poss[i];
+    std::optional<BlockDecomposition<Tidx>> opt = FindIntermediateBlockDecomposition_choice(LGen, BlkDec1, BlkDec2, iBlk1, jBlk1);
+    if (opt) {
+      return opt;
+    }
+  }
+  return {};
+}
+
+
+
+
+
+template<typename Telt>
+std::vector<BlockDecomposition<typename Telt::Tidx>> ComputeSequenceBlockDecomposition(std::vector<Telt> const& LGen, typename Telt::Tidx const& n_vert)
+{
+  using Tidx = typename Telt::Tidx;
+  std::list<BlockDecomposition<Tidx>> ListBlk;
+  ListBlk.push_back(SuperfineBlockDecomposition(n_vert));
+  ListBlk.push_back(SupercoarseBlockDecomposition(n_vert));
+  std::vector<uint8_t> status(0);
+  auto refine=[&]() -> bool {
+    size_t len = ListBlk.size() - 1;
+    auto iter = ListBlk.begin();
+    for (size_t i=0; i<len; i++) {
+      if (status[i] == 0) {
+        BlockDecomposition<Tidx> const& BlkDec1 = *iter;
+        BlockDecomposition<Tidx> const& BlkDec2 = *(iter + 1);
+        std::optional<BlockDecomposition<Tidx>> opt = FindIntermediateBlockDecomposition(LGen, BlkDec1, BlkDec2);
+        if (!opt) {
+          status[i] = 1;
+        } else {
+          status.insert(status.begin() + i, 0);
+          ListBlk.insert(*opt);
+          return false;
+        }
+      }
+      iter++;
+    }
+    return true;
+  };
+  while(true) {
+    if (refine())
+      break;
+  }
+  std::vector<BlockDecomposition<Tidx>> l_Blk;
+  for (auto & eBlkDec : ListBlk)
+    l_Blk.emplace_back(std::move(eBlkDec));
+  return l_Blk;
+}
+
+
+
+
+
+
+
+
+
+
+
 template <typename Telt>
 std::vector<std::vector<typename Telt::Tidx>>
 Blocks(const std::vector<Telt> &acts, const typename Telt::Tidx &n) {
