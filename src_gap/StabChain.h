@@ -276,7 +276,7 @@ void PrintStabChain(StabChain<Telt, Tidx_label> const &S) {
   StabChain<Telt, Tidx_label> Sptr = S;
   Tidx n = Sptr->comm->n;
   std::cerr << "CPP Reference Partition="
-            << GetListStabCommPartition(ListStabChain(S)) << "\n";
+            << GetListStabCommPartition(StdVectorStabChain(S)) << "\n";
   size_t iLevel = 0;
   while (Sptr != nullptr) {
     std::cerr << "CPP iLev=" << iLevel << "\n";
@@ -942,7 +942,7 @@ StabChainOp_trivial_group(StabChain<Telt, Tidx_label> const &Stot,
 
 template <typename Telt, typename Tidx_label>
 std::vector<StabChain<Telt, Tidx_label>>
-ListStabChain(StabChain<Telt, Tidx_label> const &S) {
+StdVectorStabChain(StabChain<Telt, Tidx_label> const &S) {
   std::vector<StabChain<Telt, Tidx_label>> ListStab;
   StabChain<Telt, Tidx_label> Sptr = S;
   while (Sptr != nullptr) {
@@ -951,6 +951,21 @@ ListStabChain(StabChain<Telt, Tidx_label> const &S) {
   }
   return ListStab;
 }
+
+template <typename Telt, typename Tidx_label>
+std::list<StabChain<Telt, Tidx_label>>
+StdListStabChain(StabChain<Telt, Tidx_label> const &S) {
+  std::list<StabChain<Telt, Tidx_label>> ListStab;
+  StabChain<Telt, Tidx_label> Sptr = S;
+  while (Sptr != nullptr) {
+    ListStab.push_back(Sptr);
+    Sptr = Sptr->stabilizer;
+  }
+  return ListStab;
+}
+
+
+
 
 template <typename Telt, typename Tidx_label>
 StabChain<Telt, Tidx_label>

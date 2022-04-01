@@ -1011,9 +1011,8 @@ std::pair<bool, Telt> VerifySGS(StabChain<Telt, Tidx_label> const &S,
                                 bool const &correct) {
   using Tidx = typename Telt::Tidx;
   Tidx n = S->comm->n;
-  std::vector<StabChain<Telt, Tidx_label>> list = ListStabChain(S);
+  std::vector<StabChain<Telt, Tidx_label>> list = StdVectorStabChain(S);
   size_t len = list.size();
-  // list := ListStabChain(S);
   std::pair<bool, Telt> result = {true, S->comm->identity};
   //
   std::vector<int> TotSet(n);

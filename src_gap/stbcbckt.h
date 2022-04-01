@@ -1531,7 +1531,7 @@ ResultPBT<Telt, Tidx_label> PartitionBacktrack(
                     << " base=" << GapStringIntVector(rbase.base) << "\n";
           std::cerr << "CPP assigning L sequence\n";
 #endif
-          L_list = ListStabChain(
+          L_list = StdVectorStabChain(
               StabChainOp_stabchain_nofalse<Telt, Tidx_label, Tint>(L,
                                                                     options));
 #ifdef DEBUG_STBCBCKT
@@ -2177,8 +2177,8 @@ ResultPBT<Telt, Tidx_label> PartitionBacktrack(
                               std::numeric_limits<Tidx>::max());
       }
     }
-    L_list = ListStabChain(StructuralCopy(L));
-    R_list = ListStabChain(StructuralCopy(R));
+    L_list = StdVectorStabChain(StructuralCopy(L));
+    R_list = StdVectorStabChain(StructuralCopy(R));
   }
 
   permPlusBool<Telt> rep = PBEnumerate(0, !repr);

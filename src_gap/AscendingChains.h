@@ -5,6 +5,33 @@
 
 namespace permutalib {
 
+/*
+  From the stabilizer chain, we get an ascending chain almost automatically
+  which is already very good.
+  ---
+  So, we face the situation of a group G acting on an orbit O.
+  The stabilizer of O[0] is the subgroup H.
+  We want to find a pyramid of block decompositions so as not just to test primitivity
+  but get a sequence of groups.
+
+  
+
+
+ */
+template<typename Telt, typename Tidx_label>
+std::vector<StabChain<Telt,Tidx_label>> Kernel_AscendingChain(StabChain<Telt,Tidx_label> const& G)
+{
+  std::list<StabChain<Telt,Tidx_label>> ListStab = StdListStabChain(G);
+  size_t len = ListStab.size();
+  std::vector<StabChain<Telt,Tidx_label>> ListGroup;
+  ListGroup.push_back(ListStab[0]);
+  for (size_t i=1; i<len; i++) {
+  }
+  std::vector<Telt> ListGroup;
+}
+
+
+
 
   /*
     Functions depending on special data types.
@@ -295,7 +322,7 @@ end );
 
 
 
-
+  /*
 
 template<typename Telt, typename Tidx_label>
 std::vector<Telt> RightTransversal(StabChain<Telt,Tidx_label> const& G_in, StabChain<Telt,Tidx_label> const& U_in)
@@ -305,7 +332,7 @@ std::vector<Telt> RightTransversal(StabChain<Telt,Tidx_label> const& G_in, StabC
   return ListTransversal;
 }
 
-
+  */
 /*
 #############################################################################
 ##
@@ -317,6 +344,7 @@ std::vector<Telt> RightTransversal(StabChain<Telt,Tidx_label> const& G_in, StabC
 ##  the operation of G on the Right Cosets of U.
 ##
 */
+/*
 template<typename Telt, typename Tidx_label>
 std::optional<StabChain<Telt,Tidx_label>> IntermediateGroup(StabChain<Telt,Tidx_label> const& G_in, StabChain<Telt,Tidx_label> const& U)
 {
@@ -353,7 +381,7 @@ std::optional<StabChain<Telt,Tidx_label>> IntermediateGroup(StabChain<Telt,Tidx_
     return b;
   fi;
 }
-
+*/
 
 /*
 #############################################################################
@@ -361,6 +389,7 @@ std::optional<StabChain<Telt,Tidx_label>> IntermediateGroup(StabChain<Telt,Tidx_
 #F  RefinedChain(<G>,<c>) . . . . . . . . . . . . . . . .  refine chain links
 ##
 */
+/*
 template<typename Telt, typename Tidx_label>
 std::vector<StabChain<Telt,Tidx_label>> RefinedChain(StabChain<Telt,Tidx_label> const& G, std::vector<StabChain<Telt,Tidx_label>> const& cc)
 {
@@ -461,7 +490,7 @@ std::vector<StabChain<Telt,Tidx_label>> RefinedChain(StabChain<Telt,Tidx_label> 
   od;
   return c;
 }
-
+*/
 
 
 /*
@@ -470,6 +499,7 @@ std::vector<StabChain<Telt,Tidx_label>> RefinedChain(StabChain<Telt,Tidx_label> 
 #M  AscendingChainOp(<G>,<pnt>) . . . approximation of
 ##
 */
+/*
 template<typename Telt, typename Tidx_label>
 std::vector<StabChain<Telt,typename Tidx_label>> AscendingChain(StabChain<Telt,typename Tidx_label> const& G, StabChain<Telt,typename Tidx_label> const& U)
 {
@@ -510,7 +540,7 @@ std::vector<StabChain<Telt,typename Tidx_label>> AscendingChain(StabChain<Telt,t
   fi;
   return RefinedChain(G,Reversed(c));
 }
-
+*/
 
 
 
