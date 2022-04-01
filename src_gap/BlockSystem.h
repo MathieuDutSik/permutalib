@@ -26,7 +26,7 @@ struct BlockDecomposition {
 template<typename Tidx>
 bool IsBlockDecompositionRefinement(BlockDecomposition<Tidx> const& BlkDec1, BlockDecomposition<Tidx> const& BlkDec2)
 {
-  for (auto & eBlock : BlkDec1) {
+  for (auto & eBlock : BlkDec1.ListBlocks) {
     Tidx the_block2 = BlkDec2.map_vert_block[eBlock[0]];
     for (auto & eVert : eBlock) {
       if (the_block2 != BlkDec2.map_vert_block[eVert]) {
@@ -93,7 +93,6 @@ BlockDecomposition<Tidx> SpanBlockDecomposition(std::vector<Telt> const& LGen, s
   auto insert=[&](std::vector<Tidx> const& vect) -> bool {
     ListBlkMatch.clear();
     std::vector<Tidx> NewV;
-    size_t n_miss = 0;
     for (auto & val : vect) {
       Tidx iBlock = map_vert_block[val];
       if (iBlock == miss_val) {
@@ -106,7 +105,7 @@ BlockDecomposition<Tidx> SpanBlockDecomposition(std::vector<Telt> const& LGen, s
       // All the points are new. So a new block is inserted.
       Tidx pos = Tidx(ListBlocks.size());
       for (auto & val : NewV)
-        map_vert_block[vect] = pos;
+        map_vert_block[val] = pos;
       ListBlocks.emplace_back(std::move(NewV));
       return true; // We do something
     } else {
@@ -149,8 +148,8 @@ BlockDecomposition<Tidx> SpanBlockDecomposition(std::vector<Telt> const& LGen, s
         std::vector<Tidx> BlockImg;
         BlockImg.reserve(ListBlocks[iBlock].size());
         for (auto & ePt : ListBlocks[iBlock]) {
-          Tidx ePtImg = OnPoints(eGen, ePt);
-          BlockImg.push_bqck(ePtImg);
+          Tidx ePtImg = OnPoints(ePt, eGen);
+          BlockImg.push_back(ePtImg);
         }
         if (insert(BlockImg))
           IsFinished = false;
@@ -189,7 +188,7 @@ std::optional<BlockDecomposition<Tidx>> FindIntermediateBlockDecomposition(std::
     Tidx iBlk1 = BlkDec1.map_vert_block[vert];
     set_blk1_poss.insert(iBlk1);
   }
-  std::vector<Tidx> l_blk1_poss(l_blk1_poss.begin(), set_blk1_poss.begin(), set_blk1_poss.end());
+  std::vector<Tidx> l_blk1_poss(set_blk1_poss.begin(), set_blk1_poss.end());
   for (size_t i=1; i<l_blk1_poss.size(); i++) {
     Tidx iBlk1 = l_blk1_poss[0];
     Tidx jBlk1 = l_blk1_poss[i];
@@ -219,13 +218,15 @@ std::vector<BlockDecomposition<typename Telt::Tidx>> ComputeSequenceBlockDecompo
     for (size_t i=0; i<len; i++) {
       if (status[i] == 0) {
         BlockDecomposition<Tidx> const& BlkDec1 = *iter;
-        BlockDecomposition<Tidx> const& BlkDec2 = *(iter + 1);
+        auto iterB = iter;
+        iterB++;
+        BlockDecomposition<Tidx> const& BlkDec2 = *iterB;
         std::optional<BlockDecomposition<Tidx>> opt = FindIntermediateBlockDecomposition(LGen, BlkDec1, BlkDec2);
         if (!opt) {
           status[i] = 1;
         } else {
           status.insert(status.begin() + i, 0);
-          ListBlk.insert(*opt);
+          ListBlk.insert(iter, *opt);
           return false;
         }
       }
