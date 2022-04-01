@@ -411,6 +411,50 @@ end;
 
 
 
+
+
+
+TestSequenceBlockDecomposition:=function(nbMov, eGRP)
+    local eDir, FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, Result1, Result2, test, ListBlockDecomp, testIsPrimitive;
+    Print("Checking SequenceBlockDecomposition feature\n");
+    eDir:="/tmp/DebugSequenceBlockDecomposition_datarun/";
+    eCommand:=Concatenation("mkdir -p ", eDir);
+    Exec(eCommand);
+    #
+    FileName:=Concatenation(eDir, "Input");
+    MyRemoveFileIfExist(FileName);
+    output:=OutputTextFile(FileName, true);
+    LGen:=GeneratorsOfGroup(eGRP);
+    AppendTo(output, Length(LGen), " ", nbMov, "\n");
+    for eGen in LGen
+    do
+        for iMov in [1..nbMov]
+        do
+            eImg:=OnPoints(iMov, eGen);
+            AppendTo(output, " ", eImg-1);
+        od;
+        AppendTo(output, "\n");
+    od;
+    CloseStream(output);
+    #
+    eBinary:="../src_gap/GapComputeSequenceBlockSystems";
+    FileErr:=Concatenation(eDir, "CppError");
+    FileRes:=Concatenation(eDir, "GapOutput");
+    eCommand:=Concatenation(eBinary, " ", FileName, " ", FileRes, " 2> ", FileErr);
+    Exec(eCommand);
+    #
+    ListBlockDecomp:=ReadAsFunction(FileRes)();
+    testIsPrimitive:=Length(ListBlockDecomp) = 2;
+    if testIsPrimitive <> IsPrimitive(eGRP) then
+        Error("Found some error. Please debug");
+    fi;
+    MyRemoveFileIfExist(FileName);
+    MyRemoveFileIfExist(FileErr);
+    MyRemoveFileIfExist(FileRes);
+end;
+
+
+
 TestCentreSubgroup:=function(nbMov, eGRP)
     local eDir, FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, Result1, Result2, test, eGRP_cent;
     Print("Checking CentreSubgroup feature\n");
@@ -583,6 +627,9 @@ TestSpecificGroup:=function(method, size_opt, nbMov, eGRP)
             fi;
         od;
     fi;
+    if method="sequenceblockdecomposition" then
+        TestSequenceBlockDecomposition(nbMov, eGRP);
+    fi;
 end;
 
 
@@ -632,7 +679,11 @@ WriteAllGroupsInFile:=function(eFile)
 end;
 
 
-TestAllGroups("centralizerelt", 1);
+
+
+
+TestAllGroups("sequenceblockdecomposition", 1);
+#TestAllGroups("centralizerelt", 1);
 #TestAllGroups("derivedsubgroup", 1);
 #TestAllGroups("centresubgroup", 1);
 #TestAllGroups("smallgeneratingset", 1);

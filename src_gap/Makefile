@@ -15,7 +15,7 @@
 #PROGRAM	= Factorize
 #PROGRAM	= TestSerialization
 #PROGRAM	= TestEnumerationElement
-PROGRAM	= TestComputeSequenceBlockSystems
+PROGRAM	= GapComputeSequenceBlockSystems
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
