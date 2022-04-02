@@ -628,7 +628,9 @@ TestSpecificGroup:=function(method, size_opt, nbMov, eGRP)
         od;
     fi;
     if method="sequenceblockdecomposition" then
-        TestSequenceBlockDecomposition(nbMov, eGRP);
+        if Length(Orbits(eGRP, [1..nbMov], OnPoints))=1 then
+            TestSequenceBlockDecomposition(nbMov, eGRP);
+        fi;
     fi;
 end;
 

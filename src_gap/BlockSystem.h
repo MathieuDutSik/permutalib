@@ -196,6 +196,7 @@ BlockDecomposition<Tidx> SpanBlockDecomposition(std::vector<Telt> const& LGen, s
 template<typename Telt, typename Tidx>
 std::optional<BlockDecomposition<Tidx>> FindIntermediateBlockDecomposition_choice(std::vector<Telt> const& LGen, BlockDecomposition<Tidx> const& BlkDec1, BlockDecomposition<Tidx> const& BlkDec2, Tidx const& iBlk1, Tidx const& jBlk1)
 {
+  //  std::cerr << "iBlk1=" << iBlk1 << " jBlk1=" << jBlk1 << "\n";
   std::vector<Tidx> eBlock;
   for (auto & val : BlkDec1.ListBlocks[iBlk1])
     eBlock.push_back(val);
@@ -244,6 +245,7 @@ std::vector<BlockDecomposition<typename Telt::Tidx>> ComputeSequenceBlockDecompo
   ListBlk.push_back(SuperfineBlockDecomposition(n_vert));
   ListBlk.push_back(SupercoarseBlockDecomposition(n_vert));
   std::vector<uint8_t> status{0};
+  /*
   auto prt_status=[&]() -> void {
     std::cerr << "status =";
     for (auto & val : status)
@@ -255,13 +257,14 @@ std::vector<BlockDecomposition<typename Telt::Tidx>> ComputeSequenceBlockDecompo
       pos++;
     }
   };
-  prt_status();
+  */
+  //  prt_status();
   auto refine=[&]() -> bool {
     size_t len = ListBlk.size() - 1;
     auto iter = ListBlk.begin();
-    std::cerr << "|ListBlk|=" << ListBlk.size() << " |status|=" << status.size() << "\n";
+    //    std::cerr << "|ListBlk|=" << ListBlk.size() << " |status|=" << status.size() << "\n";
     for (size_t i=0; i<len; i++) {
-      std::cerr << "refine i=" << i << " / " << len << "\n";
+      //      std::cerr << "refine i=" << i << " / " << len << "\n";
       if (status[i] == 0) {
         BlockDecomposition<Tidx> const& BlkDec1 = *iter;
         auto iterInc = iter;
@@ -273,9 +276,9 @@ std::vector<BlockDecomposition<typename Telt::Tidx>> ComputeSequenceBlockDecompo
         } else {
           status.insert(status.begin() + i, 0);
           ListBlk.insert(iterInc, *opt);
-          std::cerr << "  BlcDec1=" << BlkDec1 << "\n";
-          std::cerr << "  BlcDec2=" << BlkDec2 << "\n";
-          std::cerr << "  BlcDecS=" << *opt << "\n";
+          //          std::cerr << "  BlcDec1=" << BlkDec1 << "\n";
+          //          std::cerr << "  BlcDec2=" << BlkDec2 << "\n";
+          //          std::cerr << "  BlcDecS=" << *opt << "\n";
           return false;
         }
       }
@@ -286,7 +289,7 @@ std::vector<BlockDecomposition<typename Telt::Tidx>> ComputeSequenceBlockDecompo
   while(true) {
     if (refine())
       break;
-    prt_status();
+    //    prt_status();
   }
   std::vector<BlockDecomposition<Tidx>> l_Blk;
   for (auto & eBlkDec : ListBlk)
