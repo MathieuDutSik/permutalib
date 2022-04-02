@@ -7,6 +7,7 @@
 #include "StabChainMain.h"
 #include "nsi.h"
 #include "stbcbckt.h"
+#include "AscendingChains.h"
 #include <map>
 
 #include <boost/archive/tmpdir.hpp>
@@ -211,6 +212,17 @@ public:
   }
   std::vector<BlockDecomposition<Tidx>> GetSequenceBlockDecomposition() const {
     return ComputeSequenceBlockDecomposition(Kernel_GeneratorsOfGroup(S), S->comm->identity.size());
+  }
+  std::vector<Group<Telt, Tint>> GetAscendingChain() const {
+    Telt id = S->comm->identity;
+    std::vector<StabChain<Telt,Tidx_label>> l_stab = Kernel_AscendingChain(S);
+    std::vector<Group<Telt,Tint>> l_grp;
+    for (auto & e_s : l_stab) {
+      Tint ord = Order<Telt,Tidx_label,Tint>(e_s);
+      Group<Telt,Tint> eGRP(e_s, ord);
+      l_grp.push_back(eGRP);
+    }
+    return l_grp;
   }
   bool isin(const Telt &x) const { return IsElementInStabChain(S, x); }
   Telt Sift(Telt const &x) const { return SiftedPermutation(S, x); }

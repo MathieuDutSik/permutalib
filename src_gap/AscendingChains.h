@@ -22,7 +22,7 @@ template<typename Telt, typename Tidx_label, typename Tint>
 std::vector<StabChain<Telt,Tidx_label>> Kernel_AscendingChain(StabChain<Telt,Tidx_label> const& G)
 {
   using Tidx = typename Telt::Tidx;
-  using Tstab = typename StabChain<Telt,Tidx_label>;
+  using Tstab = StabChain<Telt,Tidx_label>;
   
   Tidx miss_val = std::numeric_limits<Tidx>::max();
   Tidx n_vert = G->comm->identity.size();
