@@ -455,6 +455,50 @@ end;
 
 
 
+
+TestAscendingChain:=function(nbMov, eGRP)
+    local eDir, FileName, output, LGen, eGen, iMov, eImg, eBinary, FileErr, FileRes, eCommand, ListGroup, i;
+    Print("Checking AscendingChain feature\n");
+    eDir:="/tmp/DebugAscendingChain_datarun/";
+    eCommand:=Concatenation("mkdir -p ", eDir);
+    Exec(eCommand);
+    #
+    FileName:=Concatenation(eDir, "Input");
+    MyRemoveFileIfExist(FileName);
+    output:=OutputTextFile(FileName, true);
+    LGen:=GeneratorsOfGroup(eGRP);
+    AppendTo(output, Length(LGen), " ", nbMov, "\n");
+    for eGen in LGen
+    do
+        for iMov in [1..nbMov]
+        do
+            eImg:=OnPoints(iMov, eGen);
+            AppendTo(output, " ", eImg-1);
+        od;
+        AppendTo(output, "\n");
+    od;
+    CloseStream(output);
+    #
+    eBinary:="../src_gap/GapAscendingChain";
+    FileErr:=Concatenation(eDir, "CppError");
+    FileRes:=Concatenation(eDir, "GapOutput");
+    eCommand:=Concatenation(eBinary, " ", FileName, " ", FileRes, " 2> ", FileErr);
+    Exec(eCommand);
+    #
+    ListGroup:=ReadAsFunction(FileRes)();
+    for i in [2..Length(ListGroup)]
+    do
+        if IsSubgroup(ListGroup[i], ListGroup[i-1])=false then
+            Error("The inclusion is not satisfied");
+        fi;
+    od;
+    MyRemoveFileIfExist(FileName);
+    MyRemoveFileIfExist(FileErr);
+    MyRemoveFileIfExist(FileRes);
+end;
+
+
+
 TestCentreSubgroup:=function(nbMov, eGRP)
     local eDir, FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, Result1, Result2, test, eGRP_cent;
     Print("Checking CentreSubgroup feature\n");
@@ -632,6 +676,9 @@ TestSpecificGroup:=function(method, size_opt, nbMov, eGRP)
             TestSequenceBlockDecomposition(nbMov, eGRP);
         fi;
     fi;
+    if method="ascendingchain" then
+        TestAscendingChain(nbMov, eGRP);
+    fi;
 end;
 
 
@@ -639,8 +686,8 @@ end;
 TestAllGroups:=function(method, size_opt)
     local ListGroups, nbGroups, eGRP, nMov, iGRP;
     ListGroups:=GetListCandidateGroups();
-    ListGroups:=Filtered(ListGroups, x->IsSolvable(x)=false);
-    ListGroups:=Filtered(ListGroups, x->IsSymmetricGroup(x)=false);
+#    ListGroups:=Filtered(ListGroups, x->IsSolvable(x)=false);
+#    ListGroups:=Filtered(ListGroups, x->IsSymmetricGroup(x)=false);
     nbGroups:=Length(ListGroups);
     Print("|ListGroups|=", nbGroups, "\n");
 
@@ -684,7 +731,8 @@ end;
 
 
 
-TestAllGroups("sequenceblockdecomposition", 1);
+TestAllGroups("ascendingchain", 1);
+#TestAllGroups("sequenceblockdecomposition", 1);
 #TestAllGroups("centralizerelt", 1);
 #TestAllGroups("derivedsubgroup", 1);
 #TestAllGroups("centresubgroup", 1);
