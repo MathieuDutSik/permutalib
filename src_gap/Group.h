@@ -215,11 +215,10 @@ public:
   }
   std::vector<Group<Telt, Tint>> GetAscendingChain() const {
     Telt id = S->comm->identity;
-    std::vector<StabChain<Telt,Tidx_label>> l_stab = Kernel_AscendingChain(S);
+    std::vector<StabChain<Telt,Tidx_label>> l_stab = Kernel_AscendingChain<Telt,Tidx_label,Tint>(S);
     std::vector<Group<Telt,Tint>> l_grp;
     for (auto & e_s : l_stab) {
-      Tint ord = Order<Telt,Tidx_label,Tint>(e_s);
-      Group<Telt,Tint> eGRP(e_s, ord);
+      Group<Telt,Tint> eGRP(e_s);
       l_grp.push_back(eGRP);
     }
     return l_grp;
