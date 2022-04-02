@@ -18,16 +18,57 @@ namespace permutalib {
 
 
  */
-template<typename Telt, typename Tidx_label>
+template<typename Telt, typename Tidx_label, typename Tint>
 std::vector<StabChain<Telt,Tidx_label>> Kernel_AscendingChain(StabChain<Telt,Tidx_label> const& G)
 {
-  std::list<StabChain<Telt,Tidx_label>> ListStab = StdListStabChain(G);
+  using Tidx = typename Telt::Tidx;
+  using Tstab = typename StabChain<Telt,Tidx_label>;
+  
+  Tidx miss_val = std::numeric_limits<Tidx>::max();
+  Tidx n_vert = G->comm->identity.size();
+  std::list<Tstab> ListStab = StdListStabChain(G);
+  auto iter = ListStab.begin();
   size_t len = ListStab.size();
-  std::vector<StabChain<Telt,Tidx_label>> ListGroup;
-  ListGroup.push_back(ListStab[0]);
+  std::vector<Tstab> ListGroup;
+  ListGroup.push_back(*iter);
   for (size_t i=1; i<len; i++) {
+    iter++;
+    Tstab const& TheStab = *iter;
+    std::vector<Telt> LGenBig = Kernel_GeneratorsOfGroup(TheStab);
+    std::vector<Tidx> const& orbit = TheStab->orbit;
+    Tidx pt_stab = orbit[0];
+    Tidx len = Tidx(orbit.size());
+    std::vector<Tidx> orbit_rev(n_vert,miss_val);
+    for (Tidx i=0; i<len; i++) {
+      orbit_rev[orbit[i]] = i;
+    }
+    std::vector<Telt> LGenSma;
+    for (auto & eGen : LGenBig) {
+      std::vector<Tidx> eList(len);
+      for (Tidx i=0; i<len; i++) {
+        Tidx pt1 = orbit[i];
+        Tidx pt2 = OnPoints(pt1, eGen);
+        Tidx pt3 = orbit_rev[pt2];
+        eList[i] = pt3;
+      }
+      Telt eGenSma(std::move(eList));
+      LGenSma.emplace_back(std::move(eGenSma));
+    }
+    std::vector<BlockDecomposition<Tidx>> l_blkdec = ComputeSequenceBlockDecomposition(LGenSma, len);
+    for (size_t j=1; j<l_blkdec.size()-1; j++) {
+      BlockDecomposition<Tidx> const& BlkDec = l_blkdec[j];
+      Tidx pt_stab2 = orbit_rev[pt_stab];
+      Tidx iBlock = BlkDec.map_vert_block[pt_stab2];
+      Face Phi(n_vert);
+      for (auto & ePt : BlkDec.ListBlocks[iBlock]) {
+        Phi[orbit[ePt]] = 1;
+      }
+      Tstab eStab = Kernel_Stabilizer_OnSets<Telt,Tidx_label,Tint>(TheStab, Phi);
+      ListGroup.push_back(eStab);
+    }
+    ListGroup.push_back(TheStab);
   }
-  std::vector<Telt> ListGroup;
+  return ListGroup;
 }
 
 
