@@ -352,7 +352,8 @@ PreImageSubgroupAction(std::vector<TeltMatr> const &ListMatrGens,
     return {x.first * y.first, x.second * y.second};
   };
   //
-  Tidx len = stab->comm->identity.size();
+  Telt id = stab.get_identity();
+  Tidx len = id.size();
   Tgroup GRP(ListPermGens, len);
   auto f_act = [&](Tobj const &x, Telt const &u) -> Tobj {
     return f_op(x, u.second);
