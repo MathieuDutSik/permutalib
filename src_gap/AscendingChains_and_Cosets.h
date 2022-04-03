@@ -14,16 +14,12 @@ namespace permutalib {
   We want to find a pyramid of block decompositions so as not just to test primitivity
   but get a sequence of groups.
 
-  
-
-
  */
 template<typename Telt, typename Tidx_label, typename Tint>
 std::vector<StabChain<Telt,Tidx_label>> Kernel_AscendingChain(StabChain<Telt,Tidx_label> const& G)
 {
   using Tidx = typename Telt::Tidx;
   using Tstab = StabChain<Telt,Tidx_label>;
-  
   Tidx miss_val = std::numeric_limits<Tidx>::max();
   Tidx n_vert = G->comm->identity.size();
   std::list<Tstab> ListStab = StdListStabChain(G);
@@ -34,8 +30,6 @@ std::vector<StabChain<Telt,Tidx_label>> Kernel_AscendingChain(StabChain<Telt,Tid
     std::cerr << "pos=" << pos << " ord=" << ord << "\n";
     pos++;
   }
-
-  
   auto iter = ListStab.begin();
   size_t len = ListStab.size();
   std::vector<Tstab> ListGroup;
@@ -82,6 +76,57 @@ std::vector<StabChain<Telt,Tidx_label>> Kernel_AscendingChain(StabChain<Telt,Tid
 
 
 
+/*
+  U is a subgroup of G.
+  We compute the left transversals g H
+*/
+template<typename Telt, typename Tidx_label>
+std::vector<Telt> LeftTransversal_Direct(StabChain<Telt,Tidx_label> const& G, StabChain<Telt,Tidx_label> const& H)
+{
+  std::vector<Telt> ListTransversal;
+  std::unordered_set<Telt,uint8_t> map;
+  auto fInsert=[&](Telt const& x) -> void {
+    uint8_t pos = map[x];
+    if (pos == 0) {
+      pos = 1;
+      ListTransversal.push_back(x);
+    }
+  };
+  Telt id = G->comm->identity;
+  std::vector<Telt> LGen = Kernel_GeneratorsOfGroup(G);
+  fInsert(id);
+  size_t pos=0;
+  while(true) {
+    size_t len = ListTransversal.size();
+    if (pos == len)
+      break;
+    for (size_t idx=pos; idx<len; idx++) {
+      Telt const& x = ListTransversal[idx];
+      for (auto & eGen : LGen) {
+        Telt eProd = eGen * x;
+        fInsert(eProd);
+      }
+    }
+    pos = len;
+  }
+  return ListTransversal;
+}
+
+
+/*
+  U is a subgroup of G.
+  We compute the right transversals g H
+*/
+template<typename Telt, typename Tidx_label>
+std::vector<Telt> RightTransversal_Direct(StabChain<Telt,Tidx_label> const& G, StabChain<Telt,Tidx_label> const& H)
+{
+  std::vector<Telt> ListTransversal = RightTransversal_Direct(G, H);
+  size_t len = ListTransversal.size();
+  std::vector<Telt> ListRet(len);
+  for (size_t i=0; i<len; i++)
+    ListRet[i] = Inverse(ListTransversal[i]);
+  return ListRet;
+}
 
   /*
     Functions depending on special data types.
@@ -372,17 +417,6 @@ end );
 
 
 
-  /*
-
-template<typename Telt, typename Tidx_label>
-std::vector<Telt> RightTransversal(StabChain<Telt,Tidx_label> const& G_in, StabChain<Telt,Tidx_label> const& U_in)
-{
-  std::vector<Telt> ListTransversal;
-
-  return ListTransversal;
-}
-
-  */
 /*
 #############################################################################
 ##

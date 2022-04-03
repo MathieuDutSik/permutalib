@@ -635,6 +635,10 @@ InverseRepresentativeWord(StabChain<Telt, Tidx_label> const &S,
   return word;
 }
 
+/*
+The *= operation v *= x is equivalent to v = v * x.
+The sifting operation returns an element g_can such that g_can S = g S.
+*/
 template <typename Telt, typename Tidx_label>
 Telt SiftedPermutation(StabChain<Telt, Tidx_label> const &S, Telt const &g) {
   using Tidx = typename Telt::Tidx;
