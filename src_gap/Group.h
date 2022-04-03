@@ -7,7 +7,7 @@
 #include "StabChainMain.h"
 #include "nsi.h"
 #include "stbcbckt.h"
-#include "AscendingChains.h"
+#include "AscendingChains_and_Cosets.h"
 #include <map>
 
 #include <boost/archive/tmpdir.hpp>
@@ -331,6 +331,14 @@ private:
   Tint size_tint;
 };
 
+
+
+
+
+
+
+
+
 template <typename TeltPerm, typename TeltMatr, typename Tint>
 std::vector<TeltMatr>
 StabilizerMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
@@ -415,6 +423,16 @@ StabilizerMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
     ListMatrGens_ret.push_back(eGen);
   return ListMatrGens_ret;
 }
+
+
+
+
+
+
+
+
+
+
 
 template <typename TeltPerm, typename TeltMatr, typename Tint>
 std::optional<TeltMatr>
