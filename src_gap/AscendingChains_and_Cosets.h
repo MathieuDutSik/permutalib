@@ -87,7 +87,7 @@ std::vector<Telt> LeftTransversal_Direct(StabChain<Telt,Tidx_label> const& G, St
   std::unordered_set<Telt,uint8_t> map;
   auto fInsert=[&](Telt const& x) -> void {
     Telt x_can = SiftedPermutation(H, x);
-    uint8_t pos = map[x_can];
+    uint8_t & pos = map[x_can];
     if (pos == 0) {
       pos = 1;
       ListTransversal.push_back(x_can);
