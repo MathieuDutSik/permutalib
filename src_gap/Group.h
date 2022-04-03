@@ -358,7 +358,7 @@ PreImageSubgroupAction(std::vector<TeltMatr> const &ListMatrGens,
   auto f_act = [&](Tobj const &x, Telt const &u) -> Tobj {
     return f_op(x, u.second);
   };
-  Telt id{id_matr, id_perm};
+  const Telt & id{id_matr, id_perm};
   std::vector<Telt> ListGens;
   for (size_t iGen = 0; iGen < ListMatrGens.size(); iGen++) {
     ListGens.push_back({ListMatrGens[iGen], ListPermGens[iGen]});
