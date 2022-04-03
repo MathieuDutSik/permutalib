@@ -3,6 +3,7 @@
 
 #include "GapPrint.h"
 #include "PermGroup.h"
+#include <unordered_map>
 
 #ifdef SYNCHRONIZED_DEBUG_GAP478
 #define DEBUG_PARTITION
