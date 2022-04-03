@@ -223,6 +223,7 @@ public:
     }
     return l_grp;
   }
+  const Telt& get_identity() const { return S->comm->identity; }
   bool isin(const Telt &x) const { return IsElementInStabChain(S, x); }
   Telt Sift(Telt const &x) const { return SiftedPermutation(S, x); }
 
@@ -326,7 +327,7 @@ public:
     return IteratorType({}, ListPos, {}, {});
   }
 
-private:
+public:
   StabChain<Telt, Tidx_label> S;
   Tint size_tint;
 };
@@ -339,23 +340,22 @@ private:
 
 
 
-template <typename TeltPerm, typename TeltMatr, typename Tint>
+template <typename Tgroup, typename TeltMatr, typename Tobj, typename Fop>
 std::vector<TeltMatr>
-StabilizerMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
-                           std::vector<TeltPerm> const &ListPermGens,
-                           TeltMatr const &id_matr, Face const &f) {
+PreImageSubgroupAction(std::vector<TeltMatr> const &ListMatrGens,
+                       std::vector<typename Tgroup::Telt> const &ListPermGens,
+                       TeltMatr const &id_matr, Tgroup const& stab, Tobj const &x, Fop const& f_op) {
+  using TeltPerm = typename Tgroup::Telt;
   using Tidx = typename TeltPerm::Tidx;
-  using Tgroup = Group<TeltPerm, Tint>;
   using Telt = std::pair<TeltMatr, TeltPerm>;
   auto f_prod = [](Telt const &x, Telt const &y) -> Telt {
     return {x.first * y.first, x.second * y.second};
   };
   //
-  Tidx len = f.size();
+  Tidx len = stab->comm->identity.size();
   Tgroup GRP(ListPermGens, len);
-  Tgroup stab = GRP.Stabilizer_OnSets(f);
-  auto f_act = [](Face const &x, Telt const &u) -> Face {
-    return OnSets(x, u.second);
+  auto f_act = [&](Tobj const &x, Telt const &u) -> Tobj {
+    return f_op(x, u.second);
   };
   TeltPerm id_perm(len);
   Telt id{id_matr, id_perm};
@@ -363,9 +363,9 @@ StabilizerMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
   for (size_t iGen = 0; iGen < ListMatrGens.size(); iGen++) {
     ListGens.push_back({ListMatrGens[iGen], ListPermGens[iGen]});
   }
-  std::vector<std::pair<Face, Telt>> ListPair =
-      OrbitPairEltRepr(ListGens, id, f, f_prod, f_act);
-  std::unordered_map<Face, Telt> map;
+  std::vector<std::pair<Tobj, Telt>> ListPair =
+      OrbitPairEltRepr(ListGens, id, x, f_prod, f_act);
+  std::unordered_map<Tobj, Telt> map;
   //  std::cerr << "f=" << f << "\n";
   for (auto &kv : ListPair) {
     map[kv.first] = kv.second;
@@ -389,7 +389,7 @@ StabilizerMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
   size_t nGen = ListMatrGens.size();
   std::cerr << "nCoset=" << nCoset << " |ListMatrGens|=" << nGen << "\n";
   for (size_t iCoset = 0; iCoset < nCoset; iCoset++) {
-    Face const &f_cos = ListPair[iCoset].first;
+    Tobj const &x_cos = ListPair[iCoset].first;
     TeltMatr const &eGenMatr = ListPair[iCoset].second.first;
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
     TeltPerm const &eGenPerm = ListPair[iCoset].second.second;
@@ -397,16 +397,16 @@ StabilizerMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
     for (size_t iGen = 0; iGen < nGen; iGen++) {
       TeltMatr const &eGenMatr_B = ListMatrGens[iGen];
       TeltPerm const &eGenPerm_B = ListPermGens[iGen];
-      Face f_img = OnSets(f_cos, eGenPerm_B);
-      Telt const &eElt = map[f_img];
+      Tobj x_img = f_op(x_cos, eGenPerm_B);
+      Telt const &eElt = map[x_img];
       TeltMatr eGenMatr_new = eGenMatr * eGenMatr_B * Inverse(eElt.first);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
       TeltPerm eGenPerm_new = eGenPerm * eGenPerm_B * Inverse(eElt.second);
-      Face f_test = OnSets(f, eGenPerm_new);
-      if (f_test != f) {
+      Tobj x_test = f_op(x, eGenPerm_new);
+      if (x_test != x) {
         std::cerr << "iGen=" << iGen << " / " << nGen << "  iCoset=" << iCoset
                   << " / " << nCoset << "\n";
-        std::cerr << "f_test=" << f_test << " f=" << f << "\n";
+        std::cerr << "x_test=" << x_test << " x=" << x << "\n";
         std::cerr << "eGenPerm=" << eGenPerm << "\n";
         std::cerr << "eElt.second=" << eElt.second << "\n";
         std::cerr << "eGenPerm_new=" << eGenPerm_new << "\n";
@@ -425,9 +425,38 @@ StabilizerMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
 }
 
 
+template <typename TeltPerm, typename TeltMatr, typename Tint>
+std::vector<TeltMatr>
+StabilizerMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
+                           std::vector<TeltPerm> const &ListPermGens,
+                           TeltMatr const &id_matr, Face const &f) {
+  using Tgroup = Group<TeltPerm, Tint>;
+  using Tidx = typename TeltPerm::Tidx;
+  using Tobj = Face;
+
+  Tidx len = f.size();
+  Tgroup GRP(ListPermGens, len);
+  Tgroup stab = GRP.Stabilizer_OnSets(f);
+  auto f_op=[&](Tobj const &x, TeltPerm const &u) -> Tobj {
+    return OnSets(x, u);
+  };
+  return PreImageSubgroupAction<Tgroup,TeltMatr,Tobj,decltype(f_op)>(ListMatrGens, ListPermGens, id_matr, stab, f, f_op);
+}
 
 
-
+template <typename Tgroup, typename TeltMatr>
+std::vector<TeltMatr>
+PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
+                 std::vector<typename Tgroup::Telt> const &ListPermGens,
+                 TeltMatr const &id_matr, Tgroup const& eGRP) {
+  using Telt = typename Tgroup::Telt;
+  using Tobj = Telt;
+  auto f_op=[&](Tobj const &x, Telt const &u) -> Tobj {
+    return eGRP.Sift(Inverse(u) * x);
+  };
+  Telt id = eGRP.get_identity();
+  return PreImageSubgroupAction<Tgroup,TeltMatr,Tobj,decltype(f_op)>(ListMatrGens, ListPermGens, id_matr, eGRP, id, f_op);
+}
 
 
 
