@@ -499,6 +499,10 @@ end;
 
 
 
+
+
+
+
 TestCentreSubgroup:=function(nbMov, eGRP)
     local eDir, FileName, output, LGen, eGen, iMov, eImg, pos, eVal, eBinary, FileErr, FileRes, eCommand, Result1, Result2, test, eGRP_cent;
     Print("Checking CentreSubgroup feature\n");
@@ -582,6 +586,75 @@ TestCentralizerElt:=function(nbMov, eGRP, g)
     MyRemoveFileIfExist(FileName);
     MyRemoveFileIfExist(FileErr);
     MyRemoveFileIfExist(FileRes);
+end;
+
+
+TestIntersection:=function(nbMov, eGRP1, eGRP2)
+    local eDir, eCommand, PrtGroup, FileName1, FileName2, eBinary, FileErr, FileRes, eInt, fInt;
+    eDir:="/tmp/DebugIntersection_datarun/";
+    eCommand:=Concatenation("mkdir -p ", eDir);
+    Exec(eCommand);
+    #
+    PrtGroup:=function(eFile, eGRP)
+        local output, LGen, PrtElement, eGen, iMov, eImg;
+        MyRemoveFileIfExist(eFile);
+        output:=OutputTextFile(eFile, true);
+        LGen:=GeneratorsOfGroup(eGRP);
+        AppendTo(output, Length(LGen), " ", nbMov, "\n");
+        for eGen in LGen
+        do
+            for iMov in [1..nbMov]
+            do
+                eImg:=OnPoints(iMov, eGen);
+                AppendTo(output, " ", eImg-1);
+            od;
+            AppendTo(output, "\n");
+        od;
+        CloseStream(output);
+    end;
+    FileName1:=Concatenation(eDir, "Input1");
+    FileName2:=Concatenation(eDir, "Input2");
+    PrtGroup(FileName1, eGRP1);
+    PrtGroup(FileName2, eGRP2);
+    #
+    eBinary:="../src_gap/GapIntersection";
+    FileErr:=Concatenation(eDir, "CppError");
+    FileRes:=Concatenation(eDir, "GapOutput");
+    eCommand:=Concatenation(eBinary, " ", FileName1, " ", FileName2, " ", FileRes, " 2> ", FileErr);
+    Exec(eCommand);
+    #
+    eInt:=ReadAsFunction(FileRes)();
+    fInt:=Intersection(eGRP1, eGRP2);
+    if eInt <> fInt then
+        Print("eInt=", eInt, " fInt=", fInt, "\n");
+        Error("Found some error. Please debug");
+    fi;
+    MyRemoveFileIfExist(FileName1);
+    MyRemoveFileIfExist(FileName2);
+    MyRemoveFileIfExist(FileErr);
+    MyRemoveFileIfExist(FileRes);
+end;
+
+
+TestIntersectionSeqInt:=function(nbMov, eGRP)
+    local LGen, nGen, GetRandomGroup, i, eGRP1, eGRP2;
+    LGen:=GeneratorsOfGroup(eGRP);
+    nGen:=Length(LGen);
+    GetRandomGroup:=function()
+        local sizSet, LGenR;
+        sizSet:=Random([0..nGen]);
+        LGenR:=Local_RandomSubset(LGen, sizSet);
+        if Length(LGenR)=0 then
+            return Group(());
+        fi;
+        return Group(LGenR);
+    end;
+    for i in [1..10]
+    do
+        eGRP1:=GetRandomGroup();
+        eGRP2:=GetRandomGroup();
+        TestIntersection(nbMov, eGRP1, eGRP2);
+    od;
 end;
 
 
@@ -679,6 +752,9 @@ TestSpecificGroup:=function(method, size_opt, nbMov, eGRP)
     if method="ascendingchain" then
         TestAscendingChain(nbMov, eGRP);
     fi;
+    if method="intersection" then
+        TestIntersectionSeqInt(nbMov, eGRP);
+    fi;
 end;
 
 
@@ -731,7 +807,8 @@ end;
 
 
 
-TestAllGroups("ascendingchain", 1);
+TestAllGroups("intersection", 1);
+#TestAllGroups("ascendingchain", 1);
 #TestAllGroups("sequenceblockdecomposition", 1);
 #TestAllGroups("centralizerelt", 1);
 #TestAllGroups("derivedsubgroup", 1);
