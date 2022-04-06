@@ -637,6 +637,9 @@ OrbitsPartition(std::vector<Telt> const &gens,
   return GetPartition(OrbitsPermsB(gens, Omega));
 }
 
+
+
+
 template <typename Tarith> int SmallestPrimeDivisor(Tarith const &size) {
   if (size == 1)
     return 1;

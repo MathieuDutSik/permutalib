@@ -2909,18 +2909,23 @@ Kernel_Intersection(StabChain<Telt, Tidx_label> const& G, StabChain<Telt, Tidx_l
   Face mg_minus_mh(n);
   Face mh_minus_mg(n);
   std::vector<Tidx> Omega;
+  std::vector<Tidx> OmegaC;
   for (Tidx i=0; i<n; i++) {
     bool val_g =  IsMoved(LGen_G, i);
     bool val_h =  IsMoved(LGen_H, i);
     mg[i] = val_g;
     mh[i] = val_h;
-    if (val_g && val_h)
+    if (val_g && val_h) {
       Omega.push_back(i);
+    } else {
+      OmegaC.push_back(i);
+    }
     if (val_g && !val_h)
       mg_minus_mh[i] = 1;
     if (val_h && !val_g)
       mh_minus_mg[i] = 1;
   }
+  Tidx n_mov = Tidx(Omega.size());
   StabChainOptions<Tint, Telt> options = GetStandardOptions<Tint, Telt>(id);
   StabChain<Telt, Tidx_label> TrivGrp = StabChainOp_listgen<Telt, Tidx_label, Tint>({}, options);
   if (Omega.size() == 0) {
@@ -2932,10 +2937,41 @@ Kernel_Intersection(StabChain<Telt, Tidx_label> const& G, StabChain<Telt, Tidx_l
     return H_red;
   if (InclusionTest(H_red, G_red))
     return G_red;
-  Partition<Tidx> P = OrbitsPartition(Kernel_GeneratorsOfGroup(H_red), Omega);
+  std::vector<Tidx> eList = Omega;
+  eList.insert(eList.end(), OmegaC.begin(), OmegaC.end());
+  Telt eReordInv(eList);
+  Telt eReordDir = Inverse(eReordInv);
+  ConjugateStabChain_Element(H_red, eReordDir);
+  ConjugateStabChain_Element(G_red, eReordDir);
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+  {
+    std::vector<Telt> LGen_G_red = Kernel_GeneratorsOfGroup(G_red);
+    std::vector<Telt> LGen_H_red = Kernel_GeneratorsOfGroup(H_red);
+    for (Tidx i=0; i<n_mov; i++) {
+      bool val_g =  IsMoved(LGen_G_red, i);
+      bool val_h =  IsMoved(LGen_H_red, i);
+      if (!val_g || !val_h) {
+        std::cerr << "We have an incoherence for OmegaMap\n";
+        throw PermutalibException{1};
+      }
+    }
+    for (Tidx i=n_mov; i<n; i++) {
+      bool val_g =  IsMoved(LGen_G_red, i);
+      bool val_h =  IsMoved(LGen_H_red, i);
+      if (val_g && val_h) {
+        std::cerr << "We have an incoherence for OmegaCMap\n";
+        throw PermutalibException{1};
+      }
+    }
+  }
+#endif
+  std::vector<Tidx> OmegaMap;
+  for (Tidx i=0; i<n_mov; i++)
+    OmegaMap.push_back(i);
+  Partition<Tidx> P = OrbitsPartition(Kernel_GeneratorsOfGroup(H_red), OmegaMap);
 
   using Trfm = std::variant<Trfm_processfixpoint<Tidx>, Trfm_intersection<Tidx>>;
-  rbaseType<Telt, Tidx_label, Trfm> rbase = EmptyRBase<Telt, Tidx_label, Trfm>({G_red, H_red}, false, Omega, P);
+  rbaseType<Telt, Tidx_label, Trfm> rbase = EmptyRBase<Telt, Tidx_label, Trfm>({G_red, H_red}, false, OmegaMap, P);
 
   using Tdata = dataType_opset<Tidx>;
   Tdata data(P);
@@ -2949,8 +2985,11 @@ Kernel_Intersection(StabChain<Telt, Tidx_label> const& G, StabChain<Telt, Tidx_l
     throw PermutalibException{1};
     return false;
   };
-  return PartitionBacktrack<Telt, Tidx_label, Tdata, Trfm, Tint, false,
+  StabChain<Telt,Tidx_label> retGRP =
+    PartitionBacktrack<Telt, Tidx_label, Tdata, Trfm, Tint, false,
     decltype(Pr), decltype(nextLevel)>(G, Pr, nextLevel, rbase, data, TrivGrp, TrivGrp).stab;
+  ConjugateStabChain_Element(retGRP,eReordInv);
+  return retGRP;
 }
 
 
