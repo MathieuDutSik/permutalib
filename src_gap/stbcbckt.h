@@ -1141,16 +1141,18 @@ bool Refinements_Intersection(
     Partition<typename Telt::Tidx> const &Q,
     std::vector<singStrat<typename Telt::Tidx>> const &strat) {
   Telt t;
-  if (image.level2.status == int_false) {
-    t = image.perm.val;
-  } else {
-    t = image.perm2.val;
-  }
-  Telt tinv = Inverse(t);
+  auto oper=[&](Telt const& t) -> bool {
+    Telt tinv = Inverse(t);
 #ifdef DEBUG_STBCBCKT
-  std::cerr << "CPP Refinements_Intersection\n";
+    std::cerr << "CPP Refinements_Intersection\n";
 #endif
-  return MeetPartitionStrat(rbase, image, Q, tinv, strat);
+    return MeetPartitionStrat(rbase, image, Q, tinv, strat);
+  };
+  if (image.level2.status == int_false) {
+    return oper(image.perm.val);
+  } else {
+    return oper(image.perm2.val);
+  }
 }
 
 template <typename Telt, typename Tidx_label, typename Tdata, typename Trfm>
@@ -2515,6 +2517,10 @@ Kernel_RepresentativeAction_OnSets(StabChain<Telt, Tidx_label> const &G,
   }
 }
 
+
+
+
+
 template <typename Telt, typename Tidx_label, typename Tint>
 std::optional<Telt>
 Kernel_RepresentativeAction_OnPoints(StabChain<Telt, Tidx_label> const &G,
@@ -2880,6 +2886,73 @@ Kernel_Centralizer_grp(const StabChain<Telt, Tidx_label> &G,
              G, LGen_U, LGen_U, LR_grp, LR_grp)
       .stab;
 }
+
+
+template <typename Telt, typename Tidx_label, typename Tint>
+StabChain<Telt, Tidx_label>
+Kernel_Intersection(StabChain<Telt, Tidx_label> const& G, StabChain<Telt, Tidx_label> const& H)
+{
+  using Tidx = typename Telt::Tidx;
+  Telt id = G->comm->identity;
+  Tidx n = id.size();
+  using Tidx = typename Telt::Tidx;
+  std::vector<Telt> LGen_G = Kernel_GeneratorsOfGroup(G);
+  std::vector<Telt> LGen_H = Kernel_GeneratorsOfGroup(H);
+  auto IsMoved=[&](std::vector<Telt> const& gens, Tidx const& pt) -> bool {
+    for (auto & eGen : gens)
+      if (PowAct(pt, eGen) != pt)
+        return true;
+    return false;
+  };
+  Face mg(n);
+  Face mh(n);
+  Face mg_minus_mh(n);
+  Face mh_minus_mg(n);
+  std::vector<Tidx> Omega;
+  for (Tidx i=0; i<n; i++) {
+    bool val_g =  IsMoved(LGen_G, i);
+    bool val_h =  IsMoved(LGen_H, i);
+    mg[i] = val_g;
+    mh[i] = val_h;
+    if (val_g && val_h)
+      Omega.push_back(i);
+    if (val_g && !val_h)
+      mg_minus_mh[i] = 1;
+    if (val_h && !val_g)
+      mh_minus_mg[i] = 1;
+  }
+  StabChainOptions<Tint, Telt> options = GetStandardOptions<Tint, Telt>(id);
+  StabChain<Telt, Tidx_label> TrivGrp = StabChainOp_listgen<Telt, Tidx_label, Tint>({}, options);
+  if (Omega.size() == 0) {
+    return TrivGrp;
+  }
+  StabChain<Telt,Tidx_label> G_red = Kernel_Stabilizer_OnSets<Telt,Tidx_label,Tint>(G, mg_minus_mh);
+  StabChain<Telt,Tidx_label> H_red = Kernel_Stabilizer_OnSets<Telt,Tidx_label,Tint>(H, mh_minus_mg);
+  if (InclusionTest(G_red, H_red))
+    return H_red;
+  if (InclusionTest(H_red, G_red))
+    return G_red;
+  Partition<Tidx> P = OrbitsPartition(Kernel_GeneratorsOfGroup(H_red), Omega);
+
+  using Trfm = std::variant<Trfm_processfixpoint<Tidx>, Trfm_intersection<Tidx>>;
+  rbaseType<Telt, Tidx_label, Trfm> rbase = EmptyRBase<Telt, Tidx_label, Trfm>({G_red, H_red}, false, Omega, P);
+
+  using Tdata = dataType_opset<Tidx>;
+  Tdata data(P);
+  auto nextLevel = [&](Partition<Tidx> &P,
+                       rbaseType<Telt, Tidx_label, Trfm> &rbase,
+                       [[maybe_unused]] Telt const &TheId) -> void {
+    NextRBasePoint_no_order<Telt, Tidx_label, Trfm>(P, rbase);
+  };
+  auto Pr = [&]([[maybe_unused]] Telt const& eElt) -> bool {
+    std::cerr << "We need to see what to put here from the GAP code\n";
+    throw PermutalibException{1};
+    return false;
+  };
+  return PartitionBacktrack<Telt, Tidx_label, Tdata, Trfm, Tint, false,
+    decltype(Pr), decltype(nextLevel)>(G, Pr, nextLevel, rbase, data, TrivGrp, TrivGrp).stab;
+}
+
 
 /*
 #############################################################################

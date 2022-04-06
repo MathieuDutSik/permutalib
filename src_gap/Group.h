@@ -223,6 +223,9 @@ public:
     }
     return l_grp;
   }
+  Group<Telt, Tint> Intersection(Group<Telt, Tint> const& H) const {
+    return Group<Telt, Tint>(Kernel_Intersection<Telt, Tidx_label, Tint>(S, H.S));
+  }
   const Telt& get_identity() const { return S->comm->identity; }
   bool isin(const Telt &x) const { return IsElementInStabChain(S, x); }
   Telt Sift(Telt const &x) const { return SiftedPermutation(S, x); }

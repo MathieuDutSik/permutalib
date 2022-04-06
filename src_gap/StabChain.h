@@ -667,12 +667,12 @@ bool IsElementInStabChain(StabChain<Telt, Tidx_label> const &S, Telt const &g) {
   return res.isIdentity();
 }
 
-// Testing that S1 is a subset of S2
+// Testing that H is a subset of G
 template <typename Telt, typename Tidx_label>
-bool InclusionTest(const StabChain<Telt, Tidx_label> &S1,
-                   const StabChain<Telt, Tidx_label> &S2) {
-  for (auto &eGen : Kernel_GeneratorsOfGroup(S1)) {
-    Telt res = SiftedPermutation(S2, eGen);
+bool InclusionTest(const StabChain<Telt, Tidx_label> &G,
+                   const StabChain<Telt, Tidx_label> &H) {
+  for (auto &eGen : Kernel_GeneratorsOfGroup(H)) {
+    Telt res = SiftedPermutation(G, eGen);
     if (!res.isIdentity())
       return false;
   }

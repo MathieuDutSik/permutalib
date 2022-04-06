@@ -24,12 +24,14 @@ std::vector<StabChain<Telt,Tidx_label>> Kernel_AscendingChain(StabChain<Telt,Tid
   Tidx n_vert = G->comm->identity.size();
   std::list<Tstab> ListStab = StdListStabChain(G);
   ListStab.reverse();
+  /*
   size_t pos = 0;
   for (auto & eStab : ListStab) {
     Tint ord = Order<Telt,Tidx_label,Tint>(eStab);
     std::cerr << "pos=" << pos << " ord=" << ord << "\n";
     pos++;
   }
+  */
   auto iter = ListStab.begin();
   size_t len = ListStab.size();
   std::vector<Tstab> ListGroup;
