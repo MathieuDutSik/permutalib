@@ -2352,6 +2352,7 @@ Kernel_Stabilizer_OnPoints(StabChain<Telt, Tidx_label> const &G,
   using Tidx = typename Telt::Tidx;
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Beginning of Stabilizer_OnSets\n";
+  PrintStabChain(G);
 #endif
   Telt id = G->comm->identity;
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
@@ -2895,37 +2896,41 @@ Kernel_Intersection(StabChain<Telt, Tidx_label> const& G, StabChain<Telt, Tidx_l
   Telt id = G->comm->identity;
   Tidx n = id.size();
   using Tidx = typename Telt::Tidx;
-  std::vector<Telt> LGen_G = Kernel_GeneratorsOfGroup(G);
-  std::vector<Telt> LGen_H = Kernel_GeneratorsOfGroup(H);
   auto IsMoved=[&](std::vector<Telt> const& gens, Tidx const& pt) -> bool {
     for (auto & eGen : gens)
       if (PowAct(pt, eGen) != pt)
         return true;
     return false;
   };
-  Face mg(n);
-  Face mh(n);
   StabChain<Telt,Tidx_label> G_red = G;
   StabChain<Telt,Tidx_label> H_red = H;
   std::vector<Tidx> Omega;
   std::vector<Tidx> OmegaC;
-  for (Tidx i=0; i<n; i++) {
-    bool val_g =  IsMoved(LGen_G, i);
-    bool val_h =  IsMoved(LGen_H, i);
-    std::cerr << "i=" << i << " val_h=" << val_g << " val_h=" << val_h << "\n";
-    mg[i] = val_g;
-    mh[i] = val_h;
-    if (val_g && val_h) {
-      Omega.push_back(i);
-    } else {
-      OmegaC.push_back(i);
+  while(true) {
+    Omega.clear();
+    OmegaC.clear();
+    std::vector<Telt> LGen_G = Kernel_GeneratorsOfGroup(G_red);
+    std::vector<Telt> LGen_H = Kernel_GeneratorsOfGroup(H_red);
+    bool DoSomething = false;
+    for (Tidx i=0; i<n; i++) {
+      bool val_g =  IsMoved(LGen_G, i);
+      bool val_h =  IsMoved(LGen_H, i);
+      if (val_g && val_h) {
+        Omega.push_back(i);
+      } else {
+        OmegaC.push_back(i);
+      }
+      if (val_g && !val_h) {
+        G_red = Kernel_Stabilizer_OnPoints<Telt,Tidx_label,Tint>(G_red,i);
+        DoSomething = true;
+      }
+      if (val_h && !val_g) {
+        H_red = Kernel_Stabilizer_OnPoints<Telt,Tidx_label,Tint>(H_red,i);
+        DoSomething = true;
+      }
     }
-    if (val_g && !val_h) {
-      G_red = Kernel_Stabilizer_OnPoints<Telt,Tidx_label,Tint>(G_red,i);
-    }
-    if (val_h && !val_g) {
-      H_red = Kernel_Stabilizer_OnPoints<Telt,Tidx_label,Tint>(H_red,i);
-    }
+    if (!DoSomething)
+      break;
   }
   Tidx n_mov = Tidx(Omega.size());
   StabChainOptions<Tint, Telt> options = GetStandardOptions<Tint, Telt>(id);
@@ -2937,10 +2942,25 @@ Kernel_Intersection(StabChain<Telt, Tidx_label> const& G, StabChain<Telt, Tidx_l
     return H_red;
   if (InclusionTest(H_red, G_red))
     return G_red;
+  std::cerr << "n=" << n << "\n";
+  std::cerr << "Omega =";
+  for (auto & v : Omega)
+    std::cerr << " " << v;
+  std::cerr << "\n";
+  std::cerr << "OmegaC =";
+  for (auto & v : OmegaC)
+    std::cerr << " " << v;
+  std::cerr << "\n";
+
   std::vector<Tidx> eList = Omega;
   eList.insert(eList.end(), OmegaC.begin(), OmegaC.end());
+  std::cerr << "eList =";
+  for (auto & v : eList)
+    std::cerr << " " << v;
+  std::cerr << "\n";
   Telt eReordInv(eList);
   Telt eReordDir = Inverse(eReordInv);
+  std::cerr << "eReordInv=" << eReordInv << " eReordDir=" << eReordDir << "\n";
   ConjugateStabChain_Element(H_red, eReordDir);
   ConjugateStabChain_Element(G_red, eReordDir);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
@@ -2951,7 +2971,7 @@ Kernel_Intersection(StabChain<Telt, Tidx_label> const& G, StabChain<Telt, Tidx_l
       bool val_g =  IsMoved(LGen_G_red, i);
       bool val_h =  IsMoved(LGen_H_red, i);
       if (!val_g || !val_h) {
-        std::cerr << "We have an incoherence for OmegaMap\n";
+        std::cerr << "We have an incoherence for OmegaMap i=" << i << " val_g=" << val_g << " val_h=" << val_h << "\n";
         throw PermutalibException{1};
       }
     }
