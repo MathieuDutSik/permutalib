@@ -595,10 +595,6 @@ TestIntersection:=function(nbMov, eGRP1, eGRP2)
     eCommand:=Concatenation("mkdir -p ", eDir);
     Exec(eCommand);
     #
-    if IsSolvable(eGRP1) or IsSolvable(eGRP2) then
-        Print("Not what we are looking for\n");
-    fi;
-    #
     PrtGroup:=function(eFile, eGRP)
         local output, LGen, PrtElement, eGen, iMov, eImg;
         MyRemoveFileIfExist(eFile);
