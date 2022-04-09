@@ -22,6 +22,20 @@ template <typename Tidx> struct Partition {
   std::vector<Tidx> cellno;
 };
 
+/*
+When working with partitions, we have to deal with the possibility
+that the set of active points of the group is different from the set
+of nodes being partitionned:
+---The classical scenario is a group acting on vertices 0....n-1
+but the set of moved points being e.g. {2,3}.
+---The reverse occurs for intersections. We take the set Omega of all
+points moved by G and H. Therefore there is movement outside of
+Omega.
+
+
+
+*/
+
 //
 // Print functionality
 //

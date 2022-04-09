@@ -1054,7 +1054,6 @@ void NextRBasePoint_no_order(Partition<typename Telt::Tidx> &P,
   */
 #endif
   SortParallel_PairList(lens, order);
-
   Tidx miss_val = std::numeric_limits<Tidx>::max();
   Tidx k = PositionProperty<Tidx>(lens,
                                   [](Tidx const &x) -> bool { return x != 1; });
@@ -2906,13 +2905,14 @@ Kernel_Intersection(StabChain<Telt, Tidx_label> const& G, StabChain<Telt, Tidx_l
   };
   Face mg(n);
   Face mh(n);
-  Face mg_minus_mh(n);
-  Face mh_minus_mg(n);
+  StabChain<Telt,Tidx_label> G_red = G;
+  StabChain<Telt,Tidx_label> H_red = H;
   std::vector<Tidx> Omega;
   std::vector<Tidx> OmegaC;
   for (Tidx i=0; i<n; i++) {
     bool val_g =  IsMoved(LGen_G, i);
     bool val_h =  IsMoved(LGen_H, i);
+    std::cerr << "i=" << i << " val_h=" << val_g << " val_h=" << val_h << "\n";
     mg[i] = val_g;
     mh[i] = val_h;
     if (val_g && val_h) {
@@ -2920,10 +2920,12 @@ Kernel_Intersection(StabChain<Telt, Tidx_label> const& G, StabChain<Telt, Tidx_l
     } else {
       OmegaC.push_back(i);
     }
-    if (val_g && !val_h)
-      mg_minus_mh[i] = 1;
-    if (val_h && !val_g)
-      mh_minus_mg[i] = 1;
+    if (val_g && !val_h) {
+      G_red = Kernel_Stabilizer_OnPoints<Telt,Tidx_label,Tint>(G_red,i);
+    }
+    if (val_h && !val_g) {
+      H_red = Kernel_Stabilizer_OnPoints<Telt,Tidx_label,Tint>(H_red,i);
+    }
   }
   Tidx n_mov = Tidx(Omega.size());
   StabChainOptions<Tint, Telt> options = GetStandardOptions<Tint, Telt>(id);
@@ -2931,8 +2933,6 @@ Kernel_Intersection(StabChain<Telt, Tidx_label> const& G, StabChain<Telt, Tidx_l
   if (Omega.size() == 0) {
     return TrivGrp;
   }
-  StabChain<Telt,Tidx_label> G_red = Kernel_Stabilizer_OnSets<Telt,Tidx_label,Tint>(G, mg_minus_mh);
-  StabChain<Telt,Tidx_label> H_red = Kernel_Stabilizer_OnSets<Telt,Tidx_label,Tint>(H, mh_minus_mg);
   if (InclusionTest(G_red, H_red))
     return H_red;
   if (InclusionTest(H_red, G_red))
