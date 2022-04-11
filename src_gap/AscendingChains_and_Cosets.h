@@ -2,6 +2,12 @@
 #define INCLUDE_PERMUTALIB_ASCENDING_CHAIN_H
 
 
+#include <limits>
+#include <list>
+#include <utility>
+#include <unordered_set>
+#include <vector>
+
 
 namespace permutalib {
 

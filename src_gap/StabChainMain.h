@@ -5,6 +5,8 @@
 
 #include "StabChain.h"
 #include "stbcrand.h"
+#include <utility>
+#include <vector>
 
 namespace permutalib {
 

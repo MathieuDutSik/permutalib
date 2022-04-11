@@ -4,6 +4,11 @@
 #include "GapPrint.h"
 #include "PermGroup.h"
 #include <unordered_map>
+#include <string>
+#include <set>
+#include <limits>
+#include <utility>
+#include <vector>
 
 #ifdef SYNCHRONIZED_DEBUG_GAP478
 #define DEBUG_PARTITION

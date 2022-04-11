@@ -4,6 +4,9 @@
 #include <set>
 #include <unordered_set>
 #include <vector>
+#include <map>
+#include <limits>
+#include <algorithm>
 
 namespace permutalib {
 

@@ -4,6 +4,7 @@
 #include "exception.h"
 #include <functional>
 #include <iostream>
+#include <vector>
 
 #include <bitset>
 #include <boost/dynamic_bitset.hpp>

@@ -6,6 +6,12 @@
 #include "partition.h"
 //#include "plus_infinity.h"
 #include <optional>
+#include <map>
+#include <string>
+#include <algorithm>
+#include <utility>
+#include <limits>
+#include <vector>
 
 /*
 #############################################################################

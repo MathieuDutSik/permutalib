@@ -6,6 +6,11 @@
 #include "PermGroup.h"
 #include "factorize.h"
 #include "GapPrint.h"
+#include <unordered_set>
+#include <list>
+#include <utility>
+#include <limits>
+#include <vector>
 
 namespace permutalib {
 

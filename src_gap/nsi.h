@@ -5,6 +5,11 @@
 #include "StabChain.h"
 #include "stbcbckt.h"
 #include <unordered_map>
+#include <utility>
+#include <limits>
+#include <memory>
+#include <vector>
+#include <algorithm>
 
 //#define DEBUG_NSI
 

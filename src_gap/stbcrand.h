@@ -12,6 +12,11 @@
 #include "COMB_Vectors.h"
 #include "StabChain.h"
 #include "pseudorandom.h"
+#include <limits>
+#include <string>
+#include <algorithm>
+#include <utility>
+#include <vector>
 
 namespace permutalib {
 

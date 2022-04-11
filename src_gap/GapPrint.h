@@ -5,6 +5,9 @@
 #include <iostream>
 #include <optional>
 #include <sstream>
+#include <string>
+#include <vector>
+#include <limits>
 
 namespace permutalib {
 

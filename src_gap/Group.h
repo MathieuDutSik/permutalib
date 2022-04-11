@@ -9,6 +9,11 @@
 #include "stbcbckt.h"
 #include "AscendingChains_and_Cosets.h"
 #include <map>
+#include <string>
+#include <unordered_set>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 #include <boost/archive/tmpdir.hpp>
 

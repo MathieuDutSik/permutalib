@@ -1,6 +1,9 @@
 #ifndef DEFINE_PERMUTALIB_COMBINATORICS_H
 #define DEFINE_PERMUTALIB_COMBINATORICS_H
 
+#include <vector>
+#include <algorithm>
+
 template <typename T1, typename T2>
 void SortParallel_PairList(std::vector<T1> &list1, std::vector<T2> &list2) {
   struct PairData {

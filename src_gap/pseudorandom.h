@@ -2,6 +2,7 @@
 #define DEFINE_PERMUTALIB_PSEUDO_RANDOM_H
 
 #include "Face_basic.h"
+#include <vector>
 
 namespace permutalib {
 

@@ -3,6 +3,11 @@
 
 #include "BlockSystem.h"
 #include "StabChainMain.h"
+#include <unordered_set>
+#include <map>
+#include <limits>
+#include <vector>
+#include <utility>
 
 namespace permutalib {
 

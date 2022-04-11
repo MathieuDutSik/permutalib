@@ -27,14 +27,19 @@
   ---The attribute "relativeOrders" is related to pcgs and not needed here.
 */
 
-#include <memory>
-#include <vector>
-
 #include "COMB_Vectors.h"
 #include "GapPrint.h"
 #include "PermGroup.h"
 #include "factorize.h"
 #include "list.h"
+#include <memory>
+#include <vector>
+#include <map>
+#include <unordered_set>
+#include <list>
+#include <string>
+#include <limits>
+#include <utility>
 
 // Needed for the comparison with
 #ifdef SYNCHRONIZED_DEBUG_GAP478

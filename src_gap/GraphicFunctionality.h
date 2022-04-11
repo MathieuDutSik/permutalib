@@ -2,6 +2,8 @@
 #define DEFINE_PERMUTALIB_GRAPHIC_FUNCTIONALITY_H
 
 #include "COMB_Vectors.h"
+#include <limits>
+#include <vector>
 
 namespace permutalib {
 

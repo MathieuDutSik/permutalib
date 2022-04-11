@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
+#include <limits>
+#include <utility>
 
 namespace permutalib {
 

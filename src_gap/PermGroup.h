@@ -4,6 +4,10 @@
 #include "Face_basic.h"
 #include <set>
 #include <unordered_set>
+#include <algorithm>
+#include <limits>
+#include <utility>
+#include <vector>
 
 namespace permutalib {
 

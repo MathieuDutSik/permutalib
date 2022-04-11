@@ -3,6 +3,8 @@
 
 #include "BlockSystem.h"
 #include "StabChain.h"
+#include <vector>
+#include <map>
 
 namespace permutalib {
 
