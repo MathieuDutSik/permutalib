@@ -1,5 +1,5 @@
-#ifndef DEFINE_PERMUTALIB_STAB_CHAIN_H
-#define DEFINE_PERMUTALIB_STAB_CHAIN_H
+#ifndef SRC_GAP_STABCHAIN_H_
+#define SRC_GAP_STABCHAIN_H_
 
 /*
   Version of the code used. It must be from Summer 2016.
@@ -32,14 +32,14 @@
 #include "PermGroup.h"
 #include "factorize.h"
 #include "list.h"
-#include <memory>
-#include <vector>
-#include <map>
-#include <unordered_set>
-#include <list>
-#include <string>
 #include <limits>
+#include <list>
+#include <map>
+#include <memory>
+#include <string>
+#include <unordered_set>
 #include <utility>
+#include <vector>
 
 // Needed for the comparison with
 #ifdef SYNCHRONIZED_DEBUG_GAP478
@@ -973,9 +973,6 @@ StdListStabChain(StabChain<Telt, Tidx_label> const &S) {
   return ListStab;
 }
 
-
-
-
 template <typename Telt, typename Tidx_label>
 StabChain<Telt, Tidx_label>
 StabChainBaseStrongGenerators(std::vector<typename Telt::Tidx> const &base,
@@ -1092,8 +1089,6 @@ void AddGeneratorsExtendSchreierTree(StabChain<Telt, Tidx_label> &S,
 #ifdef DEBUG_ADD_GEN_SCH
           std::cerr << "CPP     AGEST img=" << int(img + 1)
                     << " g=" << S->comm->labels[j] << "\n";
-          //	  std::cerr << "DEBUG |S->transversal|=" <<
-          //S->transversal.size() << " img=" << img << "\n";
 #endif
           if (S->transversal[img] != std::numeric_limits<Tidx_label>::max()) {
 #ifdef DEBUG_ADD_GEN_SCH
@@ -2001,4 +1996,4 @@ HomomorphismMapping(StabChain<Telt, Tidx_label> const &Stot, F_pt f_pt,
 
 } // namespace permutalib
 
-#endif
+#endif  // SRC_GAP_STABCHAIN_H_

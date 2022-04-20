@@ -1,5 +1,5 @@
-#ifndef DEFINE_PERMUTALIB_PROPERTIES_H
-#define DEFINE_PERMUTALIB_PROPERTIES_H
+#ifndef SRC_GAP_PROPERTIES_H_
+#define SRC_GAP_PROPERTIES_H_
 
 #include "BlockSystem.h"
 #include "StabChain.h"
@@ -161,4 +161,4 @@ std::optional<Telt> { Tidx len = Tidx(S->orbit.size()); Tidx bpt = S->orbit[0];
 
 } // namespace permutalib
 
-#endif
+#endif  // SRC_GAP_PROPERTIES_H_

@@ -40,9 +40,9 @@ int main(int argc, char *argv[]) {
     Tgroup eG(LGen, id);
     //
     std::vector<Tgroup> ListGroup = eG.GetAscendingChain();
-    auto prt=[&](std::ostream & os) -> void {
+    auto prt = [&](std::ostream &os) -> void {
       os << "return [";
-      for (size_t i=0; i<ListGroup.size(); i++) {
+      for (size_t i = 0; i < ListGroup.size(); i++) {
         if (i > 0)
           os << ",\n";
         os << ListGroup[i].GapString();

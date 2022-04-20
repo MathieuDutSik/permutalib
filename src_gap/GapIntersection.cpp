@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
     std::string eFile1 = argv[1];
     std::string eFile2 = argv[2];
     //
-    auto ReadGroup=[&](std::string const& eFile) -> Tgroup {
+    auto ReadGroup = [&](std::string const &eFile) -> Tgroup {
       std::ifstream is(eFile);
       size_t nbGen;
       int n_i;

@@ -1,15 +1,15 @@
-#ifndef DEFINE_PERMUTALIB_PERMUTATION_H
-#define DEFINE_PERMUTALIB_PERMUTATION_H
+#ifndef SRC_GAP_PERMUTATION_H_
+#define SRC_GAP_PERMUTATION_H_
 
 #include "Face_basic.h"
 #include "exception.h"
 #include "hash_fct.h"
 #include <iostream>
+#include <limits>
 #include <stdlib.h>
 #include <string>
-#include <vector>
-#include <limits>
 #include <utility>
+#include <vector>
 
 namespace permutalib {
 
@@ -797,4 +797,4 @@ template <typename Tidx> struct hash<permutalib::DoubleSidedPerm<Tidx>> {
 
 } // namespace std
 
-#endif
+#endif  // SRC_GAP_PERMUTATION_H_

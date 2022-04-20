@@ -1,5 +1,5 @@
-#ifndef DEFINE_PERMUTALIB_STBCRAND_H
-#define DEFINE_PERMUTALIB_STBCRAND_H
+#ifndef SRC_GAP_STBCRAND_H_
+#define SRC_GAP_STBCRAND_H_
 
 // Functions return type
 // SCRSift           : returns permutation
@@ -1123,4 +1123,4 @@ std::pair<bool, Telt> VerifySGS(StabChain<Telt, Tidx_label> const &S,
 
 } // namespace permutalib
 
-#endif
+#endif  // SRC_GAP_STBCRAND_H_

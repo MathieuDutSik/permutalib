@@ -1,17 +1,17 @@
-#ifndef DEFINE_PERMUTALIB_GROUP_H
-#define DEFINE_PERMUTALIB_GROUP_H
+#ifndef SRC_GAP_GROUP_H_
+#define SRC_GAP_GROUP_H_
 
+#include "AscendingChains_and_Cosets.h"
 #include "NormalStructure.h"
 #include "PermutationElt.h"
 #include "Properties.h"
 #include "StabChainMain.h"
 #include "nsi.h"
 #include "stbcbckt.h"
-#include "AscendingChains_and_Cosets.h"
 #include <map>
 #include <string>
-#include <unordered_set>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -216,22 +216,25 @@ public:
         Kernel_Centralizer_grp<Telt, Tidx_label, Tint>(S, H.S));
   }
   std::vector<BlockDecomposition<Tidx>> GetSequenceBlockDecomposition() const {
-    return ComputeSequenceBlockDecomposition(Kernel_GeneratorsOfGroup(S), S->comm->identity.size());
+    return ComputeSequenceBlockDecomposition(Kernel_GeneratorsOfGroup(S),
+                                             S->comm->identity.size());
   }
   std::vector<Group<Telt, Tint>> GetAscendingChain() const {
     Telt id = S->comm->identity;
-    std::vector<StabChain<Telt,Tidx_label>> l_stab = Kernel_AscendingChain<Telt,Tidx_label,Tint>(S);
-    std::vector<Group<Telt,Tint>> l_grp;
-    for (auto & e_s : l_stab) {
-      Group<Telt,Tint> eGRP(e_s);
+    std::vector<StabChain<Telt, Tidx_label>> l_stab =
+        Kernel_AscendingChain<Telt, Tidx_label, Tint>(S);
+    std::vector<Group<Telt, Tint>> l_grp;
+    for (auto &e_s : l_stab) {
+      Group<Telt, Tint> eGRP(e_s);
       l_grp.push_back(eGRP);
     }
     return l_grp;
   }
-  Group<Telt, Tint> Intersection(Group<Telt, Tint> const& H) const {
-    return Group<Telt, Tint>(Kernel_Intersection<Telt, Tidx_label, Tint>(S, H.S));
+  Group<Telt, Tint> Intersection(Group<Telt, Tint> const &H) const {
+    return Group<Telt, Tint>(
+        Kernel_Intersection<Telt, Tidx_label, Tint>(S, H.S));
   }
-  const Telt& get_identity() const { return S->comm->identity; }
+  const Telt &get_identity() const { return S->comm->identity; }
   bool isin(const Telt &x) const { return IsElementInStabChain(S, x); }
   Telt Sift(Telt const &x) const { return SiftedPermutation(S, x); }
 
@@ -340,19 +343,12 @@ public:
   Tint size_tint;
 };
 
-
-
-
-
-
-
-
-
 template <typename Tgroup, typename TeltMatr, typename Tobj, typename Fop>
 std::vector<TeltMatr>
 PreImageSubgroupAction(std::vector<TeltMatr> const &ListMatrGens,
                        std::vector<typename Tgroup::Telt> const &ListPermGens,
-                       TeltMatr const &id_matr, Tgroup const& stab, Tobj const &x, Fop const& f_op) {
+                       TeltMatr const &id_matr, Tgroup const &stab,
+                       Tobj const &x, Fop const &f_op) {
   using TeltPerm = typename Tgroup::Telt;
   using Tidx = typename TeltPerm::Tidx;
   using Telt = std::pair<TeltMatr, TeltPerm>;
@@ -432,7 +428,6 @@ PreImageSubgroupAction(std::vector<TeltMatr> const &ListMatrGens,
   return ListMatrGens_ret;
 }
 
-
 template <typename TeltPerm, typename TeltMatr, typename Tint>
 std::vector<TeltMatr>
 StabilizerMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
@@ -445,31 +440,27 @@ StabilizerMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
   Tidx len = f.size();
   Tgroup GRP(ListPermGens, len);
   Tgroup stab = GRP.Stabilizer_OnSets(f);
-  auto f_op=[&](Tobj const &x, TeltPerm const &u) -> Tobj {
+  auto f_op = [&](Tobj const &x, TeltPerm const &u) -> Tobj {
     return OnSets(x, u);
   };
-  return PreImageSubgroupAction<Tgroup,TeltMatr,Tobj,decltype(f_op)>(ListMatrGens, ListPermGens, id_matr, stab, f, f_op);
+  return PreImageSubgroupAction<Tgroup, TeltMatr, Tobj, decltype(f_op)>(
+      ListMatrGens, ListPermGens, id_matr, stab, f, f_op);
 }
-
 
 template <typename Tgroup, typename TeltMatr>
 std::vector<TeltMatr>
 PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
                  std::vector<typename Tgroup::Telt> const &ListPermGens,
-                 TeltMatr const &id_matr, Tgroup const& eGRP) {
+                 TeltMatr const &id_matr, Tgroup const &eGRP) {
   using Telt = typename Tgroup::Telt;
   using Tobj = Telt;
-  auto f_op=[&](Tobj const &x, Telt const &u) -> Tobj {
+  auto f_op = [&](Tobj const &x, Telt const &u) -> Tobj {
     return eGRP.Sift(Inverse(u) * x);
   };
   Telt id = eGRP.get_identity();
-  return PreImageSubgroupAction<Tgroup,TeltMatr,Tobj,decltype(f_op)>(ListMatrGens, ListPermGens, id_matr, eGRP, id, f_op);
+  return PreImageSubgroupAction<Tgroup, TeltMatr, Tobj, decltype(f_op)>(
+      ListMatrGens, ListPermGens, id_matr, eGRP, id, f_op);
 }
-
-
-
-
-
 
 template <typename TeltPerm, typename TeltMatr, typename Tint>
 std::optional<TeltMatr>
@@ -611,4 +602,4 @@ std::istream &operator>>(std::istream &is, permutalib::Group<Telt, Tint> &grp) {
 
 } // namespace permutalib
 
-#endif
+#endif  // SRC_GAP_GROUP_H_

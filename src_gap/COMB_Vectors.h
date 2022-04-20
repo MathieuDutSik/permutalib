@@ -1,12 +1,12 @@
-#ifndef DEFINE_PERMUTALIB_COMB_VECTORS_H
-#define DEFINE_PERMUTALIB_COMB_VECTORS_H
+#ifndef SRC_GAP_COMB_VECTORS_H_
+#define SRC_GAP_COMB_VECTORS_H_
 
+#include <algorithm>
+#include <limits>
+#include <map>
 #include <set>
 #include <unordered_set>
 #include <vector>
-#include <map>
-#include <limits>
-#include <algorithm>
 
 namespace permutalib {
 
@@ -166,4 +166,4 @@ template <typename T> std::vector<T> SortVector(std::vector<T> const &f) {
 }
 
 } // namespace permutalib
-#endif
+#endif  // SRC_GAP_COMB_VECTORS_H_

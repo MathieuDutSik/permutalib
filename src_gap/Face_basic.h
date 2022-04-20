@@ -1,5 +1,5 @@
-#ifndef DEFINE_PERMUTALIB_FACE_BASIC_H
-#define DEFINE_PERMUTALIB_FACE_BASIC_H
+#ifndef SRC_GAP_FACE_BASIC_H_
+#define SRC_GAP_FACE_BASIC_H_
 
 #include "exception.h"
 #include <functional>
@@ -53,4 +53,4 @@ bool operator<(Face const &x, Face const &y) {
 }
 
 } // namespace permutalib
-#endif
+#endif  // SRC_GAP_FACE_BASIC_H_

@@ -1,11 +1,11 @@
-#ifndef DEFINE_PERMUTALIB_PERM_GROUP_H
-#define DEFINE_PERMUTALIB_PERM_GROUP_H
+#ifndef SRC_GAP_PERMGROUP_H_
+#define SRC_GAP_PERMGROUP_H_
 
 #include "Face_basic.h"
-#include <set>
-#include <unordered_set>
 #include <algorithm>
 #include <limits>
+#include <set>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -338,4 +338,4 @@ std::vector<typename Telt::Tidx> MovedPoints(const std::vector<Telt> &LGen,
 
 } // namespace permutalib
 
-#endif
+#endif  // SRC_GAP_PERMGROUP_H_

@@ -1,5 +1,5 @@
-#ifndef PERMUTALIB_INCLUDE_FACTORIZE_H
-#define PERMUTALIB_INCLUDE_FACTORIZE_H
+#ifndef SRC_GAP_FACTORIZE_H_
+#define SRC_GAP_FACTORIZE_H_
 
 #include <map>
 #include <vector>
@@ -115,4 +115,4 @@ std::map<Tidx, int> QuotientMapMultiplicity(const std::map<Tidx, int> &x,
 }
 
 } // namespace permutalib
-#endif
+#endif  // SRC_GAP_FACTORIZE_H_

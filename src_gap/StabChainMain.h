@@ -1,5 +1,5 @@
-#ifndef DEFINE_PERMUTALIB_STAB_CHAIN_MAIN_H
-#define DEFINE_PERMUTALIB_STAB_CHAIN_MAIN_H
+#ifndef SRC_GAP_STABCHAINMAIN_H_
+#define SRC_GAP_STABCHAINMAIN_H_
 
 #undef DEBUG_STABCHAINMAIN
 
@@ -135,4 +135,4 @@ StabChain<Telt, Tidx_label> FCT_Group(std::vector<Telt> const &LGen,
 
 } // namespace permutalib
 
-#endif
+#endif  // SRC_GAP_STABCHAINMAIN_H_

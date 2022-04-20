@@ -1,12 +1,12 @@
-#ifndef DEFINE_PERMUTALIB_PARTITION_H
-#define DEFINE_PERMUTALIB_PARTITION_H
+#ifndef SRC_GAP_PARTITION_H_
+#define SRC_GAP_PARTITION_H_
 
 #include "GapPrint.h"
 #include "PermGroup.h"
-#include <unordered_map>
-#include <string>
-#include <set>
 #include <limits>
+#include <set>
+#include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -303,7 +303,7 @@ Tidx SplitCell_Kernel(Partition<Tidx> &P, Tidx const &i, Ftest test,
   // and thus breaks a < b comparisons.
   Tidx a = P.firsts[i] + 1;
 #ifdef DEBUG_PARTITION
-  std::cerr << "CPP SplitCell i=" << (i+1) << " a=" << int(a) << "\n";
+  std::cerr << "CPP SplitCell i=" << (i + 1) << " a=" << int(a) << "\n";
 #endif
   Tidx b = a + P.lengths[i];
   Tidx l = b - 1;
@@ -336,7 +336,7 @@ Tidx SplitCell_Kernel(Partition<Tidx> &P, Tidx const &i, Ftest test,
 #endif
         return std::numeric_limits<Tidx>::max();
       }
-      if (!test(b-1))
+      if (!test(b - 1))
         break;
     }
 #ifdef DEBUG_PARTITION
@@ -347,14 +347,14 @@ Tidx SplitCell_Kernel(Partition<Tidx> &P, Tidx const &i, Ftest test,
       std::cerr << "CPP A LOOP\n";
 #endif
       a++;
-      if (a > b || test(a-1))
+      if (a > b || test(a - 1))
         break;
     }
 #ifdef DEBUG_PARTITION
     std::cerr << "CPP     3 a=" << int(a) << " b=" << int(b) << "\n";
 #endif
     if (a < b) {
-      std::swap(P.points[a-1], P.points[b-1]);
+      std::swap(P.points[a - 1], P.points[b - 1]);
     }
   }
 #ifdef DEBUG_PARTITION
@@ -368,9 +368,9 @@ Tidx SplitCell_Kernel(Partition<Tidx> &P, Tidx const &i, Ftest test,
   }
   Tidx m = Tidx(P.firsts.size());
   for (Tidx idx = a; idx <= l; idx++)
-    P.cellno[P.points[idx-1]] = m;
-  P.firsts.push_back(a-1);
-  P.lengths.push_back((1+l) - a);
+    P.cellno[P.points[idx - 1]] = m;
+  P.firsts.push_back(a - 1);
+  P.lengths.push_back((1 + l) - a);
   P.lengths[i] = P.lengths[i] - P.lengths[m];
 
 #ifdef DEBUG_PARTITION
@@ -656,9 +656,6 @@ OrbitsPartition(std::vector<Telt> const &gens,
   return GetPartition(OrbitsPermsB(gens, Omega));
 }
 
-
-
-
 template <typename Tarith> int SmallestPrimeDivisor(Tarith const &size) {
   if (size == 1)
     return 1;
@@ -679,22 +676,22 @@ Partition<Tidx> CollectedPartition(Partition<Tidx> const &P,
   std::cerr << "CPP div=" << div << "\n";
 #endif
   Tidx nbPart = P.firsts.size();
-  std::unordered_map<Tidx,std::vector<Tidx>> map;
+  std::unordered_map<Tidx, std::vector<Tidx>> map;
   for (Tidx iPart = 0; iPart < nbPart; iPart++) {
     Tidx sizPart = P.lengths[iPart];
     map[sizPart].push_back(iPart);
   }
   std::vector<std::vector<Tidx>> C;
-  for (auto & kv: map) {
+  for (auto &kv : map) {
     Tidx n_block = kv.second.size();
     if (n_block < div) {
-      for (auto & iPart : kv.second) {
+      for (auto &iPart : kv.second) {
         C.push_back(Cell(P, iPart));
       }
     } else {
       std::vector<Tidx> NewConn;
-      for (auto & iPart : kv.second) {
-        for (auto & val : Cell(P, iPart))
+      for (auto &iPart : kv.second) {
+        for (auto &val : Cell(P, iPart))
           NewConn.push_back(val);
       }
       C.push_back(NewConn);
@@ -705,4 +702,4 @@ Partition<Tidx> CollectedPartition(Partition<Tidx> const &P,
 
 } // namespace permutalib
 
-#endif
+#endif  // SRC_GAP_PARTITION_H_

@@ -38,15 +38,16 @@ int main(int argc, char *argv[]) {
     Telt id(n);
     permutalib::Group<Telt, Tint> eG(LGen, id);
     //
-    std::vector<permutalib::BlockDecomposition<Tidx>> ListBlkDec = eG.GetSequenceBlockDecomposition();
-    auto prt=[&](std::ostream & os) -> void {
+    std::vector<permutalib::BlockDecomposition<Tidx>> ListBlkDec =
+        eG.GetSequenceBlockDecomposition();
+    auto prt = [&](std::ostream &os) -> void {
       os << "return [";
-      for (size_t i=0; i<ListBlkDec.size(); i++) {
+      for (size_t i = 0; i < ListBlkDec.size(); i++) {
         if (i > 0)
           os << ",\n";
         os << "rec(map_vert_block:=[";
         bool IsFirst = true;
-        for (auto & iBlock : ListBlkDec[i].map_vert_block) {
+        for (auto &iBlock : ListBlkDec[i].map_vert_block) {
           if (!IsFirst)
             os << ",";
           IsFirst = false;

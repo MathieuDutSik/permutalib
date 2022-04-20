@@ -1,5 +1,5 @@
-#ifndef DEFINE_PERMUTALIB_GRAPHIC_FUNCTIONALITY_H
-#define DEFINE_PERMUTALIB_GRAPHIC_FUNCTIONALITY_H
+#ifndef SRC_GAP_GRAPHICFUNCTIONALITY_H_
+#define SRC_GAP_GRAPHICFUNCTIONALITY_H_
 
 #include "COMB_Vectors.h"
 #include <limits>
@@ -160,4 +160,4 @@ std::vector<std::vector<size_t>> ConnectedComponents_set(Tgr const &GR) {
 
 } // namespace permutalib
 
-#endif
+#endif  // SRC_GAP_GRAPHICFUNCTIONALITY_H_

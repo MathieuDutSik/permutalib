@@ -1,5 +1,5 @@
-#ifndef DEFINE_PERMUTALIB_PLUS_INFINITY_H
-#define DEFINE_PERMUTALIB_PLUS_INFINITY_H
+#ifndef SRC_GAP_PLUS_INFINITY_H_
+#define SRC_GAP_PLUS_INFINITY_H_
 
 #include <iostream>
 
@@ -134,4 +134,4 @@ Tplusinfinity<T> operator*(T const &x, Tplusinfinity<T> const &y) {
   return Tplusinfinity<T>(y.IsInfinity(), x * y.GetValue());
 }
 
-#endif
+#endif  // SRC_GAP_PLUS_INFINITY_H_

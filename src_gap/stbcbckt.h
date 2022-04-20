@@ -1,16 +1,16 @@
-#ifndef DEFINE_PERMUTALIB_STBCBCKT_H
-#define DEFINE_PERMUTALIB_STBCBCKT_H
+#ifndef SRC_GAP_STBCBCKT_H_
+#define SRC_GAP_STBCBCKT_H_
 
 #include "Combinatorics.h"
 #include "StabChainMain.h"
 #include "partition.h"
 //#include "plus_infinity.h"
-#include <optional>
-#include <map>
-#include <string>
 #include <algorithm>
-#include <utility>
 #include <limits>
+#include <map>
+#include <optional>
+#include <string>
+#include <utility>
 #include <vector>
 
 /*
@@ -72,8 +72,9 @@ permPlusBool<Telt> ExtendedT(Telt const &t, typename Telt::Tidx const &pnt,
   // = <img>.
   Tidx bpt = BasePoint(S.Stot);
 #ifdef DEBUG_STBCBCKT
-  std::cerr << "CPP ExtendedT img=" << int(img + 1) << " bpt=" << PosFalse_to_string(bpt)
-            << " pnt=" << int(pnt + 1) << "\n";
+  std::cerr << "CPP ExtendedT img=" << int(img + 1)
+            << " bpt=" << PosFalse_to_string(bpt) << " pnt=" << int(pnt + 1)
+            << "\n";
 #endif
   if (bpt != pnt) {
 #ifdef DEBUG_STBCBCKT
@@ -354,7 +355,8 @@ void PrintRBaseLevel(rbaseType<Telt, Tidx_label, Trfm> const &rbase,
   }
   // level2
   if (rbase.level2.status == int_int) {
-    std::cerr << str << " PRBL rbase.level2, integer : " << rbase.level2.value_int
+    std::cerr << str
+              << " PRBL rbase.level2, integer : " << rbase.level2.value_int
               << "\n";
   } else {
     if (rbase.level2.status == int_stablev) {
@@ -367,12 +369,10 @@ void PrintRBaseLevel(rbaseType<Telt, Tidx_label, Trfm> const &rbase,
       std::cerr << str << " PRBL orbit=" << PrintTopOrbit(rbase.level2.Stot)
                 << "\n";
     } else {
-      std::cerr << str
-                << " PRBL rbase.level2=" << GetIntTypeNature(rbase.level2.status)
-                << "\n";
+      std::cerr << str << " PRBL rbase.level2="
+                << GetIntTypeNature(rbase.level2.status) << "\n";
     }
   }
-
 }
 
 //
@@ -383,7 +383,8 @@ template <typename Telt, typename Tidx_label, typename Trfm>
 bool ProcessFixpoint_rbase(rbaseType<Telt, Tidx_label, Trfm> &rbase,
                            typename Telt::Tidx const &pnt) {
 #ifdef DEBUG_STBCBCKT
-  std::cerr << "CPP ProcessFixpoint_rbase beginning pnt=" << int(pnt + 1) << "\n";
+  std::cerr << "CPP ProcessFixpoint_rbase beginning pnt=" << int(pnt + 1)
+            << "\n";
   PrintRBaseLevel(rbase, "CPP Beginning ProcessFixpoint_rbase");
 #endif
   if (rbase.level2.status != int_true && rbase.level2.status != int_false) {
@@ -454,7 +455,8 @@ bool ProcessFixpoint_image(imageType<Telt, Tidx_label, Tdata> &image,
                      SortVector(StrongGeneratorsStabChain(image.level.Stot)))
               << "\n";
     std::cerr << "CPP Case image.perm.status = true\n";
-    std::cerr << "CPP PFI Before ExtendedT img=" << int(img + 1) << " pnt=" << int(pnt+1) << "\n";
+    std::cerr << "CPP PFI Before ExtendedT img=" << int(img + 1)
+              << " pnt=" << int(pnt + 1) << "\n";
 #endif
     permPlusBool<Telt> t =
         ExtendedT(image.perm.val, pnt, img, simg, image.level);
@@ -584,7 +586,8 @@ EmptyRBase(std::vector<StabChain<Telt, Tidx_label>> const &G, bool const &IsId,
 #endif
   for (auto &pnt : Fixcells(P)) {
 #ifdef DEBUG_STBCBCKT
-    std::cerr << "CPP Fixcells call ProcessFixpoint_rbase pnt=" << (pnt+1) << "\n";
+    std::cerr << "CPP Fixcells call ProcessFixpoint_rbase pnt=" << (pnt + 1)
+              << "\n";
 #endif
     ProcessFixpoint_rbase(rbase, pnt);
   }
@@ -889,14 +892,15 @@ std::vector<singStrat<Tidx>> StratMeetPartition_p_p(Partition<Tidx> &P,
         splits.push_back(kv.first);
     }
 #ifdef DEBUG_STBCBCKT
-    std::cerr << "CPP splits=" << GapStringIntVector(splits) << " s=" << (s+1) << "\n";
+    std::cerr << "CPP splits=" << GapStringIntVector(splits) << " s=" << (s + 1)
+              << "\n";
 #endif
     for (auto &pVal : splits) {
       // Last argument true means that the cell will split.
       (void)SplitCell_Partition(P, pVal, S, s,
                                 std::numeric_limits<Tidx>::max());
 #ifdef DEBUG_STBCBCKT
-      std::cerr << "CPP g=() i=" << int(pVal+1) << "\n";
+      std::cerr << "CPP g=() i=" << int(pVal + 1) << "\n";
 #endif
     }
   }
@@ -982,7 +986,7 @@ void RegisterRBasePoint(Partition<typename Telt::Tidx> &P,
     PrintRBaseLevel(rbase, "CPP RegisterRBasePoint 2.2");
     KeyUpdatingRbase("RegisterRBasePoint 1.4", rbase);
     std::cerr << "CPP Section P.lengths after ProcessFixpoint_rbase\n";
-    std::cerr << "CPP AddRefinement PROCESSFIX pnt=" << int(pnt+1) << "\n";
+    std::cerr << "CPP AddRefinement PROCESSFIX pnt=" << int(pnt + 1) << "\n";
 #endif
     AddRefinement(rbase, Trfm(Trfm_processfixpoint<Tidx>({pnt, k})));
 #ifdef DEBUG_STBCBCKT
@@ -1133,7 +1137,9 @@ bool Refinements_ProcessFixpoint(
   using Tidx = typename Telt::Tidx;
   Tidx img = FixpointCellNo(image.partition, cellnum);
 #ifdef DEBUG_STBCBCKT
-  std::cerr << "CPP ProcessFixpoint_image, Case Refinements_ProcessFixpoint pnt=" << int(pnt+1) << "\n";
+  std::cerr
+      << "CPP ProcessFixpoint_image, Case Refinements_ProcessFixpoint pnt="
+      << int(pnt + 1) << "\n";
 #endif
   return ProcessFixpoint_image(image, pnt, img,
                                std::numeric_limits<Tidx>::max());
@@ -1146,7 +1152,7 @@ bool Refinements_Intersection(
     Partition<typename Telt::Tidx> const &Q,
     std::vector<singStrat<typename Telt::Tidx>> const &strat) {
   Telt t;
-  auto oper=[&](Telt const& t) -> bool {
+  auto oper = [&](Telt const &t) -> bool {
     Telt tinv = Inverse(t);
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP Refinements_Intersection\n";
@@ -1446,7 +1452,7 @@ ResultPBT<Telt, Tidx_label> PartitionBacktrack(
       [&](size_t const &d, bool const &wasTriv) -> permPlusBool<Telt> {
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP PBEnumerate, step 1, d=" << int(d + 1)
-    << " wasTriv=" << GapStringBool(wasTriv) << "\n";
+              << " wasTriv=" << GapStringBool(wasTriv) << "\n";
 #endif
     permPlusBool<Telt> oldprm, oldprm2;
     Tidx a;               // current R-base point
@@ -1737,7 +1743,8 @@ ResultPBT<Telt, Tidx_label> PartitionBacktrack(
     }
     AssignationVectorGapStyle(orB, d, orb[d]);
 #ifdef DEBUG_STBCBCKT
-    std::cerr << "CPP PBEnumerate, step 7, wasTriv=" << GapStringBool(wasTriv) << "\n";
+    std::cerr << "CPP PBEnumerate, step 7, wasTriv=" << GapStringBool(wasTriv)
+              << "\n";
     PrintRBaseLevel(rbase, "CPP Step 7");
 #endif
 
@@ -1924,8 +1931,8 @@ ResultPBT<Telt, Tidx_label> PartitionBacktrack(
         bool val = ProcessFixpoint_image(image, a, b_int, org[d][b_int]);
 #ifdef DEBUG_STBCBCKT
         std::cerr << "CPP a=" << int(a + 1) << " b=" << int(b_int + 1)
-                  << " org[d][b]=" << int(org[d][b_int] + 1) << " val=" << GapStringBool(val)
-                  << "\n";
+                  << " org[d][b]=" << int(org[d][b_int] + 1)
+                  << " val=" << GapStringBool(val) << "\n";
 #endif
         if (val) {
 #ifdef DEBUG_STBCBCKT
@@ -1956,7 +1963,8 @@ ResultPBT<Telt, Tidx_label> PartitionBacktrack(
           //   which until now is identical to  <L>, must be changed
           //   without affecting <L>, so take a copy.
 #ifdef DEBUG_STBCBCKT
-          std::cerr << "CPP wasTriv=" << GapStringBool(wasTriv) << " d=" << int(d + 1) << "\n";
+          std::cerr << "CPP wasTriv=" << GapStringBool(wasTriv)
+                    << " d=" << int(d + 1) << "\n";
           std::cerr << "CPP L[d]=\n";
           PrintStabChain(L_list[d]);
           std::cerr << "CPP R[d]=\n";
@@ -2523,10 +2531,6 @@ Kernel_RepresentativeAction_OnSets(StabChain<Telt, Tidx_label> const &G,
   }
 }
 
-
-
-
-
 template <typename Telt, typename Tidx_label, typename Tint>
 std::optional<Telt>
 Kernel_RepresentativeAction_OnPoints(StabChain<Telt, Tidx_label> const &G,
@@ -2666,7 +2670,7 @@ RepOpElmTuplesPermGroup(const StabChain<Telt, Tidx_label> &G,
   // [1, 3] that is with preserved elements in their vicinity.
   //  std::vector<Tidx> Omega = MovedPoints(LGen, n);
   std::vector<Tidx> Omega;
-  for (Tidx i=0; i<LargestMovedPoint(LGen); i++)
+  for (Tidx i = 0; i < LargestMovedPoint(LGen); i++)
     Omega.push_back(i);
 
 #ifdef DEBUG_STBCBCKT
@@ -2737,7 +2741,8 @@ RepOpElmTuplesPermGroup(const StabChain<Telt, Tidx_label> &G,
   rbaseType<Telt, Tidx_label, Trfm> rbase =
       EmptyRBase<Telt, Tidx_label, Trfm>({G}, true, Omega, P);
 #ifdef DEBUG_STBCBCKT
-  std::cerr << "CPP After EmptyRBase |G|=" << Order<Telt, Tidx_label, Tint>(G) << "\n";
+  std::cerr << "CPP After EmptyRBase |G|=" << Order<Telt, Tidx_label, Tint>(G)
+            << "\n";
   PrintRBaseLevel(rbase, "CPP rbase just after EmptyRBase");
 #endif
 
@@ -2773,7 +2778,8 @@ RepOpElmTuplesPermGroup(const StabChain<Telt, Tidx_label> &G,
             Tidx pnt_b = FixpointCellNo(P, strat);
             ProcessFixpoint_rbase(rbase, pnt_b);
 #ifdef DEBUG_STBCBCKT
-            std::cerr << "CPP AddRefinement nextLevel PROCESSFIX pnt=" << int(pnt_b+1) << "\n";
+            std::cerr << "CPP AddRefinement nextLevel PROCESSFIX pnt="
+                      << int(pnt_b + 1) << "\n";
 #endif
             AddRefinement(rbase,
                           Trfm(Trfm_processfixpoint<Tidx>({pnt_b, strat})));
@@ -2852,7 +2858,8 @@ Kernel_Centralizer_elt(const StabChain<Telt, Tidx_label> &G, const Telt &e) {
 #endif
   Telt id = G->comm->identity;
   std::vector<Telt> e_v{e};
-  // We compute the L R before RepOpElmTuplesPermGroup in contrary to the GAP code.
+  // We compute the L R before RepOpElmTuplesPermGroup in contrary to the GAP
+  // code.
   std::vector<Telt> LGen;
   for (auto &eGen : Kernel_GeneratorsOfGroup(G))
     if (Conjugation(e, eGen) == e)
@@ -2893,45 +2900,44 @@ Kernel_Centralizer_grp(const StabChain<Telt, Tidx_label> &G,
       .stab;
 }
 
-
 template <typename Telt, typename Tidx_label, typename Tint>
 StabChain<Telt, Tidx_label>
-Kernel_Intersection(StabChain<Telt, Tidx_label> const& G, StabChain<Telt, Tidx_label> const& H)
-{
+Kernel_Intersection(StabChain<Telt, Tidx_label> const &G,
+                    StabChain<Telt, Tidx_label> const &H) {
   using Tidx = typename Telt::Tidx;
   Telt id = G->comm->identity;
   Tidx n = id.size();
   using Tidx = typename Telt::Tidx;
-  auto IsMoved=[&](std::vector<Telt> const& gens, Tidx const& pt) -> bool {
-    for (auto & eGen : gens)
+  auto IsMoved = [&](std::vector<Telt> const &gens, Tidx const &pt) -> bool {
+    for (auto &eGen : gens)
       if (PowAct(pt, eGen) != pt)
         return true;
     return false;
   };
-  StabChain<Telt,Tidx_label> G_red = G;
-  StabChain<Telt,Tidx_label> H_red = H;
+  StabChain<Telt, Tidx_label> G_red = G;
+  StabChain<Telt, Tidx_label> H_red = H;
   std::vector<Tidx> Omega;
   std::vector<Tidx> OmegaC;
-  while(true) {
+  while (true) {
     Omega.clear();
     OmegaC.clear();
     std::vector<Telt> LGen_G = Kernel_GeneratorsOfGroup(G_red);
     std::vector<Telt> LGen_H = Kernel_GeneratorsOfGroup(H_red);
     bool DoSomething = false;
-    for (Tidx i=0; i<n; i++) {
-      bool val_g =  IsMoved(LGen_G, i);
-      bool val_h =  IsMoved(LGen_H, i);
+    for (Tidx i = 0; i < n; i++) {
+      bool val_g = IsMoved(LGen_G, i);
+      bool val_h = IsMoved(LGen_H, i);
       if (val_g && val_h) {
         Omega.push_back(i);
       } else {
         OmegaC.push_back(i);
       }
       if (val_g && !val_h) {
-        G_red = Kernel_Stabilizer_OnPoints<Telt,Tidx_label,Tint>(G_red,i);
+        G_red = Kernel_Stabilizer_OnPoints<Telt, Tidx_label, Tint>(G_red, i);
         DoSomething = true;
       }
       if (val_h && !val_g) {
-        H_red = Kernel_Stabilizer_OnPoints<Telt,Tidx_label,Tint>(H_red,i);
+        H_red = Kernel_Stabilizer_OnPoints<Telt, Tidx_label, Tint>(H_red, i);
         DoSomething = true;
       }
     }
@@ -2940,7 +2946,8 @@ Kernel_Intersection(StabChain<Telt, Tidx_label> const& G, StabChain<Telt, Tidx_l
   }
   Tidx n_mov = Tidx(Omega.size());
   StabChainOptions<Tint, Telt> options = GetStandardOptions<Tint, Telt>(id);
-  StabChain<Telt, Tidx_label> TrivGrp = StabChainOp_listgen<Telt, Tidx_label, Tint>({}, options);
+  StabChain<Telt, Tidx_label> TrivGrp =
+      StabChainOp_listgen<Telt, Tidx_label, Tint>({}, options);
   if (Omega.size() == 0) {
     return TrivGrp;
   }
@@ -2950,18 +2957,18 @@ Kernel_Intersection(StabChain<Telt, Tidx_label> const& G, StabChain<Telt, Tidx_l
     return G_red;
   std::cerr << "n=" << n << "\n";
   std::cerr << "Omega =";
-  for (auto & v : Omega)
+  for (auto &v : Omega)
     std::cerr << " " << v;
   std::cerr << "\n";
   std::cerr << "OmegaC =";
-  for (auto & v : OmegaC)
+  for (auto &v : OmegaC)
     std::cerr << " " << v;
   std::cerr << "\n";
 
   std::vector<Tidx> eList = Omega;
   eList.insert(eList.end(), OmegaC.begin(), OmegaC.end());
   std::cerr << "eList =";
-  for (auto & v : eList)
+  for (auto &v : eList)
     std::cerr << " " << v;
   std::cerr << "\n";
   Telt eReordInv(eList);
@@ -2973,17 +2980,18 @@ Kernel_Intersection(StabChain<Telt, Tidx_label> const& G, StabChain<Telt, Tidx_l
   {
     std::vector<Telt> LGen_G_red = Kernel_GeneratorsOfGroup(G_red);
     std::vector<Telt> LGen_H_red = Kernel_GeneratorsOfGroup(H_red);
-    for (Tidx i=0; i<n_mov; i++) {
-      bool val_g =  IsMoved(LGen_G_red, i);
-      bool val_h =  IsMoved(LGen_H_red, i);
+    for (Tidx i = 0; i < n_mov; i++) {
+      bool val_g = IsMoved(LGen_G_red, i);
+      bool val_h = IsMoved(LGen_H_red, i);
       if (!val_g || !val_h) {
-        std::cerr << "We have an incoherence for OmegaMap i=" << i << " val_g=" << val_g << " val_h=" << val_h << "\n";
+        std::cerr << "We have an incoherence for OmegaMap i=" << i
+                  << " val_g=" << val_g << " val_h=" << val_h << "\n";
         throw PermutalibException{1};
       }
     }
-    for (Tidx i=n_mov; i<n; i++) {
-      bool val_g =  IsMoved(LGen_G_red, i);
-      bool val_h =  IsMoved(LGen_H_red, i);
+    for (Tidx i = n_mov; i < n; i++) {
+      bool val_g = IsMoved(LGen_G_red, i);
+      bool val_h = IsMoved(LGen_H_red, i);
       if (val_g && val_h) {
         std::cerr << "We have an incoherence for OmegaCMap\n";
         throw PermutalibException{1};
@@ -2992,12 +3000,15 @@ Kernel_Intersection(StabChain<Telt, Tidx_label> const& G, StabChain<Telt, Tidx_l
   }
 #endif
   std::vector<Tidx> OmegaMap;
-  for (Tidx i=0; i<n_mov; i++)
+  for (Tidx i = 0; i < n_mov; i++)
     OmegaMap.push_back(i);
-  Partition<Tidx> P = OrbitsPartition(Kernel_GeneratorsOfGroup(H_red), OmegaMap);
+  Partition<Tidx> P =
+      OrbitsPartition(Kernel_GeneratorsOfGroup(H_red), OmegaMap);
 
-  using Trfm = std::variant<Trfm_processfixpoint<Tidx>, Trfm_intersection<Tidx>>;
-  rbaseType<Telt, Tidx_label, Trfm> rbase = EmptyRBase<Telt, Tidx_label, Trfm>({G_red, H_red}, false, OmegaMap, P);
+  using Trfm =
+      std::variant<Trfm_processfixpoint<Tidx>, Trfm_intersection<Tidx>>;
+  rbaseType<Telt, Tidx_label, Trfm> rbase =
+      EmptyRBase<Telt, Tidx_label, Trfm>({G_red, H_red}, false, OmegaMap, P);
 
   using Tdata = dataType_opset<Tidx>;
   Tdata data(P);
@@ -3006,18 +3017,19 @@ Kernel_Intersection(StabChain<Telt, Tidx_label> const& G, StabChain<Telt, Tidx_l
                        [[maybe_unused]] Telt const &TheId) -> void {
     NextRBasePoint_no_order<Telt, Tidx_label, Trfm>(P, rbase);
   };
-  auto Pr = [&]([[maybe_unused]] Telt const& eElt) -> bool {
+  auto Pr = [&]([[maybe_unused]] Telt const &eElt) -> bool {
     std::cerr << "We need to see what to put here from the GAP code\n";
     throw PermutalibException{1};
     return false;
   };
-  StabChain<Telt,Tidx_label> retGRP =
-    PartitionBacktrack<Telt, Tidx_label, Tdata, Trfm, Tint, false,
-    decltype(Pr), decltype(nextLevel)>(G, Pr, nextLevel, rbase, data, TrivGrp, TrivGrp).stab;
-  ConjugateStabChain_Element(retGRP,eReordInv);
+  StabChain<Telt, Tidx_label> retGRP =
+      PartitionBacktrack<Telt, Tidx_label, Tdata, Trfm, Tint, false,
+                         decltype(Pr), decltype(nextLevel)>(
+          G, Pr, nextLevel, rbase, data, TrivGrp, TrivGrp)
+          .stab;
+  ConjugateStabChain_Element(retGRP, eReordInv);
   return retGRP;
 }
-
 
 /*
 #############################################################################
@@ -3381,4 +3393,4 @@ end );
   */
 } // namespace permutalib
 
-#endif
+#endif  // SRC_GAP_STBCBCKT_H_

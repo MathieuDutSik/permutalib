@@ -1,13 +1,13 @@
-#ifndef PERMUTALIB_INCLUDE_NORMAL_STRUCTURE_H
-#define PERMUTALIB_INCLUDE_NORMAL_STRUCTURE_H
+#ifndef SRC_GAP_NORMALSTRUCTURE_H_
+#define SRC_GAP_NORMALSTRUCTURE_H_
 
 #include "BlockSystem.h"
 #include "StabChainMain.h"
-#include <unordered_set>
-#include <map>
 #include <limits>
-#include <vector>
+#include <map>
+#include <unordered_set>
 #include <utility>
+#include <vector>
 
 namespace permutalib {
 
@@ -630,4 +630,4 @@ Kernel_CentreSubgroup(const StabChain<Telt, Tidx_label> &G) {
 
 } // namespace permutalib
 
-#endif
+#endif  // SRC_GAP_NORMALSTRUCTURE_H_

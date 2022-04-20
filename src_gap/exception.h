@@ -1,8 +1,8 @@
-#ifndef DEFINE_PERMUTALIB_INCLUDE_EXCEPTION_H
-#define DEFINE_PERMUTALIB_INCLUDE_EXCEPTION_H
+#ifndef SRC_GAP_EXCEPTION_H_
+#define SRC_GAP_EXCEPTION_H_
 
 struct PermutalibException {
   int eVal;
 };
 
-#endif
+#endif  // SRC_GAP_EXCEPTION_H_

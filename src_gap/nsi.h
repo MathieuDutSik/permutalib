@@ -1,5 +1,5 @@
-#ifndef DEFINE_PERMUTALIB_NSI_H
-#define DEFINE_PERMUTALIB_NSI_H
+#ifndef SRC_GAP_NSI_H_
+#define SRC_GAP_NSI_H_
 
 #include "NumberTheory.h"
 #include "StabChain.h"
@@ -869,4 +869,4 @@ Face Kernel_CanonicalImage(StabChain<Telt, Tidx_label> const &g,
 }
 
 } // namespace permutalib
-#endif
+#endif  // SRC_GAP_NSI_H_

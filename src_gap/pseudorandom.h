@@ -1,5 +1,5 @@
-#ifndef DEFINE_PERMUTALIB_PSEUDO_RANDOM_H
-#define DEFINE_PERMUTALIB_PSEUDO_RANDOM_H
+#ifndef SRC_GAP_PSEUDORANDOM_H_
+#define SRC_GAP_PSEUDORANDOM_H_
 
 #include "Face_basic.h"
 #include <vector>
@@ -83,4 +83,4 @@ template <typename Telt> Telt Random(std::vector<Telt> const &V) {
 
 } // namespace permutalib
 
-#endif
+#endif  // SRC_GAP_PSEUDORANDOM_H_

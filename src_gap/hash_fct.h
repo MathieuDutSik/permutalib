@@ -1,5 +1,5 @@
-#ifndef DEFINE_PERMUTALIB_HASH_FCT_H
-#define DEFINE_PERMUTALIB_HASH_FCT_H
+#ifndef SRC_GAP_HASH_FCT_H_
+#define SRC_GAP_HASH_FCT_H_
 
 namespace permutalib {
 
@@ -109,4 +109,4 @@ inline size_t robin_hood_hash_bytes(void const *ptr, size_t len,
 
 } // namespace permutalib
 
-#endif
+#endif  // SRC_GAP_HASH_FCT_H_

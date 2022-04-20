@@ -1,15 +1,15 @@
-#ifndef DEFINE_PERMUTALIB_PERMUTATION_MATRIX_H
-#define DEFINE_PERMUTALIB_PERMUTATION_MATRIX_H
+#ifndef SRC_GAP_PERMUTATIONELT_H_
+#define SRC_GAP_PERMUTATIONELT_H_
 
 #include "Face_basic.h"
 #include "exception.h"
 #include "hash_fct.h"
 #include <iostream>
+#include <limits>
 #include <stdlib.h>
 #include <string>
-#include <vector>
-#include <limits>
 #include <utility>
+#include <vector>
 
 namespace permutalib {
 
@@ -391,4 +391,4 @@ struct hash<permutalib::PermutationElt<Tidx, Telt>> {
 };
 } // namespace std
 
-#endif
+#endif  // SRC_GAP_PERMUTATIONELT_H_

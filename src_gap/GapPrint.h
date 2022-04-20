@@ -1,13 +1,13 @@
-#ifndef DEFINE_PERMUTALIB_GAP_PRINT_H
-#define DEFINE_PERMUTALIB_GAP_PRINT_H
+#ifndef SRC_GAP_GAPPRINT_H_
+#define SRC_GAP_GAPPRINT_H_
 
 #include "Face_basic.h"
 #include <iostream>
+#include <limits>
 #include <optional>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <limits>
 
 namespace permutalib {
 
@@ -128,15 +128,13 @@ std::string ConstrainedIntInfinity_to_string(int const &val, int const &n) {
   }
 }
 
-template<typename Tidx>
-std::string PosFail_to_string(Tidx const &pos) {
+template <typename Tidx> std::string PosFail_to_string(Tidx const &pos) {
   if (pos == std::numeric_limits<Tidx>::max())
     return std::string("fail");
   return std::to_string(pos + 1);
 }
 
-template<typename Tidx>
-std::string PosFalse_to_string(Tidx const &pos) {
+template <typename Tidx> std::string PosFalse_to_string(Tidx const &pos) {
   if (pos == std::numeric_limits<Tidx>::max())
     return std::string("false");
   return std::to_string(pos + 1);
@@ -184,4 +182,4 @@ std::string GapStringMissingTVector(std::vector<std::optional<T>> const &f) {
 }
 
 } // namespace permutalib
-#endif
+#endif  // SRC_GAP_GAPPRINT_H_

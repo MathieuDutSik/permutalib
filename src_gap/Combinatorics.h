@@ -1,8 +1,8 @@
-#ifndef DEFINE_PERMUTALIB_COMBINATORICS_H
-#define DEFINE_PERMUTALIB_COMBINATORICS_H
+#ifndef SRC_GAP_COMBINATORICS_H_
+#define SRC_GAP_COMBINATORICS_H_
 
-#include <vector>
 #include <algorithm>
+#include <vector>
 
 template <typename T1, typename T2>
 void SortParallel_PairList(std::vector<T1> &list1, std::vector<T2> &list2) {
@@ -24,4 +24,4 @@ void SortParallel_PairList(std::vector<T1> &list1, std::vector<T2> &list2) {
   }
 }
 
-#endif
+#endif  // SRC_GAP_COMBINATORICS_H_

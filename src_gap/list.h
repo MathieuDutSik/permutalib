@@ -1,5 +1,5 @@
-#ifndef DEFINE_PERMUTALIB_LIST_H
-#define DEFINE_PERMUTALIB_LIST_H
+#ifndef SRC_GAP_LIST_H_
+#define SRC_GAP_LIST_H_
 
 #include "COMB_Vectors.h"
 #include "Face_basic.h"
@@ -106,4 +106,4 @@ void SubtractBlist(Face &a, Face const &b) {
 }
 
 } // namespace permutalib
-#endif
+#endif  // SRC_GAP_LIST_H_
