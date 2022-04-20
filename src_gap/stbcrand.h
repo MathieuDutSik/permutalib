@@ -66,7 +66,7 @@ noticeType SCRNotice_A(std::vector<int> const &orb,
     for (size_t j = 0; j < siz2; j++) {
       Tidx ePt = PowAct(orb[i], genlist[j]);
       if (transversal[ePt] == -1)
-        return {false, int(i), int(j)};
+        return {false, static_cast<int>(i), static_cast<int>(j)};
     }
   return {true, -1, -1};
 }
@@ -84,7 +84,7 @@ noticeType SCRNotice_B(std::vector<int> const &orb,
       int posGen = genlistIdx[j];
       Tidx ePt = PowAct(orb[i], labels[posGen]);
       if (transversal[ePt] == -1)
-        return {false, int(i), int(j)};
+        return {false, static_cast<int>(i), static_cast<int>(j)};
     }
   return {true, -1, -1};
 }
@@ -308,7 +308,7 @@ void SCRSchTree(StabChain<Telt, Tidx_label> &S,
     S->treedepth = 0;
     size_t list5 = 0;
     while (true) {
-      if (S->treedepth >= 2 * int(S->treegen.size()))
+      if (S->treedepth >= 2 * static_cast<int>(S->treegen.size()))
         break;
       SCRExtend(S->comm->labels, S->orbit, S->transversal, S->treegen,
                 S->treegeninv, list5);
@@ -452,7 +452,7 @@ void SCRMakeStabStrong(StabChain<Telt, Tidx_label> &S,
         size_t l = 0;
         while (l < orbits.size()) {
           l++;
-          if (int(orbits[l].size()) > param.param5) {
+          if (static_cast<int>(orbits[l].size()) > param.param5) {
             size_t j = 0;
             size_t jlimit = std::max(param.param6, basesize[l]);
             while (j < jlimit) {
@@ -564,7 +564,7 @@ Telt SCRStrongGenTest(StabChain<Telt, Tidx_label> const &S,
               l = 0;
               while (l < orbits.size()) {
                 l++;
-                if (int(orbits[l].size()) > param.param5) {
+                if (static_cast<int>(orbits[l].size()) > param.param5) {
                   j = 0;
                   size_t jlimit = std::max(param.param6, basesize[l]);
                   while (j < jlimit) {
@@ -820,8 +820,8 @@ StabChain<Telt, Tidx_label> StabChainRandomPermGroup(
   if (options.random == 1000) {
     k = 1;
   } else {
-    double eFrac = 1 - double(options.random) / double(1000);
-    double Expo = double(3) / double(5);
+    double eFrac = 1 - static_cast<double>(options.random) / static_cast<double>(1000);
+    double Expo = static_cast<double>(3) / static_cast<double>(5);
     k = 0;
     double ThePow = 1;
     while (true) {
@@ -837,7 +837,7 @@ StabChain<Telt, Tidx_label> StabChainRandomPermGroup(
   paramOpt param;
   std::vector<int> UsedKnownBase;
   if (options.knownBase.size() > 0 &&
-      int(options.knownBase.size()) < 4 + LogInt(degree, 10)) {
+      static_cast<int>(options.knownBase.size()) < 4 + LogInt(degree, 10)) {
     param = {k, 4, 0, 0, 0, 0};
     UsedKnownBase = options.knownBase;
   } else {
@@ -885,7 +885,7 @@ StabChain<Telt, Tidx_label> StabChainRandomPermGroup(
     for (size_t iOrb = 0; iOrb < orbits.size(); iOrb++)
       for (auto &ePt : orbits[iOrb])
         where[ePt] = iOrb;
-    if (int(orbits.size()) * 40 > degree) {
+    if (static_cast<int>(orbits.size()) * 40 > degree) {
       param.param1 = 0;
       param.param3 = k;
     }
@@ -1029,7 +1029,7 @@ std::pair<bool, Telt> VerifySGS(StabChain<Telt, Tidx_label> const &S,
     StabChain<Telt, Tidx_label> temp = StructuralCopy(list[len - 1 - i]);
     InsertTrivialStabilizer(temp, list[len - i]->orbit[0]);
     int gencount = 0;
-    while (gencount < int(list[len - i]->genlabels.size()) &&
+    while (gencount < static_cast<int>(list[len - i]->genlabels.size()) &&
            result.second.isIdentity()) {
       gencount++;
       Tidx_label posgen = list[len - i]->genlabels[gencount - 1];

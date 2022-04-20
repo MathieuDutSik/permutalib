@@ -91,7 +91,7 @@ std::string GapStringSetBoolVector(Face const &f) {
   size_t len = f.size();
   for (size_t i = 0; i < len; i++)
     if (f[i])
-      eS.push_back(int(i));
+      eS.push_back(static_cast<int>(i));
   return GapStringIntVector(eS);
 }
 

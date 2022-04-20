@@ -264,7 +264,7 @@ std::string GetListStabCommPartition(
       auto ptr = ListS[i]->comm;
       for (size_t j = 0; j < len; j++) {
         if (ListS[j]->comm == ptr) {
-          LVal.push_back(int(j));
+          LVal.push_back(static_cast<int>(j));
           Status[j] = 1;
         }
       }
