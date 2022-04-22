@@ -1,13 +1,15 @@
 #ifndef SRC_GAP_GROUP_H_
 #define SRC_GAP_GROUP_H_
 
-#include "AscendingChains_and_Cosets.h"
+// clang-format off
+#include "StabChainMain.h"
+#include "stbcbckt.h"
+#include "nsi.h"
+#include "Properties.h"
 #include "NormalStructure.h"
 #include "PermutationElt.h"
-#include "Properties.h"
-#include "StabChainMain.h"
-#include "nsi.h"
-#include "stbcbckt.h"
+#include "AscendingChains_and_Cosets.h"
+// clang-format on
 #include <map>
 #include <string>
 #include <unordered_map>

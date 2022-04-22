@@ -1,6 +1,7 @@
 #include "Permutation.h"
 #include "gmpxx.h"
 #include <fstream>
+#include <chrono>
 
 #include "Group.h"
 
