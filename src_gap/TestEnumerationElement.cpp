@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
     using Tgroup = permutalib::Group<Telt, Tint>;
     if (argc != 4) {
       std::cerr << "TestEnumerationElement [EXMP] [limit] [case]\n";
-      throw PermutalibException{1};
+      throw permutalib::PermutalibException{1};
     }
     std::string InputFile = argv[1];
     int limit_i;
@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
             std::cerr << "Values is above range\n";
             std::cerr << "i=" << int(i) << " n=" << int(n)
                       << " eVal=" << int(eVal) << "\n";
-            throw PermutalibException{1};
+            throw permutalib::PermutalibException{1};
           }
           ePermV[i] = eVal;
         }
@@ -67,17 +67,17 @@ int main(int argc, char *argv[]) {
             if (Tint(ListElt.size()) > eG.size()) {
               std::cerr << "We found more elements\n";
               std::cerr << "than the group order\n";
-              throw PermutalibException{1};
+              throw permutalib::PermutalibException{1};
             }
             n_iter++;
           }
           if (n_iter != ListElt.size()) {
             std::cerr << "Some elements were found several times. Clear bug\n";
-            throw PermutalibException{1};
+            throw permutalib::PermutalibException{1};
           }
           if (Tint(n_iter) != eG.size()) {
             std::cerr << "Some elements were missed. Clear bug\n";
-            throw PermutalibException{1};
+            throw permutalib::PermutalibException{1};
           }
         }
         if (ecase == 2) {
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
     std::cerr << "n_treat = " << n_treat << "\n";
     //
     std::cerr << "Normal completion of the program\n";
-  } catch (PermutalibException const &e) {
+  } catch (permutalib::PermutalibException const &e) {
     std::cerr << "Erroneous completion of the program\n";
     exit(e.eVal);
   }

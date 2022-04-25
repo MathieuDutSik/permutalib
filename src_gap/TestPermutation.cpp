@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
     if (argc != 2) {
       std::cerr << "The program is used as\n";
       std::cerr << "TestPermutation [n]\n";
-      throw PermutalibException{1};
+      throw permutalib::PermutalibException{1};
     }
     int n_i;
     (void)sscanf(argv[1], "%d", &n_i);
@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
       elt1 *= elt2;
       if (elt1 != prod) {
         std::cerr << "Error in the product operator\n";
-        throw PermutalibException{1};
+        throw permutalib::PermutalibException{1};
       }
       for (Tidx i = 0; i < n; i++) {
         Tidx img1 = SlashAct(i, elt1);
@@ -57,13 +57,13 @@ int main(int argc, char *argv[]) {
         if (img2 != i) {
           std::cerr << "We have i=" << i << " but img2=" << img2 << "\n";
           std::cerr << "Please correct the bug\n";
-          throw PermutalibException{1};
+          throw permutalib::PermutalibException{1};
         }
       }
     }
 
     std::cerr << "Normal completion of the program\n";
-  } catch (PermutalibException const &e) {
+  } catch (permutalib::PermutalibException const &e) {
     std::cerr << "Something wrong happened\n";
     exit(e.eVal);
   }

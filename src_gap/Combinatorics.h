@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <vector>
 
+namespace permutalib {
+
 template <typename T1, typename T2>
 void SortParallel_PairList(std::vector<T1> &list1, std::vector<T2> &list2) {
   struct PairData {
@@ -25,5 +27,6 @@ void SortParallel_PairList(std::vector<T1> &list1, std::vector<T2> &list2) {
 }
 
 // clang-format off
+}  // namespace permutalib
 #endif  // SRC_GAP_COMBINATORICS_H_
 // clang-format on

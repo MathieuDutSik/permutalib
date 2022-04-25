@@ -82,6 +82,6 @@ template <typename Telt> Telt Random(std::vector<Telt> const &V) {
 }
 
 // clang-format off
-} // namespace permutalib
+}  // namespace permutalib
 #endif  // SRC_GAP_PSEUDORANDOM_H_
 // clang-format on

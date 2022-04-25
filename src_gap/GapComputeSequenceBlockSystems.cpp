@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
       std::cerr << "GapComputeSequenceBlockSystems [EXMP]\n";
       std::cerr << "or\n";
       std::cerr << "GapComputeSequenceBlockSystems [EXMP] [OUT]\n";
-      throw PermutalibException{1};
+      throw permutalib::PermutalibException{1};
     }
     std::string InputFile = argv[1];
     //
@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
     }
     //
     std::cerr << "CPP Normal completion of the program\n";
-  } catch (PermutalibException const &e) {
+  } catch (permutalib::PermutalibException const &e) {
     std::cerr << "Erroneous completion of the program\n";
     exit(e.eVal);
   }

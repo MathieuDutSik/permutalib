@@ -52,13 +52,13 @@ bool GetRepresentativeAction_OnSets_libgap(const Tgroup &G,
         if (str == "false")
           return false;
         std::cerr << "Failed to find a matching entry for str=" << str << "\n";
-        throw PermutalibException{1};
+        throw permutalib::PermutalibException{1};
       }
     }
   }
   return true;
   std::cerr << "We should not reach that stage\n";
-  throw PermutalibException{1};
+  throw permutalib::PermutalibException{1};
 }
 
 template <typename Tgroup>
@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
       std::cerr << "BenchmarkingPermutalib [EXMP] [opt]\n";
       std::cerr << "or\n";
       std::cerr << "BenchmarkingPermutalib [EXMP] [opt] [n_iter]\n";
-      throw PermutalibException{1};
+      throw permutalib::PermutalibException{1};
     }
     std::string InputFile = argv[1];
     std::string opt = argv[2];
@@ -173,7 +173,7 @@ int main(int argc, char *argv[]) {
         std::cerr << " " << e_opt;
       std::cerr << "\n";
       std::cerr << "Please select an option that is allowed\n";
-      throw PermutalibException{1};
+      throw permutalib::PermutalibException{1};
     }
     //
     std::ifstream is(InputFile);
@@ -201,7 +201,7 @@ int main(int argc, char *argv[]) {
             std::cerr << "Values is above range\n";
             std::cerr << "i=" << int(i) << " n=" << int(n)
                       << " eVal=" << int(eVal) << "\n";
-            throw PermutalibException{1};
+            throw permutalib::PermutalibException{1};
           }
           ePermV[i] = eVal;
         }
@@ -264,7 +264,7 @@ int main(int argc, char *argv[]) {
             permutalib::Face set_can2 = eG.CanonicalImage(eFace2);
             if (set_can1 != set_can2) {
               std::cerr << "Canonicalization failed\n";
-              throw PermutalibException{1};
+              throw permutalib::PermutalibException{1};
             }
           }
         }
@@ -281,7 +281,7 @@ int main(int argc, char *argv[]) {
 #endif
           if (!test) {
             std::cerr << "RepresentativeAction_OnSets error\n";
-            throw PermutalibException{1};
+            throw permutalib::PermutalibException{1};
           }
         }
       };
@@ -295,7 +295,7 @@ int main(int argc, char *argv[]) {
             Tgroup eG2 = eG.Stabilizer_OnSets(eFace2);
             if (eG1.size() != eG2.size()) {
               std::cerr << "Stabilizer_OnSets error\n";
-              throw PermutalibException{1};
+              throw permutalib::PermutalibException{1};
             }
           }
         }
@@ -328,7 +328,7 @@ int main(int argc, char *argv[]) {
     }
     //
     std::cerr << "CPP Normal completion of the program\n";
-  } catch (PermutalibException const &e) {
+  } catch (permutalib::PermutalibException const &e) {
     std::cerr << "Erroneous completion of the program\n";
     exit(e.eVal);
   }

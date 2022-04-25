@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
     if (argc != 2) {
       std::cerr << "The program is used as\n";
       std::cerr << "TestSymmetricGroup [n]\n";
-      throw PermutalibException{1};
+      throw permutalib::PermutalibException{1};
     }
     int n;
     (void)sscanf(argv[1], "%d", &n);
@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
     permutalib::StabChain<Telt, Tidx_label> S =
         permutalib::MinimalStabChain<Telt, Tidx_label, Tint>(LGen, id);
     std::cerr << "S=" << S << "\n";
-  } catch (PermutalibException const &e) {
+  } catch (permutalib::PermutalibException const &e) {
     exit(e.eVal);
   }
   std::cerr << "Completion of the program\n";

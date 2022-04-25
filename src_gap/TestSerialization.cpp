@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
     using Tgroup = permutalib::Group<Telt, Tint>;
     if (argc != 2) {
       std::cerr << "TestSerialization [EXMP]\n";
-      throw PermutalibException{1};
+      throw permutalib::PermutalibException{1};
     }
     std::string InputFile = argv[1];
     //
@@ -70,11 +70,11 @@ int main(int argc, char *argv[]) {
       bool test = eG == fG;
       if (!test) {
         std::cerr << "The serialization failed\n";
-        throw PermutalibException{1};
+        throw permutalib::PermutalibException{1};
       }
     }
     std::cerr << "Correct termination of the program\n";
-  } catch (PermutalibException const &e) {
+  } catch (permutalib::PermutalibException const &e) {
     std::cerr << "Erroneous completion of the program\n";
     exit(e.eVal);
   }

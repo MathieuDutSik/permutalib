@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
     if (argc != 2) {
       std::cerr << "The program is used as\n";
       std::cerr << "TestSymmetricGroup [n]\n";
-      throw PermutalibException{1};
+      throw permutalib::PermutalibException{1};
     }
     int n_pre;
     (void)sscanf(argv[1], "%d", &n_pre);
@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
     //
     bool test = eG_A == eG_B;
     std::cerr << "test=" << test << "\n";
-  } catch (PermutalibException const &e) {
+  } catch (permutalib::PermutalibException const &e) {
     exit(e.eVal);
   }
   std::cerr << "Completion of the program\n";
