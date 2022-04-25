@@ -548,19 +548,13 @@ public:
       i1 = i2;
       i2 = ListVal[i2];
     }
-    /*
-    for (Tidx j=0; j<siz; j++)
-      if (ListVal[j] == i)
-        return j;
-    return std::numeric_limits<Tidx>::max();
-    */
   }
   const Tidx *getPtr() const { return ListVal.data(); }
   const std::vector<Tidx> &getListVal() const { return ListVal; }
   Tidx operator[](Tidx const &i) const { return ListVal[i]; }
   Tidx size() const { return siz; }
   //
-public: // Should be private in a more classic construction
+public:  // Should be private in a more classic construction
   Tidx siz;
   std::vector<Tidx> ListVal;
 };
@@ -760,7 +754,7 @@ std::ostream &operator<<(std::ostream &os, SingleSidedPerm<Tidx> const &ePerm) {
   return os;
 }
 
-} // namespace permutalib
+}  // namespace permutalib
 
 namespace std {
 template <typename Tidx>
@@ -771,7 +765,7 @@ template <typename Tidx>
 std::string to_string(permutalib::SingleSidedPerm<Tidx> const &ePerm) {
   return GapStyleStringShift(ePerm, 1);
 }
-} // namespace std
+}  // namespace std
 
 namespace std {
 template <typename Tidx> struct hash<permutalib::SingleSidedPerm<Tidx>> {
@@ -781,7 +775,6 @@ template <typename Tidx> struct hash<permutalib::SingleSidedPerm<Tidx>> {
     const uint8_t *ptr_i = (const uint8_t *)ptr_tidx;
     size_t len = sizeof(Tidx) * e_val.size();
     return permutalib::robin_hood_hash_bytes(ptr_i, len, seed);
-    //      return permutalib::murmur3_32(ptr_i, len, seed);
   }
 };
 template <typename Tidx> struct hash<permutalib::DoubleSidedPerm<Tidx>> {
@@ -791,10 +784,10 @@ template <typename Tidx> struct hash<permutalib::DoubleSidedPerm<Tidx>> {
     const uint8_t *ptr_i = (const uint8_t *)ptr_tidx;
     size_t len = sizeof(Tidx) * e_val.size();
     return permutalib::robin_hood_hash_bytes(ptr_i, len, seed);
-    //      return permutalib::murmur3_32(ptr_i, len, seed);
   }
 };
 
-} // namespace std
-
+// clang-format off
+}  // namespace std
 #endif  // SRC_GAP_PERMUTATION_H_
+// clang-format on

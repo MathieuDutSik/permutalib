@@ -158,6 +158,7 @@ std::vector<std::vector<size_t>> ConnectedComponents_set(Tgr const &GR) {
   return ListConn;
 }
 
+// clang-format off
 } // namespace permutalib
-
 #endif  // SRC_GAP_GRAPHICFUNCTIONALITY_H_
+// clang-format on

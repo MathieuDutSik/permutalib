@@ -1121,6 +1121,7 @@ std::pair<bool, Telt> VerifySGS(StabChain<Telt, Tidx_label> const &S,
   return result;
 }
 
-} // namespace permutalib
-
+// clang-format off
+}  // namespace permutalib
 #endif  // SRC_GAP_STBCRAND_H_
+// clang-format on

@@ -107,6 +107,7 @@ inline size_t robin_hood_hash_bytes(void const *ptr, size_t len,
   return static_cast<size_t>(h);
 }
 
-} // namespace permutalib
-
+// clang-format off
+}  // namespace permutalib
 #endif  // SRC_GAP_HASH_FCT_H_
+// clang-format on

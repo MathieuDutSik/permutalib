@@ -700,6 +700,7 @@ Partition<Tidx> CollectedPartition(Partition<Tidx> const &P,
   return GetPartition(C);
 }
 
-} // namespace permutalib
-
+// clang-format off
+}  // namespace permutalib
 #endif  // SRC_GAP_PARTITION_H_
+// clang-format on

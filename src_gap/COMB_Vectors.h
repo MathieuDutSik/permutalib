@@ -165,5 +165,7 @@ template <typename T> std::vector<T> SortVector(std::vector<T> const &f) {
   return RetF;
 }
 
-} // namespace permutalib
+// clang-format off
+}  // namespace permutalib
 #endif  // SRC_GAP_COMB_VECTORS_H_
+// clang-format on

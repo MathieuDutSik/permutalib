@@ -133,6 +133,7 @@ StabChain<Telt, Tidx_label> FCT_Group(std::vector<Telt> const &LGen,
   return S;
 }
 
-} // namespace permutalib
-
+// clang-format off
+}  // namespace permutalib
 #endif  // SRC_GAP_STABCHAINMAIN_H_
+// clang-format on

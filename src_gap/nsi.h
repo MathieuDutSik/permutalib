@@ -868,5 +868,7 @@ Face Kernel_CanonicalImage(StabChain<Telt, Tidx_label> const &g,
   return ret;
 }
 
-} // namespace permutalib
+// clang-format off
+}  // namespace permutalib
 #endif  // SRC_GAP_NSI_H_
+// clang-format on

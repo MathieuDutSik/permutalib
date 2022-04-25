@@ -628,6 +628,7 @@ Kernel_CentreSubgroup(const StabChain<Telt, Tidx_label> &G) {
   }
 }
 
-} // namespace permutalib
-
+// clang-format off
+}  // namespace permutalib
 #endif  // SRC_GAP_NORMALSTRUCTURE_H_
+// clang-format on

@@ -3391,6 +3391,8 @@ InstallGlobalFunction( SubgroupProperty, function( arg )
 end );
 
   */
-} // namespace permutalib
 
+// clang-format off
+}  // namespace permutalib
 #endif  // SRC_GAP_STBCBCKT_H_
+// clang-format on

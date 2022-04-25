@@ -336,6 +336,7 @@ std::vector<typename Telt::Tidx> MovedPoints(const std::vector<Telt> &LGen,
   return LMoved;
 }
 
-} // namespace permutalib
-
+// clang-format off
+}  // namespace permutalib
 #endif  // SRC_GAP_PERMGROUP_H_
+// clang-format on

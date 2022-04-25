@@ -95,70 +95,7 @@ bool Kernel_IsCyclic(const StabChain<Telt, Tidx_label> &S) {
   return true;
 }
 
-/*
-  We follow here a different approach to GAP.
-  Testing cyclicity should not be a computationally intensive
-  operation.
-*/
-/*
-template<typename Telt, typename Tidx_label>
-std::optional<Telt> Kernel_IsCyclic(const StabChain<Telt,Tidx_label>& S_in)
-{
-  using Tidx=typename Telt::Tidx;
-  Tidx n = S_in->comm->n;
-  Tidx order = 1;
-  auto transposition=[&](const Tidx& a, const Tidx& b) -> Telt {
-    std::vector<Tidx> V(n);
-    for (Tidx i=0; i<n; i++)
-      V[i] = i;
-    V[a] = b;
-    V[b] = a;
-    return Telt(V);
-  };
-  auto get_spanning_generator=[&](const StabChain<Telt,Tidx_label>& S) ->
-std::optional<Telt> { Tidx len = Tidx(S->orbit.size()); Tidx bpt = S->orbit[0];
-    for (Tidx i=1; i<len; i++) {
-      const Tidx img = S->orbit[i];
-      Tidx img_work = img;
-      Telt g = S->comm->identity;
-      while(true) {
-        if (img_work == bpt)
-          break;
-        Tidx_label idx = S->transversal[img];
-        g *= S->comm->labels[idx];
-        img_work = PowAct(img, g);
-      }
-      Tidx ord = OrderElement(g);
-      Tidx res = ord % len;
-      if (res == 0) { // Finding an element of order len
-        Face f(n);
-        Tidx work = bpt;
-        Tidx siz_match = 0;
-        while(true) {
-          f[workpt] = 1;
-          siz_match++;
-          workpt = PowAct(workpt, g);
-          if (f[workpt] == 1)
-            break;
-        }
-        if (siz_match == len)
-          return g;
-      }
-    }
-    return {};
-  };
-  StabChain<Telt,Tidx_label> Swork = S_in;
-  Face status(n);
-  while(true) {
-    std::optional<Telt> test = get_spanning_generator(Swork);
-    if (!test) {
-      return {};
-    }
-
-  }
-}
-*/
-
-} // namespace permutalib
-
+// clang-format off
+}  // namespace permutalib
 #endif  // SRC_GAP_PROPERTIES_H_
+// clang-format on

@@ -602,6 +602,7 @@ std::istream &operator>>(std::istream &is, permutalib::Group<Telt, Tint> &grp) {
   return is;
 }
 
-} // namespace permutalib
-
+// clang-format off
+}  // namespace permutalib
 #endif  // SRC_GAP_GROUP_H_
+// clang-format on

@@ -32,6 +32,8 @@ ComputePower(const Tint &x, const Tidx &expo) {
   return ret;
   */
 }
-} // namespace permutalib
 
-#endif
+// clang-format off
+}  // namespace permutalib
+#endif  // SRC_GAP_NUMBERTHEORY_H_
+// clang-format on

@@ -181,5 +181,7 @@ std::string GapStringMissingTVector(std::vector<std::optional<T>> const &f) {
   return os.str();
 }
 
-} // namespace permutalib
+// clang-format off
+}  // namespace permutalib
 #endif  // SRC_GAP_GAPPRINT_H_
+// clang-format on

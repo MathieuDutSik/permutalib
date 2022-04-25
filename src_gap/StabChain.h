@@ -1994,6 +1994,7 @@ HomomorphismMapping(StabChain<Telt, Tidx_label> const &Stot, F_pt f_pt,
   return ListLevel[0];
 }
 
-} // namespace permutalib
-
+// clang-format off
+}  // namespace permutalib
 #endif  // SRC_GAP_STABCHAIN_H_
+// clang-format on

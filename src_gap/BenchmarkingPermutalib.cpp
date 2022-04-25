@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
     using Telt = permutalib::SingleSidedPerm<Tidx>;
     using Tint = mpz_class;
     using Tgroup = permutalib::Group<Telt, Tint>;
-    long n_iter = 50;
+    int64_t n_iter = 50;
     if (argc != 3 && argc != 4) {
       std::cerr << "BenchmarkingPermutalib [EXMP] [opt]\n";
       std::cerr << "or\n";
@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
     std::string InputFile = argv[1];
     std::string opt = argv[2];
     if (argc == 4) {
-      sscanf(argv[3], "%ld", &n_iter);
+      sscanf(argv[3], "%lld", &n_iter);
       std::cerr << "Using input value n_iter=" << n_iter << "\n";
     } else {
       std::cerr << "Using default value of 50 on n_iter\n";
@@ -91,28 +91,28 @@ int main(int argc, char *argv[]) {
         return eFace;
       };
       auto bench_canonical = [&]() -> void {
-        for (long iter = 0; iter < n_iter; iter++) {
+        for (int64_t iter = 0; iter < n_iter; iter++) {
           permutalib::Face eFace = random_face(n);
           permutalib::Face set_can = eG.CanonicalImage(eFace);
           siz_control += set_can.count();
         }
       };
       auto bench_stabilizer = [&]() -> void {
-        for (long iter = 0; iter < n_iter; iter++) {
+        for (int64_t iter = 0; iter < n_iter; iter++) {
           permutalib::Face eFace = random_face(n);
           Tgroup eG2 = eG.Stabilizer_OnSets(eFace);
           siz_control += eFace.count();
         }
       };
       auto bench_pointstabilizer = [&]() -> void {
-        for (long iter = 0; iter < n_iter; iter++) {
+        for (int64_t iter = 0; iter < n_iter; iter++) {
           Tidx pos = Tidx(rand()) % n;
           Tgroup eG2 = eG.Stabilizer_OnPoints(pos);
           siz_control += size_t(pos);
         }
       };
       auto bench_pointrepresentative = [&]() -> void {
-        for (long iter = 0; iter < n_iter; iter++) {
+        for (int64_t iter = 0; iter < n_iter; iter++) {
           Tidx pos1 = Tidx(rand()) % n;
           Tidx pos2 = Tidx(rand()) % n;
           std::optional<Telt> eP = eG.RepresentativeAction_OnPoints(pos1, pos2);
@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
         }
       };
       auto check_canonical = [&]() -> void {
-        for (long iter = 0; iter < n_iter; iter++) {
+        for (int64_t iter = 0; iter < n_iter; iter++) {
           permutalib::Face eFace1 = random_face(n);
           permutalib::Face set_can1 = eG.CanonicalImage(eFace1);
           for (int i = 0; i < 4; i++) {
@@ -138,7 +138,7 @@ int main(int argc, char *argv[]) {
         }
       };
       auto check_representative = [&]() -> void {
-        for (long iter = 0; iter < n_iter; iter++) {
+        for (int64_t iter = 0; iter < n_iter; iter++) {
           permutalib::Face eFace1 = random_face(n);
           Telt u = eG.rand();
           permutalib::Face eFace2 = OnSets(eFace1, u);
@@ -152,7 +152,7 @@ int main(int argc, char *argv[]) {
         }
       };
       auto check_stabilizer = [&]() -> void {
-        for (long iter = 0; iter < n_iter; iter++) {
+        for (int64_t iter = 0; iter < n_iter; iter++) {
           permutalib::Face eFace1 = random_face(n);
           Tgroup eG1 = eG.Stabilizer_OnSets(eFace1);
           for (int i = 0; i < 4; i++) {

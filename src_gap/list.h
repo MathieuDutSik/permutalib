@@ -105,5 +105,7 @@ void SubtractBlist(Face &a, Face const &b) {
   }
 }
 
-} // namespace permutalib
+// clang-format off
+}  // namespace permutalib
 #endif  // SRC_GAP_LIST_H_
+// clang-format on

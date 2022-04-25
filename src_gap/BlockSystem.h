@@ -765,6 +765,7 @@ int GetNonTrivialPointInBlock(std::vector<int> const &eBlock, int const &ePt) {
   return -1;
 }
 
+// clang-format off
 } // namespace permutalib
-
 #endif  // SRC_GAP_BLOCKSYSTEM_H_
+// clang-format on

@@ -114,5 +114,7 @@ std::map<Tidx, int> QuotientMapMultiplicity(const std::map<Tidx, int> &x,
   return quot;
 }
 
-} // namespace permutalib
+// clang-format off
+}  // namespace permutalib
 #endif  // SRC_GAP_FACTORIZE_H_
+// clang-format on

@@ -134,4 +134,6 @@ Tplusinfinity<T> operator*(T const &x, Tplusinfinity<T> const &y) {
   return Tplusinfinity<T>(y.IsInfinity(), x * y.GetValue());
 }
 
+// clang-format off
 #endif  // SRC_GAP_PLUS_INFINITY_H_
+// clang-format on

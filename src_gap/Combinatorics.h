@@ -24,4 +24,6 @@ void SortParallel_PairList(std::vector<T1> &list1, std::vector<T2> &list2) {
   }
 }
 
+// clang-format off
 #endif  // SRC_GAP_COMBINATORICS_H_
+// clang-format on

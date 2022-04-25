@@ -389,6 +389,8 @@ struct hash<permutalib::PermutationElt<Tidx, Telt>> {
     return hash1;
   }
 };
-} // namespace std
 
+// clang-format off
+}  // namespace std
 #endif  // SRC_GAP_PERMUTATIONELT_H_
+// clang-format on

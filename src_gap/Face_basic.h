@@ -52,5 +52,7 @@ bool operator<(Face const &x, Face const &y) {
   return false;
 }
 
-} // namespace permutalib
+// clang-format off
+}  // namespace permutalib
 #endif  // SRC_GAP_FACE_BASIC_H_
+// clang-format on
