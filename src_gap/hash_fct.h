@@ -1,6 +1,8 @@
 #ifndef SRC_GAP_HASH_FCT_H_
 #define SRC_GAP_HASH_FCT_H_
 
+#include <cstring>
+
 namespace permutalib {
 
 static inline uint32_t murmur_32_scramble(uint32_t k) {
