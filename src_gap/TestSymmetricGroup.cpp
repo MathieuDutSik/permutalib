@@ -1,3 +1,4 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #include "Permutation.h"
 #include "StabChainMain.h"
 #include "gmpxx.h"

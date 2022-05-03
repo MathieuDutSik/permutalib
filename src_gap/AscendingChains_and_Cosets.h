@@ -1,3 +1,4 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef SRC_GAP_ASCENDINGCHAINS_AND_COSETS_H_
 #define SRC_GAP_ASCENDINGCHAINS_AND_COSETS_H_
 
