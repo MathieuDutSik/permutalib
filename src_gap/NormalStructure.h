@@ -119,7 +119,7 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
     if (status_remove[i] == 0) {
       for (size_t j = 0; j < len; j++) {
         if (i != j && status_remove[j] == 0) {
-          Tidx val = LogPerm(gens[i], gens[j]); // test if gens[i]^e = gens[j]
+          Tidx val = LogPerm(gens[i], gens[j]);
           if (val != std::numeric_limits<Tidx>::max()) {
             status_remove[j] = 1;
           }
@@ -396,10 +396,10 @@ struct InjectiveRestrictionHomomorphism_base {
     for (Tidx i = 0; i < n; i++)
       eList[i] = i;
     Tidx n_restr = S_restr->comm->n;
-    for (Tidx i = 0; i < n_restr; i++) {
+    for (Tidx i = 0; i < n_restr; i++)
       eList[subset[i]] = subset[PowAct(i, eElt)];
-    }
-    Telt g(eList); // Build g, but keep eList separately for further use.
+    // Build g, but keep eList separately for further use, so, no move.
+    Telt g(eList); 
     Telt res = SiftedPermutation(G, g);
     Telt res_inv = Inverse(res);
     for (Tidx i = 0; i < n; i++)

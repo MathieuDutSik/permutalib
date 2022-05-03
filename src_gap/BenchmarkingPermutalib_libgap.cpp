@@ -90,10 +90,10 @@ void set_argc_argv_gap(int *argc, char ***argv) {
   std::vector<std::string> LStr = {
       "./BenchmarkingPermutalib", "-A", "-l", ".", "-q", "-T", "--nointeract"};
   *argc = LStr.size();
-  *argv = (char **)malloc(LStr.size() * sizeof(char **));
+  *argv = reinterpret_cast<char **>(malloc(LStr.size() * sizeof(char **)));
   for (size_t i_str = 0; i_str < LStr.size(); i_str++) {
     size_t len_str = LStr[i_str].size();
-    (*argv)[i_str] = (char *)malloc((len_str + 1) * sizeof(char *));
+    (*argv)[i_str] = reinterpret_cast<char *>(malloc((len_str + 1) * sizeof(char *)));
     for (size_t i_c = 0; i_c < len_str; i_c++)
       (*argv)[i_str][i_c] = LStr[i_str][i_c];
     (*argv)[i_str][len_str] = '\0';
@@ -252,7 +252,7 @@ int main(int argc, char *argv[]) {
           Tidx pos2 = Tidx(rand()) % n;
           std::pair<bool, Telt> eP =
               eG.RepresentativeAction_OnPoints(pos1, pos2);
-          siz_control += int(eP.first);
+          siz_control += static_cast<int>(eP.first);
         }
       };
       auto check_canonical = [&]() -> void {

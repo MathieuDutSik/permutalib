@@ -13,9 +13,9 @@
 #include "COMB_Vectors.h"
 #include "StabChain.h"
 #include "pseudorandom.h"
+#include <algorithm>
 #include <limits>
 #include <string>
-#include <algorithm>
 #include <utility>
 #include <vector>
 
@@ -821,7 +821,8 @@ StabChain<Telt, Tidx_label> StabChainRandomPermGroup(
   if (options.random == 1000) {
     k = 1;
   } else {
-    double eFrac = 1 - static_cast<double>(options.random) / static_cast<double>(1000);
+    double eFrac =
+        1 - static_cast<double>(options.random) / static_cast<double>(1000);
     double Expo = static_cast<double>(3) / static_cast<double>(5);
     k = 0;
     double ThePow = 1;

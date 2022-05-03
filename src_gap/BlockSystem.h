@@ -123,7 +123,8 @@ BlockDecomposition<Tidx> SpanBlockDecomposition(std::vector<Telt> const &LGen,
         map_vert_block[val] = pos;
       ListBlocks.emplace_back(std::move(NewV));
       //      prt_status("1");
-      return true; // We do something
+      // We do something
+      return true;
     } else {
       if (ListBlkMatch.size() == 1) {
         Tidx iBlock = *(ListBlkMatch.begin());
@@ -132,7 +133,8 @@ BlockDecomposition<Tidx> SpanBlockDecomposition(std::vector<Telt> const &LGen,
           map_vert_block[val] = iBlock;
         }
         //        prt_status("2");
-        return NewV.size() > 0; // return true if something is new.
+        // return true if something is new.
+        return NewV.size() > 0;
       }
       std::vector<std::vector<Tidx>> NewListBlocks;
       std::vector<Tidx> &NewBlock = NewV;
@@ -356,7 +358,7 @@ Blocks(const std::vector<Telt> &acts, const typename Telt::Tidx &n) {
   for (Tidx i = 0; i < n; i++) {
     eql[i] = i;
     leq[i] = i;
-    next[i] = 0; // not completely sure
+    next[i] = 0;
     last[i] = i;
   }
 
@@ -388,7 +390,7 @@ Blocks(const std::vector<Telt> &acts, const typename Telt::Tidx &n) {
       changed++;
 
       // compute the image of every point under <gen>
-      for (auto &pre_pnt : orbit) { // not sure about this
+      for (auto &pre_pnt : orbit) {
         Tidx pnt = pre_pnt;
         Tidx img = PowAct(pnt, gen);
 
@@ -514,7 +516,7 @@ Blocks(const std::vector<Telt> &acts, const typename Telt::Tidx &n) {
 
     // compute the block system with an orbit algorithm
     int i = 0;
-    while (0 <= changed && i < int(blocks.size())) {
+    while (0 <= changed && i < static_cast<int>(blocks.size())) {
 
       // loop over the generators
       for (auto &gen : acts) {
@@ -767,6 +769,6 @@ int GetNonTrivialPointInBlock(std::vector<int> const &eBlock, int const &ePt) {
 }
 
 // clang-format off
-} // namespace permutalib
+}  // namespace permutalib
 #endif  // SRC_GAP_BLOCKSYSTEM_H_
 // clang-format on

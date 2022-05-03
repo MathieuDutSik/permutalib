@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
       for (size_t i = 0; i < siz; i++) {
         if (i > 0)
           os << ",";
-        os << (int(aRow) + 1);
+        os << (static_cast<int>(aRow) + 1);
         aRow = set_can.find_next(aRow);
       }
       os << "];\n";

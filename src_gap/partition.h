@@ -535,7 +535,7 @@ Tidx FixcellPoint(Partition<Tidx> const& P, std::set<Tidx> & old)
   Tidx nbPoss=poss.size();
   if (nbPoss == 0)
     return std::numeric_limits<Tidx>::max();
-  Tidx idx=rand() % nbPoss;
+  Tidx idx=random() % nbPoss;
   Tidx p=poss[idx];
   old.insert(p);
   return p;

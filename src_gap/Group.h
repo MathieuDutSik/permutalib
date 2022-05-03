@@ -95,11 +95,11 @@ namespace permutalib {
 
 template <typename Telt>
 Telt RandomElement(const std::vector<Telt> &LGen, const Telt &id) {
-  size_t len = rand() % 100;
+  size_t len = random() % 100;
   size_t n_gen = LGen.size();
   Telt eElt = id;
   for (size_t iIter = 0; iIter < len; iIter++) {
-    size_t pos = size_t(rand()) % n_gen;
+    size_t pos = size_t(random()) % n_gen;
     eElt *= LGen[pos];
   }
   return eElt;
@@ -132,7 +132,7 @@ public:
   Group(Group<Telt, Tint> &&G) : S(std::move(G.S)), size_tint(G.size_tint) {}
   Group(const Group<Telt, Tint> &G)
       : S(G.S), size_tint(G.size_tint) {
-  } // The S is a shared_ptr so copy is fine.
+  }
   Group<Telt, Tint> &operator=(const Group<Telt, Tint> &G) {
     // The S is a shared_ptr so copy is fine.
     S = G.S;
@@ -536,7 +536,9 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
   return ret;
 }
 
-} // namespace permutalib
+// clang-format off
+}  // namespace permutalib
+// clang-format on
 
 namespace boost::serialization {
 
@@ -584,7 +586,9 @@ inline void serialize(Archive &ar, permutalib::Group<Telt, Tint> &val,
                       const unsigned int version) {
   split_free(ar, val, version);
 }
-} // namespace boost::serialization
+// clang-format off
+}  // namespace boost::serialization
+// clang-format on
 
 namespace permutalib {
 

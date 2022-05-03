@@ -5,12 +5,12 @@
 #include "NumberTheory.h"
 #include "StabChain.h"
 #include "stbcbckt.h"
-#include <unordered_map>
-#include <utility>
+#include <algorithm>
 #include <limits>
 #include <memory>
+#include <unordered_map>
+#include <utility>
 #include <vector>
-#include <algorithm>
 
 //#define DEBUG_NSI
 

@@ -1,8 +1,8 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #include "Permutation.h"
 #include "gmpxx.h"
-#include <fstream>
 #include <chrono>
+#include <fstream>
 
 #include "Group.h"
 
@@ -38,7 +38,6 @@ int main(int argc, char *argv[]) {
                 << " nbGen=" << nbGen << "\n";
       std::vector<Telt> LGen(nbGen);
       for (size_t iGen = 0; iGen < nbGen; iGen++) {
-        //        std::cerr << "iGen=" << iGen << "/" << nbGen << " n=" << int(n) << "\n";
         std::vector<Tidx> ePermV(n);
         for (Tidx i = 0; i < n; i++) {
           int eVal_i;
@@ -82,13 +81,19 @@ int main(int argc, char *argv[]) {
           }
         }
         if (ecase == 2) {
-          std::chrono::time_point<std::chrono::system_clock> time1 = std::chrono::system_clock::now();
+          std::chrono::time_point<std::chrono::system_clock> time1 =
+              std::chrono::system_clock::now();
           size_t n_iter = 0;
           for (auto &elt : eG) {
             n_iter++;
           }
-          std::chrono::time_point<std::chrono::system_clock> time2 = std::chrono::system_clock::now();
-          std::cerr << "n_iter=" << n_iter << " seconds=" << std::chrono::duration_cast<std::chrono::seconds>(time2 - time1).count() << "\n";
+          std::chrono::time_point<std::chrono::system_clock> time2 =
+              std::chrono::system_clock::now();
+          std::cerr << "n_iter=" << n_iter << " seconds="
+                    << std::chrono::duration_cast<std::chrono::seconds>(time2 -
+                                                                        time1)
+                           .count()
+                    << "\n";
         }
         n_treat++;
       } else {

@@ -8,11 +8,11 @@
 //#include "plus_infinity.h"
 #include <algorithm>
 #include <limits>
-#include <variant>
 #include <map>
 #include <optional>
 #include <string>
 #include <utility>
+#include <variant>
 #include <vector>
 
 /*
