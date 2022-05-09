@@ -216,7 +216,7 @@ int main(int argc, char *argv[]) {
       auto random_face = [](const Tidx &len) -> permutalib::Face {
         permutalib::Face eFace(len);
         for (Tidx i = 0; i < len; i++) {
-          int eVal = Tidx(rand()) % 2;
+          int eVal = Tidx(random()) % 2;
           eFace[i] = eVal;
         }
         return eFace;
@@ -241,15 +241,15 @@ int main(int argc, char *argv[]) {
       };
       auto bench_pointstabilizer = [&]() -> void {
         for (long iter = 0; iter < n_iter; iter++) {
-          Tidx pos = Tidx(rand()) % n;
+          Tidx pos = Tidx(random()) % n;
           Tgroup eG2 = eG.Stabilizer_OnPoints(pos);
           siz_control += eG2.n_act();
         }
       };
       auto bench_pointrepresentative = [&]() -> void {
         for (long iter = 0; iter < n_iter; iter++) {
-          Tidx pos1 = Tidx(rand()) % n;
-          Tidx pos2 = Tidx(rand()) % n;
+          Tidx pos1 = Tidx(random()) % n;
+          Tidx pos2 = Tidx(random()) % n;
           std::pair<bool, Telt> eP =
               eG.RepresentativeAction_OnPoints(pos1, pos2);
           siz_control += static_cast<int>(eP.first);
@@ -260,7 +260,7 @@ int main(int argc, char *argv[]) {
           permutalib::Face eFace1 = random_face(n);
           permutalib::Face set_can1 = eG.CanonicalImage(eFace1);
           for (int i = 0; i < 4; i++) {
-            Telt u = eG.rand();
+            Telt u = eG.random();
             permutalib::Face eFace2 = OnSets(eFace1, u);
             permutalib::Face set_can2 = eG.CanonicalImage(eFace2);
             if (set_can1 != set_can2) {
@@ -273,7 +273,7 @@ int main(int argc, char *argv[]) {
       auto check_representative = [&]() -> void {
         for (long iter = 0; iter < n_iter; iter++) {
           permutalib::Face eFace1 = random_face(n);
-          Telt u = eG.rand();
+          Telt u = eG.random();
           permutalib::Face eFace2 = OnSets(eFace1, u);
 #ifdef USE_LIBGAP
           bool test = GetRepresentativeAction_OnSets_libgap(eG, eFace1, eFace2);
@@ -291,7 +291,7 @@ int main(int argc, char *argv[]) {
           permutalib::Face eFace1 = random_face(n);
           Tgroup eG1 = eG.Stabilizer_OnSets(eFace1);
           for (int i = 0; i < 4; i++) {
-            Telt u = eG.rand();
+            Telt u = eG.random();
             permutalib::Face eFace2 = OnSets(eFace1, u);
             Tgroup eG2 = eG.Stabilizer_OnSets(eFace2);
             if (eG1.size() != eG2.size()) {

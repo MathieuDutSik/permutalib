@@ -44,8 +44,8 @@ int main(int argc, char *argv[]) {
     //
     for (int i = 0; i < 400; i++) {
       std::cerr << "i=" << i << "\n";
-      Telt elt1 = SymmGrp.rand();
-      Telt elt2 = SymmGrp.rand();
+      Telt elt1 = SymmGrp.random();
+      Telt elt2 = SymmGrp.random();
       Telt prod = elt1 * elt2;
       elt1 *= elt2;
       if (elt1 != prod) {

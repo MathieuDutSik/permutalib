@@ -189,6 +189,9 @@ public:
   Telt rand() const {
     return RandomElement(Kernel_GeneratorsOfGroup(S), S->comm->identity);
   }
+  Telt random() const {
+    return rand();
+  }
   bool IsCommutative() const { return Kernel_IsCommutative(S); }
   bool IsTransitive() const { return Kernel_IsTransitive(S); }
   bool IsPrimitive() const { return Kernel_IsPrimitive(S); }

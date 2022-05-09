@@ -136,7 +136,8 @@ public:
   Tidx operator[](Tidx const &i) const { return ListVal[i]; }
   Tidx size() const { return siz; }
   //
-public: // Should be private in a more classic construction
+public:
+  // Should be private in a more classic construction
   Tidx siz;
   std::vector<Tidx> ListVal;
   Telt elt;
@@ -373,7 +374,9 @@ std::ostream &operator<<(std::ostream &os,
   return os;
 }
 
-} // namespace permutalib
+// clang-format off
+}  // namespace permutalib
+// clang-format on
 
 namespace std {
 template <typename Tidx, typename Telt>

@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
     std::string InputFile = argv[1];
     std::string opt = argv[2];
     if (argc == 4) {
-      sscanf(argv[3], "%lld", &n_iter);
+      sscanf(argv[3], "%ld", &n_iter);
       std::cerr << "Using input value n_iter=" << n_iter << "\n";
     } else {
       std::cerr << "Using default value of 50 on n_iter\n";
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
       auto random_face = [](const Tidx &len) -> permutalib::Face {
         permutalib::Face eFace(len);
         for (Tidx i = 0; i < len; i++) {
-          int eVal = Tidx(rand()) % 2;
+          int eVal = Tidx(random()) % 2;
           eFace[i] = eVal;
         }
         return eFace;
@@ -107,15 +107,15 @@ int main(int argc, char *argv[]) {
       };
       auto bench_pointstabilizer = [&]() -> void {
         for (int64_t iter = 0; iter < n_iter; iter++) {
-          Tidx pos = Tidx(rand()) % n;
+          Tidx pos = Tidx(random()) % n;
           Tgroup eG2 = eG.Stabilizer_OnPoints(pos);
           siz_control += size_t(pos);
         }
       };
       auto bench_pointrepresentative = [&]() -> void {
         for (int64_t iter = 0; iter < n_iter; iter++) {
-          Tidx pos1 = Tidx(rand()) % n;
-          Tidx pos2 = Tidx(rand()) % n;
+          Tidx pos1 = Tidx(random()) % n;
+          Tidx pos2 = Tidx(random()) % n;
           std::optional<Telt> eP = eG.RepresentativeAction_OnPoints(pos1, pos2);
           siz_control += size_t(pos1) + size_t(pos2);
           if (eP)
@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
           permutalib::Face eFace1 = random_face(n);
           permutalib::Face set_can1 = eG.CanonicalImage(eFace1);
           for (int i = 0; i < 4; i++) {
-            Telt u = eG.rand();
+            Telt u = eG.random();
             permutalib::Face eFace2 = OnSets(eFace1, u);
             permutalib::Face set_can2 = eG.CanonicalImage(eFace2);
             if (set_can1 != set_can2) {
@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
       auto check_representative = [&]() -> void {
         for (int64_t iter = 0; iter < n_iter; iter++) {
           permutalib::Face eFace1 = random_face(n);
-          Telt u = eG.rand();
+          Telt u = eG.random();
           permutalib::Face eFace2 = OnSets(eFace1, u);
           std::optional<Telt> test =
               eG.RepresentativeAction_OnSets(eFace1, eFace2);
@@ -157,7 +157,7 @@ int main(int argc, char *argv[]) {
           permutalib::Face eFace1 = random_face(n);
           Tgroup eG1 = eG.Stabilizer_OnSets(eFace1);
           for (int i = 0; i < 4; i++) {
-            Telt u = eG.rand();
+            Telt u = eG.random();
             permutalib::Face eFace2 = OnSets(eFace1, u);
             Tgroup eG2 = eG.Stabilizer_OnSets(eFace2);
             if (eG1.size() != eG2.size()) {
