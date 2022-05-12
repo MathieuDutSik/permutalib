@@ -38,6 +38,34 @@ template <typename Tidx> bool CheckList(const std::vector<Tidx> &l) {
   return true;
 }
 
+template<typename Tidx>
+void TerminateDoubleList(const std::vector<Tidx> &ListVal, const std::vector<Tidx> &ListRev) {
+  if (!CheckList(ListVal) || !CheckList(ListRev)) {
+    std::cerr << "ListVal =";
+    for (auto & eVal : ListVal)
+      std::cerr << " " << size_t(eVal);
+    std::cerr << "\n";
+    std::cerr << "ListRev =";
+    for (auto & eVal : ListRev)
+      std::cerr << " " << size_t(eVal);
+    std::cerr << "\n";
+    std::cerr << "ListVal or ListRev do not define a permutation\n";
+    throw PermutalibException{1};
+  }
+}
+
+template<typename Tidx>
+void TerminateSingleList(const std::vector<Tidx> &ListVal) {
+  if (!CheckList(ListVal)) {
+    std::cerr << "ListVal =";
+    for (auto & eVal : ListVal)
+      std::cerr << " " << size_t(eVal);
+    std::cerr << "\n";
+    std::cerr << "ListVal does not define a permutation\n";
+    throw PermutalibException{1};
+  }
+}
+
 template <typename Tidx>
 std::pair<std::vector<Tidx>, std::vector<Tidx>>
 GetListValRev(std::string const &estr) {
@@ -113,10 +141,7 @@ public:
     ListRev = epair.second;
     siz = ListVal.size();
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    if (!CheckList(ListVal) || !CheckList(ListVal)) {
-      std::cerr << "ListVal or ListRev are not rightly organized\n";
-      throw PermutalibException{1};
-    }
+    TerminateDoubleList(ListVal, ListRev);
 #endif
   }
   DoubleSidedPerm(DoubleSidedPerm const &ePerm, Tidx const &n) {
@@ -155,10 +180,7 @@ public:
     for (Tidx i = 0; i < siz; i++)
       ListRev[v[i]] = i;
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    if (!CheckList(ListVal) || !CheckList(ListRev)) {
-      std::cerr << "ListVal or ListRev are not rightly organized\n";
-      throw PermutalibException{1};
-    }
+    TerminateDoubleList(ListVal, ListRev);
 #endif
   }
   DoubleSidedPerm(std::vector<Tidx> const &v1, std::vector<Tidx> const &v2) {
@@ -166,10 +188,7 @@ public:
     ListVal = v1;
     ListRev = v2;
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    if (!CheckList(ListVal) || !CheckList(ListRev)) {
-      std::cerr << "ListVal or ListRev are not rightly organized\n";
-      throw PermutalibException{1};
-    }
+    TerminateDoubleList(ListVal, ListRev);
 #endif
   }
   DoubleSidedPerm(DoubleSidedPerm const &ePerm) {
@@ -177,10 +196,7 @@ public:
     ListVal = ePerm.ListVal;
     ListRev = ePerm.ListRev;
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    if (!CheckList(ListVal) || !CheckList(ListRev)) {
-      std::cerr << "ListVal or ListRev are not rightly organized\n";
-      throw PermutalibException{1};
-    }
+    TerminateDoubleList(ListVal, ListRev);
 #endif
   }
   DoubleSidedPerm(DoubleSidedPerm &&ePerm) {
@@ -189,10 +205,7 @@ public:
     ListRev = std::move(ePerm.ListRev);
     ePerm.siz = 0;
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    if (!CheckList(ListVal) || !CheckList(ListRev)) {
-      std::cerr << "ListVal or ListRev are not rightly organized\n";
-      throw PermutalibException{1};
-    }
+    TerminateDoubleList(ListVal, ListRev);
 #endif
   }
   //
@@ -461,10 +474,7 @@ public:
     ListVal = std::move(epair.first);
     siz = ListVal.size();
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    if (!CheckList(ListVal)) {
-      std::cerr << "ListVal does not define a permutation\n";
-      throw PermutalibException{1};
-    }
+    TerminateSingleList(ListVal);
 #endif
   }
   SingleSidedPerm(SingleSidedPerm const &ePerm, int const &n) {
@@ -484,10 +494,7 @@ public:
       ListVal.push_back(pos);
     siz = n;
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    if (!CheckList(ListVal)) {
-      std::cerr << "ListVal does not define a permutation\n";
-      throw PermutalibException{1};
-    }
+    TerminateSingleList(ListVal);
 #endif
   }
   SingleSidedPerm() {
@@ -516,10 +523,7 @@ public:
     ListVal = v;
     siz = Tidx(v.size());
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    if (!CheckList(ListVal)) {
-      std::cerr << "ListVal does not define a permutation\n";
-      throw PermutalibException{1};
-    }
+    TerminateSingleList(ListVal);
 #endif
   }
   SingleSidedPerm(std::vector<Tidx> const &v) {
@@ -532,10 +536,7 @@ public:
     ListVal = v;
     siz = Tidx(v.size());
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    if (!CheckList(ListVal)) {
-      std::cerr << "ListVal does not define a permutation\n";
-      throw PermutalibException{1};
-    }
+    TerminateSingleList(ListVal);
 #endif
   }
   SingleSidedPerm(std::vector<Tidx> const &v1,
@@ -549,10 +550,7 @@ public:
     siz = v1.size();
     ListVal = v1;
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    if (!CheckList(ListVal)) {
-      std::cerr << "ListVal does not define a permutation\n";
-      throw PermutalibException{1};
-    }
+    TerminateSingleList(ListVal);
 #endif
   }
   SingleSidedPerm(SingleSidedPerm const &ePerm) {
@@ -573,10 +571,7 @@ public:
     }
 #endif
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    if (!CheckList(ListVal)) {
-      std::cerr << "ListVal does not define a permutation\n";
-      throw PermutalibException{1};
-    }
+    TerminateSingleList(ListVal);
 #endif
   }
   //
