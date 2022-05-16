@@ -1205,5 +1205,5 @@ end);
 
 // clang-format off
 }  // namespace permutalib
-#endif // SRC_GAP_ASCENDINGCHAINS_AND_COSETS_H_
+#endif  // SRC_GAP_ASCENDINGCHAINS_AND_COSETS_H_
 // clang-format on

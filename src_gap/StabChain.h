@@ -1826,7 +1826,6 @@ bool TestEqualityStabChain(StabChain<Telt, Tidx_label> const &L,
                            StabChain<Telt, Tidx_label> const &R) {
   StabChain<Telt, Tidx_label> Lptr = L;
   StabChain<Telt, Tidx_label> Rptr = R;
-  //#define DEBUG_EQUALITY
   while (true) {
     if (Lptr == nullptr && Rptr != nullptr) {
 #ifdef DEBUG_EQUALITY

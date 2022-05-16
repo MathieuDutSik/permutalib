@@ -192,7 +192,8 @@ bool CoherencyCheck(PermutationElt<Tidx, Telt> const &ePermElt) {
   const std::vector<Tidx> &LVal = ePermElt.getListVal();
   Telt elt = ePermElt.getElt();
   bool is_ok = true;
-  if (static_cast<int>(siz) == elt.rows() && static_cast<int>(siz) == elt.cols()) {
+  if (static_cast<int>(siz) == elt.rows() &&
+      static_cast<int>(siz) == elt.cols()) {
     for (Tidx iLine = 0; iLine < siz; iLine++) {
       Tidx pos = LVal[iLine];
       if (elt(iLine, pos) != 1)

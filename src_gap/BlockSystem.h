@@ -309,7 +309,6 @@ Blocks(const std::vector<Telt> &acts, const typename Telt::Tidx &n) {
   }
   if (IsPrime(n)) {
     std::vector<Tidx> eVect(n);
-    ;
     for (Tidx i = 0; i < n; i++)
       eVect[i] = i;
     return {eVect};
@@ -373,7 +372,7 @@ Blocks(const std::vector<Telt> &acts, const typename Telt::Tidx &n) {
     // and stop if 2 successive generators dont change the orbits any more
     while (changed < 2) {
 
-      // compute a random Schreier generator of $G_1$
+      // compute a random Schreier generator of G_1
       size_t i_siz = orbit.size();
       while (1 <= i_siz) {
         rnd *= Random(acts);

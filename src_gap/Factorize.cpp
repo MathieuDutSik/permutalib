@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
     std::cerr << "Factorize [nb]\n";
     return 1;
   }
-  using T = long;
+  using T = int64_t;
   T val;
   sscanf(argv[1], "%ld", &val);
   std::cerr << "val=" << val << "\n";

@@ -130,9 +130,7 @@ public:
   Group(const Tidx &n) : Group({}, n) {}
   Group() : Group(0) {}
   Group(Group<Telt, Tint> &&G) : S(std::move(G.S)), size_tint(G.size_tint) {}
-  Group(const Group<Telt, Tint> &G)
-      : S(G.S), size_tint(G.size_tint) {
-  }
+  Group(const Group<Telt, Tint> &G) : S(G.S), size_tint(G.size_tint) {}
   Group<Telt, Tint> &operator=(const Group<Telt, Tint> &G) {
     // The S is a shared_ptr so copy is fine.
     S = G.S;
@@ -189,9 +187,7 @@ public:
   Telt rand() const {
     return RandomElement(Kernel_GeneratorsOfGroup(S), S->comm->identity);
   }
-  Telt random() const {
-    return rand();
-  }
+  Telt random() const { return rand(); }
   bool IsCommutative() const { return Kernel_IsCommutative(S); }
   bool IsTransitive() const { return Kernel_IsTransitive(S); }
   bool IsPrimitive() const { return Kernel_IsPrimitive(S); }

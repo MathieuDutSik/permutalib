@@ -38,15 +38,16 @@ template <typename Tidx> bool CheckList(const std::vector<Tidx> &l) {
   return true;
 }
 
-template<typename Tidx>
-void TerminateDoubleList(const std::vector<Tidx> &ListVal, const std::vector<Tidx> &ListRev) {
+template <typename Tidx>
+void TerminateDoubleList(const std::vector<Tidx> &ListVal,
+                         const std::vector<Tidx> &ListRev) {
   if (!CheckList(ListVal) || !CheckList(ListRev)) {
     std::cerr << "ListVal =";
-    for (auto & eVal : ListVal)
+    for (auto &eVal : ListVal)
       std::cerr << " " << size_t(eVal);
     std::cerr << "\n";
     std::cerr << "ListRev =";
-    for (auto & eVal : ListRev)
+    for (auto &eVal : ListRev)
       std::cerr << " " << size_t(eVal);
     std::cerr << "\n";
     std::cerr << "ListVal or ListRev do not define a permutation\n";
@@ -54,11 +55,11 @@ void TerminateDoubleList(const std::vector<Tidx> &ListVal, const std::vector<Tid
   }
 }
 
-template<typename Tidx>
+template <typename Tidx>
 void TerminateSingleList(const std::vector<Tidx> &ListVal) {
   if (!CheckList(ListVal)) {
     std::cerr << "ListVal =";
-    for (auto & eVal : ListVal)
+    for (auto &eVal : ListVal)
       std::cerr << " " << size_t(eVal);
     std::cerr << "\n";
     std::cerr << "ListVal does not define a permutation\n";
@@ -616,7 +617,7 @@ public:
   Tidx operator[](Tidx const &i) const { return ListVal[i]; }
   Tidx size() const { return siz; }
   //
-public:  // Should be private in a more classic construction
+public: // Should be private in a more classic construction
   Tidx siz;
   std::vector<Tidx> ListVal;
 };
@@ -816,7 +817,7 @@ std::ostream &operator<<(std::ostream &os, SingleSidedPerm<Tidx> const &ePerm) {
   return os;
 }
 
-}  // namespace permutalib
+} // namespace permutalib
 
 namespace std {
 template <typename Tidx>
@@ -827,7 +828,7 @@ template <typename Tidx>
 std::string to_string(permutalib::SingleSidedPerm<Tidx> const &ePerm) {
   return GapStyleStringShift(ePerm, 1);
 }
-}  // namespace std
+} // namespace std
 
 namespace std {
 template <typename Tidx> struct hash<permutalib::SingleSidedPerm<Tidx>> {

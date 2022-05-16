@@ -1408,7 +1408,7 @@ BuildInitialImage(rbaseType<Telt, Tidx_label, Trfm> &rbase, Tdata &data) {
   } else {
     return imageType<Telt, Tidx_label, Tdata>(rbase.partition, data);
   }
-};
+}
 
 template <typename Telt, typename Tidx_label, typename Tdata, typename Trfm,
           typename Tint, bool repr, typename F_pr, typename F_nextLevel>
@@ -2068,8 +2068,8 @@ ResultPBT<Telt, Tidx_label> PartitionBacktrack(
             // Subgroup case, base  <> image at current level: Enlarge
             //   <L>    with  <t>. Decrease <max>     according to the
             //   enlarged <L>. Reset <R> to the enlarged <L>.
-            //	    for (int dd=0; dd<d; dd++)
-            //	      AddGeneratorsExtendSchreierTree( L[ dd ], {t});
+            //      for (int dd=0; dd<d; dd++)
+            //        AddGeneratorsExtendSchreierTree( L[ dd ], {t});
             // It is a little bit unclear why the loop was removed and a single
             // call to AGEST with L_list[dd].
 #ifdef DEBUG_STBCBCKT

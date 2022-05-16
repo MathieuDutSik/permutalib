@@ -11,7 +11,7 @@ template <typename T> struct is_mpz_class { static const bool value = false; };
 template <> struct is_mpz_class<mpz_class> { static const bool value = true; };
 
 template <typename Tint, typename Tidx>
-inline typename std::enable_if<(not is_mpz_class<Tint>::value), Tint>::type
+inline typename std::enable_if<(!is_mpz_class<Tint>::value), Tint>::type
 ComputePower(const Tint &x, const Tidx &expo) {
   Tint ret = 1;
   for (Tidx i = 0; i < expo; i++)

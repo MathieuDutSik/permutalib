@@ -399,7 +399,7 @@ struct InjectiveRestrictionHomomorphism_base {
     for (Tidx i = 0; i < n_restr; i++)
       eList[subset[i]] = subset[PowAct(i, eElt)];
     // Build g, but keep eList separately for further use, so, no move.
-    Telt g(eList); 
+    Telt g(eList);
     Telt res = SiftedPermutation(G, g);
     Telt res_inv = Inverse(res);
     for (Tidx i = 0; i < n; i++)

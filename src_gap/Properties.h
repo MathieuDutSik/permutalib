@@ -4,8 +4,8 @@
 
 #include "BlockSystem.h"
 #include "StabChain.h"
-#include <vector>
 #include <map>
+#include <vector>
 
 namespace permutalib {
 
