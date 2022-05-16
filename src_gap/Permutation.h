@@ -68,6 +68,18 @@ void TerminateSingleList(const std::vector<Tidx> &ListVal) {
 }
 
 template <typename Tidx>
+void TerminateSizeTooLarge(const size_t& siz)
+{
+  if (siz >= std::numeric_limits<Tidx>::max() - 1) {
+    std::cerr << "siz=" << siz << "\n";
+    std::cerr << "std::numeric_limits<Tidx>::max() = " << std::numeric_limits<Tidx>::max() << "\n";
+    std::cerr << "Tidx is too small for representing the asked size\n";
+    throw PermutalibException{1};
+  }
+}
+
+
+template <typename Tidx>
 std::pair<std::vector<Tidx>, std::vector<Tidx>>
 GetListValRev(std::string const &estr) {
   size_t maxlen = 0;
@@ -146,12 +158,14 @@ public:
 #endif
   }
   DoubleSidedPerm(DoubleSidedPerm const &ePerm, Tidx const &n) {
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
     if (ePerm.size() > n) {
       std::cerr << "ePerm.size()=" << ePerm.size() << " n=" << n << "\n";
       std::cerr << "ExtendPermutation to a size that is lower than the current "
                    "size\n";
       throw PermutalibException{1};
     }
+#endif
     ListVal = ePerm.getListVal();
     ListRev = ePerm.getListRev();
     for (Tidx pos = ePerm.size(); pos < n; pos++) {
@@ -467,10 +481,7 @@ public:
     std::pair<std::vector<Tidx>, std::vector<Tidx>> epair =
         GetListValRev<Tidx>(estr);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    if (epair.first.size() >= std::numeric_limits<Tidx>::max() - 1) {
-      std::cerr << "Tidx is too small for representing the vector\n";
-      throw PermutalibException{1};
-    }
+    TerminateSizeTooLarge(epair.first.size());
 #endif
     ListVal = std::move(epair.first);
     siz = ListVal.size();
@@ -478,12 +489,9 @@ public:
     TerminateSingleList(ListVal);
 #endif
   }
-  SingleSidedPerm(SingleSidedPerm const &ePerm, int const &n) {
+  SingleSidedPerm(SingleSidedPerm const &ePerm, Tidx const &n) {
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    if (n >= std::numeric_limits<Tidx>::max() - 1) {
-      std::cerr << "Tidx is too small for representing the vector\n";
-      throw PermutalibException{1};
-    }
+    TerminateSizeTooLarge(n);
 #endif
     if (ePerm.size() > n) {
       std::cerr << "ePerm.size()=" << ePerm.size() << " n=" << n << "\n";
@@ -504,10 +512,7 @@ public:
   }
   SingleSidedPerm(Tidx const &n) {
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    if (n >= std::numeric_limits<Tidx>::max() - 1) {
-      std::cerr << "Tidx is too small for representing the vector\n";
-      throw PermutalibException{1};
-    }
+    TerminateSizeTooLarge(n);
 #endif
     siz = n;
     ListVal = std::vector<Tidx>(n);
@@ -516,10 +521,7 @@ public:
   }
   SingleSidedPerm(std::vector<Tidx> &&v) {
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    if (v.size() >= std::numeric_limits<Tidx>::max() - 1) {
-      std::cerr << "Tidx is too small for representing the vector\n";
-      throw PermutalibException{1};
-    }
+    TerminateSizeTooLarge(v.size());
 #endif
     ListVal = v;
     siz = Tidx(v.size());
@@ -529,10 +531,7 @@ public:
   }
   SingleSidedPerm(std::vector<Tidx> const &v) {
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    if (v.size() >= std::numeric_limits<Tidx>::max() - 1) {
-      std::cerr << "Tidx is too small for representing the vector\n";
-      throw PermutalibException{1};
-    }
+    TerminateSizeTooLarge(v.size());
 #endif
     ListVal = v;
     siz = Tidx(v.size());
@@ -543,10 +542,7 @@ public:
   SingleSidedPerm(std::vector<Tidx> const &v1,
                   [[maybe_unused]] std::vector<Tidx> const &v2) {
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    if (v1.size() >= std::numeric_limits<Tidx>::max() - 1) {
-      std::cerr << "Tidx is too small for representing the vector\n";
-      throw PermutalibException{1};
-    }
+    TerminateSizeTooLarge(v1.size());
 #endif
     siz = v1.size();
     ListVal = v1;
@@ -566,12 +562,7 @@ public:
   SingleSidedPerm(std::initializer_list<Tidx> l)
       : siz(Tidx(l.size())), ListVal(l) {
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    if (ListVal.size() >= std::numeric_limits<Tidx>::max() - 1) {
-      std::cerr << "Tidx is too small for representing the vector\n";
-      throw PermutalibException{1};
-    }
-#endif
-#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+    TerminateSizeTooLarge(ListVal.size());
     TerminateSingleList(ListVal);
 #endif
   }

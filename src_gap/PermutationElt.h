@@ -14,6 +14,17 @@
 
 namespace permutalib {
 
+template<typename Tidx>
+void CheckSize(size_t siz)
+{
+  if (siz >= std::numeric_limits<Tidx>::max() - 1) {
+    std::cerr << "siz=" << siz << "\n";
+    std::cerr << "but std::numeric_limits<Tidx>::max() = " << std::numeric_limits<Tidx>::max() << "\n";
+    std::cerr << "Tidx is too small for representing the vector\n";
+    throw PermutalibException{1};
+  }
+}
+
 template <typename Tidx_inp, typename Telt_impl> struct PermutationElt;
 
 template <typename Tidx, typename Telt>
@@ -42,32 +53,20 @@ public:
     //    NicePrint("Constructor 1", *this);
   }
   PermutationElt(std::vector<Tidx> &&v, Telt &&_elt) {
-    //    std::cerr << "PermutationElt 2\n";
-    //    std::cerr << "_elt=";
-    //    WriteMatrix(std::cerr, _elt);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    if (v.size() >= std::numeric_limits<Tidx>::max() - 1) {
-      std::cerr << "Tidx is too small for representing the vector\n";
-      throw PermutalibException{1};
-    }
+    CheckSize<Tidx>(v.size());
 #endif
     ListVal = v;
     siz = Tidx(v.size());
     elt = std::move(_elt);
-    //    NicePrint("Constructor 2", *this);
   }
   PermutationElt(std::vector<Tidx> const &v, Telt const &_elt) {
-    //    std::cerr << "PermutationElt 3\n";
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    if (v.size() >= std::numeric_limits<Tidx>::max() - 1) {
-      std::cerr << "Tidx is too small for representing the vector\n";
-      throw PermutalibException{1};
-    }
+    CheckSize<Tidx>(v.size());
 #endif
     ListVal = v;
     siz = Tidx(v.size());
     elt = _elt;
-    //    NicePrint("Constructor 3", *this);
   }
   PermutationElt(PermutationElt const &ePermElt) {
     //    std::cerr << "PermutationElt 4\n";
