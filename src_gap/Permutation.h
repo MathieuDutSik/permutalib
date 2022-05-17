@@ -481,7 +481,7 @@ public:
     std::pair<std::vector<Tidx>, std::vector<Tidx>> epair =
         GetListValRev<Tidx>(estr);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    TerminateSizeTooLarge(epair.first.size());
+    TerminateSizeTooLarge<Tidx>(epair.first.size());
 #endif
     ListVal = std::move(epair.first);
     siz = ListVal.size();
@@ -491,7 +491,7 @@ public:
   }
   SingleSidedPerm(SingleSidedPerm const &ePerm, Tidx const &n) {
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    TerminateSizeTooLarge(n);
+    TerminateSizeTooLarge<Tidx>(n);
 #endif
     if (ePerm.size() > n) {
       std::cerr << "ePerm.size()=" << ePerm.size() << " n=" << n << "\n";
@@ -512,7 +512,7 @@ public:
   }
   SingleSidedPerm(Tidx const &n) {
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    TerminateSizeTooLarge(n);
+    TerminateSizeTooLarge<Tidx>(n);
 #endif
     siz = n;
     ListVal = std::vector<Tidx>(n);
@@ -521,7 +521,7 @@ public:
   }
   SingleSidedPerm(std::vector<Tidx> &&v) {
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    TerminateSizeTooLarge(v.size());
+    TerminateSizeTooLarge<Tidx>(v.size());
 #endif
     ListVal = v;
     siz = Tidx(v.size());
@@ -531,7 +531,7 @@ public:
   }
   SingleSidedPerm(std::vector<Tidx> const &v) {
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    TerminateSizeTooLarge(v.size());
+    TerminateSizeTooLarge<Tidx>(v.size());
 #endif
     ListVal = v;
     siz = Tidx(v.size());
@@ -542,7 +542,7 @@ public:
   SingleSidedPerm(std::vector<Tidx> const &v1,
                   [[maybe_unused]] std::vector<Tidx> const &v2) {
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    TerminateSizeTooLarge(v1.size());
+    TerminateSizeTooLarge<Tidx>(v1.size());
 #endif
     siz = v1.size();
     ListVal = v1;
@@ -562,7 +562,7 @@ public:
   SingleSidedPerm(std::initializer_list<Tidx> l)
       : siz(Tidx(l.size())), ListVal(l) {
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    TerminateSizeTooLarge(ListVal.size());
+    TerminateSizeTooLarge<Tidx>(ListVal.size());
     TerminateSingleList(ListVal);
 #endif
   }
