@@ -67,17 +67,15 @@ void TerminateSingleList(const std::vector<Tidx> &ListVal) {
   }
 }
 
-template <typename Tidx>
-void TerminateSizeTooLarge(const size_t& siz)
-{
+template <typename Tidx> void TerminateSizeTooLarge(const size_t &siz) {
   if (siz >= std::numeric_limits<Tidx>::max() - 1) {
     std::cerr << "siz=" << siz << "\n";
-    std::cerr << "std::numeric_limits<Tidx>::max() = " << std::numeric_limits<Tidx>::max() << "\n";
+    std::cerr << "std::numeric_limits<Tidx>::max() = "
+              << std::numeric_limits<Tidx>::max() << "\n";
     std::cerr << "Tidx is too small for representing the asked size\n";
     throw PermutalibException{1};
   }
 }
-
 
 template <typename Tidx>
 std::pair<std::vector<Tidx>, std::vector<Tidx>>

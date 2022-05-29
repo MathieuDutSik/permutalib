@@ -21,6 +21,20 @@ static const int int_perm = 4;
 static const int int_group = 5;
 static const int int_stablev = 6;
 
+
+template <typename F>
+std::string GapString_F(size_t const& len, F const& f) {
+  std::string str = "[ ";
+  for (size_t i = 0; i < len; i++) {
+    if (i > 0)
+      str += ", ";
+    str += f(i);
+  }
+  str +=  " ]";
+  return str;
+}
+
+
 template <typename T> std::string GapStringTVector(std::vector<T> const &f) {
   std::ostringstream os;
   os << "[ ";
@@ -41,17 +55,11 @@ template <typename T> std::string GapStringTVectorB(std::vector<T> const &f) {
 }
 
 template <typename Tidx>
-std::string GapStringIntVector(std::vector<Tidx> const &f) {
-  std::string str;
-  str += "[ ";
-  size_t len = f.size();
-  for (size_t i = 0; i < len; i++) {
-    if (i > 0)
-      str += ", ";
-    str += std::to_string(f[i] + 1);
-  }
-  str += " ]";
-  return str;
+std::string GapStringIntVector(std::vector<Tidx> const &ev) {
+  auto f=[&](size_t const& i) -> std::string {
+    return std::to_string(ev[i] + 1);
+  };
+  return GapString_F(ev.size(), f);
 }
 
 std::string GapStringTrueFalseFail(int const &v) {
@@ -72,19 +80,10 @@ std::string GapStringBool(bool const &v) {
 }
 
 std::string GapStringBoolVector(Face const &f) {
-  std::string str;
-  str += "[ ";
-  size_t len = f.size();
-  for (size_t i = 0; i < len; i++) {
-    if (i > 0)
-      str += ", ";
-    if (f[i])
-      str += "true";
-    else
-      str += "false";
-  }
-  str += " ]";
-  return str;
+  auto f_str=[&](size_t const& i) -> std::string {
+    return GapStringBool(f[i]);
+  };
+  return GapString_F(f.size(), f_str);
 }
 
 std::string GapStringSetBoolVector(Face const &f) {
@@ -106,19 +105,12 @@ std::string GapStringListBoolVector(std::vector<Face> const &f) {
 }
 
 std::string GapStringBoolVectorB(std::vector<int8_t> const &f) {
-  std::string str;
-  str += "[ ";
-  size_t len = f.size();
-  for (size_t i = 0; i < len; i++) {
-    if (i > 0)
-      str += ", ";
+  auto f_str=[&](size_t const& i) -> std::string {
     if (f[i] == 1)
-      str += "true";
-    else
-      str += "false";
-  }
-  str += " ]";
-  return str;
+      return "true";
+    return "false";
+  };
+  return GapString_F(f.size(), f_str);
 }
 
 std::string ConstrainedIntInfinity_to_string(int const &val, int const &n) {

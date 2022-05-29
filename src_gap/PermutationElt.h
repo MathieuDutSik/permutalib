@@ -14,12 +14,11 @@
 
 namespace permutalib {
 
-template<typename Tidx>
-void CheckSize(size_t siz)
-{
+template <typename Tidx> void CheckSize(size_t siz) {
   if (siz >= std::numeric_limits<Tidx>::max() - 1) {
     std::cerr << "siz=" << siz << "\n";
-    std::cerr << "but std::numeric_limits<Tidx>::max() = " << std::numeric_limits<Tidx>::max() << "\n";
+    std::cerr << "but std::numeric_limits<Tidx>::max() = "
+              << std::numeric_limits<Tidx>::max() << "\n";
     std::cerr << "Tidx is too small for representing the vector\n";
     throw PermutalibException{1};
   }

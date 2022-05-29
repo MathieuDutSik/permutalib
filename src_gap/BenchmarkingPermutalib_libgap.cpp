@@ -93,7 +93,8 @@ void set_argc_argv_gap(int *argc, char ***argv) {
   *argv = reinterpret_cast<char **>(malloc(LStr.size() * sizeof(char **)));
   for (size_t i_str = 0; i_str < LStr.size(); i_str++) {
     size_t len_str = LStr[i_str].size();
-    (*argv)[i_str] = reinterpret_cast<char *>(malloc((len_str + 1) * sizeof(char *)));
+    (*argv)[i_str] =
+        reinterpret_cast<char *>(malloc((len_str + 1) * sizeof(char *)));
     for (size_t i_c = 0; i_c < len_str; i_c++)
       (*argv)[i_str][i_c] = LStr[i_str][i_c];
     (*argv)[i_str][len_str] = '\0';

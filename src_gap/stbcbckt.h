@@ -1098,8 +1098,7 @@ void NextRBasePoint_order(Partition<typename Telt::Tidx> &P,
                           rbaseType<Telt, Tidx_label, Trfm> &rbase,
                           const std::vector<typename Telt::Tidx> &order) {
   using Tidx = typename Telt::Tidx;
-  const std::vector<Tidx> &lens =
-      P.lengths; // Copy is needed as the lens is changed in the sortparallel
+  const std::vector<Tidx> &lens = P.lengths;
 #ifdef DEBUG_STBCBCKT
   /*
   std::cerr << "CPP lens=[ ";
@@ -2331,10 +2330,6 @@ RepOpSetsPermGroup(StabChain<Telt, Tidx_label> const &G, Face const &Phi,
 
   rbaseType<Telt, Tidx_label, Trfm> rbase =
       EmptyRBase<Telt, Tidx_label, Trfm>({G, G}, true, Omega, P);
-  //#ifdef DEBUG_STBCBCKT
-  //  std::cerr << "CPP RepOpSetsPermGroup rbase.level2.status=" <<
-  //  GetIntTypeNature(rbase.level2.status) << "\n";
-  //#endif
   std::vector<Tidx> Phi_vect = FaceToVector<Tidx>(Phi);
   auto Pr = [&](Telt const &gen) -> bool {
     for (auto &i : Phi_vect) {

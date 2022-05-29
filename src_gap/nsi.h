@@ -12,8 +12,6 @@
 #include <utility>
 #include <vector>
 
-//#define DEBUG_NSI
-
 /*
 #
 # V 1.1 - Bug fixed
