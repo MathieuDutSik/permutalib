@@ -43,9 +43,6 @@ bool GetRepresentativeAction_OnSets_libgap(const Tgroup &G,
     Obj ires = GAP_ElmList(res, 1);
     if (GAP_ElmList(ires, 1) == GAP_True) {
       Char *buffer = GAP_CSTR_STRING(GAP_ElmList(ires, 5));
-      if (buffer) {
-        //        printf("%s\n", buffer);
-      }
       if (strlen(buffer) > 0) {
         std::string str = buffer;
         if (str == "true")
