@@ -258,7 +258,8 @@ public:
   Tidx operator[](Tidx const &i) const { return ListVal[i]; }
   Tidx size() const { return siz; }
   //
-public: // Should be private but simpler to do it like that.
+  // Should be private but simpler to do it like that.
+public:
   Tidx siz;
   std::vector<Tidx> ListVal;
   std::vector<Tidx> ListRev;

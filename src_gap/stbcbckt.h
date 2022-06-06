@@ -5,7 +5,6 @@
 #include "Combinatorics.h"
 #include "StabChainMain.h"
 #include "partition.h"
-//#include "plus_infinity.h"
 #include <algorithm>
 #include <limits>
 #include <map>
@@ -37,12 +36,14 @@ template <typename T, typename... Args>
 struct is_one_of : std::disjunction<std::is_same<std::decay_t<T>, Args>...> {};
 
 template <typename Telt> struct permPlusBool {
-  int status; // values in {int_false, int_true, int_perm}
+  // status: values in {int_false, int_true, int_perm}
+  int status;
   Telt val;
 };
 
 template <typename Telt, typename Tidx_label> struct StabChainPlusLev {
-  int status; // possible values in {int_false, int_true, int_int, int_stablev}
+  // status: possible values in {int_false, int_true, int_int, int_stablev}
+  int status;
   int value_int;
   StabChain<Telt, Tidx_label> Stot;
 };
@@ -70,7 +71,7 @@ permPlusBool<Telt> ExtendedT(Telt const &t, typename Telt::Tidx const &pnt,
     img = SlashAct(img, t);
   else
     img = simg;
-  // If <G> fixes <pnt>, nothing more can  be changed, so test whether <pnt>
+  // If <G> fixes <pnt>, nothing more can be changed, so test whether <pnt>
   // = <img>.
   Tidx bpt = BasePoint(S.Stot);
 #ifdef DEBUG_STBCBCKT
@@ -136,7 +137,8 @@ public:
     nature = 1;
     inputIntersection = {ePart, strat};
   }
-  int nature; // 0 for PROCESSFIX, 1 for INTERSECTION
+  // nature: 0 for PROCESSFIX, 1 for INTERSECTION
+  int nature;
   std::pair<Tidx, Tidx> inputProcessfix;
   std::pair<Partition<Tidx>, std::vector<singStrat<Tidx>>> inputIntersection;
 };
@@ -1051,8 +1053,8 @@ template <typename Telt, typename Tidx_label, typename Trfm>
 void NextRBasePoint_no_order(Partition<typename Telt::Tidx> &P,
                              rbaseType<Telt, Tidx_label, Trfm> &rbase) {
   using Tidx = typename Telt::Tidx;
-  std::vector<Tidx> lens =
-      P.lengths; // Copy is needed as the lens is changed in the sortparallel
+  // Copy is needed as the lens is changed in the sortparallel
+  std::vector<Tidx> lens = P.lengths;
   std::vector<Tidx> order = ClosedInterval<Tidx>(0, NumberCells(P));
 #ifdef DEBUG_STBCBCKT
   /*
@@ -1345,10 +1347,8 @@ void SubtractBlistOrbitStabChain(Face &blist, std::vector<Telt> const &LGen,
 }
 
 template <typename Telt, typename Tidx_label> struct ResultPBT {
-  int nature; // Allowed values in {int_group, int_fail, int_perm}.
-              // int_group for group
-              // int_fail for fail
-              // int_perm for equivalence element
+  // nature: Allowed values in {int_group, int_fail, int_perm}.
+  int nature;
   StabChain<Telt, Tidx_label> stab;
   Telt res;
 };

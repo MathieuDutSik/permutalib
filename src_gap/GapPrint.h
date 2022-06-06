@@ -21,19 +21,16 @@ static const int int_perm = 4;
 static const int int_group = 5;
 static const int int_stablev = 6;
 
-
-template <typename F>
-std::string GapString_F(size_t const& len, F const& f) {
+template <typename F> std::string GapString_F(size_t const &len, F const &f) {
   std::string str = "[ ";
   for (size_t i = 0; i < len; i++) {
     if (i > 0)
       str += ", ";
     str += f(i);
   }
-  str +=  " ]";
+  str += " ]";
   return str;
 }
-
 
 template <typename T> std::string GapStringTVector(std::vector<T> const &f) {
   std::ostringstream os;
@@ -56,7 +53,7 @@ template <typename T> std::string GapStringTVectorB(std::vector<T> const &f) {
 
 template <typename Tidx>
 std::string GapStringIntVector(std::vector<Tidx> const &ev) {
-  auto f=[&](size_t const& i) -> std::string {
+  auto f = [&](size_t const &i) -> std::string {
     return std::to_string(ev[i] + 1);
   };
   return GapString_F(ev.size(), f);
@@ -80,7 +77,7 @@ std::string GapStringBool(bool const &v) {
 }
 
 std::string GapStringBoolVector(Face const &f) {
-  auto f_str=[&](size_t const& i) -> std::string {
+  auto f_str = [&](size_t const &i) -> std::string {
     return GapStringBool(f[i]);
   };
   return GapString_F(f.size(), f_str);
@@ -105,7 +102,7 @@ std::string GapStringListBoolVector(std::vector<Face> const &f) {
 }
 
 std::string GapStringBoolVectorB(std::vector<int8_t> const &f) {
-  auto f_str=[&](size_t const& i) -> std::string {
+  auto f_str = [&](size_t const &i) -> std::string {
     if (f[i] == 1)
       return "true";
     return "false";
