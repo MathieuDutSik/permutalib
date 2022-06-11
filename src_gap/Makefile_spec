@@ -3,7 +3,8 @@
 #PROGRAM	= TestStabilizerOnSet
 #PROGRAM	= TestRepresentativeActionOnSet
 #PROGRAM	= GapCanonicalImage
-PROGRAM	= GapCentralizerElt
+#PROGRAM	= GapCentralizerElt
+PROGRAM	= SequenceSimplify
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
