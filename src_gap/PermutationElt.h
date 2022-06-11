@@ -88,6 +88,7 @@ bool IsSimplifiable(std::vector<T> const& V)
   return false;
 }
 
+template<bool always_equal>
 struct SequenceType {
   SequenceType() : ListIdx() {
   }
@@ -97,20 +98,20 @@ struct SequenceType {
   SequenceType(std::vector<int64_t> const &v) {
     ListIdx = v;
   }
-  SequenceType(SequenceType const &seq) {
+  SequenceType(SequenceType<always_equal> const &seq) {
     ListIdx = seq.ListIdx;
   }
-  SequenceType(SequenceType &&seq) {
+  SequenceType(SequenceType<always_equal> &&seq) {
     ListIdx = std::move(seq.ListIdx);
   }
   //
   // Copy operator
   //
-  SequenceType operator=(SequenceType const &seq) {
+  SequenceType operator=(SequenceType<always_equal> const &seq) {
     ListIdx = seq.ListIdx;
     return *this;
   }
-  SequenceType operator=(SequenceType &&seq) {
+  SequenceType operator=(SequenceType<always_equal> &&seq) {
     ListIdx = std::move(seq.ListIdx);
     return *this;
   }
@@ -135,17 +136,19 @@ private:
   std::vector<int64_t> ListIdx;
 };
 
-SequenceType operator*(SequenceType const& v1, SequenceType const& v2) {
+template<bool always_equal>
+SequenceType<always_equal> operator*(SequenceType<always_equal> const& v1, SequenceType<always_equal> const& v2) {
   std::vector<int64_t> ListIdx1 = v1.getVect();
   const std::vector<int64_t> &ListIdx2 = v2.getVect();
   ListIdx1.insert(ListIdx1.end(), ListIdx2.begin(), ListIdx2.end());
   if (IsSimplifiable(ListIdx1))
     ListIdx1 = SimplifySequence(ListIdx1);
-  return SequenceType(std::move(ListIdx1));
+  return SequenceType<always_equal>(std::move(ListIdx1));
 }
 
-void operator*=(SequenceType &v1,
-                SequenceType const &v2) {
+template<bool always_equal>
+void operator*=(SequenceType<always_equal> &v1,
+                SequenceType<always_equal> const &v2) {
   std::vector<int64_t> &ListIdx1 = v1.getVect();
   const std::vector<int64_t> &ListIdx2 = v2.getVect();
   ListIdx1.insert(ListIdx1.end(), ListIdx2.begin(), ListIdx2.end());
@@ -153,8 +156,9 @@ void operator*=(SequenceType &v1,
     ListIdx1 = SimplifySequence(ListIdx1);
 }
 
-SequenceType Conjugation(SequenceType const &v1,
-                         SequenceType const &v2) {
+template<bool always_equal>
+SequenceType<always_equal> Conjugation(SequenceType<always_equal> const &v1,
+                                       SequenceType<always_equal> const &v2) {
   const std::vector<int64_t> &ListIdx1 = v1.getVect();
   const std::vector<int64_t> &ListIdx2 = v2.getVect();
   size_t siz1 = ListIdx1.size();
@@ -168,11 +172,12 @@ SequenceType Conjugation(SequenceType const &v1,
     ListIdx[siz2 + siz1 + i] = ListIdx2[i];
   if (IsSimplifiable(ListIdx))
     ListIdx = SimplifySequence(ListIdx);
-  return SequenceType(std::move(ListIdx));
+  return SequenceType<always_equal>(std::move(ListIdx));
 }
 
 // LeftQuotient(a,b) = a^{-1} * b in the list.gi file
-SequenceType LeftQuotient(SequenceType const &a, SequenceType const &b) {
+template<bool always_equal>
+SequenceType<always_equal> LeftQuotient(SequenceType<always_equal> const &a, SequenceType<always_equal> const &b) {
   const std::vector<int64_t> &Val_A = a.getVect();
   const std::vector<int64_t> &Val_B = b.getVect();
   size_t siz_a = Val_A.size();
@@ -184,50 +189,61 @@ SequenceType LeftQuotient(SequenceType const &a, SequenceType const &b) {
     ListIdx[siz_a + i] = Val_B[i];
   if (IsSimplifiable(ListIdx))
     ListIdx = SimplifySequence(ListIdx);
-  return SequenceType(std::move(ListIdx));
+  return SequenceType<always_equal>(std::move(ListIdx));
 }
 
-SequenceType operator~(SequenceType const &seq) {
+template<bool always_equal>
+SequenceType<always_equal> operator~(SequenceType<always_equal> const &seq) {
   const std::vector<int64_t> & ListIdx = seq.getVect();
   size_t len = ListIdx.size();
   std::vector<int64_t> vret(len);
   for (size_t i=0; i<len; i++)
     vret[len - 1 - i] = - ListIdx[i];
-  return SequenceType(std::move(vret));
+  return SequenceType<always_equal>(std::move(vret));
 }
 
 
-SequenceType Inverse(SequenceType const &seq) {
+template<bool always_equal>
+SequenceType<always_equal> Inverse(SequenceType<always_equal> const &seq) {
   return ~seq;
 }
 
 
-bool operator==(SequenceType const &v1,
-                SequenceType const &v2) {
-  const std::vector<int64_t> & LIdx1 = v1.getVect();
-  const std::vector<int64_t> & LIdx2 = v2.getVect();
-  size_t siz = LIdx1.size();
-  if (siz != LIdx2.size())
-    return false;
-  for (size_t i = 0; i < siz; i++)
-    if (LIdx1.at(i) != LIdx2.at(i))
-      return false;
-  return true;
-}
-
-bool operator!=(SequenceType const &v1,
-                SequenceType const &v2) {
-  const std::vector<int64_t> & LIdx1 = v1.getVect();
-  const std::vector<int64_t> & LIdx2 = v2.getVect();
-  size_t siz = LIdx1.size();
-  if (siz != LIdx2.size())
+template<bool always_equal>
+bool operator==(SequenceType<always_equal> const &v1,
+                SequenceType<always_equal> const &v2) {
+  if (always_equal) {
     return true;
-  for (size_t i = 0; i < siz; i++)
-    if (LIdx1.at(i) != LIdx2.at(i))
-      return true;
-  return false;
+  } else {
+    const std::vector<int64_t> & LIdx1 = v1.getVect();
+    const std::vector<int64_t> & LIdx2 = v2.getVect();
+    size_t siz = LIdx1.size();
+    if (siz != LIdx2.size())
+      return false;
+    for (size_t i = 0; i < siz; i++)
+      if (LIdx1.at(i) != LIdx2.at(i))
+        return false;
+    return true;
+  }
 }
 
+template<bool always_equal>
+bool operator!=(SequenceType<always_equal> const &v1,
+                SequenceType<always_equal> const &v2) {
+  if (always_equal) {
+    return false;
+  } else {
+    const std::vector<int64_t> & LIdx1 = v1.getVect();
+    const std::vector<int64_t> & LIdx2 = v2.getVect();
+    size_t siz = LIdx1.size();
+    if (siz != LIdx2.size())
+      return true;
+    for (size_t i = 0; i < siz; i++)
+      if (LIdx1.at(i) != LIdx2.at(i))
+        return true;
+    return false;
+  }
+}
 
 
 

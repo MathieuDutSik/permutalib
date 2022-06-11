@@ -494,7 +494,7 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
   //  WriteMatrix(std::cerr, id_matr);
   //
   TeltPerm id_perm(len);
-  using Tseq = SequenceType;
+  using Tseq = SequenceType<true>;
   using Telt = PermutationElt<Tidx, Tseq>;
   using TgroupB = Group<Telt, Tint>;
   Tseq id_seq;
