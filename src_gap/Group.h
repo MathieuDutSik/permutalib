@@ -470,12 +470,21 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
                                      std::vector<TeltPerm> const &ListPermGens,
                                      TeltMatr const &id_matr, Face const &f1,
                                      Face const &f2) {
+#ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
+  std::cerr << "Beginning of RepresentativeActionMatrixPermSubset\n";
+#endif
   using Tidx = typename TeltPerm::Tidx;
   using Tgroup = Group<TeltPerm, Tint>;
   //
   Tidx len = f1.size();
   Tgroup GRP(ListPermGens, len);
+#ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
+  std::cerr << "We have GRP\n";
+#endif
   std::optional<TeltPerm> opt = GRP.RepresentativeAction_OnSets(f1, f2);
+#ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
+  std::cerr << "We have opt\n";
+#endif
   if (!opt)
     return {};
   TeltPerm const &elt = *opt;
@@ -497,6 +506,9 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
     ListGensB.push_back(fPair);
   }
   TgroupB GRP_B(ListGensB, idB);
+#ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
+  std::cerr << "We have GRP_B\n";
+#endif
   /*
   {
     size_t nElt = 20;
@@ -518,6 +530,9 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
   */
   //  NicePrint("ePair", ePair);
   Telt res = GRP_B.Sift(ePair);
+#ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
+  std::cerr << "We have res\n";
+#endif
   //  NicePrint("res", res);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   //  std::cerr << "Doing the check\n";
@@ -531,6 +546,9 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
   }
 #endif
   TeltMatr ret = Inverse(res.getElt());
+#ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
+  std::cerr << "We have ret\n";
+#endif
   //  std::cerr << "Returning from RepresentativeActionMatrixPermSubset\n";
   return ret;
 }
