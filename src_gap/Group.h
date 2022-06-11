@@ -493,18 +493,27 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
   //  WriteMatrix(std::cerr, id_matr);
   //
   TeltPerm id_perm(len);
-  using Telt = PermutationElt<Tidx, TeltMatr>;
+  using Tseq = SequenceType;
+  using Telt = PermutationElt<Tidx, Tseq>;
   using TgroupB = Group<Telt, Tint>;
-  Telt ePair(elt.getListVal(), id_matr);
-  Telt idB(id_perm.getListVal(), id_matr);
+  Tseq id_seq;
+  Telt ePair(elt.getListVal(), id_seq);
+  Telt idB(id_perm.getListVal(), id_seq);
   std::vector<Telt> ListGensB;
   size_t nGen = ListPermGens.size();
+  std::vector<TeltMatr> ListMatrGens_inv(nGen);
   for (size_t iGen = 0; iGen < nGen; iGen++) {
-    Telt fPair(ListPermGens[iGen].getListVal(), ListMatrGens[iGen]);
+    std::vector<int64_t> ListIdx{int64_t(iGen) + 1};
+    Tseq e_seq(ListIdx);
+    Telt fPair(ListPermGens[iGen].getListVal(), e_seq);
     //    std::string mesg = "fPair : iGen" + std::to_string(iGen);
     //    NicePrint(mesg, fPair);
     ListGensB.push_back(fPair);
+    ListMatrGens_inv[iGen] = Inverse(ListMatrGens[iGen]);
   }
+#ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
+  std::cerr << "We have ListGensB\n";
+#endif
   TgroupB GRP_B(ListGensB, idB);
 #ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
   std::cerr << "We have GRP_B\n";
@@ -545,12 +554,26 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
     }
   }
 #endif
-  TeltMatr ret = Inverse(res.getElt());
+  Tseq ret_seq = Inverse(res.getElt());
 #ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
-  std::cerr << "We have ret\n";
+  std::cerr << "We have ret_seq\n";
+#endif
+  TeltMatr ret_matr = id_matr;
+  const std::vector<int64_t>& ListIdx = ret_seq.getVect();
+  for (auto & eIdx : ListIdx) {
+    if (eIdx > 0) {
+      size_t iGen = eIdx - 1;
+      ret_matr *= ListMatrGens[iGen];
+    } else {
+      size_t iGen = (-eIdx) - 1;
+      ret_matr *= ListMatrGens_inv[iGen];
+    }
+  }
+#ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
+  std::cerr << "We have ret_matr\n";
 #endif
   //  std::cerr << "Returning from RepresentativeActionMatrixPermSubset\n";
-  return ret;
+  return ret_matr;
 }
 
 // clang-format off
