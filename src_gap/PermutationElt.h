@@ -19,7 +19,7 @@ namespace permutalib {
    */
 
 template<typename T>
-std::vector<T> SimplifySequence(std::vector<T> const& V)
+void SimplifySequence(std::vector<T> & V)
 {
   size_t len = V.size();
   std::vector<uint8_t> status(len,1);
@@ -66,16 +66,18 @@ std::vector<T> SimplifySequence(std::vector<T> const& V)
     if (n_change == 0)
       break;
   }
-  std::vector<T> Vret(n_ent);
+  if (n_ent == len)
+    return;
   size_t pos = 0;
   for (size_t i=0; i<len; i++) {
     if (status[i] == 1) {
-      Vret[pos] = V[i];
+      V[pos] = V[i];
       pos++;
     }
   }
-  return Vret;
+  V.resize(n_ent);
 }
+
 
 template<typename T>
 bool IsSimplifiable(std::vector<T> const& V)
@@ -87,6 +89,7 @@ bool IsSimplifiable(std::vector<T> const& V)
   }
   return false;
 }
+
 
 template<bool always_equal>
 struct SequenceType {
@@ -131,20 +134,20 @@ struct SequenceType {
   std::vector<int64_t>& getVect() {
     return ListIdx;
   }
-
 private:
   std::vector<int64_t> ListIdx;
 };
+
 
 template<bool always_equal>
 SequenceType<always_equal> operator*(SequenceType<always_equal> const& v1, SequenceType<always_equal> const& v2) {
   std::vector<int64_t> ListIdx1 = v1.getVect();
   const std::vector<int64_t> &ListIdx2 = v2.getVect();
   ListIdx1.insert(ListIdx1.end(), ListIdx2.begin(), ListIdx2.end());
-  if (IsSimplifiable(ListIdx1))
-    ListIdx1 = SimplifySequence(ListIdx1);
+  SimplifySequence(ListIdx1);
   return SequenceType<always_equal>(std::move(ListIdx1));
 }
+
 
 template<bool always_equal>
 void operator*=(SequenceType<always_equal> &v1,
@@ -152,9 +155,9 @@ void operator*=(SequenceType<always_equal> &v1,
   std::vector<int64_t> &ListIdx1 = v1.getVect();
   const std::vector<int64_t> &ListIdx2 = v2.getVect();
   ListIdx1.insert(ListIdx1.end(), ListIdx2.begin(), ListIdx2.end());
-  if (IsSimplifiable(ListIdx1))
-    ListIdx1 = SimplifySequence(ListIdx1);
+  SimplifySequence(ListIdx1);
 }
+
 
 template<bool always_equal>
 SequenceType<always_equal> Conjugation(SequenceType<always_equal> const &v1,
@@ -170,10 +173,10 @@ SequenceType<always_equal> Conjugation(SequenceType<always_equal> const &v1,
     ListIdx[siz2 + i] = ListIdx1[i];
   for (size_t i=0; i<siz2; i++)
     ListIdx[siz2 + siz1 + i] = ListIdx2[i];
-  if (IsSimplifiable(ListIdx))
-    ListIdx = SimplifySequence(ListIdx);
+  SimplifySequence(ListIdx);
   return SequenceType<always_equal>(std::move(ListIdx));
 }
+
 
 // LeftQuotient(a,b) = a^{-1} * b in the list.gi file
 template<bool always_equal>
@@ -187,10 +190,10 @@ SequenceType<always_equal> LeftQuotient(SequenceType<always_equal> const &a, Seq
     ListIdx[i] = - Val_A[siz_a - 1 - i];
   for (size_t i=0; i<siz_b; i++)
     ListIdx[siz_a + i] = Val_B[i];
-  if (IsSimplifiable(ListIdx))
-    ListIdx = SimplifySequence(ListIdx);
+  SimplifySequence(ListIdx);
   return SequenceType<always_equal>(std::move(ListIdx));
 }
+
 
 template<bool always_equal>
 SequenceType<always_equal> operator~(SequenceType<always_equal> const &seq) {
@@ -227,6 +230,7 @@ bool operator==(SequenceType<always_equal> const &v1,
   }
 }
 
+
 template<bool always_equal>
 bool operator!=(SequenceType<always_equal> const &v1,
                 SequenceType<always_equal> const &v2) {
@@ -245,6 +249,23 @@ bool operator!=(SequenceType<always_equal> const &v1,
   }
 }
 
+
+template<bool always_equal>
+std::ostream &operator<<(std::ostream &os, SequenceType<always_equal> const& seq)
+{
+  const std::vector<int64_t>& ListIdx = seq.getVect();
+  size_t len = ListIdx.size();
+  os << len << ":[";
+  bool IsFirst = true;
+  for (auto & eval : ListIdx) {
+    if (!IsFirst)
+      os << ",";
+    IsFirst = false;
+    os << eval;
+  }
+  os << "]";
+  return os;
+}
 
 
   /*
