@@ -507,8 +507,6 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
     std::vector<int64_t> ListIdx{int64_t(iGen) + 1};
     Tseq e_seq(ListIdx);
     Telt fPair(ListPermGens[iGen].getListVal(), e_seq);
-    //    std::string mesg = "fPair : iGen" + std::to_string(iGen);
-    //    NicePrint(mesg, fPair);
     ListGensB.push_back(fPair);
     ListMatrGens_inv[iGen] = Inverse(ListMatrGens[iGen]);
   }

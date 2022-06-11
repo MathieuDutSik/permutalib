@@ -79,6 +79,20 @@ void SimplifySequence(std::vector<T> & V)
 }
 
 
+void PrintListIdx(std::string const& mesg, std::vector<int64_t> const& ListIdx) {
+  size_t len = ListIdx.size();
+  std::cerr << mesg << " " << len << ":[";
+  bool IsFirst = true;
+  for (auto & eval : ListIdx) {
+    if (!IsFirst)
+      std::cerr << ",";
+    IsFirst = false;
+    std::cerr << eval;
+  }
+  std::cerr << "]\n";
+}
+
+
 template<typename T>
 bool IsSimplifiable(std::vector<T> const& V)
 {
@@ -94,18 +108,23 @@ bool IsSimplifiable(std::vector<T> const& V)
 template<bool always_equal>
 struct SequenceType {
   SequenceType() : ListIdx() {
+    PrintListIdx("default constructor", ListIdx);
   }
   SequenceType(std::vector<int64_t> &&v) {
     ListIdx = v;
+    PrintListIdx("constructor 1", ListIdx);
   }
   SequenceType(std::vector<int64_t> const &v) {
     ListIdx = v;
+    PrintListIdx("constructor 2", ListIdx);
   }
   SequenceType(SequenceType<always_equal> const &seq) {
     ListIdx = seq.ListIdx;
+    PrintListIdx("constructor 3", ListIdx);
   }
   SequenceType(SequenceType<always_equal> &&seq) {
     ListIdx = std::move(seq.ListIdx);
+    PrintListIdx("constructor 4", ListIdx);
   }
   //
   // Copy operator
@@ -145,6 +164,7 @@ SequenceType<always_equal> operator*(SequenceType<always_equal> const& v1, Seque
   const std::vector<int64_t> &ListIdx2 = v2.getVect();
   ListIdx1.insert(ListIdx1.end(), ListIdx2.begin(), ListIdx2.end());
   SimplifySequence(ListIdx1);
+  PrintListIdx("operator*", ListIdx1);
   return SequenceType<always_equal>(std::move(ListIdx1));
 }
 
@@ -156,6 +176,7 @@ void operator*=(SequenceType<always_equal> &v1,
   const std::vector<int64_t> &ListIdx2 = v2.getVect();
   ListIdx1.insert(ListIdx1.end(), ListIdx2.begin(), ListIdx2.end());
   SimplifySequence(ListIdx1);
+  PrintListIdx("operator*=", ListIdx1);
 }
 
 
@@ -174,6 +195,7 @@ SequenceType<always_equal> Conjugation(SequenceType<always_equal> const &v1,
   for (size_t i=0; i<siz2; i++)
     ListIdx[siz2 + siz1 + i] = ListIdx2[i];
   SimplifySequence(ListIdx);
+  PrintListIdx("Conjugation", ListIdx);
   return SequenceType<always_equal>(std::move(ListIdx));
 }
 
@@ -191,6 +213,7 @@ SequenceType<always_equal> LeftQuotient(SequenceType<always_equal> const &a, Seq
   for (size_t i=0; i<siz_b; i++)
     ListIdx[siz_a + i] = Val_B[i];
   SimplifySequence(ListIdx);
+  PrintListIdx("LeftQuotient", ListIdx);
   return SequenceType<always_equal>(std::move(ListIdx));
 }
 
@@ -202,6 +225,7 @@ SequenceType<always_equal> operator~(SequenceType<always_equal> const &seq) {
   std::vector<int64_t> vret(len);
   for (size_t i=0; i<len; i++)
     vret[len - 1 - i] = - ListIdx[i];
+  PrintListIdx("operator~", vret);
   return SequenceType<always_equal>(std::move(vret));
 }
 
