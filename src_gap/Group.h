@@ -480,7 +480,7 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
   Tgroup GRP(ListPermGens, len);
 #ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
   std::cerr << "We have GRP\n";
-  std::cerr << "GRP=" << GRP << "\n";
+  std::cerr << "GRP=" << GRP.GapString() << "\n";
 #endif
   std::optional<TeltPerm> opt = GRP.RepresentativeAction_OnSets(f1, f2);
 #ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
