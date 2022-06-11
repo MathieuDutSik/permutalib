@@ -202,6 +202,35 @@ SequenceType Inverse(SequenceType const &seq) {
 }
 
 
+bool operator==(SequenceType const &v1,
+                SequenceType const &v2) {
+  const std::vector<int64_t> & LIdx1 = v1.getVect();
+  const std::vector<int64_t> & LIdx2 = v2.getVect();
+  size_t siz = LIdx1.size();
+  if (siz != LIdx2.size())
+    return false;
+  for (size_t i = 0; i < siz; i++)
+    if (LIdx1.at(i) != LIdx2.at(i))
+      return false;
+  return true;
+}
+
+bool operator!=(SequenceType const &v1,
+                SequenceType const &v2) {
+  const std::vector<int64_t> & LIdx1 = v1.getVect();
+  const std::vector<int64_t> & LIdx2 = v2.getVect();
+  size_t siz = LIdx1.size();
+  if (siz != LIdx2.size())
+    return true;
+  for (size_t i = 0; i < siz; i++)
+    if (LIdx1.at(i) != LIdx2.at(i))
+      return true;
+  return false;
+}
+
+
+
+
   /*
     This is for containing pairs of Element and Permutation.
    */
