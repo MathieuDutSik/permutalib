@@ -14,6 +14,199 @@
 
 namespace permutalib {
 
+  /*
+    This is for containing words.
+   */
+
+template<typename T>
+std::vector<T> SimplifySequence(std::vector<T> const& V)
+{
+  size_t len = V.size();
+  std::vector<uint8_t> status(len,1);
+  size_t miss_val = std::numeric_limits<size_t>::max();
+  std::vector<size_t> next(len,1);
+  std::vector<size_t> prev(len,1);
+  for (size_t i=0; i<len-1; i++)
+    next[i] = i+1;
+  next[len-1] = miss_val;
+  for (size_t i=1; i<len; i++)
+    prev[i] = i-1;
+  prev[0] = miss_val;
+  size_t n_ent = len;
+  while(true) {
+    size_t n_change = 0;
+    for (size_t i=0; i<len-1; i++) {
+      if (status[i] == 1) {
+        size_t iNext = next[i];
+        if (iNext != miss_val) {
+          if (V[i] == -V[iNext]) {
+            n_change++;
+            n_ent -= 2;
+            status[i] = 0;
+            status[iNext] = 0;
+            size_t iP = prev[i];
+            size_t iN = next[iNext];
+            next[i] = miss_val;
+            prev[i] = miss_val;
+            next[iNext] = miss_val;
+            prev[iNext] = miss_val;
+            //
+            if (iP != miss_val) {
+              // We can assign, but note that the iN can be missing
+              next[iP] = iN;
+            }
+            if (iN != miss_val) {
+              // We can assign, but note that the iP can be missing
+              prev[iN] = iP;
+            }
+          }
+        }
+      }
+    }
+    if (n_change == 0)
+      break;
+  }
+  std::vector<T> Vret(n_ent);
+  size_t pos = 0;
+  for (size_t i=0; i<len; i++) {
+    if (status[i] == 1) {
+      Vret[pos] = V[i];
+      pos++;
+    }
+  }
+  return Vret;
+}
+
+template<typename T>
+bool IsSimplifiable(std::vector<T> const& V)
+{
+  size_t len = V.size();
+  for (size_t i=1; i<len; i++) {
+    if (V[i-1] == -V[i])
+      return true;
+  }
+  return false;
+}
+
+struct SequenceType {
+  SequenceType() : ListIdx() {
+  }
+  SequenceType(std::vector<int64_t> &&v) {
+    ListIdx = v;
+  }
+  SequenceType(std::vector<int64_t> const &v) {
+    ListIdx = v;
+  }
+  SequenceType(SequenceType const &seq) {
+    ListIdx = seq.ListIdx;
+  }
+  SequenceType(SequenceType &&seq) {
+    ListIdx = std::move(seq.ListIdx);
+  }
+  //
+  // Copy operator
+  //
+  SequenceType operator=(SequenceType const &seq) {
+    ListIdx = seq.ListIdx;
+    return *this;
+  }
+  SequenceType operator=(SequenceType &&seq) {
+    ListIdx = std::move(seq.ListIdx);
+    return *this;
+  }
+  //
+  // The destructor
+  //
+  ~SequenceType() {}
+  //
+  // Other stuff
+  //
+  bool isIdentity() const {
+    return ListIdx.size() == 0;
+  }
+  const std::vector<int64_t>& getVect() const {
+    return ListIdx;
+  }
+  std::vector<int64_t>& getVect() {
+    return ListIdx;
+  }
+
+private:
+  std::vector<int64_t> ListIdx;
+};
+
+SequenceType operator*(SequenceType const& v1, SequenceType const& v2) {
+  std::vector<int64_t> ListIdx1 = v1.getVect();
+  const std::vector<int64_t> &ListIdx2 = v2.getVect();
+  ListIdx1.insert(ListIdx1.end(), ListIdx2.begin(), ListIdx2.end());
+  if (IsSimplifiable(ListIdx1))
+    ListIdx1 = SimplifySequence(ListIdx1);
+  return SequenceType(std::move(ListIdx1));
+}
+
+void operator*=(SequenceType &v1,
+                SequenceType const &v2) {
+  std::vector<int64_t> &ListIdx1 = v1.getVect();
+  const std::vector<int64_t> &ListIdx2 = v2.getVect();
+  ListIdx1.insert(ListIdx1.end(), ListIdx2.begin(), ListIdx2.end());
+  if (IsSimplifiable(ListIdx1))
+    ListIdx1 = SimplifySequence(ListIdx1);
+}
+
+SequenceType Conjugation(SequenceType const &v1,
+                         SequenceType const &v2) {
+  const std::vector<int64_t> &ListIdx1 = v1.getVect();
+  const std::vector<int64_t> &ListIdx2 = v2.getVect();
+  size_t siz1 = ListIdx1.size();
+  size_t siz2 = ListIdx2.size();
+  std::vector<int64_t> ListIdx(siz2 + siz1 + siz2);
+  for (size_t i=0; i<siz2; i++)
+    ListIdx[i] = - ListIdx2[siz2 - 1 - i];
+  for (size_t i=0; i<siz1; i++)
+    ListIdx[siz2 + i] = ListIdx1[i];
+  for (size_t i=0; i<siz2; i++)
+    ListIdx[siz2 + siz1 + i] = ListIdx2[i];
+  if (IsSimplifiable(ListIdx))
+    ListIdx = SimplifySequence(ListIdx);
+  return SequenceType(std::move(ListIdx));
+}
+
+// LeftQuotient(a,b) = a^{-1} * b in the list.gi file
+SequenceType LeftQuotient(SequenceType const &a, SequenceType const &b) {
+  const std::vector<int64_t> &Val_A = a.getVect();
+  const std::vector<int64_t> &Val_B = b.getVect();
+  size_t siz_a = Val_A.size();
+  size_t siz_b = Val_B.size();
+  std::vector<int64_t> ListIdx(siz_a + siz_b);
+  for (size_t i=0; i<siz_a; i++)
+    ListIdx[i] = - Val_A[siz_a - 1 - i];
+  for (size_t i=0; i<siz_b; i++)
+    ListIdx[siz_a + i] = Val_B[i];
+  if (IsSimplifiable(ListIdx))
+    ListIdx = SimplifySequence(ListIdx);
+  return SequenceType(std::move(ListIdx));
+}
+
+SequenceType operator~(SequenceType const &seq) {
+  const std::vector<int64_t> & ListIdx = seq.getVect();
+  size_t len = ListIdx.size();
+  std::vector<int64_t> vret(len);
+  for (size_t i=0; i<len; i++)
+    vret[len - 1 - i] = - ListIdx[i];
+  return SequenceType(std::move(vret));
+}
+
+
+SequenceType Inverse(SequenceType const &seq) {
+  return ~seq;
+}
+
+
+  /*
+    This is for containing pairs of Element and Permutation.
+   */
+
+
 template <typename Tidx> void CheckSize(size_t siz) {
   if (siz >= std::numeric_limits<Tidx>::max() - 1) {
     std::cerr << "siz=" << siz << "\n";
@@ -104,7 +297,7 @@ public:
   //
   ~PermutationElt() {}
   //
-  // The destructor
+  // The other functionalities
   //
   bool isIdentity() const {
     for (Tidx i = 0; i < siz; i++)

@@ -1,4 +1,5 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
+#include "GapPrint.h"
 #include "factorize.h"
 #include <iostream>
 #include <stdio.h>
@@ -10,8 +11,7 @@ int main(int argc, char *argv[]) {
     return 1;
   }
   using T = int64_t;
-  T val;
-  sscanf(argv[1], "%ld", &val);
+  T val = permutalib::ReadScalar<T>(argv[1]);
   std::cerr << "val=" << val << "\n";
   std::vector<T> V = permutalib::factorize(val);
   std::cerr << "V =";

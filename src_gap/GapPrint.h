@@ -21,6 +21,15 @@ static const int int_perm = 4;
 static const int int_group = 5;
 static const int int_stablev = 6;
 
+
+template<typename T>
+T ReadScalar(std::string const& estr) {
+  T ret_val;
+  std::istringstream is(estr);
+  is >> ret_val;
+  return ret_val;
+}
+
 template <typename F> std::string GapString_F(size_t const &len, F const &f) {
   std::string str = "[ ";
   for (size_t i = 0; i < len; i++) {

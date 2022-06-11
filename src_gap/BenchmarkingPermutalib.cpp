@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
     std::string InputFile = argv[1];
     std::string opt = argv[2];
     if (argc == 4) {
-      sscanf(argv[3], "%ld", &n_iter);
+      n_iter = permutalib::ReadScalar<int64_t>(argv[3]);
       std::cerr << "Using input value n_iter=" << n_iter << "\n";
     } else {
       std::cerr << "Using default value of 50 on n_iter\n";
