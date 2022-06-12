@@ -568,7 +568,13 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
         return;
       set.insert(x);
       std::tuple<Face,size_t,size_t> tuple{x,iOrig,iGen};
+#ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
+    std::cerr << "Before push_back\n";
+#endif
       l_x_iorig_igen.push_back(tuple);
+#ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
+    std::cerr << "After push_back\n";
+#endif
     };
     auto f_get_elt=[&](size_t const& pos) -> TeltMatr {
       size_t curr_pos = pos;
