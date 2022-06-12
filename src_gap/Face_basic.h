@@ -12,7 +12,7 @@
 
 namespace permutalib {
 
-typedef boost::dynamic_bitset<> Face;
+using Face = boost::dynamic_bitset<>;
 
 template <typename Tidx> std::vector<Tidx> FaceToVector(Face const &eSet) {
   size_t nbVert = eSet.count();
@@ -24,6 +24,31 @@ template <typename Tidx> std::vector<Tidx> FaceToVector(Face const &eSet) {
   }
   return eList;
 }
+
+template<typename Telt>
+Face FaceAct(Face const& f, Telt const& u) {
+  size_t len = f.size();
+  Face fret(len);
+  boost::dynamic_bitset<>::size_type aRow = f.find_first();
+  while (aRow != boost::dynamic_bitset<>::npos) {
+    size_t pos = u.at(aRow);
+    fret[pos] = 1;
+    aRow = f.find_next(aRow);
+  }
+  return fret;
+}
+
+
+bool TestEqual(Face const& f1, Face const& f2) {
+  size_t len = f1.size();
+  if (len != f2.size())
+    return false;
+  for (size_t i=0; i<len; i++)
+    if (f1[i] != f2[i])
+      return false;
+  return true;
+}
+
 
 Face ReadFace(std::istream &is) {
   if (!is.good()) {

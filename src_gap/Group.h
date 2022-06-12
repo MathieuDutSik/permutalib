@@ -488,91 +488,132 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
 #endif
   if (!opt)
     return {};
+  // If we allow ourselves to compute RepresentativeAction
+  Tgroup TheStab = GRP.Stabilizer_OnSets(f1);
+  Tint OrbitSize = GRP.order() / TheStab.order();
+  Tint CritSize = 10000;
   TeltPerm const &elt = *opt;
-  //  std::cerr << "len=" << len << "  elt=" << elt << "\n";
-  //  std::cerr << "id_matr=";
-  //  WriteMatrix(std::cerr, id_matr);
-  //
-  TeltPerm id_perm(len);
-  using Tseq = SequenceType<true>;
-  using Telt = PermutationElt<Tidx, Tseq>;
-  using TgroupB = Group<Telt, Tint>;
-  Tseq id_seq;
-  Telt ePair(elt.getListVal(), id_seq);
-  Telt idB(id_perm.getListVal(), id_seq);
-  std::vector<Telt> ListGensB;
   size_t nGen = ListPermGens.size();
-  std::vector<TeltMatr> ListMatrGens_inv(nGen);
-  for (size_t iGen = 0; iGen < nGen; iGen++) {
-    std::vector<int64_t> ListIdx{int64_t(iGen) + 1};
-    Tseq e_seq(ListIdx);
-    Telt fPair(ListPermGens[iGen].getListVal(), e_seq);
-    ListGensB.push_back(fPair);
-    ListMatrGens_inv[iGen] = Inverse(ListMatrGens[iGen]);
-  }
+  auto f_mapping_elt=[&]() -> TeltMatr {
+    //
+    TeltPerm id_perm(len);
+    using Tseq = SequenceType<true>;
+    using Telt = PermutationElt<Tidx, Tseq>;
+    using TgroupB = Group<Telt, Tint>;
+    Tseq id_seq;
+    Telt ePair(elt.getListVal(), id_seq);
+    Telt idB(id_perm.getListVal(), id_seq);
+    std::vector<Telt> ListGensB;
+    std::vector<TeltMatr> ListMatrGens_inv(nGen);
+    for (size_t iGen = 0; iGen < nGen; iGen++) {
+      std::vector<int64_t> ListIdx{int64_t(iGen) + 1};
+      Tseq e_seq(ListIdx);
+      Telt fPair(ListPermGens[iGen].getListVal(), e_seq);
+      ListGensB.push_back(fPair);
+      ListMatrGens_inv[iGen] = Inverse(ListMatrGens[iGen]);
+    }
 #ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
-  std::cerr << "We have ListGensB\n";
+    std::cerr << "We have ListGensB\n";
 #endif
-  TgroupB GRP_B(ListGensB, idB);
+    TgroupB GRP_B(ListGensB, idB);
 #ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
-  std::cerr << "We have GRP_B\n";
+    std::cerr << "We have GRP_B\n";
 #endif
-  /*
-  {
-    size_t nElt = 20;
-    std::vector<Telt> ListElt;
-    for (size_t iElt=0; iElt<nElt; iElt++)
-      ListElt.push_back(GRP_B.rand());
-    std::vector<Telt> LGen;
-    for (size_t iElt=0; iElt<nElt; iElt++)
-      for (size_t jElt=0; jElt<nElt; jElt++) {
-        Telt v1 = ListElt[iElt];
-        Telt v2 = ListElt[jElt];
-        Telt trans1 = Conjugation(v1, v2);
-        Telt trans2 = LeftQuotient(v1, v2);
-        LGen.push_back(trans1);
-        LGen.push_back(trans2);
-      }
-    std::cerr << "|LGen|=" << LGen.size() << "\n";
-  }
-  */
-  //  NicePrint("ePair", ePair);
-  Telt res = GRP_B.Sift(ePair);
+    Telt res = GRP_B.Sift(ePair);
 #ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
-  std::cerr << "We have res\n";
+    std::cerr << "We have res\n";
 #endif
-  //  NicePrint("res", res);
+    //  NicePrint("res", res);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-  //  std::cerr << "Doing the check\n";
-  std::vector<Tidx> const &V = res.getListVal();
-  for (Tidx u = 0; u < len; u++) {
-    if (V[u] != u) {
-      std::cerr << "The permutation residue is not the idenity at u=" << u
-                << "\n";
-      throw PermutalibException{1};
+    //  std::cerr << "Doing the check\n";
+    std::vector<Tidx> const &V = res.getListVal();
+    for (Tidx u = 0; u < len; u++) {
+      if (V[u] != u) {
+        std::cerr << "The permutation residue is not the idenity at u=" << u
+                  << "\n";
+        throw PermutalibException{1};
+      }
     }
-  }
 #endif
-  Tseq ret_seq = Inverse(res.getElt());
+    Tseq ret_seq = Inverse(res.getElt());
 #ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
-  std::cerr << "We have ret_seq\n";
+    std::cerr << "We have ret_seq\n";
 #endif
-  TeltMatr ret_matr = id_matr;
-  const std::vector<int64_t>& ListIdx = ret_seq.getVect();
-  for (auto & eIdx : ListIdx) {
-    if (eIdx > 0) {
-      size_t iGen = eIdx - 1;
-      ret_matr *= ListMatrGens[iGen];
-    } else {
-      size_t iGen = (-eIdx) - 1;
-      ret_matr *= ListMatrGens_inv[iGen];
+    TeltMatr ret_matr = id_matr;
+    const std::vector<int64_t>& ListIdx = ret_seq.getVect();
+    for (auto & eIdx : ListIdx) {
+      if (eIdx > 0) {
+        size_t iGen = eIdx - 1;
+        ret_matr *= ListMatrGens[iGen];
+      } else {
+        size_t iGen = (-eIdx) - 1;
+        ret_matr *= ListMatrGens_inv[iGen];
+      }
     }
-  }
 #ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
-  std::cerr << "We have ret_matr\n";
+    std::cerr << "We have ret_matr\n";
 #endif
-  //  std::cerr << "Returning from RepresentativeActionMatrixPermSubset\n";
-  return ret_matr;
+    //  std::cerr << "Returning from RepresentativeActionMatrixPermSubset\n";
+    return ret_matr;
+  };
+  auto f_build_orbit=[&]() -> TeltMatr {
+    size_t miss_val = std::numeric_limits<size_t>::max();
+    std::unordered_set<Face> set;
+    std::vector<std::tuple<Face,size_t,size_t>> l_x_iorig_igen;
+    auto f_insert=[&](Face const& x, size_t iOrig, size_t iGen) -> void {
+      if (set.count(x) == 1)
+        return;
+      set.insert(x);
+      std::tuple<Face,size_t,size_t> tuple{x,iOrig,iGen};
+      l_x_iorig_igen.push_back(tuple);
+    };
+    auto f_get_elt=[&](size_t const& pos) -> TeltMatr {
+      size_t curr_pos = pos;
+      std::vector<size_t> ListIGen;
+      while (true) {
+        if (curr_pos == 0)
+          break;
+        size_t iOrig = std::get<1>(l_x_iorig_igen[curr_pos]);
+        size_t iGen = std::get<2>(l_x_iorig_igen[curr_pos]);
+        ListIGen.push_back(iGen);
+        curr_pos = iOrig;
+      }
+      TeltMatr ret_matr = id_matr;
+      size_t len = ListIGen.size();
+      for (size_t i=0; i<len; i++) {
+        size_t iGen = ListIGen[len - 1 - i];
+        ret_matr *= ListMatrGens[iGen];
+      }
+      return ret_matr;
+    };
+    f_insert(f1, miss_val, miss_val);
+    size_t n_done = 0;
+    while(true) {
+      size_t len = l_x_iorig_igen.size();
+      if (n_done == len)
+        break;
+      for (size_t iOrig=n_done; iOrig<len; iOrig++) {
+        Face const& f = std::get<0>(l_x_iorig_igen[iOrig]);
+        for (size_t iGen=0; iGen<nGen; iGen++) {
+          Face f_img = FaceAct(f, ListPermGens[iGen]);
+          f_insert(f_img, iOrig, iGen);
+          if (TestEqual(f_img, f2)) {
+            size_t pos = l_x_iorig_igen.size() - 1;
+            return f_get_elt(pos);
+          }
+        }
+      }
+      n_done = len;
+    }
+    std::cerr << "We should never reach that stage\n";
+    throw PermutalibException{1};
+  };
+
+  if (OrbitSize < CritSize) {
+    return f_build_orbit();
+  } else {
+    return f_mapping_elt();
+  }
 }
 
 // clang-format off
