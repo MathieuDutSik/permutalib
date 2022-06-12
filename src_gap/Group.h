@@ -490,8 +490,11 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
     return {};
   // If we allow ourselves to compute RepresentativeAction
   Tgroup TheStab = GRP.Stabilizer_OnSets(f1);
-  Tint OrbitSize = GRP.order() / TheStab.order();
+  Tint OrbitSize = GRP.size() / TheStab.size();
   Tint CritSize = 10000;
+#ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
+  std::cerr << "We have OrbitSize=" << OrbitSize << " CritSize=" << CritSize << "\n";
+#endif
   TeltPerm const &elt = *opt;
   size_t nGen = ListPermGens.size();
   auto f_mapping_elt=[&]() -> TeltMatr {
@@ -590,6 +593,9 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
     size_t n_done = 0;
     while(true) {
       size_t len = l_x_iorig_igen.size();
+#ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
+      std::cerr << "n_done=" << n_done << " len=" << len << "\n";
+#endif
       if (n_done == len)
         break;
       for (size_t iOrig=n_done; iOrig<len; iOrig++) {
