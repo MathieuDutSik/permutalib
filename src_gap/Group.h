@@ -577,6 +577,9 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
 #endif
     };
     auto f_get_elt=[&](size_t const& pos) -> TeltMatr {
+#ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
+    std::cerr << "Beginning of f_get_elt\n";
+#endif
       size_t curr_pos = pos;
       std::vector<size_t> ListIGen;
       while (true) {
@@ -593,6 +596,9 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
         size_t iGen = ListIGen[len - 1 - i];
         ret_matr *= ListMatrGens[iGen];
       }
+#ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
+      std::cerr << "End of f_get_elt\n";
+#endif
       return ret_matr;
     };
     f_insert(f1, miss_val, miss_val);
@@ -605,9 +611,19 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
       if (n_done == len)
         break;
       for (size_t iOrig=n_done; iOrig<len; iOrig++) {
-        Face const& f = std::get<0>(l_x_iorig_igen[iOrig]);
+#ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
+        std::cerr << "iOrig=" << iOrig << "\n";
+#endif
+        // Copy is needed since the std::vector is growing
+        Face f = std::get<0>(l_x_iorig_igen[iOrig]);
+#ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
+        std::cerr << "We have f\n";
+#endif
         for (size_t iGen=0; iGen<nGen; iGen++) {
           Face f_img = FaceAct(f, ListPermGens[iGen]);
+#ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
+          std::cerr << "We have f_img\n";
+#endif
           f_insert(f_img, iOrig, iGen);
           if (TestEqual(f_img, f2)) {
             size_t pos = l_x_iorig_igen.size() - 1;
