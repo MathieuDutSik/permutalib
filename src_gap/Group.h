@@ -680,6 +680,12 @@ inline void serialize(Archive &ar, permutalib::Group<Telt, Tint> &val,
   split_free(ar, val, version);
 }
 
+// clang-format off
+}  // boost::serialization
+// clang-format on
+
+namespace permutalib {
+
 template <typename Telt, typename Tint>
 std::ostream &operator<<(std::ostream &os,
                          const permutalib::Group<Telt, Tint> &grp) {
