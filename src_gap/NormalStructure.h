@@ -28,6 +28,17 @@ bool Kernel_IsNormalSubgroup(const StabChain<Telt, Tidx_label> &G,
   return true;
 }
 
+template <typename Telt, typename Tidx_label>
+bool Kernel_IsSubgroup(const StabChain<Telt, Tidx_label> &G,
+                       const StabChain<Telt, Tidx_label> &H) {
+  std::vector<Telt> gens_H = Kernel_GeneratorsOfGroup(H);
+  for (auto &eGen_H : gens_H) {
+    if (!IsElementInStabChain(G, eGen_H))
+      return false;
+  }
+  return true;
+}
+
 template <typename Telt, typename Tidx_label, typename Tint>
 StabChain<Telt, Tidx_label>
 Kernel_NormalClosure(const StabChain<Telt, Tidx_label> &G,

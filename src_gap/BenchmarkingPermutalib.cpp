@@ -134,6 +134,17 @@ int main(int argc, char *argv[]) {
               std::cerr << "Canonicalization failed\n";
               throw permutalib::PermutalibException{1};
             }
+            std::pair<permutalib::Face,Tgroup> pairCan = eG.PairCanonicalImageStabilizer(eFace2);
+            if (pairCan.first != set_can2) {
+              std::cerr << "We fail at that obvious step\n";
+              throw permutalib::PermutalibException{1};
+            }
+            Tgroup eStab = eG.Stabilizer_OnSets(pairCan.first);
+            if (!eStab.IsSubgroup(pairCan.second)) {
+              std::cerr << "We fail that pairCan.second is not a subgroup of the stabilizer\n";
+              std::cerr << "|eStab|=" << eStab.size() << " |pairCan.second|=" << pairCan.second.size() << "\n";
+              throw permutalib::PermutalibException{1};
+            }
           }
           siz_control += eFace1.count();
         }

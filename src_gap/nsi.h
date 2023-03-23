@@ -146,7 +146,7 @@ template <typename T> std::vector<T> Set(std::vector<T> const &V) {
   --- skip_fnuc eliminated as it is the identity in the case that interest us.
  */
 template <typename Telt, typename Tidx_label, typename Tint>
-std::vector<typename Telt::Tidx>
+std::pair<std::vector<typename Telt::Tidx>, StabChain<Telt, Tidx_label>>
 NewCanonicImage(StabChain<Telt, Tidx_label> const &g,
                 std::vector<typename Telt::Tidx> const &set,
                 StabChain<Telt, Tidx_label> const &k) {
@@ -170,7 +170,7 @@ NewCanonicImage(StabChain<Telt, Tidx_label> const &g,
     };
     // The comparison goes
     // log(a.orbCount) / a.orbSize < log(b.orbCount) / b.orbSize
-    // whish is equivalent to
+    // which is equivalent to
     // a.orbCount ^ b.orbSize    <    b.orbCount ^ a.orbSize
     auto comparisonLower = [](typeCnt const &a, typeCnt const &b) -> bool {
 #ifdef DEBUG_NSI
@@ -454,7 +454,7 @@ NewCanonicImage(StabChain<Telt, Tidx_label> const &g,
   };
   if (set.size() == 0) {
     free_all_nodes();
-    return {};
+    return {{}, g};
   }
   Tidx depth;
   std::vector<Tidx> orbmins;
@@ -801,11 +801,12 @@ NewCanonicImage(StabChain<Telt, Tidx_label> const &g,
     }
   }
   free_all_nodes();
-  return leftmost_node(depth + 1)->image;
+  NodePtr node = leftmost_node(depth + 1);
+  return {node->image, node->substab};
 }
 
 template <typename Telt, typename Tidx_label, typename Tint>
-Face Kernel_CanonicalImage(StabChain<Telt, Tidx_label> const &g,
+std::pair<Face,StabChain<Telt,Tidx_label>> Kernel_CanonicalImagePair(StabChain<Telt, Tidx_label> const &g,
                            Face const &set) {
   using Tidx = typename Telt::Tidx;
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
@@ -818,7 +819,7 @@ Face Kernel_CanonicalImage(StabChain<Telt, Tidx_label> const &g,
   }
 #endif
   if (set.count() == 0 || set.count() == set.size())
-    return set;
+    return {set, g};
   size_t siz = set.size();
   Face ret(siz);
   size_t cnt = set.count();
@@ -833,14 +834,15 @@ Face Kernel_CanonicalImage(StabChain<Telt, Tidx_label> const &g,
     }
     StabChain<Telt, Tidx_label> k =
         Kernel_Stabilizer_OnSets<Telt, Tidx_label, Tint>(g, set);
-    std::vector<Tidx> eSetCan =
+    std::pair<std::vector<Tidx>,StabChain<Telt,Tidx_label>> pairCan =
         NewCanonicImage<Telt, Tidx_label, Tint>(g, set_i, k);
 #ifdef DEBUG_NSI
     std::cerr << "CPP eSetCan=" << GapStringIntVector(eSetCan) << "\n";
 #endif
-    for (auto &eVal : eSetCan) {
+    for (auto &eVal : pairCan.first) {
       ret[eVal] = 1;
     }
+    return {ret,pairCan.second};
   } else {
     // instead of building the complement, we do a simple iteration
     Face setC(siz);
@@ -857,14 +859,20 @@ Face Kernel_CanonicalImage(StabChain<Telt, Tidx_label> const &g,
     }
     StabChain<Telt, Tidx_label> k =
         Kernel_Stabilizer_OnSets<Telt, Tidx_label, Tint>(g, setC);
-    std::vector<Tidx> eSetCan =
+    std::pair<std::vector<Tidx>,StabChain<Telt,Tidx_label>> pairCan =
         NewCanonicImage<Telt, Tidx_label, Tint>(g, set_i, k);
     for (size_t i = 0; i < siz; i++)
       ret[i] = 1;
-    for (auto &eVal : eSetCan)
+    for (auto &eVal : pairCan.first)
       ret[eVal] = 0;
+    return {ret,pairCan.second};
   }
-  return ret;
+}
+
+template <typename Telt, typename Tidx_label, typename Tint>
+Face Kernel_CanonicalImage(StabChain<Telt, Tidx_label> const &g,
+                           Face const &set) {
+  return Kernel_CanonicalImagePair<Telt,Tidx_label,Tint>(g, set).first;
 }
 
 // clang-format off
