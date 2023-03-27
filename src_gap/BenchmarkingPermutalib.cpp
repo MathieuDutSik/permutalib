@@ -86,6 +86,8 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
         permutalib::Face set_can2 = eG.ExhaustiveCanonicalImage(eFace2);
         if (set_can1 != set_can2) {
           std::cerr << "ExhaustiveCanonicalization failed\n";
+          std::cerr << "set_can1=" << set_can1 << "\n";
+          std::cerr << "set_can2=" << set_can2 << "\n";
           throw permutalib::PermutalibException{1};
         }
       }
