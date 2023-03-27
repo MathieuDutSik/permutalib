@@ -3,6 +3,7 @@
 #include "Permutation.h"
 #include "gmpxx.h"
 #include <fstream>
+#include "TestingFct.h"
 
 
 template<typename Tgroup>
@@ -94,6 +95,24 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
       siz_control += eFace1.count();
     }
   };
+  auto timing_canonical_algorithms = [&]() -> void {
+    std::vector<permutalib::Face> ListF;
+    for (int64_t iter = 0; iter < n_iter; iter++) {
+      permutalib::Face eFace1 = random_face(n);
+      ListF.push_back(eFace1);
+    }
+    permutalib::NanosecondTime time;
+    for (auto & f : ListF) {
+      (void)eG.CanonicalImage(f);
+    }
+    double time_canonic = double(time.eval());
+    for (auto & f : ListF) {
+      (void)eG.ExhaustiveCanonicalImage(f);
+    }
+    double time_exhaustive_canonic = double(time.eval());
+    double frac = time_canonic / time_exhaustive_canonic;
+    std::cerr << "|eG|=" << eG.size() << " frac=" << frac << " |canonic|=" << time_canonic << " |exhaust|=" << time_exhaustive_canonic << "\n";
+  };
   auto check_representative = [&]() -> void {
     for (int64_t iter = 0; iter < n_iter; iter++) {
       permutalib::Face eFace1 = random_face(n);
@@ -137,6 +156,8 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
     check_canonical();
   if (opt == "check_exhaustive_canonical")
     check_exhaustive_canonical();
+  if (opt == "timing_canonical_algorithms")
+    timing_canonical_algorithms();
   if (opt == "check_representative")
     check_representative();
   if (opt == "check_stabilizer")
@@ -168,7 +189,7 @@ int main(int argc, char *argv[]) {
         "canonical",        "stabilizer",
         "pointstabilizer",  "pointrepresentative",
         "check_canonical",   "check_exhaustive_canonical",
-        "check_representative",
+        "timing_canonical_algorithms", "check_representative",
         "check_stabilizer", "all"};
     if (argc != 4 && argc != 5) {
       std::cerr << "BenchmarkingPermutalib [InputFile] [limit] [opt]\n";
@@ -227,7 +248,7 @@ int main(int argc, char *argv[]) {
                 << " nbGen=" << nbGen << "\n";
       std::vector<Telt> LGen(nbGen);
       for (size_t iGen = 0; iGen < nbGen; iGen++) {
-        std::cerr << "iGen=" << iGen << "/" << nbGen << " n=" << int(n) << "\n";
+        //        std::cerr << "iGen=" << iGen << "/" << nbGen << " n=" << int(n) << "\n";
         std::vector<Tidx> ePermV(n);
         for (Tidx i = 0; i < n; i++) {
           int eVal_i;
