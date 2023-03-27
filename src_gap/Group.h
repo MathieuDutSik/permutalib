@@ -113,9 +113,22 @@ public:
   using Tidx = typename Telt::Tidx;
   using Tint = Tint_inp;
   using Tidx_label = uint16_t;
+private:
+  StabChain<Telt, Tidx_label> S;
+  Tint size_tint;
+  bool use_exhaustive_canonic;
+  void set_exhaustive_canonic() {
+    if (size_tint < 200)
+      use_exhaustive_canonic = true;
+    else
+      use_exhaustive_canonic = false;
+  }
+public:
   // constructors
   Group(const StabChain<Telt, Tidx_label> &_S)
-      : S(_S), size_tint(Order<Telt, Tidx_label, Tint>(_S)) {}
+      : S(_S), size_tint(Order<Telt, Tidx_label, Tint>(_S)) {
+    set_exhaustive_canonic();
+  }
   Group(const std::vector<Telt> &LGen, const Telt &id) {
 #ifdef DEBUG_STABCHAINMAIN
     std::cerr << "CPP Beginning of MinimalStabChain\n";
@@ -127,15 +140,25 @@ public:
     S = StabChainOp_listgen<Telt, Tidx_label, Tint>(LGen, options);
     UnbindCycles(S);
     size_tint = Order<Telt, Tidx_label, Tint>(S);
+    set_exhaustive_canonic();
   }
-  Group(const Tidx &n) : Group({}, n) {}
-  Group() : Group(0) {}
-  Group(Group<Telt, Tint> &&G) : S(std::move(G.S)), size_tint(G.size_tint) {}
-  Group(const Group<Telt, Tint> &G) : S(G.S), size_tint(G.size_tint) {}
+  Group(const Tidx &n) : Group({}, n) {
+    set_exhaustive_canonic();
+  }
+  Group() : Group(0) {
+    set_exhaustive_canonic();
+  }
+  Group(Group<Telt, Tint> &&G) : S(std::move(G.S)), size_tint(G.size_tint) {
+    set_exhaustive_canonic();
+  }
+  Group(const Group<Telt, Tint> &G) : S(G.S), size_tint(G.size_tint) {
+    set_exhaustive_canonic();
+  }
   Group<Telt, Tint> &operator=(const Group<Telt, Tint> &G) {
     // The S is a shared_ptr so copy is fine.
     S = G.S;
     size_tint = G.size_tint;
+    set_exhaustive_canonic();
     return *this;
   }
   // Basic getters
@@ -187,6 +210,12 @@ public:
   }
   Face ExhaustiveCanonicalImage(const Face &f) const {
     return exhaustive_minimum_face_orbit<Telt,Tidx_label>(S, f);
+  }
+  Face OptCanonicalImage(const Face &f) const {
+    if (use_exhaustive_canonic)
+      return exhaustive_minimum_face_orbit<Telt,Tidx_label>(S, f);
+    else
+      return Kernel_CanonicalImage<Telt, Tidx_label, Tint>(S, f);
   }
   std::pair<Face,Group<Telt,Tint>> PairCanonicalImageStabilizer(const Face &f) const {
     std::pair<Face,StabChain<Telt,Tidx_label>> pairCan = Kernel_CanonicalImagePair<Telt,Tidx_label,Tint>(S, f);
@@ -262,10 +291,6 @@ public:
   const_iterator end() const {
     return get_end_iterator(S);
   }
-
-private:
-  StabChain<Telt, Tidx_label> S;
-  Tint size_tint;
 };
 
 template <typename Tgroup, typename TeltMatr, typename Tobj, typename Fop>
