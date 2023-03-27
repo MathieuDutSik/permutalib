@@ -13,15 +13,28 @@ int main(int argc, char *argv[]) {
     using Tint = mpz_class;
     using Tgroup = permutalib::Group<Telt, Tint>;
     if (argc != 4) {
-      std::cerr << "TestEnumerationElement [EXMP] [limit] [case]\n";
+      std::cerr << "TestEnumerationElement [InputFile] [limit] [case]\n";
+      std::cerr << "\n";
+      std::cerr << "   ------ Code -----\n";
+      std::cerr << "\n";
+      std::cerr << "InputFile: The file containing the list of groups to be treated\n";
+      std::cerr << "limit: The maximal size of the group to treat. E.g. 1000 or -1 for no limit\n";
+      std::cerr << "case: The chosen option. \"check\" for checking the algo and \"perf\" for performance of iterating element\n";
       throw permutalib::PermutalibException{1};
     }
     std::string InputFile = argv[1];
+    //
     int limit_i;
     (void)sscanf(argv[2], "%d", &limit_i);
     Tint limit = limit_i;
-    int ecase;
-    (void)sscanf(argv[3], "%d", &ecase);
+    //
+    std::string ecase = argv[3];
+    if (ecase != "check" && ecase != "perf") {
+      std::cerr << "Available option to consider are\n";
+      std::cerr << "check: for checking the group\n";
+      std::cerr << "perf: for performance check\n";
+      throw permutalib::PermutalibException{1};
+    }
     std::cerr << "ecase=" << ecase << "\n";
     //
     std::ifstream is(InputFile);
@@ -59,7 +72,7 @@ int main(int argc, char *argv[]) {
       std::cerr << "|eG|=" << eG.size() << " limit=" << limit << "\n";
       // Some groups can be too large to iterate over their elements.
       if (eG.size() <= limit || limit < 0) {
-        if (ecase == 1) {
+        if (ecase == "check") {
           std::unordered_set<Telt> ListElt;
           size_t n_iter = 0;
           for (auto &elt : eG) {
@@ -80,7 +93,7 @@ int main(int argc, char *argv[]) {
             throw permutalib::PermutalibException{1};
           }
         }
-        if (ecase == 2) {
+        if (ecase == "perf") {
           std::chrono::time_point<std::chrono::system_clock> time1 =
               std::chrono::system_clock::now();
           size_t n_iter = 0;

@@ -4,6 +4,7 @@
 
 // clang-format off
 #include "StabChainMain.h"
+#include "IteratingElement.h"
 #include "stbcbckt.h"
 #include "nsi.h"
 #include "Properties.h"
@@ -246,108 +247,20 @@ public:
   const Telt &get_identity() const { return S->comm->identity; }
   bool isin(const Telt &x) const { return IsElementInStabChain(S, x); }
   Telt Sift(Telt const &x) const { return SiftedPermutation(S, x); }
-
-private:
-  struct IteratorType {
-  private:
-    std::vector<StabChain<Telt, Tidx_label>> ListS;
-    std::vector<size_t> ListPos;
-    std::vector<size_t> ListSiz;
-    std::vector<Telt> ListRes;
-
-  public:
-    IteratorType(std::vector<StabChain<Telt, Tidx_label>> ListS,
-                 std::vector<size_t> ListPos, std::vector<size_t> ListSiz,
-                 std::vector<Telt> ListRes)
-        : ListS(ListS), ListPos(ListPos), ListSiz(ListSiz), ListRes(ListRes) {}
-    const Telt &operator*() const { return ListRes[0]; }
-    void IterIncrease() {
-      Tidx n = ListS[0]->comm->n;
-      size_t len = ListPos.size();
-      for (size_t i = 0; i < len; i++) {
-        if (ListPos[i] < ListSiz[i] - 1) {
-          ListPos[i]++;
-          for (size_t j = 0; j < i; j++)
-            ListPos[j] = 0;
-          Telt elt(n);
-          Tidx bpt = ListS[i]->orbit[0];
-          Tidx img = ListS[i]->orbit[ListPos[i]];
-          Tidx img_work = img;
-          while (true) {
-            if (img_work == bpt)
-              break;
-            Tidx_label idx = ListS[i]->transversal[img_work];
-            elt *= ListS[i]->comm->labels[idx];
-            img_work = PowAct(img, elt);
-          }
-          if (i != len - 1)
-            elt *= ListRes[i + 1];
-          for (size_t j = 0; j <= i; j++)
-            ListRes[j] = elt;
-          return;
-        }
-      }
-      // This is the case of a END iterator
-      for (size_t i = 0; i < len; i++)
-        ListPos[i] = ListSiz[i];
-    }
-    IteratorType &operator++() {
-      IterIncrease();
-      return *this;
-    }
-    IteratorType operator++(int) {
-      IteratorType tmp = *this;
-      IterIncrease();
-      return tmp;
-    }
-    bool operator!=(const IteratorType &x) const {
-      for (size_t i = 0; i < ListPos.size(); i++)
-        if (ListPos[i] != x.ListPos[i])
-          return true;
-      return false;
-    }
-    bool operator==(const IteratorType &x) const {
-      for (size_t i = 0; i < ListPos.size(); i++)
-        if (ListPos[i] != x.ListPos[i])
-          return false;
-      return true;
-    }
-  };
-
-public:
-  using iterator = IteratorType;
-  using const_iterator = IteratorType;
+  //
+  // The iterator business
+  //
+  using iterator = IteratorType<Telt,Tidx_label>;
+  using const_iterator = IteratorType<Telt,Tidx_label>;
   using value_type = Telt;
   const_iterator begin() const {
-    Tidx n = S->comm->n;
-    std::vector<StabChain<Telt, Tidx_label>> ListS;
-    std::vector<size_t> ListPos;
-    std::vector<size_t> ListSiz;
-    std::vector<Telt> ListRes;
-    StabChain<Telt, Tidx_label> Swork = S;
-    while (Swork != nullptr) {
-      size_t len = Swork->orbit.size();
-      if (len == 0)
-        break;
-      ListS.push_back(Swork);
-      ListPos.push_back(0);
-      ListSiz.push_back(len);
-      ListRes.push_back(Telt(n));
-      Swork = Swork->stabilizer;
-    }
-    return IteratorType(ListS, ListPos, ListSiz, ListRes);
+    return get_begin_iterator(S);
   }
   const_iterator end() const {
-    std::vector<size_t> ListPos;
-    StabChain<Telt, Tidx_label> Swork = S;
-    while (Swork != nullptr) {
-      ListPos.push_back(Swork->orbit.size());
-      Swork = Swork->stabilizer;
-    }
-    return IteratorType({}, ListPos, {}, {});
+    return get_end_iterator(S);
   }
 
-public:
+private:
   StabChain<Telt, Tidx_label> S;
   Tint size_tint;
 };
