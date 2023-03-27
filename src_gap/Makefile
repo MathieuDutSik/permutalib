@@ -1,4 +1,4 @@
-PROGRAM	= GapRepresentativeActionOnSet GapStabilizerOnSet GapEquivalenceOnSet GapCanonicalImage BenchmarkingPermutalib Factorize TestPermutation TestSymmetricGroup GroupProperties EqSymmGroup TestSerialization GapDerivedSubgroup GapSmallGeneratingSet TestEnumerationElement GapCentreSubgroup GapCentralizerElt GapComputeSequenceBlockSystems GapAscendingChain
+#PROGRAM	= GapRepresentativeActionOnSet GapStabilizerOnSet GapEquivalenceOnSet GapCanonicalImage BenchmarkingPermutalib Factorize TestPermutation TestSymmetricGroup GroupProperties EqSymmGroup TestSerialization GapDerivedSubgroup GapSmallGeneratingSet TestEnumerationElement GapCentreSubgroup GapCentralizerElt GapComputeSequenceBlockSystems GapAscendingChain
 #PROGRAM	= EqSymmGroup
 #PROGRAM	= GapStabilizerOnSet
 #PROGRAM	= GapRepresentativeActionOnSet
@@ -10,8 +10,7 @@ PROGRAM	= GapRepresentativeActionOnSet GapStabilizerOnSet GapEquivalenceOnSet Ga
 #PROGRAM	= GapDerivedSubgroup
 #PROGRAM	= GapCentreSubgroup
 #PROGRAM	= GapCentralizerElt
-#PROGRAM	= BenchmarkingPermutalib
-#PROGRAM	= BenchmarkingPermutalib GapCanonicalImage
+PROGRAM	= BenchmarkingPermutalib
 #PROGRAM	= Factorize
 #PROGRAM	= TestSerialization
 #PROGRAM	= TestEnumerationElement
@@ -21,14 +20,14 @@ PROGRAM	= GapRepresentativeActionOnSet GapStabilizerOnSet GapEquivalenceOnSet Ga
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
-#CC		= icpc -std=c++11 -Wall -g -O2
-#CC		= clang++ -Weverything -std=c++11
-#CC		= clang++ -Weverything -fsanitize=thread -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fsanitize=bounds -fsanitize=return -fsanitize=null -std=c++11
-#CC		= g++ -I $(BOOST_INCDIR)    -std=c++11 -Wall -g -O2
-#CC		= g++ -std=c++14 -Wall -g -O2 -fsanitize=address -fsanitize=undefined -fstack-protector-all
-#CC		= g++ -std=c++14 -Wall -g -O2 -fsanitize=address -fsanitize=undefined -fsanitize=bool -fstack-protector-all
+#CC		= icpc -std=c++17 -Wall -g -O2
+#CC		= clang++ -Weverything -std=c++17
+#CC		= clang++ -Weverything -fsanitize=thread -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fsanitize=bounds -fsanitize=return -fsanitize=null -std=c++17
+#CC		= g++ -I $(BOOST_INCDIR)    -std=c++17 -Wall -g -O2
+CC		= g++ -std=c++17 -Wall -g -O2 -fsanitize=address -fsanitize=undefined -fstack-protector-all
+#CC		= g++ -std=c++17 -Wall -g -O2 -fsanitize=address -fsanitize=undefined -fsanitize=bool -fstack-protector-all
 #CC		= g++ -std=c++17 -Wall -g -O3 -fsanitize=address -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fstack-protector-all
-CC		= g++ -std=c++17 -O3
+#CC		= g++ -std=c++17 -O3
 #CC		= g++ -std=c++17 -Wall -g -O2 -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=bounds-strict -fsanitize=alignment -fsanitize=leak -Wstrict-aliasing
 #CC		= g++ -std=c++17 -Wall -Wextra -O3
 #CC		= g++ -pg -std=c++17 -Wall -g -O3
