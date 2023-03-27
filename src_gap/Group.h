@@ -185,6 +185,9 @@ public:
   Face CanonicalImage(const Face &f) const {
     return Kernel_CanonicalImage<Telt, Tidx_label, Tint>(S, f);
   }
+  Face ExhaustiveCanonicalImage(const Face &f) const {
+    return exhaustive_minimum_face_orbit<Telt,Tidx_label>(S, f);
+  }
   std::pair<Face,Group<Telt,Tint>> PairCanonicalImageStabilizer(const Face &f) const {
     std::pair<Face,StabChain<Telt,Tidx_label>> pairCan = Kernel_CanonicalImagePair<Telt,Tidx_label,Tint>(S, f);
     return {std::move(pairCan.first), Group(std::move(pairCan.second))};

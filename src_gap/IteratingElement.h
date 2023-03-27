@@ -9,6 +9,7 @@
  */
 
 #include "StabChainMain.h"
+#include "PermGroup.h"
 
 
 
@@ -115,6 +116,21 @@ IteratorType<Telt,Tidx_label> get_end_iterator(StabChain<Telt, Tidx_label> const
     Swork = Swork->stabilizer;
   }
   return IteratorType<Telt,Tidx_label>({}, ListPos, {}, {});
+}
+
+
+template<typename Telt, typename Tidx_label>
+Face exhaustive_minimum_face_orbit(StabChain<Telt, Tidx_label> const& S, Face const& f) {
+  IteratorType<Telt,Tidx_label> iter = get_begin_iterator(S);
+  IteratorType<Telt,Tidx_label> iter_end = get_begin_iterator(S);
+  Face f_minimum = f;
+  while (iter != iter_end) {
+    Telt const& eElt = *iter;
+    Face f_img = OnSets(f, eElt);
+    if (f_img < f_minimum)
+      f_minimum = f_img;
+  }
+  return f_minimum;
 }
 
 // clang-format off
