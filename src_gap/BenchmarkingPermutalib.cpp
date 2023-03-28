@@ -95,6 +95,24 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
       siz_control += eFace1.count();
     }
   };
+  auto check_store_canonical = [&]() -> void {
+    for (int64_t iter = 0; iter < n_iter; iter++) {
+      permutalib::Face eFace1 = random_face(n);
+      permutalib::Face set_can1 = eG.StoreCanonicalImage(eFace1);
+      for (int i = 0; i < 4; i++) {
+        Telt u = eG.random();
+        permutalib::Face eFace2 = OnSets(eFace1, u);
+        permutalib::Face set_can2 = eG.StoreCanonicalImage(eFace2);
+        if (set_can1 != set_can2) {
+          std::cerr << "ExhaustiveCanonicalization failed\n";
+          std::cerr << "set_can1=" << set_can1 << "\n";
+          std::cerr << "set_can2=" << set_can2 << "\n";
+          throw permutalib::PermutalibException{1};
+        }
+      }
+      siz_control += eFace1.count();
+    }
+  };
   auto timing_canonical_algorithms = [&]() -> void {
     std::vector<permutalib::Face> ListF;
     for (int64_t iter = 0; iter < n_iter; iter++) {
@@ -110,8 +128,14 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
       (void)eG.ExhaustiveCanonicalImage(f);
     }
     double time_exhaustive_canonic = double(time.eval());
-    double frac = time_canonic / time_exhaustive_canonic;
-    std::cerr << "|eG|=" << eG.size() << " frac=" << frac << " |canonic|=" << time_canonic << " |exhaust|=" << time_exhaustive_canonic << "\n";
+    for (auto & f : ListF) {
+      (void)eG.StoreCanonicalImage(f);
+    }
+    double time_store_canonic = double(time.eval());
+    double frac1 = time_canonic / time_exhaustive_canonic;
+    double frac2 = time_exhaustive_canonic / time_store_canonic;
+    double frac3 = time_canonic / time_store_canonic;
+    std::cerr << "|eG|=" << eG.size() << " frac3=" << frac3 << " frac1=" << frac1 << " frac2=" << frac2 << " |canonic|=" << time_canonic << " |exhaust|=" << time_exhaustive_canonic << " |store|=" << time_store_canonic << "\n";
   };
   auto check_representative = [&]() -> void {
     for (int64_t iter = 0; iter < n_iter; iter++) {
@@ -156,6 +180,8 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
     check_canonical();
   if (opt == "check_exhaustive_canonical")
     check_exhaustive_canonical();
+  if (opt == "check_store_canonical")
+    check_store_canonical();
   if (opt == "timing_canonical_algorithms")
     timing_canonical_algorithms();
   if (opt == "check_representative")
@@ -170,6 +196,7 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
     bench_pointrepresentative();
     check_canonical();
     check_exhaustive_canonical();
+    check_store_canonical();
     check_representative();
     check_stabilizer();
   }
@@ -189,8 +216,9 @@ int main(int argc, char *argv[]) {
         "canonical",        "stabilizer",
         "pointstabilizer",  "pointrepresentative",
         "check_canonical",   "check_exhaustive_canonical",
-        "timing_canonical_algorithms", "check_representative",
-        "check_stabilizer", "all"};
+        "check_store_canonical", "timing_canonical_algorithms",
+        "check_representative", "check_stabilizer",
+        "all"};
     if (argc != 4 && argc != 5) {
       std::cerr << "BenchmarkingPermutalib [InputFile] [limit] [opt]\n";
       std::cerr << "or\n";

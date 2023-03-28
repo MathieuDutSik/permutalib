@@ -116,12 +116,22 @@ public:
 private:
   StabChain<Telt, Tidx_label> S;
   Tint size_tint;
-  bool use_exhaustive_canonic;
+  bool use_store_canonic;
   void set_exhaustive_canonic() {
-    if (size_tint < 200)
-      use_exhaustive_canonic = true;
+    if (size_tint < 2000)
+      use_store_canonic = true;
     else
-      use_exhaustive_canonic = false;
+      use_store_canonic = false;
+  }
+  mutable std::vector<Telt> l_group_elt;
+  void compute_all_element() const {
+    IteratorType<Telt,Tidx_label> iter = get_begin_iterator(S);
+    IteratorType<Telt,Tidx_label> iter_end = get_end_iterator(S);
+    while (iter != iter_end) {
+      l_group_elt.push_back(*iter);
+      iter++;
+    }
+    
   }
 public:
   // constructors
@@ -211,9 +221,21 @@ public:
   Face ExhaustiveCanonicalImage(const Face &f) const {
     return exhaustive_minimum_face_orbit<Telt,Tidx_label>(S, f);
   }
+  Face StoreCanonicalImage(const Face &f) const {
+    if (l_group_elt.size() == 0) {
+      compute_all_element();
+    }
+    Face f_minimum = f;
+    for (auto const& eElt : l_group_elt) {
+      Face f_img = OnSets(f, eElt);
+      if (f_img < f_minimum)
+        f_minimum = f_img;
+    }
+    return f_minimum;
+  }
   Face OptCanonicalImage(const Face &f) const {
-    if (use_exhaustive_canonic)
-      return exhaustive_minimum_face_orbit<Telt,Tidx_label>(S, f);
+    if (use_store_canonic)
+      return StoreCanonicalImage(f);
     else
       return Kernel_CanonicalImage<Telt, Tidx_label, Tint>(S, f);
   }
