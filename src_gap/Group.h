@@ -237,17 +237,27 @@ public:
       compute_all_element();
     }
     Tidx n = n_act();
+    auto comp=[&](Face const& f1, Face const& f2) -> int8_t {
+      for (Tidx i=0; i<n; i++) {
+        if (f1[i] < f2[i])
+          return 1;
+        if (f1[i] > f2[i])
+          return -1;
+      }
+      return 0;
+    };
     Face f_minimum(n);
     for (Tidx i=0; i<n; i++)
       f_minimum[i] = 1;
     int size = 0;
     for (auto const& eElt : l_group_elt) {
       Face f_img = OnSets(f, eElt);
-      if (f_img < f_minimum) {
+      int8_t test = comp(f_img, f_minimum);
+      if (test == 1) {
         f_minimum = f_img;
         size = 1;
       } else {
-        if (f_img == f_minimum) {
+        if (test == 0) {
           size++;
         }
       }
