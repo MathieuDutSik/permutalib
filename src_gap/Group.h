@@ -252,7 +252,9 @@ public:
         }
       }
     }
-    return {f_minimum, Tint(size)};
+    Tint stabSize(size);
+    Tint orbitSize = size_tint / stabSize;
+    return {f_minimum, orbitSize};
   }
   Face OptCanonicalImage(const Face &f) const {
     if (use_store_canonic)

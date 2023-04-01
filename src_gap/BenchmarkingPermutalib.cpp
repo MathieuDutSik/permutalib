@@ -132,6 +132,9 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
         Tint eProd = eStab.size() * pair.second;
         if (eProd != eG.size()) {
           std::cerr << "Discrepancy in the order size\n";
+          std::cerr << "set_can1 = " << set_can1 << "\n";
+          std::cerr << "|eStab|=" << eStab.size() << "\n";
+          std::cerr << "|orbit|=" << pair.second << "\n";
           std::cerr << "eProd=" << eProd << "\n";
           std::cerr << " |eG|=" << eG.size() << "\n";
           throw permutalib::PermutalibException{1};
