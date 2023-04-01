@@ -62,7 +62,7 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
           std::cerr << "Canonicalization failed\n";
           throw permutalib::PermutalibException{1};
         }
-        std::pair<permutalib::Face,Tgroup> pairCan = eG.PairCanonicalImageStabilizer(eFace2);
+        std::pair<permutalib::Face,Tgroup> pairCan = eG.PairCanonicalImageSubgroupStabilizer(eFace2);
         if (pairCan.first != set_can2) {
           std::cerr << "We fail at that obvious step\n";
           throw permutalib::PermutalibException{1};
