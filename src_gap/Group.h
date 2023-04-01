@@ -276,7 +276,7 @@ public:
     std::pair<Face,StabChain<Telt,Tidx_label>> pairCan = CanonicalImage_SubgroupStabilizer<Telt,Tidx_label,Tint>(S, f);
     return {std::move(pairCan.first), Group(std::move(pairCan.second))};
   }
-  std::pair<Face,Tint> PairCanonicalImageOrbitSize(const Face &f) const {
+  std::pair<Face,Tint> CanonicalImageOrbitSize(const Face &f) const {
     std::pair<Face,StabChain<Telt,Tidx_label>> pairCan = CanonicalImage_ConjugateStabilizer<Telt,Tidx_label,Tint>(S, f);
     Tint StabSize = Order<Telt, Tidx_label, Tint>(pairCan.second);
     Tint OrbitSize = size_tint / StabSize;
@@ -286,7 +286,7 @@ public:
     if (use_store_canonic)
       return StoreCanonicalImageOrbitSize(f);
     else
-      return PairCanonicalImageOrbitSize(f);
+      return CanonicalImageOrbitSize(f);
   }
   Telt rand() const {
     return RandomElement(Kernel_GeneratorsOfGroup(S), S->comm->identity);
