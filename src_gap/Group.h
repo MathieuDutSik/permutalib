@@ -232,6 +232,28 @@ public:
     }
     return f_minimum;
   }
+  std::pair<Face,Tint> StoreCanonicalImageStabilizerSize(const Face &f) const {
+    if (l_group_elt.size() == 0) {
+      compute_all_element();
+    }
+    Tidx n = n_act();
+    Face f_minimum(n);
+    for (Tidx i=0; i<n; i++)
+      f_minimum[i] = 1;
+    int size = 0;
+    for (auto const& eElt : l_group_elt) {
+      Face f_img = OnSets(f, eElt);
+      if (f_img < f_minimum) {
+        f_minimum = f_img;
+        size = 1;
+      } else {
+        if (f_img == f_minimum) {
+          size++;
+        }
+      }
+    }
+    return {f_minimum, Tint(size)};
+  }
   Face OptCanonicalImage(const Face &f) const {
     if (use_store_canonic)
       return StoreCanonicalImage(f);
@@ -245,6 +267,12 @@ public:
   std::pair<Face,Tint> PairCanonicalImageStabilizerSize(const Face &f) const {
     std::pair<Face,StabChain<Telt,Tidx_label>> pairCan = CanonicalImage_ConjugateStabilizer<Telt,Tidx_label,Tint>(S, f);
     return {std::move(pairCan.first), Order<Telt, Tidx_label, Tint>(pairCan.second)};
+  }
+  Face OptCanonicalImageStabilizerSize(const Face &f) const {
+    if (use_store_canonic)
+      return StoreCanonicalImageStabilizerSize(f);
+    else
+      return PairCanonicalImageStabilizerSize(f);
   }
   Telt rand() const {
     return RandomElement(Kernel_GeneratorsOfGroup(S), S->comm->identity);
