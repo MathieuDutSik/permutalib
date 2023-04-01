@@ -149,7 +149,7 @@ template <typename Telt, typename Tidx_label, typename Tint>
 std::pair<std::vector<typename Telt::Tidx>, StabChain<Telt, Tidx_label>>
 NewCanonicImage(StabChain<Telt, Tidx_label> const &g,
                 std::vector<typename Telt::Tidx> const &set,
-                StabChain<Telt, Tidx_label> const &k) {
+                StabChain<Telt, Tidx_label> const &k_group) {
   using Tidx = typename Telt::Tidx;
 #ifdef DEBUG_NSI
   std::cerr << "CPP NewCanonicImage : beginning\n";
@@ -274,7 +274,6 @@ NewCanonicImage(StabChain<Telt, Tidx_label> const &g,
     std::shared_ptr<Node> next;
     std::shared_ptr<Node> prev;
     std::shared_ptr<Node> parent;
-    //    Tidx selectedbaselength;
     // children
     Tidx childno;
     bool IsBoundChildren;
@@ -293,11 +292,11 @@ NewCanonicImage(StabChain<Telt, Tidx_label> const &g,
   std::cerr << "DEBUG MATCH set=" << GapStringIntVector(set) << "\n";
 #endif
   StabChain<Telt, Tidx_label> s = CopyStabChain(g);
-  StabChain<Telt, Tidx_label> l = Action<Telt, Tidx_label, Tint>(k, set);
+  StabChain<Telt, Tidx_label> l_group = Action<Telt, Tidx_label, Tint>(k_group, set);
   Tidx m = Tidx(set.size());
   Node root_v;
   root_v.image = set;
-  root_v.substab = l;
+  root_v.substab = l_group;
   root_v.deleted = false;
   root_v.next = nullptr;
   root_v.prev = nullptr;
@@ -805,9 +804,9 @@ NewCanonicImage(StabChain<Telt, Tidx_label> const &g,
   return {node->image, node->substab};
 }
 
-template <typename Telt, typename Tidx_label, typename Tint>
-std::pair<Face,StabChain<Telt,Tidx_label>> Kernel_CanonicalImagePair(StabChain<Telt, Tidx_label> const &g,
-                           Face const &set) {
+template <typename Telt, typename Tidx_label, typename Tint, typename F>
+std::pair<Face,StabChain<Telt,Tidx_label>> Kernel_GeneralCanonicalImagePair(StabChain<Telt, Tidx_label> const &g,
+                                                                            Face const &set, F f) {
   using Tidx = typename Telt::Tidx;
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   if (g->comm->n != Tidx(set.size())) {
@@ -832,17 +831,17 @@ std::pair<Face,StabChain<Telt,Tidx_label>> Kernel_CanonicalImagePair(StabChain<T
       pos++;
       aRow = set.find_next(aRow);
     }
-    StabChain<Telt, Tidx_label> k =
+    StabChain<Telt, Tidx_label> k_group =
         Kernel_Stabilizer_OnSets<Telt, Tidx_label, Tint>(g, set);
     std::pair<std::vector<Tidx>,StabChain<Telt,Tidx_label>> pairCan =
-        NewCanonicImage<Telt, Tidx_label, Tint>(g, set_i, k);
+        NewCanonicImage<Telt, Tidx_label, Tint>(g, set_i, k_group);
 #ifdef DEBUG_NSI
     std::cerr << "CPP eSetCan=" << GapStringIntVector(eSetCan) << "\n";
 #endif
     for (auto &eVal : pairCan.first) {
       ret[eVal] = 1;
     }
-    return {ret,pairCan.second};
+    return f(k_group, ret, pairCan);
   } else {
     // instead of building the complement, we do a simple iteration
     Face setC(siz);
@@ -857,22 +856,42 @@ std::pair<Face,StabChain<Telt,Tidx_label>> Kernel_CanonicalImagePair(StabChain<T
         pos++;
       }
     }
-    StabChain<Telt, Tidx_label> k =
+    StabChain<Telt, Tidx_label> k_group =
         Kernel_Stabilizer_OnSets<Telt, Tidx_label, Tint>(g, setC);
     std::pair<std::vector<Tidx>,StabChain<Telt,Tidx_label>> pairCan =
-        NewCanonicImage<Telt, Tidx_label, Tint>(g, set_i, k);
+        NewCanonicImage<Telt, Tidx_label, Tint>(g, set_i, k_group);
     for (size_t i = 0; i < siz; i++)
       ret[i] = 1;
     for (auto &eVal : pairCan.first)
       ret[eVal] = 0;
-    return {ret,pairCan.second};
+    return f(k_group, ret, pairCan);
   }
+}
+
+template <typename Telt, typename Tidx_label, typename Tint>
+std::pair<Face,StabChain<Telt,Tidx_label>> CanonicalImage_SubgroupStabilizer(StabChain<Telt, Tidx_label> const &g,
+                                                                             Face const &set) {
+  using Tidx = typename Telt::Tidx;
+  auto f=[&]([[maybe_unused]] StabChain<Telt, Tidx_label> const& k, Face const& ret, std::pair<std::vector<Tidx>,StabChain<Telt,Tidx_label>> const& pair) -> std::pair<Face,StabChain<Telt,Tidx_label>> {
+    return {ret, pair.second};
+  };
+  return Kernel_GeneralCanonicalImagePair<Telt,Tidx_label,Tint>(g, set, f);
+}
+
+template <typename Telt, typename Tidx_label, typename Tint>
+std::pair<Face,StabChain<Telt,Tidx_label>> CanonicalImage_ConjugateStabilizer(StabChain<Telt, Tidx_label> const &g,
+                                                                             Face const &set) {
+  using Tidx = typename Telt::Tidx;
+  auto f=[&](StabChain<Telt, Tidx_label> const& k, Face const& ret, [[maybe_unused]] std::pair<std::vector<Tidx>,StabChain<Telt,Tidx_label>> const& pair) -> std::pair<Face,StabChain<Telt,Tidx_label>> {
+    return {ret, k};
+  };
+  return Kernel_GeneralCanonicalImagePair<Telt,Tidx_label,Tint>(g, set, f);
 }
 
 template <typename Telt, typename Tidx_label, typename Tint>
 Face Kernel_CanonicalImage(StabChain<Telt, Tidx_label> const &g,
                            Face const &set) {
-  return Kernel_CanonicalImagePair<Telt,Tidx_label,Tint>(g, set).first;
+  return CanonicalImage_SubgroupStabilizer<Telt,Tidx_label,Tint>(g, set).first;
 }
 
 // clang-format off

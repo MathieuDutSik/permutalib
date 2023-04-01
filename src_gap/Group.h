@@ -240,7 +240,7 @@ public:
       return Kernel_CanonicalImage<Telt, Tidx_label, Tint>(S, f);
   }
   std::pair<Face,Group<Telt,Tint>> PairCanonicalImageStabilizer(const Face &f) const {
-    std::pair<Face,StabChain<Telt,Tidx_label>> pairCan = Kernel_CanonicalImagePair<Telt,Tidx_label,Tint>(S, f);
+    std::pair<Face,StabChain<Telt,Tidx_label>> pairCan = CanonicalImage_SubgroupStabilizer<Telt,Tidx_label,Tint>(S, f);
     return {std::move(pairCan.first), Group(std::move(pairCan.second))};
   }
   Telt rand() const {
