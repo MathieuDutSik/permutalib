@@ -232,7 +232,7 @@ public:
     }
     return f_minimum;
   }
-  std::pair<Face,Tint> StoreCanonicalImageStabilizerSize(const Face &f) const {
+  std::pair<Face,Tint> StoreCanonicalImageOrbitSize(const Face &f) const {
     if (l_group_elt.size() == 0) {
       compute_all_element();
     }
@@ -264,15 +264,17 @@ public:
     std::pair<Face,StabChain<Telt,Tidx_label>> pairCan = CanonicalImage_SubgroupStabilizer<Telt,Tidx_label,Tint>(S, f);
     return {std::move(pairCan.first), Group(std::move(pairCan.second))};
   }
-  std::pair<Face,Tint> PairCanonicalImageStabilizerSize(const Face &f) const {
+  std::pair<Face,Tint> PairCanonicalImageOrbitSize(const Face &f) const {
     std::pair<Face,StabChain<Telt,Tidx_label>> pairCan = CanonicalImage_ConjugateStabilizer<Telt,Tidx_label,Tint>(S, f);
-    return {std::move(pairCan.first), Order<Telt, Tidx_label, Tint>(pairCan.second)};
+    Tint StabSize = Order<Telt, Tidx_label, Tint>(pairCan.second);
+    Tint OrbitSize = size_tint / StabSize;
+    return {std::move(pairCan.first), OrbitSize};
   }
-  Face OptCanonicalImageStabilizerSize(const Face &f) const {
+  std::pair<Face,Tint> OptCanonicalImageOrbitSize(const Face &f) const {
     if (use_store_canonic)
-      return StoreCanonicalImageStabilizerSize(f);
+      return StoreCanonicalImageOrbitSize(f);
     else
-      return PairCanonicalImageStabilizerSize(f);
+      return PairCanonicalImageOrbitSize(f);
   }
   Telt rand() const {
     return RandomElement(Kernel_GeneratorsOfGroup(S), S->comm->identity);

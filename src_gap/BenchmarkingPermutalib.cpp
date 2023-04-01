@@ -8,6 +8,7 @@
 
 template<typename Tgroup>
 void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter, size_t & siz_control) {
+  using Tint = typename Tgroup::Tint;
   using Telt = typename Tgroup::Telt;
   using Tidx = typename Telt::Tidx;
   Tidx n = eG.n_act();
@@ -113,6 +114,32 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
       siz_control += eFace1.count();
     }
   };
+  auto check_canonical_orbitsize = [&]() -> void {
+    for (int64_t iter = 0; iter < n_iter; iter++) {
+      permutalib::Face eFace1 = random_face(n);
+      permutalib::Face set_can1 = eG.OptCanonicalImage(eFace1);
+      for (int i = 0; i < 4; i++) {
+        Telt u = eG.random();
+        permutalib::Face eFace2 = OnSets(eFace1, u);
+        std::pair<permutalib::Face,Tint> pair = eG.OptCanonicalImageOrbitSize(eFace2);
+        if (set_can1 != pair.first) {
+          std::cerr << "ExhaustiveCanonicalization failed\n";
+          std::cerr << "set_can1   = " << set_can1 << "\n";
+          std::cerr << "pair.first = " << pair.first << "\n";
+          throw permutalib::PermutalibException{1};
+        }
+        Tgroup eStab = eG.Stabilizer_OnSets(eFace2);
+        Tint eProd = eStab.size() * pair.second;
+        if (eProd != eG.size()) {
+          std::cerr << "Discrepancy in the order size\n";
+          std::cerr << "eProd=" << eProd << "\n";
+          std::cerr << " |eG|=" << eG.size() << "\n";
+          throw permutalib::PermutalibException{1};
+        }
+      }
+      siz_control += eFace1.count();
+    }
+  };
   auto timing_canonical_algorithms = [&]() -> void {
     std::vector<permutalib::Face> ListF;
     for (int64_t iter = 0; iter < n_iter; iter++) {
@@ -180,6 +207,8 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
     check_canonical();
   if (opt == "check_exhaustive_canonical")
     check_exhaustive_canonical();
+  if (opt == "check_canonical_orbitsize")
+    check_canonical_orbitsize();
   if (opt == "check_store_canonical")
     check_store_canonical();
   if (opt == "timing_canonical_algorithms")
@@ -196,6 +225,7 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
     bench_pointrepresentative();
     check_canonical();
     check_exhaustive_canonical();
+    check_canonical_orbitsize();
     check_store_canonical();
     check_representative();
     check_stabilizer();
@@ -216,7 +246,8 @@ int main(int argc, char *argv[]) {
         "canonical",        "stabilizer",
         "pointstabilizer",  "pointrepresentative",
         "check_canonical",   "check_exhaustive_canonical",
-        "check_store_canonical", "timing_canonical_algorithms",
+        "check_store_canonical", "check_canonical_orbitsize",
+        "timing_canonical_algorithms",
         "check_representative", "check_stabilizer",
         "all"};
     if (argc != 4 && argc != 5) {
