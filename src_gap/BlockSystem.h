@@ -92,20 +92,22 @@ BlockDecomposition<Tidx> SpanBlockDecomposition(std::vector<Telt> const &LGen,
   Tidx miss_val = std::numeric_limits<Tidx>::max();
   std::vector<std::vector<Tidx>> ListBlocks{eBlock};
   std::vector<Tidx> map_vert_block(n_vert, miss_val);
-  /*
+#ifdef DEBUG_BLOCK_SYSTEM
   auto prt_status=[&](std::string const& s) -> void {
     std::cerr << s << " ListBlocks =";
     for (auto & eBlock : ListBlocks)
       std::cerr << " " << GapStringIntVector(eBlock);
     std::cerr << " map_v_b=" << GapStringIntVector(map_vert_block) << "\n";
   };
-  */
+#endif
   for (auto &val : eBlock)
     map_vert_block[val] = 0;
   std::unordered_set<Tidx> ListBlkMatch;
   auto insert = [&](std::vector<Tidx> const &vect) -> bool {
-    //    prt_status("begin");
-    //    std::cerr << "vect = " << GapStringIntVector(vect) << "\n";
+#ifdef DEBUG_BLOCK_SYSTEM
+    prt_status("begin");
+    std::cerr << "vect = " << GapStringIntVector(vect) << "\n";
+#endif
     ListBlkMatch.clear();
     std::vector<Tidx> NewV;
     for (auto &val : vect) {
@@ -156,17 +158,25 @@ BlockDecomposition<Tidx> SpanBlockDecomposition(std::vector<Telt> const &LGen,
       }
       ListBlocks = NewListBlocks;
       map_vert_block = new_map_vert_block;
-      //      prt_status("3");
+#ifdef DEBUG_BLOCK_SYSTEM
+      prt_status("3");
+#endif
       return true;
     }
   };
   auto merge_operation = [&]() -> bool {
     size_t n_block = ListBlocks.size();
-    //    std::cerr << "n_block=" << n_block << "\n";
+#ifdef DEBUG_BLOCK_SYSTEM
+    std::cerr << "n_block=" << n_block << "\n";
+#endif
     for (size_t iBlock = 0; iBlock < n_block; iBlock++) {
-      //      std::cerr << "iBlock=" << iBlock << " / " << n_block << "\n";
+#ifdef DEBUG_BLOCK_SYSTEM
+      std::cerr << "iBlock=" << iBlock << " / " << n_block << "\n";
+#endif
       for (auto &eGen : LGen) {
-        //        std::cerr << "  eGen=" << eGen << "\n";
+#ifdef DEBUG_BLOCK_SYSTEM
+        std::cerr << "  eGen=" << eGen << "\n";
+#endif
         std::vector<Tidx> BlockImg;
         BlockImg.reserve(ListBlocks[iBlock].size());
         for (auto &ePt : ListBlocks[iBlock]) {
@@ -174,7 +184,9 @@ BlockDecomposition<Tidx> SpanBlockDecomposition(std::vector<Telt> const &LGen,
           BlockImg.push_back(ePtImg);
         }
         if (insert(BlockImg)) {
-          //          prt_status("insert returns false");
+#ifdef DEBUG_BLOCK_SYSTEM
+          prt_status("insert returns false");
+#endif
           return false;
         }
       }
@@ -194,7 +206,9 @@ FindIntermediateBlockDecomposition_choice(
     std::vector<Telt> const &LGen, BlockDecomposition<Tidx> const &BlkDec1,
     BlockDecomposition<Tidx> const &BlkDec2, Tidx const &iBlk1,
     Tidx const &jBlk1) {
-  //  std::cerr << "iBlk1=" << iBlk1 << " jBlk1=" << jBlk1 << "\n";
+#ifdef DEBUG_BLOCK_SYSTEM
+  std::cerr << "iBlk1=" << iBlk1 << " jBlk1=" << jBlk1 << "\n";
+#endif
   std::vector<Tidx> eBlock;
   for (auto &val : BlkDec1.ListBlocks[iBlk1])
     eBlock.push_back(val);
@@ -241,7 +255,7 @@ ComputeSequenceBlockDecomposition(std::vector<Telt> const &LGen,
   ListBlk.push_back(SuperfineBlockDecomposition(n_vert));
   ListBlk.push_back(SupercoarseBlockDecomposition(n_vert));
   std::vector<uint8_t> status{0};
-  /*
+#ifdef DEBUG_BLOCK_SYSTEM
   auto prt_status=[&]() -> void {
     std::cerr << "status =";
     for (auto & val : status)
@@ -253,15 +267,18 @@ ComputeSequenceBlockDecomposition(std::vector<Telt> const &LGen,
       pos++;
     }
   };
-  */
-  //  prt_status();
+  prt_status();
+#endif
   auto refine = [&]() -> bool {
     size_t len = ListBlk.size() - 1;
     auto iter = ListBlk.begin();
-    //    std::cerr << "|ListBlk|=" << ListBlk.size() << " |status|=" <<
-    //    status.size() << "\n";
+#ifdef DEBUG_BLOCK_SYSTEM
+    std::cerr << "|ListBlk|=" << ListBlk.size() << " |status|=" << status.size() << "\n";
+#endif
     for (size_t i = 0; i < len; i++) {
-      //      std::cerr << "refine i=" << i << " / " << len << "\n";
+#ifdef DEBUG_BLOCK_SYSTEM
+      std::cerr << "refine i=" << i << " / " << len << "\n";
+#endif
       if (status[i] == 0) {
         BlockDecomposition<Tidx> const &BlkDec1 = *iter;
         auto iterInc = iter;
@@ -274,9 +291,11 @@ ComputeSequenceBlockDecomposition(std::vector<Telt> const &LGen,
         } else {
           status.insert(status.begin() + i, 0);
           ListBlk.insert(iterInc, *opt);
-          //          std::cerr << "  BlcDec1=" << BlkDec1 << "\n";
-          //          std::cerr << "  BlcDec2=" << BlkDec2 << "\n";
-          //          std::cerr << "  BlcDecS=" << *opt << "\n";
+#ifdef DEBUG_BLOCK_SYSTEM
+          std::cerr << "  BlcDec1=" << BlkDec1 << "\n";
+          std::cerr << "  BlcDec2=" << BlkDec2 << "\n";
+          std::cerr << "  BlcDecS=" << *opt << "\n";
+#endif
           return false;
         }
       }
@@ -287,7 +306,9 @@ ComputeSequenceBlockDecomposition(std::vector<Telt> const &LGen,
   while (true) {
     if (refine())
       break;
-    //    prt_status();
+#ifdef DEBUG_BLOCK_SYSTEM
+    prt_status();
+#endif
   }
   std::vector<BlockDecomposition<Tidx>> l_Blk;
   for (auto &eBlkDec : ListBlk)
@@ -367,7 +388,9 @@ Blocks(const std::vector<Telt> &acts, const typename Telt::Tidx &n) {
   Telt rnd = one;
   std::vector<std::vector<Tidx>> blocks;
   while (true) {
+#ifdef DEBUG_BLOCK_SYSTEM
     std::cerr << "Passing by the while loop changed=" << changed << "\n";
+#endif
     // compute such an $H$ by taking random  Schreier generators  of $G_1$
     // and stop if 2 successive generators dont change the orbits any more
     while (changed < 2) {
@@ -378,7 +401,9 @@ Blocks(const std::vector<Telt> &acts, const typename Telt::Tidx &n) {
         i_siz = i_siz / 2;
       }
       Telt gen = rnd;
+#ifdef DEBUG_BLOCK_SYSTEM
       std::cerr << "gen=" << gen << "\n";
+#endif
       Tidx d1g = PowAct(Tidx(0), gen);
       while (d1g != 0) {
         Telt tr = trans[d1g];
@@ -413,7 +438,9 @@ Blocks(const std::vector<Telt> &acts, const typename Telt::Tidx &n) {
           }
         }
       }
+#ifdef DEBUG_BLOCK_SYSTEM
       std::cerr << "changed=" << changed << "\n";
+#endif
     }
     // take arbitrary point <cur>,  and an element <gen> taking 1 to <cur>
     while (eql[cur] != cur) {
@@ -426,10 +453,14 @@ Blocks(const std::vector<Telt> &acts, const typename Telt::Tidx &n) {
       img = PowAct(img, trans[img]);
     }
     gen_list = Reversed(gen_list);
+#ifdef DEBUG_BLOCK_SYSTEM
     std::cerr << "|gen_list|=" << gen_list.size() << "\n";
+#endif
     // compute an alleged block as orbit of 1 under $< H, gen >$
     Tidx pnt = cur;
+#ifdef DEBUG_BLOCK_SYSTEM
     std::cerr << "cur=" << cur << "\n";
+#endif
     while (pnt != 0) {
       // compute the representative of the block containing the image
       img = pnt;
@@ -486,7 +517,9 @@ Blocks(const std::vector<Telt> &acts, const typename Telt::Tidx &n) {
     if (block.size() == orbit.size()) {
       return blocks;
     }
+#ifdef DEBUG_BLOCK_SYSTEM
     std::cerr << "|block|=" << block.size() << "\n";
+#endif
     // quick test to see if the orbit can be a block
     if (orbit.size() % block.size() != 0) {
       changed = -1000;
@@ -527,12 +560,16 @@ Blocks(const std::vector<Telt> &acts, const typename Telt::Tidx &n) {
       // on to the next block in the orbit
       i++;
     }
+#ifdef DEBUG_BLOCK_SYSTEM
     std::cerr << "Before until changed=" << changed << "\n";
+#endif
     if (changed >= 0) {
       break;
     }
   }
+#ifdef DEBUG_BLOCK_SYSTEM
   std::cerr << "|blocks|=" << blocks.size() << "\n";
+#endif
   // return the block system
   return blocks;
 }
