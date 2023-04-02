@@ -132,6 +132,7 @@ private:
       iter++;
     }
   }
+  mutable std::optional<std::vector<Telt>> SmallGenSet;
 public:
   // constructors
   Group(const StabChain<Telt, Tidx_label> &_S)
@@ -297,7 +298,10 @@ public:
   bool IsPrimitive() const { return Kernel_IsPrimitive(S); }
   bool IsCyclic() const { return Kernel_IsCyclic<Telt, Tidx_label, Tint>(S); }
   std::vector<Telt> SmallGeneratingSet() const {
-    return Kernel_SmallGeneratingSet<Telt, Tidx_label, Tint>(S);
+    if (*SmallGenSet) {
+      SmallGenSet = Kernel_SmallGeneratingSet<Telt, Tidx_label, Tint>(S);
+    }
+    return *SmallGenSet;
   }
   // Normal structure
   bool IsNormalSubgroup(const Group<Telt, Tint> &U) const {
