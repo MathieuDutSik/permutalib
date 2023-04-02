@@ -303,6 +303,13 @@ public:
     }
     return *SmallGenSet;
   }
+  // Compute cosets
+  std::vector<Telt> LeftTransversal_Direct(const Group<Telt,Tint>& H) const {
+    return Kernel_LeftTransversal_Direct(S, H.S);
+  }
+  std::vector<Telt> RightTransversal_Direct(const Group<Telt,Tint>& H) const {
+    return Kernel_RightTransversal_Direct(S, H.S);
+  }
   // Normal structure
   bool IsNormalSubgroup(const Group<Telt, Tint> &U) const {
     return Kernel_IsNormalSubgroup(S, U.S);
