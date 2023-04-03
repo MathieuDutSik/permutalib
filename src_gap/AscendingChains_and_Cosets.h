@@ -110,20 +110,27 @@ Kernel_LeftTransversal_Direct(StabChain<Telt, Tidx_label> const &G,
   size_t pos = 0;
   while (true) {
     size_t len = ListTransversal.size();
+    std::cerr << "pos=" << pos << " len=" << len << "\n";
 #ifndef CHECK_COSET_ENUMERATION
     Tint n_coset = len;
     if (n_coset == index) {
-      std::cerr << "The enumeration found a wrong number of cosets\n";
-      throw PermutalibException{1};
+      // Early termination is possible
+      break;
     }
 #endif
     if (pos == len)
       break;
     for (size_t idx = pos; idx < len; idx++) {
-      Telt const &x = ListTransversal[idx];
+      // Copy is needed because the insertion into ListTransversal
+      // invalidates the reference.
+      Telt eTrans = ListTransversal[idx];
+      std::cerr << "idx=" << idx << " eTrans=" << eTrans << "\n";
       for (auto &eGen : LGen) {
-        Telt eProd = eGen * x;
+        std::cerr << "eGen=" << eGen << "\n";
+        Telt eProd = eGen * eTrans;
+        std::cerr << "eProd=" << eProd << "\n";
         fInsert(eProd);
+        std::cerr << "After fInsert\n";
       }
     }
     pos = len;
