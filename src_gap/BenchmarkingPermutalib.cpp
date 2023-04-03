@@ -114,6 +114,36 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
       siz_control += eFace1.count();
     }
   };
+  auto check_canonical_initialtriv_algorithm=[&]() -> void {
+    for (int64_t iter = 0; iter < n_iter; iter++) {
+      permutalib::Face eFace1 = random_face(n);
+      permutalib::Face set_can1 = eG.CanonicalImageInitialTriv(eFace1);
+      for (int i = 0; i < 4; i++) {
+        Telt u = eG.random();
+        permutalib::Face eFace2 = OnSets(eFace1, u);
+        permutalib::Face set_can2 = eG.CanonicalImageInitialTriv(eFace2);
+        if (set_can1 != set_can2) {
+          std::cerr << "ExhaustiveCanonicalization failed\n";
+          std::cerr << "set_can1=" << set_can1 << "\n";
+          std::cerr << "set_can2=" << set_can2 << "\n";
+          throw permutalib::PermutalibException{1};
+        }
+      }
+      siz_control += eFace1.count();
+    }
+  };
+  auto check_canonical_algorithm=[&]() -> void {
+    for (int64_t iter = 0; iter < n_iter; iter++) {
+      permutalib::Face eFace1 = random_face(n);
+      permutalib::Face set_canA = eG.CanonicalImage(eFace1);
+      permutalib::Face set_canB = eG.CanonicalImageInitialTriv(eFace1);
+      if (set_canA != set_canB) {
+        std::cerr << "Both algorithms return different results\n";
+        throw permutalib::PermutalibException{1};
+      }
+      siz_control += eFace1.count();
+    }
+  };
   auto check_canonical_orbitsize = [&]() -> void {
     for (int64_t iter = 0; iter < n_iter; iter++) {
       permutalib::Face eFace1 = random_face(n);
@@ -245,8 +275,12 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
     check_canonical();
   if (opt == "check_exhaustive_canonical")
     check_exhaustive_canonical();
+  if (opt == "check_canonical_algorithm")
+    check_canonical_algorithm();
   if (opt == "check_canonical_orbitsize")
     check_canonical_orbitsize();
+  if (opt == "check_canonical_initialtriv_algorithm")
+    check_canonical_initialtriv_algorithm();
   if (opt == "approximate_check_random_element")
     approximate_check_random_element();
   if (opt == "check_right_cosets")
@@ -266,6 +300,8 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
     bench_pointstabilizer();
     bench_pointrepresentative();
     check_canonical();
+    check_canonical_algorithm();
+    check_canonical_initialtriv_algorithm();
     approximate_check_random_element();
     check_right_cosets();
     check_exhaustive_canonical();
@@ -292,6 +328,7 @@ int main(int argc, char *argv[]) {
         "check_canonical",   "check_exhaustive_canonical",
         "check_store_canonical", "check_canonical_orbitsize",
         "approximate_check_random_element",
+        "check_canonical_algorithm", "check_canonical_initialtriv_algorithm",
         "timing_canonical_algorithms", "check_right_cosets",
         "check_representative", "check_stabilizer",
         "all"};

@@ -831,7 +831,7 @@ std::pair<Face,StabChain<Telt,Tidx_label>> Kernel_GeneralCanonicalImagePair(Stab
       pos++;
       aRow = set.find_next(aRow);
     }
-    StabChain<Telt, Tidx_label> k_group =
+    StabChain<Telt, Tidx_label> k_group = 
         Kernel_Stabilizer_OnSets<Telt, Tidx_label, Tint>(g, set);
     std::pair<std::vector<Tidx>,StabChain<Telt,Tidx_label>> pairCan =
         NewCanonicImage<Telt, Tidx_label, Tint>(g, set_i, k_group);
@@ -865,6 +865,67 @@ std::pair<Face,StabChain<Telt,Tidx_label>> Kernel_GeneralCanonicalImagePair(Stab
     for (auto &eVal : pairCan.first)
       ret[eVal] = 0;
     return f(k_group, ret, pairCan);
+  }
+}
+
+template <typename Telt, typename Tidx_label, typename Tint>
+Face Kernel_GeneralCanonicalInitialTriv(StabChain<Telt, Tidx_label> const &g, Face const &set) {
+  using Tidx = typename Telt::Tidx;
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+  if (g->comm->n != Tidx(set.size())) {
+    std::cerr << "The set set should have the same size as the number of "
+                 "elements on which g acts\n";
+    std::cerr << "g->comm->n=" << int(g->comm->n) << " |set|=" << set.size()
+              << "\n";
+    throw PermutalibException{1};
+  }
+#endif
+  if (set.count() == 0 || set.count() == set.size())
+    return set;
+  size_t siz = set.size();
+  Face ret(siz);
+  size_t cnt = set.count();
+  Telt id = g->comm->identity;
+  StabChain<Telt, Tidx_label> k_group = EmptyStabChain<Telt, Tidx_label>(id);
+  if (2 * cnt <= siz) {
+    std::vector<Tidx> set_i(cnt);
+    size_t pos = 0;
+    boost::dynamic_bitset<>::size_type aRow = set.find_first();
+    while (aRow != boost::dynamic_bitset<>::npos) {
+      set_i[pos] = Tidx(aRow);
+      pos++;
+      aRow = set.find_next(aRow);
+    }
+    std::pair<std::vector<Tidx>,StabChain<Telt,Tidx_label>> pairCan =
+        NewCanonicImage<Telt, Tidx_label, Tint>(g, set_i, k_group);
+#ifdef DEBUG_NSI
+    std::cerr << "CPP eSetCan=" << GapStringIntVector(eSetCan) << "\n";
+#endif
+    for (auto &eVal : pairCan.first) {
+      ret[eVal] = 1;
+    }
+    return ret;
+  } else {
+    // instead of building the complement, we do a simple iteration
+    Face setC(siz);
+    std::vector<Tidx> set_i(siz - cnt);
+    Tidx siz_i = Tidx(siz);
+    size_t pos = 0;
+    for (Tidx i = 0; i < siz_i; i++) {
+      int val = set[i];
+      setC[i] = 1 - val;
+      if (val == 0) {
+        set_i[pos] = i;
+        pos++;
+      }
+    }
+    std::pair<std::vector<Tidx>,StabChain<Telt,Tidx_label>> pairCan =
+        NewCanonicImage<Telt, Tidx_label, Tint>(g, set_i, k_group);
+    for (size_t i = 0; i < siz; i++)
+      ret[i] = 1;
+    for (auto &eVal : pairCan.first)
+      ret[eVal] = 0;
+    return ret;
   }
 }
 

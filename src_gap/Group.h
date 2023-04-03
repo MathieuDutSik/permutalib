@@ -275,6 +275,9 @@ public:
     else
       return CanonicalImageOrbitSize(f);
   }
+  Face CanonicalImageInitialTriv(const Face &f) const {
+    return Kernel_GeneralCanonicalInitialTriv<Telt, Tidx_label, Tint>(S, f);
+  }
   // Action on points or sets
   Group<Telt, Tint> Stabilizer_OnPoints(const Tidx &x) const {
     return Group(Kernel_Stabilizer_OnPoints<Telt, Tidx_label, Tint>(S, x));
