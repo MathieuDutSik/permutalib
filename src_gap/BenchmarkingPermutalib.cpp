@@ -166,13 +166,15 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
     double offset = sum_pow2_d / min_sum_pow2;
     std::cerr << "   offset=" << offset << "\n";
   };
-  auto check_left_cosets = [&]() -> void {
+  auto check_right_cosets = [&]() -> void {
     for (int i=0; i<10; i++) {
       Tgroup eSubGRP = eG.RandomSubgroup();
       Tint index = eG.size() / eSubGRP.size();
-      std::cerr << "i=" << i << " |eG|=" << eG.size() << " |eSubGRP|=" << eSubGRP.size() << "\n";
+      std::cerr << "i=" << i << " |eG|=" << eG.size() << " |eSubGRP|=" << eSubGRP.size() << " index=" << index << "\n";
       if (index < 100) {
-        eG.CheckLeftTransversal_Direct(eSubGRP);
+        std::vector<Telt> ListTransversal = eG.RightTransversal_Direct(eSubGRP);
+        siz_control += ListTransversal.size();
+        eG.CheckRightTransversal_Direct(eSubGRP);
       }
     }
   };
@@ -247,8 +249,8 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
     check_canonical_orbitsize();
   if (opt == "approximate_check_random_element")
     approximate_check_random_element();
-  if (opt == "check_left_cosets")
-    check_left_cosets();
+  if (opt == "check_right_cosets")
+    check_right_cosets();
   if (opt == "check_store_canonical")
     check_store_canonical();
   if (opt == "timing_canonical_algorithms")
@@ -265,7 +267,7 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
     bench_pointrepresentative();
     check_canonical();
     approximate_check_random_element();
-    check_left_cosets();
+    check_right_cosets();
     check_exhaustive_canonical();
     check_canonical_orbitsize();
     check_store_canonical();
@@ -290,7 +292,7 @@ int main(int argc, char *argv[]) {
         "check_canonical",   "check_exhaustive_canonical",
         "check_store_canonical", "check_canonical_orbitsize",
         "approximate_check_random_element",
-        "timing_canonical_algorithms", "check_left_cosets",
+        "timing_canonical_algorithms", "check_right_cosets",
         "check_representative", "check_stabilizer",
         "all"};
     if (argc != 4 && argc != 5) {

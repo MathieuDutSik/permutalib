@@ -86,15 +86,18 @@ Kernel_AscendingChain(StabChain<Telt, Tidx_label> const &G) {
 /*
   U is a subgroup of G.
   We compute the left transversals g H
+  -----
+  THAT CODE BELOW IS BROKEN
 */
 template <typename Telt, typename Tidx_label, typename Tint>
 std::vector<Telt>
-Kernel_LeftTransversal_Direct(StabChain<Telt, Tidx_label> const &G,
-                              StabChain<Telt, Tidx_label> const &H) {
+Kernel_RightTransversal_Direct(StabChain<Telt, Tidx_label> const &G,
+                               StabChain<Telt, Tidx_label> const &H) {
   std::vector<Telt> ListTransversal;
   std::unordered_map<Telt, uint8_t> map;
   auto fInsert = [&](Telt const &x) -> void {
-    Telt x_can = SiftedPermutation(H, x);
+    Telt x_can = MinimalElementCosetStabChain(H, x);
+    //    std::cerr << "x=" << x << " x_can=" << x_can << "\n";
     uint8_t &pos = map[x_can];
     if (pos == 0) {
       pos = 1;
@@ -110,7 +113,7 @@ Kernel_LeftTransversal_Direct(StabChain<Telt, Tidx_label> const &G,
   size_t pos = 0;
   while (true) {
     size_t len = ListTransversal.size();
-    std::cerr << "pos=" << pos << " len=" << len << "\n";
+    //    std::cerr << "pos=" << pos << " len=" << len << "\n";
 #ifndef CHECK_COSET_ENUMERATION
     Tint n_coset = len;
     if (n_coset == index) {
@@ -124,13 +127,13 @@ Kernel_LeftTransversal_Direct(StabChain<Telt, Tidx_label> const &G,
       // Copy is needed because the insertion into ListTransversal
       // invalidates the reference.
       Telt eTrans = ListTransversal[idx];
-      std::cerr << "idx=" << idx << " eTrans=" << eTrans << "\n";
+      //      std::cerr << "idx=" << idx << " eTrans=" << eTrans << "\n";
       for (auto &eGen : LGen) {
-        std::cerr << "eGen=" << eGen << "\n";
-        Telt eProd = eGen * eTrans;
-        std::cerr << "eProd=" << eProd << "\n";
+        //        std::cerr << "eGen=" << eGen << "\n";
+        //        Telt eProd = eTrans * eGen;
+        Telt eProd = eTrans * eGen;
+        //        std::cerr << "Considering eProd=" << eProd << "\n";
         fInsert(eProd);
-        std::cerr << "After fInsert\n";
       }
     }
     pos = len;
@@ -138,6 +141,20 @@ Kernel_LeftTransversal_Direct(StabChain<Telt, Tidx_label> const &G,
 #ifdef CHECK_COSET_ENUMERATION
   Tint n_coset = ListTransversal.size();
   if (n_coset != index) {
+    std::cerr << "n_coset=" << n_coset << " index=" << index << "\n";
+    std::cerr << "G=[";
+    for (auto & eElt : get_all_elements(G))
+      std::cerr << " " << eElt;
+    std::cerr << " ]\n";
+    std::cerr << "H=[";
+    for (auto & eElt : get_all_elements(H))
+      std::cerr << " " << eElt;
+    std::cerr << " ]\n";
+    std::cerr << "ListTransversal=[";
+    for (auto & eElt : ListTransversal)
+      std::cerr << " " << eElt;
+    std::cerr << " ]\n";
+    
     std::cerr << "The enumeration found a wrong number of cosets\n";
     throw PermutalibException{1};
   }
@@ -151,9 +168,9 @@ Kernel_LeftTransversal_Direct(StabChain<Telt, Tidx_label> const &G,
 */
 template <typename Telt, typename Tidx_label, typename Tint>
 std::vector<Telt>
-Kernel_RightTransversal_Direct(StabChain<Telt, Tidx_label> const &G,
+Kernel_LeftTransversal_Direct(StabChain<Telt, Tidx_label> const &G,
                                StabChain<Telt, Tidx_label> const &H) {
-  std::vector<Telt> ListTransversal = Kernel_LeftTransversal_Direct(G, H);
+  std::vector<Telt> ListTransversal = Kernel_RightTransversal_Direct(G, H);
   size_t len = ListTransversal.size();
   std::vector<Telt> ListRet(len);
   for (size_t i = 0; i < len; i++)
@@ -162,15 +179,24 @@ Kernel_RightTransversal_Direct(StabChain<Telt, Tidx_label> const &G,
 }
 
 template <typename Telt, typename Tidx_label, typename Tint>
-void CheckLeftCosets(StabChain<Telt, Tidx_label> const &G,
+void CheckRightCosets(StabChain<Telt, Tidx_label> const &G,
                      StabChain<Telt, Tidx_label> const &H,
-                     std::vector<Telt> const& ListTransversal) {
+                     std::vector<Telt> const& ListRightTransversal) {
   std::vector<Telt> l_elt_g = get_all_elements(G);
   std::vector<Telt> l_elt_h = get_all_elements(H);
   std::unordered_set<Telt> set_elt;
-  for (auto & eElt : ListTransversal) {
+  size_t ProdSize = l_elt_h.size() * ListRightTransversal.size();
+  if (ProdSize != l_elt_g.size()) {
+    std::cerr << "|l_elt_g|=" << l_elt_g.size() << "\n";
+    std::cerr << "|l_elt_h|=" << l_elt_h.size() << "\n";
+    std::cerr << "|ListRightTransversal|=" << ListRightTransversal.size() << "\n";
+    std::cerr << "ProdSize=" << ProdSize << "\n";
+    std::cerr << "Discrepancy at the order level\n";
+    throw PermutalibException{1};
+  }
+  for (auto & eElt : ListRightTransversal) {
     for (auto & e_h : l_elt_h) {
-      Telt eProd = eElt * e_h;
+      Telt eProd = e_h * eElt;
       if (set_elt.count(eProd) == 1) {
         std::cerr << "The element eProd is already present\n";
         throw PermutalibException{1};

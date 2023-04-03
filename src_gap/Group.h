@@ -324,10 +324,10 @@ public:
   std::vector<Telt> RightTransversal_Direct(const Group<Telt,Tint>& H) const {
     return Kernel_RightTransversal_Direct<Telt,Tidx_label,Tint>(S, H.S);
   }
-  void CheckLeftTransversal_Direct(const Group<Telt,Tint>& H) const {
-    std::vector<Telt> ListTransversal = Kernel_LeftTransversal_Direct<Telt,Tidx_label,Tint>(S, H.S);
+  void CheckRightTransversal_Direct(const Group<Telt,Tint>& H) const {
+    std::vector<Telt> ListTransversal = Kernel_RightTransversal_Direct<Telt,Tidx_label,Tint>(S, H.S);
     std::cerr << "|eG|=" << this->size() << " |eSubGRP|=" << H.size() << " |ListTransveral|=" << ListTransversal.size() << "\n";
-    CheckLeftCosets<Telt,Tidx_label,Tint>(S, H.S, ListTransversal);
+    CheckRightCosets<Telt,Tidx_label,Tint>(S, H.S, ListTransversal);
   }
   // Normal structure
   bool IsNormalSubgroup(const Group<Telt, Tint> &U) const {
