@@ -92,7 +92,7 @@ std::vector<Telt>
 Kernel_LeftTransversal_Direct(StabChain<Telt, Tidx_label> const &G,
                               StabChain<Telt, Tidx_label> const &H) {
   std::vector<Telt> ListTransversal;
-  std::unordered_set<Telt, uint8_t> map;
+  std::unordered_map<Telt, uint8_t> map;
   auto fInsert = [&](Telt const &x) -> void {
     Telt x_can = SiftedPermutation(H, x);
     uint8_t &pos = map[x_can];
@@ -173,9 +173,6 @@ void CheckLeftCosets(StabChain<Telt, Tidx_label> const &G,
   }
 }
 
-
-
-  
 /*
   Functions depending on special data types.
 

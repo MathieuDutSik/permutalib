@@ -125,12 +125,7 @@ private:
   }
   mutable std::vector<Telt> l_group_elt;
   void compute_all_element() const {
-    IteratorType<Telt,Tidx_label> iter = get_begin_iterator(S);
-    IteratorType<Telt,Tidx_label> iter_end = get_end_iterator(S);
-    while (iter != iter_end) {
-      l_group_elt.push_back(*iter);
-      iter++;
-    }
+    l_group_elt = get_all_elements(S);
   }
   mutable std::optional<std::vector<Telt>> SmallGenSet;
 public:
@@ -164,6 +159,9 @@ public:
   Group(const Group<Telt, Tint> &G) : S(G.S), size_tint(G.size_tint) {
     set_exhaustive_canonic();
   }
+  // Standard operators
+  bool operator==(const Group &g) const { return EqualityTest(S, g.S); }
+  bool operator!=(const Group &g) const { return !EqualityTest(S, g.S); }
   Group<Telt, Tint> &operator=(const Group<Telt, Tint> &G) {
     // The S is a shared_ptr so copy is fine.
     S = G.S;
@@ -186,7 +184,13 @@ public:
   Tint size() const { return size_tint; }
   std::map<Tidx, int> factor_size() const { return FactorsSizeStabChain(S); }
   Tidx n_act() const { return S->comm->n; }
-  // operation
+  std::vector<Telt> get_all_element() const {
+    if (l_group_elt.size() == 0) {
+      compute_all_element();
+    }
+    return l_group_elt;
+  }
+  // Operation and creating new groups
   Group<Telt, Tint> GroupConjugate(const Telt &x) const {
     std::vector<Telt> LGen;
     Telt xInv = ~x;
@@ -196,25 +200,7 @@ public:
     }
     return Group<Telt, Tint>(LGen, S->comm->n);
   }
-  // Action on points or sets
-  Group<Telt, Tint> Stabilizer_OnPoints(const Tidx &x) const {
-    return Group(Kernel_Stabilizer_OnPoints<Telt, Tidx_label, Tint>(S, x));
-  }
-  std::optional<Telt> RepresentativeAction_OnPoints(const Tidx &x1,
-                                                    const Tidx &x2) const {
-    return Kernel_RepresentativeAction_OnPoints<Telt, Tidx_label, Tint>(S, x1,
-                                                                        x2);
-  }
-  Group<Telt, Tint> Stabilizer_OnSets(const Face &f) const {
-    return Group(Kernel_Stabilizer_OnSets<Telt, Tidx_label, Tint>(S, f));
-  }
-  std::optional<Telt> RepresentativeAction_OnSets(const Face &f1,
-                                                  const Face &f2) const {
-    return Kernel_RepresentativeAction_OnSets<Telt, Tidx_label, Tint>(S, f1,
-                                                                      f2);
-  }
-  bool operator==(const Group &g) const { return EqualityTest(S, g.S); }
-  bool operator!=(const Group &g) const { return !EqualityTest(S, g.S); }
+  // Canonical images
   Face CanonicalImage(const Face &f) const {
     return Kernel_CanonicalImage<Telt, Tidx_label, Tint>(S, f);
   }
@@ -289,10 +275,38 @@ public:
     else
       return CanonicalImageOrbitSize(f);
   }
+  // Action on points or sets
+  Group<Telt, Tint> Stabilizer_OnPoints(const Tidx &x) const {
+    return Group(Kernel_Stabilizer_OnPoints<Telt, Tidx_label, Tint>(S, x));
+  }
+  std::optional<Telt> RepresentativeAction_OnPoints(const Tidx &x1,
+                                                    const Tidx &x2) const {
+    return Kernel_RepresentativeAction_OnPoints<Telt, Tidx_label, Tint>(S, x1,
+                                                                        x2);
+  }
+  Group<Telt, Tint> Stabilizer_OnSets(const Face &f) const {
+    return Group(Kernel_Stabilizer_OnSets<Telt, Tidx_label, Tint>(S, f));
+  }
+  std::optional<Telt> RepresentativeAction_OnSets(const Face &f1,
+                                                  const Face &f2) const {
+    return Kernel_RepresentativeAction_OnSets<Telt, Tidx_label, Tint>(S, f1,
+                                                                      f2);
+  }
+  // Random elements and subgroups
   Telt rand() const {
+    // Uses the generators and move them at random.
     return RandomElement(Kernel_GeneratorsOfGroup(S), S->comm->identity);
   }
+  Telt uniform_rand() const {
+    // Uses the stabilizer chain in order to get random elements.
+    return UniformRandomElement(S);
+  }
+  Group<Telt, Tint> RandomSubgroup() const {
+    std::vector<Telt> LGen = UsefulRandomSubgroupGenerators(S);
+    return Group<Telt, Tint>(LGen, S->comm->n);
+  }
   Telt random() const { return rand(); }
+  // Properties of the group
   bool IsCommutative() const { return Kernel_IsCommutative(S); }
   bool IsTransitive() const { return Kernel_IsTransitive(S); }
   bool IsPrimitive() const { return Kernel_IsPrimitive(S); }
@@ -305,10 +319,15 @@ public:
   }
   // Compute cosets
   std::vector<Telt> LeftTransversal_Direct(const Group<Telt,Tint>& H) const {
-    return Kernel_LeftTransversal_Direct(S, H.S);
+    return Kernel_LeftTransversal_Direct<Telt,Tidx_label,Tint>(S, H.S);
   }
   std::vector<Telt> RightTransversal_Direct(const Group<Telt,Tint>& H) const {
-    return Kernel_RightTransversal_Direct(S, H.S);
+    return Kernel_RightTransversal_Direct<Telt,Tidx_label,Tint>(S, H.S);
+  }
+  void CheckLeftTransversal_Direct(const Group<Telt,Tint>& H) const {
+    std::vector<Telt> ListTransversal = Kernel_LeftTransversal_Direct<Telt,Tidx_label,Tint>(S, H.S);
+    std::cerr << "|eG|=" << this->size() << " |eSubGRP|=" << H.size() << " |ListTransveral|=" << ListTransversal.size() << "\n";
+    CheckLeftCosets<Telt,Tidx_label,Tint>(S, H.S, ListTransversal);
   }
   // Normal structure
   bool IsNormalSubgroup(const Group<Telt, Tint> &U) const {

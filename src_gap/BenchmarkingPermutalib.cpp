@@ -143,6 +143,39 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
       siz_control += eFace1.count();
     }
   };
+  auto approximate_check_random_element = [&]() -> void {
+    std::vector<Telt> l_elt = eG.get_all_element();
+    std::unordered_map<Telt,size_t> map;
+    for (auto & eElt : l_elt) {
+      map[eElt] = 0;
+    }
+    int mult = 10;
+    Tint n_iter = mult * eG.size();
+    for (Tint iter = 0; iter < n_iter; iter++) {
+      Telt eElt = eG.uniform_rand();
+      map[eElt]++;
+    }
+    size_t sum_pow2 = 0;
+    for (auto & kv : map) {
+      size_t pos = kv.second;
+      sum_pow2 += pos * pos;
+    }
+    double sum_pow2_d = sum_pow2;
+    siz_control += sum_pow2;
+    double min_sum_pow2 = map.size() * mult * mult;
+    double offset = sum_pow2_d / min_sum_pow2;
+    std::cerr << "   offset=" << offset << "\n";
+  };
+  auto check_left_cosets = [&]() -> void {
+    for (int i=0; i<10; i++) {
+      Tgroup eSubGRP = eG.RandomSubgroup();
+      Tint index = eG.size() / eSubGRP.size();
+      std::cerr << "i=" << i << " |eG|=" << eG.size() << " |eSubGRP|=" << eSubGRP.size() << "\n";
+      if (index < 100) {
+        eG.CheckLeftTransversal_Direct(eSubGRP);
+      }
+    }
+  };
   auto timing_canonical_algorithms = [&]() -> void {
     std::vector<permutalib::Face> ListF;
     for (int64_t iter = 0; iter < n_iter; iter++) {
@@ -212,6 +245,10 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
     check_exhaustive_canonical();
   if (opt == "check_canonical_orbitsize")
     check_canonical_orbitsize();
+  if (opt == "approximate_check_random_element")
+    approximate_check_random_element();
+  if (opt == "check_left_cosets")
+    check_left_cosets();
   if (opt == "check_store_canonical")
     check_store_canonical();
   if (opt == "timing_canonical_algorithms")
@@ -227,6 +264,8 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
     bench_pointstabilizer();
     bench_pointrepresentative();
     check_canonical();
+    approximate_check_random_element();
+    check_left_cosets();
     check_exhaustive_canonical();
     check_canonical_orbitsize();
     check_store_canonical();
@@ -250,7 +289,8 @@ int main(int argc, char *argv[]) {
         "pointstabilizer",  "pointrepresentative",
         "check_canonical",   "check_exhaustive_canonical",
         "check_store_canonical", "check_canonical_orbitsize",
-        "timing_canonical_algorithms",
+        "approximate_check_random_element",
+        "timing_canonical_algorithms", "check_left_cosets",
         "check_representative", "check_stabilizer",
         "all"};
     if (argc != 4 && argc != 5) {

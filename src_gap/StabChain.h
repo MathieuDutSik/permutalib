@@ -29,6 +29,7 @@
 */
 
 #include "COMB_Vectors.h"
+#include "pseudorandom.h"
 #include "GapPrint.h"
 #include "PermGroup.h"
 #include "factorize.h"
@@ -1993,6 +1994,38 @@ HomomorphismMapping(StabChain<Telt, Tidx_label> const &Stot, F_pt f_pt,
     ListLevel[i]->stabilizer = ListLevel[i + 1];
   return ListLevel[0];
 }
+
+/*
+  The stabilizer chain allows to sample element in the group
+  in an uniform way.
+ */
+template <typename Telt, typename Tidx_label>
+Telt UniformRandomElement(StabChain<Telt, Tidx_label> const &S) {
+  using Tidx = typename Telt::Tidx;
+  Telt rand_elt = S->comm->identity;
+  StabChain<Telt, Tidx_label> Sptr = S;
+  while (Sptr != nullptr) {
+    size_t sizOrb = Sptr->orbit.size();
+    size_t pos = RandomInteger<size_t>(sizOrb);
+    Tidx ePt = Sptr->orbit[pos];
+    rand_elt = LeftQuotient(InverseRepresentative(Sptr, ePt), rand_elt);
+    Sptr = Sptr->stabilizer;
+  }
+  return rand_elt;
+}
+
+template <typename Telt, typename Tidx_label>
+std::vector<Telt> UsefulRandomSubgroupGenerators(StabChain<Telt, Tidx_label> const &S) {
+  size_t n_gen = 1 + (random() % 2);
+  std::vector<Telt> LGen;
+  for (size_t i_gen=0; i_gen<n_gen; i_gen++) {
+    Telt eGen = UniformRandomElement(S);
+    LGen.push_back(eGen);
+  }
+  return LGen;
+}
+
+
 
 // clang-format off
 }  // namespace permutalib
