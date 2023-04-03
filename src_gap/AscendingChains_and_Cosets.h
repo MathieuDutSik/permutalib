@@ -85,9 +85,7 @@ Kernel_AscendingChain(StabChain<Telt, Tidx_label> const &G) {
 
 /*
   U is a subgroup of G.
-  We compute the left transversals g H
-  -----
-  THAT CODE BELOW IS BROKEN
+  We compute the right transversals H g
 */
 template <typename Telt, typename Tidx_label, typename Tint>
 std::vector<Telt>
@@ -154,7 +152,6 @@ Kernel_RightTransversal_Direct(StabChain<Telt, Tidx_label> const &G,
     for (auto & eElt : ListTransversal)
       std::cerr << " " << eElt;
     std::cerr << " ]\n";
-    
     std::cerr << "The enumeration found a wrong number of cosets\n";
     throw PermutalibException{1};
   }
@@ -164,7 +161,7 @@ Kernel_RightTransversal_Direct(StabChain<Telt, Tidx_label> const &G,
 
 /*
   U is a subgroup of G.
-  We compute the right transversals g H
+  We compute the left transversals g H
 */
 template <typename Telt, typename Tidx_label, typename Tint>
 std::vector<Telt>
