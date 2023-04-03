@@ -121,12 +121,16 @@ IteratorType<Telt,Tidx_label> get_end_iterator(StabChain<Telt, Tidx_label> const
 template<typename Telt, typename Tidx_label>
 std::vector<Telt> get_all_elements(StabChain<Telt, Tidx_label> const& S) {
   std::vector<Telt> l_elt;
-  IteratorType<Telt,Tidx_label> iter = get_begin_iterator(S);
-  IteratorType<Telt,Tidx_label> iter_end = get_end_iterator(S);
-  while (iter != iter_end) {
-    Telt const& eElt = *iter;
-    l_elt.push_back(eElt);
-    iter++;
+  if (S->orbit.size() == 0) {
+    l_elt.push_back(S->comm->identity);
+  } else {
+    IteratorType<Telt,Tidx_label> iter = get_begin_iterator(S);
+    IteratorType<Telt,Tidx_label> iter_end = get_end_iterator(S);
+    while (iter != iter_end) {
+      Telt const& eElt = *iter;
+      l_elt.push_back(eElt);
+      iter++;
+    }
   }
   return l_elt;
 }
