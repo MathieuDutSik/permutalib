@@ -167,7 +167,7 @@ template <typename Telt, typename Tidx_label, typename Tint>
 std::vector<Telt>
 Kernel_LeftTransversal_Direct(StabChain<Telt, Tidx_label> const &G,
                                StabChain<Telt, Tidx_label> const &H) {
-  std::vector<Telt> ListTransversal = Kernel_RightTransversal_Direct(G, H);
+  std::vector<Telt> ListTransversal = Kernel_RightTransversal_Direct<Telt,Tidx_label,Tint>(G, H);
   size_t len = ListTransversal.size();
   std::vector<Telt> ListRet(len);
   for (size_t i = 0; i < len; i++)
