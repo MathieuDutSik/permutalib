@@ -2006,6 +2006,8 @@ Telt UniformRandomElement(StabChain<Telt, Tidx_label> const &S) {
   StabChain<Telt, Tidx_label> Sptr = S;
   while (Sptr != nullptr) {
     size_t sizOrb = Sptr->orbit.size();
+    if (sizOrb == 0)
+      break;
     size_t pos = RandomInteger<size_t>(sizOrb);
     Tidx ePt = Sptr->orbit[pos];
     rand_elt = LeftQuotient(InverseRepresentative(Sptr, ePt), rand_elt);
