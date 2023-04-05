@@ -220,6 +220,10 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
     }
     double time_canonic = double(time.eval());
     for (auto & f : ListF) {
+      (void)eG.CanonicalImageInitialTriv(f);
+    }
+    double time_canonic_initial_triv = double(time.eval());
+    for (auto & f : ListF) {
       (void)eG.ExhaustiveCanonicalImage(f);
     }
     double time_exhaustive_canonic = double(time.eval());
@@ -227,10 +231,11 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
       (void)eG.StoreCanonicalImage(f);
     }
     double time_store_canonic = double(time.eval());
-    double frac1 = time_canonic / time_exhaustive_canonic;
-    double frac2 = time_exhaustive_canonic / time_store_canonic;
-    double frac3 = time_canonic / time_store_canonic;
-    std::cerr << "|eG|=" << eG.size() << " frac3=" << frac3 << " frac1=" << frac1 << " frac2=" << frac2 << " |canonic|=" << time_canonic << " |exhaust|=" << time_exhaustive_canonic << " |store|=" << time_store_canonic << "\n";
+    double frac1 = time_canonic / time_store_canonic;
+    double frac2 = time_canonic_initial_triv / time_store_canonic;
+    double frac3 = time_canonic / time_canonic_initial_triv;
+    double frac4 = time_exhaustive_canonic / time_store_canonic;
+    std::cerr << "|eG|=" << eG.size() << " f1=" << frac1 << " f2=" << frac2 << " f3=" << frac3 << " f4=" << frac4 << " |canonic|=" << time_canonic << " |exhaust|=" << time_exhaustive_canonic << " |store|=" << time_store_canonic << " |canonic_triv|=" << time_canonic_initial_triv << "\n";
   };
   auto check_representative = [&]() -> void {
     for (int64_t iter = 0; iter < n_iter; iter++) {
