@@ -295,6 +295,11 @@ public:
     return Kernel_RepresentativeAction_OnSets<Telt, Tidx_label, Tint>(S, f1,
                                                                       f2);
   }
+  Tint OrbitSize_OnSets(const Face &f) const {
+    StabChain<Telt,Tidx_label> eStab = Kernel_Stabilizer_OnSets<Telt, Tidx_label, Tint>(S, f);
+    Tint OrbitSize = size_tint / Order<Telt, Tidx_label, Tint>(eStab);
+    return OrbitSize;
+  }
   // Random elements and subgroups
   Telt rand() const {
     // Uses the generators and move them at random.
