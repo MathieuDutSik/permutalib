@@ -1,6 +1,3 @@
 [submodule "basic_common_cpp"]
 	path = basic_common_cpp
 	url = http://github.com/MathieuDutSik/basic_common_cpp.git
-[submodule "vole"]
-	path = vole
-	url = https://github.com/peal/vole
