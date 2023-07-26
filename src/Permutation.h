@@ -32,6 +32,16 @@ template <typename Tidx> bool CheckList(const std::vector<Tidx> &l) {
   for (size_t i = 0; i < len; i++)
     covered += f[i];
   if (covered != len) {
+    std::cerr << "covered=" << covered << " len=" << len << "\n";
+    for (size_t i=0; i<len; i++) {
+      for (size_t j=i+1; j<len; j++) {
+        Tidx img1 = l[i];
+        Tidx img2 = l[j];
+        if (img1 == img2) {
+          std::cerr << "i=" << i << " j=" << j << " have the same image, that is " << img1 << "\n";
+        }
+      }
+    }
     std::cerr << "covering errors\n";
     return false;
   }
