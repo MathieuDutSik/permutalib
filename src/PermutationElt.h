@@ -509,7 +509,7 @@ PermutationElt<Tidx, Telt> operator*(PermutationElt<Tidx, Telt> const &v1,
   Tidx siz = v1.size();
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   if (siz != v2.size()) {
-    std::cerr << "Error in the DoubleSidedPerm product\n";
+    std::cerr << "Error in the PermutationElt product\n";
     throw PermutalibException{1};
   }
 #endif
