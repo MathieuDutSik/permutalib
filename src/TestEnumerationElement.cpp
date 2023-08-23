@@ -44,8 +44,8 @@ int main(int argc, char *argv[]) {
     for (int iGroup = 0; iGroup < nGroup; iGroup++) {
       size_t nbGen;
       int n_i;
-      is >> nbGen;
       is >> n_i;
+      is >> nbGen;
       Tidx n = Tidx(n_i);
       std::cerr << "iGroup=" << iGroup << "/" << nGroup << " n=" << int(n)
                 << " nbGen=" << nbGen << "\n";

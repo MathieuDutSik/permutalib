@@ -7,7 +7,7 @@
 
 int main(int argc, char *argv[]) {
   try {
-    using Tidx = uint16_t;
+    using Tidx = uint32_t;
     using Telt = permutalib::SingleSidedPerm<Tidx>;
     using Tint = mpz_class;
     if (argc != 2 && argc != 3) {
@@ -22,8 +22,8 @@ int main(int argc, char *argv[]) {
     std::ifstream is(InputFile);
     size_t nbGen;
     int n_i;
-    is >> nbGen;
     is >> n_i;
+    is >> nbGen;
     Tidx n = Tidx(n_i);
     std::vector<Telt> LGen(nbGen);
     for (size_t iGen = 0; iGen < nbGen; iGen++) {
@@ -40,6 +40,7 @@ int main(int argc, char *argv[]) {
     //
     Telt id(n);
     permutalib::Group<Telt, Tint> eG(LGen, id);
+    Tint order = eG.size();
     bool IsPrimitive = eG.IsPrimitive();
     bool IsTransitive = eG.IsTransitive();
     bool IsCommutative = eG.IsCommutative();
@@ -51,10 +52,11 @@ int main(int argc, char *argv[]) {
           return "true";
         return "false";
       };
-      os << "return rec(IsPrimitive:=" << fct(IsPrimitive)
+      os << "return rec(order:=" << order
+         << ", IsPrimitive:=" << fct(IsPrimitive)
          << ", IsTransitive:=" << fct(IsTransitive)
          << ", IsCommutative:=" << fct(IsCommutative)
-         << ", IsCyclic:=" << fct(IsCyclic) << ");\n\n";
+         << ", IsCyclic:=" << fct(IsCyclic) << ");\n";
     };
 
     if (argc == 3) {

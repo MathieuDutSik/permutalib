@@ -18,8 +18,8 @@ int main(int argc, char *argv[]) {
     std::ifstream is(argv[1]);
     size_t nbGen;
     int n_i;
-    is >> nbGen;
     is >> n_i;
+    is >> nbGen;
     Tidx n = Tidx(n_i);
     std::vector<Telt> LGen(nbGen);
     for (size_t iGen = 0; iGen < nbGen; iGen++) {

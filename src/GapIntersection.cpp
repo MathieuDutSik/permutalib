@@ -25,8 +25,8 @@ int main(int argc, char *argv[]) {
       std::ifstream is(eFile);
       size_t nbGen;
       int n_i;
-      is >> nbGen;
       is >> n_i;
+      is >> nbGen;
       Tidx n = Tidx(n_i);
       std::vector<Telt> LGen(nbGen);
       auto read_elt = [&]() -> Telt {
