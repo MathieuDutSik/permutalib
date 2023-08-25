@@ -279,6 +279,13 @@ public:
     size_t max_size = std::numeric_limits<size_t>::max();
     return Kernel_GeneralCanonicalInitialTriv<Telt, Tidx_label, Tint>(S, f, max_size).first;
   }
+  Face CanonicalImageInitialTrivLimited(const Face &f, size_t const& max_size) const {
+    return Kernel_GeneralCanonicalInitialTriv<Telt, Tidx_label, Tint>(S, f, max_size).first;
+  }
+  size_t CanonicalImageInitialTrivTreeDepth(const Face &f) const {
+    size_t max_size = std::numeric_limits<size_t>::max();
+    return Kernel_GeneralCanonicalInitialTriv<Telt, Tidx_label, Tint>(S, f, max_size).second;
+  }
   // Action on points or sets
   Group<Telt, Tint> Stabilizer_OnPoints(const Tidx &x) const {
     return Group(Kernel_Stabilizer_OnPoints<Telt, Tidx_label, Tint>(S, x));

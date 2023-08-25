@@ -78,6 +78,23 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
       siz_control += eFace1.count();
     }
   };
+  auto check_canonical_tree_depth = [&]() -> void {
+    for (int64_t iter = 0; iter < n_iter; iter++) {
+      permutalib::Face eFace1 = random_face(n);
+      size_t depth1 = eG.CanonicalImageInitialTrivTreeDepth(eFace1);
+      for (int i = 0; i < 10; i++) {
+        Telt u = eG.random();
+        permutalib::Face eFace2 = OnSets(eFace1, u);
+        size_t depth2 = eG.CanonicalImageInitialTrivTreeDepth(eFace2);
+        if (depth1 != depth2) {
+          std::cerr << "The tree depths are different depth1=" << depth1 << " depth2=" << depth2 << "\n";
+          throw permutalib::PermutalibException{1};
+        }
+      }
+      //      std::cerr << "depth1=" << depth1 << " |eG|=" << eG.size() << "\n";
+      siz_control += eFace1.count();
+    }
+  };
   auto check_exhaustive_canonical = [&]() -> void {
     for (int64_t iter = 0; iter < n_iter; iter++) {
       permutalib::Face eFace1 = random_face(n);
@@ -123,7 +140,26 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
         permutalib::Face eFace2 = OnSets(eFace1, u);
         permutalib::Face set_can2 = eG.CanonicalImageInitialTriv(eFace2);
         if (set_can1 != set_can2) {
-          std::cerr << "ExhaustiveCanonicalization failed\n";
+          std::cerr << "CanonicalInitialTriv has a bug\n";
+          std::cerr << "set_can1=" << set_can1 << "\n";
+          std::cerr << "set_can2=" << set_can2 << "\n";
+          throw permutalib::PermutalibException{1};
+        }
+      }
+      siz_control += eFace1.count();
+    }
+  };
+  auto check_canonical_initialtriv_limited_algorithm=[&]() -> void {
+    size_t max_size = 100;
+    for (int64_t iter = 0; iter < n_iter; iter++) {
+      permutalib::Face eFace1 = random_face(n);
+      permutalib::Face set_can1 = eG.CanonicalImageInitialTrivLimited(eFace1, max_size);
+      for (int i = 0; i < 4; i++) {
+        Telt u = eG.random();
+        permutalib::Face eFace2 = OnSets(eFace1, u);
+        permutalib::Face set_can2 = eG.CanonicalImageInitialTrivLimited(eFace2, max_size);
+        if (set_can1 != set_can2) {
+          std::cerr << "CanonicalInitialTrivLimit has a bug\n";
           std::cerr << "set_can1=" << set_can1 << "\n";
           std::cerr << "set_can2=" << set_can2 << "\n";
           throw permutalib::PermutalibException{1};
@@ -284,8 +320,12 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
     check_canonical_algorithm();
   if (opt == "check_canonical_orbitsize")
     check_canonical_orbitsize();
+  if (opt == "check_canonical_tree_depth")
+    check_canonical_tree_depth();
   if (opt == "check_canonical_initialtriv_algorithm")
     check_canonical_initialtriv_algorithm();
+  if (opt == "check_canonical_initialtriv_limited_algorithm")
+    check_canonical_initialtriv_limited_algorithm();
   if (opt == "approximate_check_random_element")
     approximate_check_random_element();
   if (opt == "check_right_cosets")
@@ -311,6 +351,7 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
     check_right_cosets();
     check_exhaustive_canonical();
     check_canonical_orbitsize();
+    check_canonical_tree_depth();
     check_store_canonical();
     check_representative();
     check_stabilizer();
@@ -336,6 +377,7 @@ int main(int argc, char *argv[]) {
         "check_canonical_algorithm", "check_canonical_initialtriv_algorithm",
         "timing_canonical_algorithms", "check_right_cosets",
         "check_representative", "check_stabilizer",
+        "check_canonical_tree_depth", "check_canonical_initialtriv_limited_algorithm",
         "all"};
     if (argc != 4 && argc != 5) {
       std::cerr << "BenchmarkingPermutalib [InputFile] [limit] [opt]\n";
