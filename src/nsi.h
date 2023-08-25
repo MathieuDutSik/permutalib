@@ -805,9 +805,10 @@ NewCanonicImage(StabChain<Telt, Tidx_label> const &g,
 }
 
 template <typename Telt, typename Tidx_label, typename Tint>
-std::vector<typename Telt::Tidx>
+std::optional<std::pair<std::vector<typename Telt::Tidx>,size_t>>
 NewCanonicImageInitialTriv(StabChain<Telt, Tidx_label> const &g,
-                           std::vector<typename Telt::Tidx> const &set) {
+                           std::vector<typename Telt::Tidx> const &set,
+                           size_t const& max_size) {
   using Tidx = typename Telt::Tidx;
 #ifdef DEBUG_NSI
   std::cerr << "CPP NewCanonicImage : beginning\n";
@@ -1357,6 +1358,9 @@ NewCanonicImageInitialTriv(StabChain<Telt, Tidx_label> const &g,
 #endif
           NodePtr newnode = std::make_shared<Node>(newnode_v);
           ListPtr.push_back(newnode);
+          if (ListPtr.size() == max_size) {
+            return {};
+          }
           if (prevnode != nullptr) {
             prevnode->next = newnode;
           }
@@ -1388,14 +1392,59 @@ NewCanonicImageInitialTriv(StabChain<Telt, Tidx_label> const &g,
       }
     }
   }
+  size_t n_node = ListPtr.size();
   free_all_nodes();
   NodePtr node = leftmost_node(depth + 1);
-  return node->image;
+  std::pair<std::vector<typename Telt::Tidx>,size_t> pair{node->image,n_node};
+  return pair;
 }
 
 
+template<typename Tidx>
+std::pair<std::vector<Tidx>,bool> get_input_info(Face const& set) {
+  size_t siz = set.size();
+  Face ret(siz);
+  size_t cnt = set.count();
+  if (2 * cnt <= siz) {
+    std::vector<Tidx> set_i(cnt);
+    size_t pos = 0;
+    boost::dynamic_bitset<>::size_type aRow = set.find_first();
+    while (aRow != boost::dynamic_bitset<>::npos) {
+      set_i[pos] = Tidx(aRow);
+      pos++;
+      aRow = set.find_next(aRow);
+    }
+    return {std::move(set_i), true};
+  } else {
+    std::vector<Tidx> set_i(siz - cnt);
+    Tidx siz_i = Tidx(siz);
+    size_t pos = 0;
+    for (Tidx i = 0; i < siz_i; i++) {
+      int val = set[i];
+      if (val == 0) {
+        set_i[pos] = i;
+        pos++;
+      }
+    }
+    return {std::move(set_i), false};
+  }
+}
 
-
+template<typename Tidx>
+Face convert_vector_out(size_t siz, std::vector<Tidx> const& out_v, bool const& cnt_bool) {
+  Face ret(siz);
+  if (cnt_bool) {
+    for (auto &eVal : out_v) {
+      ret[eVal] = 1;
+    }
+  } else {
+    for (size_t i = 0; i < siz; i++)
+      ret[i] = 1;
+    for (auto &eVal : out_v)
+      ret[eVal] = 0;
+  }
+  return ret;
+}
 
 
 
@@ -1414,57 +1463,18 @@ std::pair<Face,StabChain<Telt,Tidx_label>> Kernel_GeneralCanonicalImagePair(Stab
 #endif
   if (set.count() == 0 || set.count() == set.size())
     return {set, g};
+  StabChain<Telt, Tidx_label> k_group =
+    Kernel_Stabilizer_OnSets<Telt, Tidx_label, Tint>(g, set);
   size_t siz = set.size();
-  Face ret(siz);
-  size_t cnt = set.count();
-  if (2 * cnt <= siz) {
-    std::vector<Tidx> set_i(cnt);
-    size_t pos = 0;
-    boost::dynamic_bitset<>::size_type aRow = set.find_first();
-    while (aRow != boost::dynamic_bitset<>::npos) {
-      set_i[pos] = Tidx(aRow);
-      pos++;
-      aRow = set.find_next(aRow);
-    }
-    StabChain<Telt, Tidx_label> k_group = 
-        Kernel_Stabilizer_OnSets<Telt, Tidx_label, Tint>(g, set);
-    std::pair<std::vector<Tidx>,StabChain<Telt,Tidx_label>> pairCan =
-        NewCanonicImage<Telt, Tidx_label, Tint>(g, set_i, k_group);
-#ifdef DEBUG_NSI
-    std::cerr << "CPP eSetCan=" << GapStringIntVector(eSetCan) << "\n";
-#endif
-    for (auto &eVal : pairCan.first) {
-      ret[eVal] = 1;
-    }
-    return f(k_group, ret, pairCan);
-  } else {
-    // instead of building the complement, we do a simple iteration
-    Face setC(siz);
-    std::vector<Tidx> set_i(siz - cnt);
-    Tidx siz_i = Tidx(siz);
-    size_t pos = 0;
-    for (Tidx i = 0; i < siz_i; i++) {
-      int val = set[i];
-      setC[i] = 1 - val;
-      if (val == 0) {
-        set_i[pos] = i;
-        pos++;
-      }
-    }
-    StabChain<Telt, Tidx_label> k_group =
-        Kernel_Stabilizer_OnSets<Telt, Tidx_label, Tint>(g, setC);
-    std::pair<std::vector<Tidx>,StabChain<Telt,Tidx_label>> pairCan =
-        NewCanonicImage<Telt, Tidx_label, Tint>(g, set_i, k_group);
-    for (size_t i = 0; i < siz; i++)
-      ret[i] = 1;
-    for (auto &eVal : pairCan.first)
-      ret[eVal] = 0;
-    return f(k_group, ret, pairCan);
-  }
+  std::pair<std::vector<Tidx>,bool> pair = get_input_info<Tidx>(set);
+  std::pair<std::vector<Tidx>,StabChain<Telt,Tidx_label>> pairCan =
+    NewCanonicImage<Telt, Tidx_label, Tint>(g, pair.first, k_group);
+  Face ret = convert_vector_out(siz, pairCan.first, pair.second);
+  return f(k_group, ret, pairCan);
 }
 
 template <typename Telt, typename Tidx_label, typename Tint>
-Face Kernel_GeneralCanonicalInitialTriv(StabChain<Telt, Tidx_label> const &g, Face const &set) {
+std::pair<Face,size_t> Kernel_GeneralCanonicalInitialTriv(StabChain<Telt, Tidx_label> const &g, Face const &set, size_t const& max_size) {
   using Tidx = typename Telt::Tidx;
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   if (g->comm->n != Tidx(set.size())) {
@@ -1476,50 +1486,25 @@ Face Kernel_GeneralCanonicalInitialTriv(StabChain<Telt, Tidx_label> const &g, Fa
   }
 #endif
   if (set.count() == 0 || set.count() == set.size())
-    return set;
+    return {set, 0};
   size_t siz = set.size();
-  Face ret(siz);
-  size_t cnt = set.count();
-  if (2 * cnt <= siz) {
-    std::vector<Tidx> set_i(cnt);
-    size_t pos = 0;
-    boost::dynamic_bitset<>::size_type aRow = set.find_first();
-    while (aRow != boost::dynamic_bitset<>::npos) {
-      set_i[pos] = Tidx(aRow);
-      pos++;
-      aRow = set.find_next(aRow);
-    }
-    std::vector<Tidx> listCan =
-        NewCanonicImageInitialTriv<Telt, Tidx_label, Tint>(g, set_i);
-#ifdef DEBUG_NSI
-    std::cerr << "CPP eSetCan=" << GapStringIntVector(eSetCan) << "\n";
-#endif
-    for (auto &eVal : listCan) {
-      ret[eVal] = 1;
-    }
-    return ret;
-  } else {
-    // instead of building the complement, we do a simple iteration
-    Face setC(siz);
-    std::vector<Tidx> set_i(siz - cnt);
-    Tidx siz_i = Tidx(siz);
-    size_t pos = 0;
-    for (Tidx i = 0; i < siz_i; i++) {
-      int val = set[i];
-      setC[i] = 1 - val;
-      if (val == 0) {
-        set_i[pos] = i;
-        pos++;
-      }
-    }
-    std::vector<Tidx> listCan =
-        NewCanonicImageInitialTriv<Telt, Tidx_label, Tint>(g, set_i);
-    for (size_t i = 0; i < siz; i++)
-      ret[i] = 1;
-    for (auto &eVal : listCan)
-      ret[eVal] = 0;
-    return ret;
+  std::pair<std::vector<Tidx>,bool> pair = get_input_info<Tidx>(set);
+  std::optional<std::pair<std::vector<Tidx>,size_t>> opt_can =
+    NewCanonicImageInitialTriv<Telt, Tidx_label, Tint>(g, pair.first, max_size);
+  if (opt_can) {
+    std::pair<std::vector<Tidx>,size_t> const& pair_can = *opt_can;
+    Face ret = convert_vector_out(siz, pair_can.first, pair.second);
+    std::pair<Face,size_t> pair_ret{std::move(ret), pair_can.second};
+    return pair_ret;
   }
+  // The happy path failed, now using the computational strategy
+  StabChain<Telt, Tidx_label> k_group =
+    Kernel_Stabilizer_OnSets<Telt, Tidx_label, Tint>(g, set);
+  std::pair<std::vector<Tidx>,StabChain<Telt,Tidx_label>> pairCan =
+    NewCanonicImage<Telt, Tidx_label, Tint>(g, pair.first, k_group);
+  Face ret = convert_vector_out(siz, pairCan.first, pair.second);
+  std::pair<Face,size_t> pair_ret{std::move(ret), max_size};
+  return pair_ret;
 }
 
 template <typename Telt, typename Tidx_label, typename Tint>

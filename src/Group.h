@@ -276,7 +276,8 @@ public:
       return CanonicalImageOrbitSize(f);
   }
   Face CanonicalImageInitialTriv(const Face &f) const {
-    return Kernel_GeneralCanonicalInitialTriv<Telt, Tidx_label, Tint>(S, f);
+    size_t max_size = std::numeric_limits<size_t>::max();
+    return Kernel_GeneralCanonicalInitialTriv<Telt, Tidx_label, Tint>(S, f, max_size).first;
   }
   // Action on points or sets
   Group<Telt, Tint> Stabilizer_OnPoints(const Tidx &x) const {
