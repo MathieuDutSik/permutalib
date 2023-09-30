@@ -527,6 +527,11 @@ Face ConvertStringToFace(std::string const& s) {
   Face f(n);
   for (size_t i=0; i<n; i++) {
     std::string eChar = s.substr(i,1);
+    if (eChar != "1" && eChar != "0") {
+      std::cerr << "We have eChar=" << eChar << "\n";
+      std::cerr << "Allowed values are 0 and 1\n";
+      throw permutalib::PermutalibException{1};
+    }
     if (eChar == "1") {
       f[i] = 1;
     }

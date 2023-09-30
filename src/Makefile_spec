@@ -2,9 +2,9 @@
 #PROGRAM	= TestCompilation TestSymmetricGroup TestStabilizerOnSet
 #PROGRAM	= TestStabilizerOnSet
 #PROGRAM	= TestRepresentativeActionOnSet
-#PROGRAM	= GapCanonicalImage
+PROGRAM	= GapCanonicalImage
 #PROGRAM	= GapCentralizerElt
-PROGRAM	= SequenceSimplify
+#PROGRAM	= SequenceSimplify
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
