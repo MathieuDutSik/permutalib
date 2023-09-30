@@ -11,6 +11,7 @@ int main(int argc, char *argv[]) {
     //    using Telt = permutalib::DoubleSidedPerm<Tidx>;
     using Telt = permutalib::SingleSidedPerm<Tidx>;
     using Tint = mpz_class;
+    using Tgroup = permutalib::Group<Telt, Tint>;
     if (argc != 2 && argc != 3) {
       std::cerr << "We should have argc = 2\n";
       std::cerr << "GapCanonicalImage [EXMP] [OutFile]\n";
@@ -20,39 +21,13 @@ int main(int argc, char *argv[]) {
     std::string InputFile = argv[1];
     //
     std::ifstream is(InputFile);
-    size_t nbGen;
-    int n_i;
-    is >> n_i;
-    is >> nbGen;
-    Tidx n = Tidx(n_i);
-    std::vector<Telt> LGen(nbGen);
-    for (size_t iGen = 0; iGen < nbGen; iGen++) {
-      std::vector<Tidx> ePermV(n);
-      for (Tidx i = 0; i < n; i++) {
-        int eVal_i;
-        is >> eVal_i;
-        Tidx eVal = Tidx(eVal_i);
-        ePermV[i] = eVal;
-      }
-      Telt ePerm(ePermV);
-      LGen[iGen] = ePerm;
-    }
+    Tgroup eG = permutalib::ReadGroupFromStream<Tgroup>(is);
     std::cerr.setf(std::ios::boolalpha);
-    //
-    //    permutalib::StabChain<Telt> eG =
-    //    permutalib::MinimalStabChain<Telt,Tint>(LGen, n);
-    Telt id(n);
-    permutalib::Group<Telt, Tint> eG(LGen, id);
-    //    std::cerr << "CPP eG=" << eG << "\n";
-    //
     std::cerr << "CPP |eG|=" << eG.size() << "\n";
     //
-    permutalib::Face eFace(n);
-    for (Tidx i = 0; i < n; i++) {
-      int eVal;
-      is >> eVal;
-      eFace[i] = eVal;
-    }
+    std::string s;
+    is >> s;
+    permutalib::Face eFace = permutalib::ConvertStringToFace(s);
     permutalib::Face set_can = eG.CanonicalImage(eFace);
     //
     auto prt = [&](std::ostream &os) -> void {

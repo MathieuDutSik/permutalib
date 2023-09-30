@@ -20,33 +20,10 @@ int main(int argc, char *argv[]) {
     }
     std::string eFile1 = argv[1];
     std::string eFile2 = argv[2];
-    //
-    auto ReadGroup = [&](std::string const &eFile) -> Tgroup {
-      std::ifstream is(eFile);
-      size_t nbGen;
-      int n_i;
-      is >> n_i;
-      is >> nbGen;
-      Tidx n = Tidx(n_i);
-      std::vector<Telt> LGen(nbGen);
-      auto read_elt = [&]() -> Telt {
-        std::vector<Tidx> ePermV(n);
-        for (Tidx i = 0; i < n; i++) {
-          int eVal_i;
-          is >> eVal_i;
-          ePermV[i] = Tidx(eVal_i);
-        }
-        return Telt(std::move(ePermV));
-      };
-      for (size_t iGen = 0; iGen < nbGen; iGen++)
-        LGen[iGen] = read_elt();
-      //
-      Telt id(n);
-      Tgroup eG(LGen, id);
-      return eG;
-    };
-    Tgroup G1 = ReadGroup(eFile1);
-    Tgroup G2 = ReadGroup(eFile2);
+    std::ifstream is1(eFile1);
+    std::ifstream is2(eFile2);
+    Tgroup G1 = permutalib::ReadGroupFromStream<Tgroup>(is1);
+    Tgroup G2 = permutalib::ReadGroupFromStream<Tgroup>(is2);
     //
     Tgroup eInt = G1.Intersection(G2);
     //

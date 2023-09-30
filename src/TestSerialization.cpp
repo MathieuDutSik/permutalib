@@ -18,33 +18,11 @@ int main(int argc, char *argv[]) {
     std::string InputFile = argv[1];
     //
     std::ifstream is(InputFile);
-    int nGroup;
-    is >> nGroup;
-    for (int iGroup = 0; iGroup < nGroup; iGroup++) {
-      //
-      // Reading one group
-      //
-      size_t nbGen;
-      int n_i;
-      is >> n_i;
-      is >> nbGen;
-      Tidx n = Tidx(n_i);
-      std::cerr << "iGroup=" << iGroup << " n=" << n << " nbGen=" << nbGen
-                << "\n";
-      std::vector<Telt> LGen(nbGen);
-      for (size_t iGen = 0; iGen < nbGen; iGen++) {
-        std::vector<Tidx> ePermV(n);
-        for (Tidx i = 0; i < n; i++) {
-          int eVal_i;
-          is >> eVal_i;
-          Tidx eVal = Tidx(eVal_i);
-          ePermV[i] = eVal;
-        }
-        Telt ePerm(ePermV);
-        LGen[iGen] = ePerm;
-      }
-      Telt id(n);
-      Tgroup eG(LGen, id);
+    int nbGroup;
+    is >> nbGroup;
+    for (int iGroup = 0; iGroup < nbGroup; iGroup++) {
+      std::cerr << "iGroup=" << iGroup << " / " << nbGroup << "\n";
+      Tgroup eG = permutalib::ReadGroupFromStream<Tgroup>(is);
       //
       // Setting the archives
       //

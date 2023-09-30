@@ -10,6 +10,7 @@ int main(int argc, char *argv[]) {
     using Tidx = uint16_t;
     using Telt = permutalib::SingleSidedPerm<Tidx>;
     using Tint = mpz_class;
+    using Tgroup = permutalib::Group<Telt, Tint>;
     if (argc != 2 && argc != 3) {
       std::cerr << "GapDerivedSubgroup [EXMP]\n";
       std::cerr << "or\n";
@@ -20,29 +21,16 @@ int main(int argc, char *argv[]) {
     std::string InputFile = argv[1];
     //
     std::ifstream is(InputFile);
-    size_t nbGen;
-    int n_i;
-    is >> n_i;
-    is >> nbGen;
-    Tidx n = Tidx(n_i);
-    std::vector<Telt> LGen(nbGen);
-    auto read_elt = [&]() -> Telt {
-      std::vector<Tidx> ePermV(n);
-      for (Tidx i = 0; i < n; i++) {
-        int eVal_i;
-        is >> eVal_i;
-        ePermV[i] = Tidx(eVal_i);
-      }
-      return Telt(std::move(ePermV));
-    };
-    for (size_t iGen = 0; iGen < nbGen; iGen++)
-      LGen[iGen] = read_elt();
-    Telt g = read_elt();
-    //
-    Telt id(n);
-    permutalib::Group<Telt, Tint> eG(LGen, id);
-    //
-    permutalib::Group<Telt, Tint> eG2 = eG.Centralizer_elt(g);
+    Tgroup eG = permutalib::ReadGroupFromStream<Tgroup>(is);
+    Tidx n = eG.n_act();
+    std::vector<Tidx> ePermV(n);
+    for (Tidx i = 0; i < n; i++) {
+      int eVal_i;
+      is >> eVal_i;
+      ePermV[i] = Tidx(eVal_i);
+    }
+    Telt g(std::move(ePermV));
+    Tgroup eG2 = eG.Centralizer_elt(g);
     //
     if (argc == 3) {
       std::string OutputFile = argv[2];

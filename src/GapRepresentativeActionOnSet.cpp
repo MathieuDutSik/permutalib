@@ -10,6 +10,7 @@ int main(int argc, char *argv[]) {
     using Tidx = uint16_t;
     using Telt = permutalib::SingleSidedPerm<Tidx>;
     using Tint = mpz_class;
+    using Tgroup = permutalib::Group<Telt, Tint>;
     if (argc != 2 && argc != 3) {
       std::cerr << "TestStabilizerOnSet [EXMP]\n";
       std::cerr << "or\n";
@@ -20,32 +21,10 @@ int main(int argc, char *argv[]) {
     std::string InputFile = argv[1];
     //
     std::ifstream is(InputFile);
-    size_t nbGen;
-    int n_i;
-    is >> n_i;
-    is >> nbGen;
-    Tidx n = Tidx(n_i);
-    std::vector<Telt> LGen(nbGen);
-    for (size_t iGen = 0; iGen < nbGen; iGen++) {
-      std::vector<Tidx> ePermV(n);
-      for (Tidx i = 0; i < n; i++) {
-        int eVal_i;
-        is >> eVal_i;
-        Tidx eVal = Tidx(eVal_i);
-        ePermV[i] = eVal;
-      }
-      Telt ePerm(ePermV);
-      LGen[iGen] = ePerm;
-    }
+    Tgroup eG = permutalib::ReadGroupFromStream<Tgroup>(is);
     std::cerr.setf(std::ios::boolalpha);
-    //
-    //    std::cerr << "CPP Before call to MinimalStabChain\n";
-    Telt id(n);
-    permutalib::Group<Telt, Tint> eG(LGen, n);
-    //    std::cerr << "CPP After call to MinimalStabChain\n";
-    //    std::cerr << "CPP eG=" << eG << "\n";
-    //
     std::cerr << "CPP |eG|=" << eG.size() << "\n";
+    int n = eG.n_act();
     //
     permutalib::Face f1(n);
     for (int i = 0; i < n; i++) {
