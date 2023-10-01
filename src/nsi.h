@@ -1498,7 +1498,8 @@ std::pair<Face,size_t> Kernel_GeneralCanonicalInitialTriv(StabChain<Telt, Tidx_l
     return pair_ret;
   }
 #ifdef PERMUTALIB_TRACK_METHOD
-  std::cerr << "Method change in Kernel_GeneralCanonicalInitialTriv\n";
+  Tint order = Order<Telt, Tidx_label, Tint>(g);
+  std::cerr << "Method change in Kernel_GeneralCanonicalInitialTriv |set|=" << set.size() << "/" << set.count() << " |g|=" << order << "\n";
 #endif
   // The happy path failed, now using the computational strategy
   StabChain<Telt, Tidx_label> k_group =
