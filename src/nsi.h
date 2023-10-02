@@ -1359,6 +1359,7 @@ NewCanonicImageInitialTriv(StabChain<Telt, Tidx_label> const &g,
           NodePtr newnode = std::make_shared<Node>(newnode_v);
           ListPtr.push_back(newnode);
           if (ListPtr.size() == max_size) {
+            free_all_nodes();
             return {};
           }
           if (prevnode != nullptr) {

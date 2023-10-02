@@ -11,8 +11,12 @@ OBJECTS		= $(PROGRAM:%=%.o)
 #CC		= icpc -std=c++11 -Wall -g -O2
 #CC		= clang++ -Weverything -std=c++11
 #CC		= g++ -std=c++11 -Wall -g -O2
-CC		= g++ -std=c++17 -Wall -g -O2
-#CC		= g++ -std=c++17 -Wall -g -O2 -fsanitize=address -fsanitize=undefined -fstack-protector-all
+#CC		= g++ -std=c++17 -Wall -g -O2
+#          For GCC
+#CC             = g++ -std=c++17 -Wall -Wextra -O3 -g -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=bounds-strict -fsanitize=alignment
+#          For CLANG
+CC             = g++ -std=c++17 -Wall -Wextra -O3 -g -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=alignment
+
 
 NOLINKFLAG 	= -c
 OUTPUTFLAG 	= -o
