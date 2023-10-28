@@ -499,6 +499,27 @@ PreImageSubgroupAction(std::vector<TeltMatr> const &ListMatrGens,
   return pair.first;
 }
 
+template <typename Tgroup, typename TeltMatr, typename Tobj, typename Fop>
+std::pair<std::vector<TeltMatr>,std::vector<TeltMatr>>
+PreImageSubgroupRightCosetsAction(std::vector<TeltMatr> const &ListMatrGens,
+                             std::vector<typename Tgroup::Telt> const &ListPermGens,
+                             TeltMatr const &id_matr, Tgroup const &stab,
+                             Tobj const &x, Fop const &f_op) {
+  std::pair<std::vector<TeltMatr>,std::vector<std::pair<Tobj, std::pair<TeltMatr, typename Tgroup::Telt>>>> pair =
+    PreImageSubgroupActionGen(ListMatrGens,
+                              ListPermGens,
+                              id_matr, stab,
+                              x, f_op);
+  // Is it Right or Left cosets? Unclear at present.
+  // But we for sure really want the right cosets.
+  std::vector<TeltMatr> ListRightCosets;
+  for (auto & epair : pair.second) {
+    ListRightCosets.emplace_back(epair.second.first);
+  }
+  return {std::move(pair.first), std::move(ListRightCosets)};
+}
+
+
 
 template <typename Tgroup>
 Tgroup ReadGroupFromStream(std::istream& is) {
