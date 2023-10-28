@@ -501,10 +501,10 @@ PreImageSubgroupAction(std::vector<TeltMatr> const &ListMatrGens,
 
 template <typename Tgroup, typename TeltMatr, typename Tobj, typename Fop>
 std::pair<std::vector<TeltMatr>,std::vector<TeltMatr>>
-PreImageSubgroupRightCosetsAction(std::vector<TeltMatr> const &ListMatrGens,
-                             std::vector<typename Tgroup::Telt> const &ListPermGens,
-                             TeltMatr const &id_matr, Tgroup const &stab,
-                             Tobj const &x, Fop const &f_op) {
+PreImageSubgroupRightCosetAction(std::vector<TeltMatr> const &ListMatrGens,
+                                 std::vector<typename Tgroup::Telt> const &ListPermGens,
+                                 TeltMatr const &id_matr, Tgroup const &stab,
+                                 Tobj const &x, Fop const &f_op) {
   std::pair<std::vector<TeltMatr>,std::vector<std::pair<Tobj, std::pair<TeltMatr, typename Tgroup::Telt>>>> pair =
     PreImageSubgroupActionGen(ListMatrGens,
                               ListPermGens,
@@ -512,11 +512,11 @@ PreImageSubgroupRightCosetsAction(std::vector<TeltMatr> const &ListMatrGens,
                               x, f_op);
   // Is it Right or Left cosets? Unclear at present.
   // But we for sure really want the right cosets.
-  std::vector<TeltMatr> ListRightCosets;
+  std::vector<TeltMatr> RightCosets;
   for (auto & epair : pair.second) {
-    ListRightCosets.emplace_back(epair.second.first);
+    RightCosets.emplace_back(std::move(epair.second.first));
   }
-  return {std::move(pair.first), std::move(ListRightCosets)};
+  return {std::move(pair.first), std::move(RightCosets)};
 }
 
 
@@ -600,6 +600,25 @@ StabilizerMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
     return OnSets(x, u);
   };
   return PreImageSubgroupAction<Tgroup, TeltMatr, Tobj, decltype(f_op)>(
+      ListMatrGens, ListPermGens, id_matr, stab, f, f_op);
+}
+
+template <typename TeltPerm, typename TeltMatr, typename Tint>
+std::vector<std::vector<TeltMatr>,std::vector<TeltMatr>>
+StabilizerRightCosetMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
+                                     std::vector<TeltPerm> const &ListPermGens,
+                                     TeltMatr const &id_matr, Face const &f) {
+  using Tgroup = Group<TeltPerm, Tint>;
+  using Tidx = typename TeltPerm::Tidx;
+  using Tobj = Face;
+
+  Tidx len = f.size();
+  Tgroup GRP(ListPermGens, len);
+  Tgroup stab = GRP.Stabilizer_OnSets(f);
+  auto f_op = [&](Tobj const &x, TeltPerm const &u) -> Tobj {
+    return OnSets(x, u);
+  };
+  return PreImageSubgroupRightCosetAction<Tgroup, TeltMatr, Tobj, decltype(f_op)>(
       ListMatrGens, ListPermGens, id_matr, stab, f, f_op);
 }
 
