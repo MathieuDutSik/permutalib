@@ -407,11 +407,11 @@ public:
 };
 
 template <typename Tgroup, typename TeltMatr, typename Tobj, typename Fop>
-std::vector<TeltMatr>
-PreImageSubgroupAction(std::vector<TeltMatr> const &ListMatrGens,
-                       std::vector<typename Tgroup::Telt> const &ListPermGens,
-                       TeltMatr const &id_matr, Tgroup const &stab,
-                       Tobj const &x, Fop const &f_op) {
+std::pair<std::vector<TeltMatr>,std::vector<std::pair<Tobj, std::pair<TeltMatr, typename Tgroup::Telt>>>>
+PreImageSubgroupActionGen(std::vector<TeltMatr> const &ListMatrGens,
+                          std::vector<typename Tgroup::Telt> const &ListPermGens,
+                          TeltMatr const &id_matr, Tgroup const &stab,
+                          Tobj const &x, Fop const &f_op) {
   using TeltPerm = typename Tgroup::Telt;
   using Tidx = typename TeltPerm::Tidx;
   using Telt = std::pair<TeltMatr, TeltPerm>;
@@ -433,11 +433,8 @@ PreImageSubgroupAction(std::vector<TeltMatr> const &ListMatrGens,
   std::vector<std::pair<Tobj, Telt>> ListPair =
       OrbitPairEltRepr(ListGens, id, x, f_prod, f_act);
   std::unordered_map<Tobj, Telt> map;
-  //  std::cerr << "f=" << f << "\n";
   for (auto &kv : ListPair) {
     map[kv.first] = kv.second;
-    //    std::cerr << "kv.first=" << kv.first << "kv.second.second=" <<
-    //    kv.second.second << "\n";
   }
   size_t nCoset = ListPair.size();
   //
@@ -448,9 +445,6 @@ PreImageSubgroupAction(std::vector<TeltMatr> const &ListMatrGens,
   // like H r. If H is a subgroup of finite index and r1, ...., rN such that G =
   // H r1  \cup  .....  \cup  H rN If we are doing the action on the right and H
   // is the stabilizer then we get O = x G = { x r1 , ..... , x rN }
-  //
-  //
-  //
   //
   std::unordered_set<TeltMatr> SetMatrGens;
   size_t nGen = ListMatrGens.size();
@@ -488,8 +482,23 @@ PreImageSubgroupAction(std::vector<TeltMatr> const &ListMatrGens,
   std::vector<TeltMatr> ListMatrGens_ret;
   for (auto &eGen : SetMatrGens)
     ListMatrGens_ret.push_back(eGen);
-  return ListMatrGens_ret;
+  return {std::move(ListMatrGens_ret), std::move(ListPair)};
 }
+
+template <typename Tgroup, typename TeltMatr, typename Tobj, typename Fop>
+std::vector<TeltMatr>
+PreImageSubgroupAction(std::vector<TeltMatr> const &ListMatrGens,
+                       std::vector<typename Tgroup::Telt> const &ListPermGens,
+                       TeltMatr const &id_matr, Tgroup const &stab,
+                       Tobj const &x, Fop const &f_op) {
+  std::pair<std::vector<TeltMatr>,std::vector<std::pair<Tobj, std::pair<TeltMatr, typename Tgroup::Telt>>>> pair =
+    PreImageSubgroupActionGen(ListMatrGens,
+                              ListPermGens,
+                              id_matr, stab,
+                              x, f_op);
+  return pair.first;
+}
+
 
 template <typename Tgroup>
 Tgroup ReadGroupFromStream(std::istream& is) {
@@ -539,6 +548,21 @@ Face ConvertStringToFace(std::string const& s) {
   return f;
 }
 
+template <typename Tgroup, typename TeltMatr>
+std::vector<TeltMatr>
+PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
+                 std::vector<typename Tgroup::Telt> const &ListPermGens,
+                 TeltMatr const &id_matr, Tgroup const &eGRP) {
+  using Telt = typename Tgroup::Telt;
+  using Tobj = Telt;
+  auto f_op = [&](Tobj const &x, Telt const &u) -> Tobj {
+    return eGRP.Sift(Inverse(u) * x);
+  };
+  Telt id = eGRP.get_identity();
+  return PreImageSubgroupAction<Tgroup, TeltMatr, Tobj, decltype(f_op)>(
+      ListMatrGens, ListPermGens, id_matr, eGRP, id, f_op);
+}
+
 template <typename TeltPerm, typename TeltMatr, typename Tint>
 std::vector<TeltMatr>
 StabilizerMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
@@ -556,21 +580,6 @@ StabilizerMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
   };
   return PreImageSubgroupAction<Tgroup, TeltMatr, Tobj, decltype(f_op)>(
       ListMatrGens, ListPermGens, id_matr, stab, f, f_op);
-}
-
-template <typename Tgroup, typename TeltMatr>
-std::vector<TeltMatr>
-PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
-                 std::vector<typename Tgroup::Telt> const &ListPermGens,
-                 TeltMatr const &id_matr, Tgroup const &eGRP) {
-  using Telt = typename Tgroup::Telt;
-  using Tobj = Telt;
-  auto f_op = [&](Tobj const &x, Telt const &u) -> Tobj {
-    return eGRP.Sift(Inverse(u) * x);
-  };
-  Telt id = eGRP.get_identity();
-  return PreImageSubgroupAction<Tgroup, TeltMatr, Tobj, decltype(f_op)>(
-      ListMatrGens, ListPermGens, id_matr, eGRP, id, f_op);
 }
 
 template <typename TeltPerm, typename TeltMatr, typename Tint>
