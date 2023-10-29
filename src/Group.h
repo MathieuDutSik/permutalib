@@ -604,7 +604,7 @@ StabilizerMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
 }
 
 template <typename TeltPerm, typename TeltMatr, typename Tint>
-std::vector<std::vector<TeltMatr>,std::vector<TeltMatr>>
+std::pair<std::vector<TeltMatr>,std::vector<TeltMatr>>
 StabilizerRightCosetMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
                                      std::vector<TeltPerm> const &ListPermGens,
                                      TeltMatr const &id_matr, Face const &f) {
