@@ -340,6 +340,14 @@ public:
   std::vector<Telt> RightTransversal_Direct(const Group<Telt,Tint>& H) const {
     return Kernel_RightTransversal_Direct<Telt,Tidx_label,Tint>(S, H.S);
   }
+  template<typename Fterminate>
+  void LeftTransversal_Direct_f(const Group<Telt,Tint>& H, Fterminate f_terminate) const {
+    (void)Kernel_LeftTransversal_Direct_f<Telt,Tidx_label,Tint>(S, H.S, f_terminate);
+  }
+  template<typename Fterminate>
+  void RightTransversal_Direct_f(const Group<Telt,Tint>& H, Fterminate f_terminate) const {
+    (void)Kernel_RightTransversal_Direct_f<Telt,Tidx_label,Tint>(S, H.S, f_terminate);
+  }
   void CheckRightTransversal_Direct(const Group<Telt,Tint>& H) const {
     std::vector<Telt> ListTransversal = Kernel_RightTransversal_Direct<Telt,Tidx_label,Tint>(S, H.S);
     std::cerr << "|eG|=" << this->size() << " |eSubGRP|=" << H.size() << " |ListTransveral|=" << ListTransversal.size() << "\n";

@@ -83,14 +83,17 @@ Kernel_AscendingChain(StabChain<Telt, Tidx_label> const &G) {
   return ListGroup;
 }
 
+
 /*
   U is a subgroup of G.
   We compute the right transversals H g
+  If the function f is triggered, then the enumeration ends prematurely.
 */
-template <typename Telt, typename Tidx_label, typename Tint>
-std::vector<Telt>
-Kernel_RightTransversal_Direct(StabChain<Telt, Tidx_label> const &G,
-                               StabChain<Telt, Tidx_label> const &H) {
+template <typename Telt, typename Tidx_label, typename Tint, typename Fterminate>
+std::optional<std::vector<Telt>>
+Kernel_RightTransversal_Direct_f(StabChain<Telt, Tidx_label> const &G,
+                                 StabChain<Telt, Tidx_label> const &H,
+                                 Fterminate f_terminate) {
   std::vector<Telt> ListTransversal;
   std::unordered_map<Telt, uint8_t> map;
   auto fInsert = [&](Telt const &x) -> void {
@@ -107,6 +110,9 @@ Kernel_RightTransversal_Direct(StabChain<Telt, Tidx_label> const &G,
   Tint size_G = Order<Telt,Tidx_label,Tint>(G);
   Tint size_H = Order<Telt,Tidx_label,Tint>(H);
   Tint index = size_G / size_H;
+  if (f_terminate(id)) {
+    return {};
+  }
   fInsert(id);
   size_t pos = 0;
   while (true) {
@@ -127,10 +133,10 @@ Kernel_RightTransversal_Direct(StabChain<Telt, Tidx_label> const &G,
       Telt eTrans = ListTransversal[idx];
       //      std::cerr << "idx=" << idx << " eTrans=" << eTrans << "\n";
       for (auto &eGen : LGen) {
-        //        std::cerr << "eGen=" << eGen << "\n";
-        //        Telt eProd = eTrans * eGen;
         Telt eProd = eTrans * eGen;
-        //        std::cerr << "Considering eProd=" << eProd << "\n";
+        if (f_terminate(eProd)) {
+          return {};
+        }
         fInsert(eProd);
       }
     }
@@ -159,6 +165,39 @@ Kernel_RightTransversal_Direct(StabChain<Telt, Tidx_label> const &G,
   return ListTransversal;
 }
 
+
+/*
+  U is a subgroup of G.
+  We compute the right transversals H g
+*/
+template <typename Telt, typename Tidx_label, typename Tint>
+std::vector<Telt>
+Kernel_RightTransversal_Direct(StabChain<Telt, Tidx_label> const &G,
+                               StabChain<Telt, Tidx_label> const &H) {
+  auto f_terminate=[]([[maybe_unused]] Telt const& x) -> bool {
+    return false;
+  };
+  std::optional<std::vector<Telt>> opt =
+    Kernel_RightTransversal_Direct_f<Telt,Tidx_label,Tint,decltype(f_terminate)>(G, H, f_terminate);
+  return *opt;
+}
+
+/*
+  U is a subgroup of G.
+  We compute the left transversals g H
+*/
+template <typename Telt, typename Tidx_label, typename Tint, typename Fterminate>
+void Kernel_LeftTransversal_Direct_f(StabChain<Telt, Tidx_label> const &G,
+                                     StabChain<Telt, Tidx_label> const &H,
+                                     Fterminate f_terminate) {
+  auto f_terminate_right=[&](Telt const& x) -> bool {
+    Telt x_inv = Inverse(x);
+    return f_terminate(x_inv);
+  };
+  (void)Kernel_RightTransversal_Direct_f<Telt,Tidx_label,Tint,decltype(f_terminate_right)>(G, H, f_terminate_right);
+}
+
+
 /*
   U is a subgroup of G.
   We compute the left transversals g H
@@ -166,7 +205,7 @@ Kernel_RightTransversal_Direct(StabChain<Telt, Tidx_label> const &G,
 template <typename Telt, typename Tidx_label, typename Tint>
 std::vector<Telt>
 Kernel_LeftTransversal_Direct(StabChain<Telt, Tidx_label> const &G,
-                               StabChain<Telt, Tidx_label> const &H) {
+                              StabChain<Telt, Tidx_label> const &H) {
   std::vector<Telt> ListTransversal = Kernel_RightTransversal_Direct<Telt,Tidx_label,Tint>(G, H);
   size_t len = ListTransversal.size();
   std::vector<Telt> ListRet(len);
