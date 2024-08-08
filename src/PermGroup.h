@@ -315,7 +315,6 @@ OrbitPairEltRepr(std::vector<Telt> const &ListGen, Telt const &id,
     }
     curr_pos = len;
   }
-  std::cerr << "OrbitPairEltRepr |ListPair|=" << ListPair.size() << "\n";
   return ListPair;
 }
 

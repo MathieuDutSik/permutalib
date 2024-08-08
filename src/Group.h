@@ -456,7 +456,9 @@ PreImageSubgroupActionGen(std::vector<TeltMatr> const &ListMatrGens,
   //
   std::unordered_set<TeltMatr> SetMatrGens;
   size_t nGen = ListMatrGens.size();
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   std::cerr << "nCoset=" << nCoset << " |ListMatrGens|=" << nGen << "\n";
+#endif
   for (size_t iCoset = 0; iCoset < nCoset; iCoset++) {
     Tobj const &x_cos = ListPair[iCoset].first;
     TeltMatr const &eGenMatr = ListPair[iCoset].second.first;
@@ -486,7 +488,9 @@ PreImageSubgroupActionGen(std::vector<TeltMatr> const &ListMatrGens,
         SetMatrGens.insert(eGenMatr_new);
     }
   }
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   std::cerr << "|SetMatrGens|=" << SetMatrGens.size() << "\n";
+#endif
   std::vector<TeltMatr> ListMatrGens_ret;
   for (auto &eGen : SetMatrGens)
     ListMatrGens_ret.push_back(eGen);

@@ -8,6 +8,27 @@
 #include <utility>
 #include <vector>
 
+/*
+  Computation of ascending chain:
+  ---A lot of tricks are applied in the generic GAP code like Normalizer, centralizer, etc.
+  ---But this may due to the fact that the groups are general ones. For permutation
+     groups, we can look for different stuff.
+  ---By orbit structure, we look at the structure of the orbits of the group on the point set.
+  ---If the orbit structure of G and H are the same, then we can take a stabilizer of one
+     point (belonging to the smallest non-trivial orbit) and compute the stabilizer in G and H.
+     ---Denote the stabilizers G_s, H_s and compute ascending chain for them by recursion.
+     ---Find the transversal u_1, ..., u_k such that H = <H_s, u_1, ..., u_k>
+     ---Then the the ascending chain for <H_s, G_s> can be lifted to an ascending chain
+     by adding those elements.
+  ---If the orbit structures are not the same, then their restriction on G leaves an interesting
+     subgroup of H < K < G.
+  ---And so we can go from that. By combining those tricks, we can get ascending chains
+  from H to G.
+
+ */
+
+
+
 namespace permutalib {
 
 /*
