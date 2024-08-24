@@ -94,9 +94,11 @@ GetListValRev(std::string const &estr) {
   std::vector<Tidx> ListVal;
   std::vector<Tidx> ListRev;
   auto insertLVal = [&](std::vector<Tidx> const &LVal) -> void {
-    for (auto &eVal : LVal)
-      if (eVal + 1 >= static_cast<int>(maxlen))
+    for (auto &eVal : LVal) {
+      if (eVal + 1 >= static_cast<Tidx>(maxlen)) {
         maxlen = eVal + 1;
+      }
+    }
     for (size_t pos = ListVal.size(); pos < maxlen; pos++) {
       ListVal[pos] = pos;
       ListRev[pos] = pos;
@@ -104,8 +106,9 @@ GetListValRev(std::string const &estr) {
     size_t len = LVal.size();
     for (size_t i = 0; i < len; i++) {
       size_t j = i + 1;
-      if (j == len)
+      if (j == len) {
         j = 0;
+      }
       Tidx val1 = LVal[i];
       Tidx val2 = LVal[j];
       ListVal[val1] = val2;
