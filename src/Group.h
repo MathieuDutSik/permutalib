@@ -181,6 +181,26 @@ public:
       return "Group(" + GapStringTVector(LGen) + ")";
     }
   }
+  std::string PythonString() const {
+    std::vector<Telt> LGen = Kernel_GeneratorsOfGroup(S);
+    std::string str_ret = "[";
+    Tidx n_act = S->comm->n;
+    bool IsFirst = true;
+    for (auto &eGen : LGen) {
+      if (!IsFirst) {
+        str_ret += ",";
+      }
+      str_ret += "[";
+      for (Tidx i=0; i<n_act; i++) {
+        Tidx pnt = eGen.at(i);
+        size_t pnt_s = static_cast<size_t>(pnt);
+        str_ret += std::to_string(pnt_s);
+      }
+      str_ret += "]";
+    }
+    str_ret += "]";
+    return str_ret;
+  }
   Tint size() const { return size_tint; }
   std::map<Tidx, int> factor_size() const { return FactorsSizeStabChain(S); }
   Tidx n_act() const { return S->comm->n; }
