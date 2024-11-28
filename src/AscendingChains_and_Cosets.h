@@ -25,6 +25,50 @@
   ---And so we can go from that. By combining those tricks, we can get ascending chains
   from H to G.
 
+  Uses of ascending chains for computing right cosets:
+  ---We want to compute the right cosets of H in G.
+  ---Suppose we have a chain
+  H = G0 < G1 < G2 < .... < Gm = G
+  ---The right cosets of G_i in G_{i+1} can be computed.
+  This allows to build an iterator for the right cosets from H to G.
+
+  Uses of ascending chains for computing with double cosets:
+  ---We have two subgroups H and K of G.
+  ---We want to decompose G as
+  H g_0 K \cup H g_1 K \cup ... \cup H g_m K
+  ---Those are conjugacy invariants. If we replace H and/or K by a conjugate
+  then the decomposition can be computed.
+  ---We can select a direction for the decomposition:
+  H = G0 < G1 < G2 < ... < Gm = G
+  ---Potentially, we could have decompositions for (Gi, K) and then decompose
+  them into decomposition for (G_{i-1}, K).
+  ---That should allow to go from a few double cosets to more double cosets.
+  ---The first step of the algorithm is also clear:
+  Write Gi = G_{i-1} u0 \cup ... \cup G_{i-1} uK
+  Then we have for Gi h K the equality
+  G_{i-1} u0 h K \cup G_{i-1} u1 K \cup ... \cup G_{i-1} uK h K
+  ---Then the question is to identify when two cosets H u K and H v K are
+  equal.
+  ---OBJECTION: This is all very clever, but it collapses for the subgroup M24
+  of S24:
+     ---M24 is a maximal subgroup of S24 (besides A24). Therefore no ascending
+     chain to speak of.
+     ---The index is 2534272925184000 therefore single coset enumeration is not
+     feasible.
+     ---But actually GAP fails for the triple (G, U, V) = (S24, M24, M24) OOM
+     ---But actually GAP fails for the triple (G, U, V) = (S22, M22, M22) Too long
+     ---For (S12, M12, M12) the number of double cosets is 8. So, maybe some
+     algorithm using cosets is used.
+  ---If H and K generates a strict subgroup of G, can we have some room for
+  improvements?
+  ---We can count on the intersection working? Maybe? We have the functionality
+  but we need to be sure that it works correctly.
+  ---If so, that give us a useful tool: The size of a double coset
+  H u K = u H^u K with H^u = u^{-1} H u being the conjugate subgroup.
+  The size of the double coset should thus be |H| x |K| / |K \cap H^u|
+  ---If we had the cosets, then we could have another enumeration algorithm.
+
+
  */
 
 
