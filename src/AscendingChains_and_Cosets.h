@@ -60,13 +60,21 @@
      ---For (S12, M12, M12) the number of double cosets is 8. So, maybe some
      algorithm using cosets is used.
   ---If H and K generates a strict subgroup of G, can we have some room for
-  improvements?
+  improvements? NO: The above examples kill it: a common example is when H = K
+  and those examples are clearly very large.
   ---We can count on the intersection working? Maybe? We have the functionality
   but we need to be sure that it works correctly.
   ---If so, that give us a useful tool: The size of a double coset
   H u K = u H^u K with H^u = u^{-1} H u being the conjugate subgroup.
   The size of the double coset should thus be |H| x |K| / |K \cap H^u|
   ---If we had the cosets, then we could have another enumeration algorithm.
+  ---If H is a normal subgroup then HK is a subgroup and it becomes a coset
+  algorithm.
+  ---If we compute the normalizer of H, how can that help?
+  ---The homomorphism method that we use for the Double Cosets is a workable
+     method that is actually used in the "CalcDoubleCosets" function.
+  ---
+     
 
 
  */
@@ -981,15 +989,11 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
     homs[step]:=hom;
   od;
 
-  omi:=[];
-  omiz:=[];
-
   for step in [1..Length(c)-1] do
     a1:=c[Length(c)-step+1];
     a2:=c[Length(c)-step];
     normal:=IsNormal(a1,a2);
     indx:=Index(a1,a2);
-
 
     # is this the last step?
     unten:=step=Length(c)-1 and cano=false;
@@ -1104,11 +1108,6 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
           Add(nstab,st);
         fi;
 
-        if cano and step=1 and not normal then
-          Add(omi,mo);
-          Add(omiz,Length(o));
-        fi;
-
         siz:=sifa*Length(o); #order
 
         if unten then
@@ -1170,204 +1169,7 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
     r:=nr;
   od;
 
-  if cano then
-    # do the final up step
-
-    IsSSortedList(omi);
-
-    # canonization fct
-    canrep:=function(x)
-    local stb, p, pinv, t, hom,ps, mop, mo, o, oi, rep, st, lstgens, lstgensop,
-          i, img, step, j,calcs;
-      stb:=b;
-      p:=One(G);
-      for step in [1..Length(c)-1] do
-        calcs:=step<Length(c)-1;
-        pinv:=p^-1;
-        t:=tra[step];
-        hom:=homs[step];
-        # orbit-stabilizer algorithm
-        ps:=PositionCanonical(t,x);
-        mop:=1;
-        mo:=ps;
-        o:=[ps];
-        oi:=[];
-        oi[ps]:=1;
-        rep:=[One(stb)];
-        st:=TrivialSubgroup(b);
-
-        lstgens:=GeneratorsOfGroup(stb);
-        if Length(lstgens)>4 and
-          Length(lstgens)/(AbelianRank(stb)+1)*2>5 then
-          lstgens:=SmallGeneratingSet(stb);
-        fi;
-        lstgensop:=List(lstgens,i->i^pinv); # conjugate generators: operation
-
-        if hom<>fail then
-          lstgensop:=List(lstgensop,i->Image(hom,i));
-        fi;
-        i:=1;
-        while i<=Length(o) do
-          for j in [1..Length(lstgensop)] do
-            if hom=fail then
-              img:=t[o[i]]*lstgensop[j];
-              ps:=PositionCanonical(t,img);
-            else
-              ps:=o[i]^lstgensop[j];
-            fi;
-            if IsBound(oi[ps]) then
-              # known image
-
-              # if there is only one orbit on the top step, we know the
-              # stabilizer!
-              if calcs then
-                #NC is safe (initializing as TrivialSubgroup(G)
-                st := ClosureSubgroupNC(st,rep[i]*lstgens[j]/rep[oi[ps]]);
-                if Size(st)*Length(o)=Size(b) then i:=Length(o);fi;
-              fi;
-              #fi;
-            else
-              Add(o,ps);
-              Add(rep,rep[i]*lstgens[j]);
-              if ps<mo then
-                mo:=ps;
-                mop:=Length(rep);
-                if step=1 and mo in omi then
-                  #Print("found\n");
-                  if Size(st)*omiz[Position(omi,mo)]=Size(stb) then
-                    # we have the minimum and the right stabilizer: break
-                    #Print("|Orbit|=",Length(o),
-                    #" of ",omiz[Position(omi,mo)]," min=",mo,"\n");
-                    i:=Length(o);
-                  fi;
-                fi;
-              fi;
-              oi[ps]:=Length(o);
-              if Size(st)*Length(o)=Size(b) then i:=Length(o);fi;
-            fi;
-          od;
-          i:=i+1;
-        od;
-
-        if calcs then
-          stb:=st^(rep[mop]);
-        fi;
-
-        x:=x*(rep[mop]^pinv)/t[mo];
-        p:=t[mo]*p;
-
-      od;
-      return p;
-    end;
-
-    # now fuse orbits under the left action of a
-    indx:=Index(a,a2);
-    t:=RightTransversal(a,a2);
-    sifa:=Size(a2)*Size(b);
-
-    # cluster according to A-double coset sizes and C lengths
-    #sizes:=List(r,x->Size(a)*Size(b)/Size(Intersection(b,a^x)));
-    hom:=ActionHomomorphism(a,t,OnRight,"surjective");
-    sizes:=[];
-    for i in [1..Length(r)] do
-      lr:=Intersection(a,b^(r[i]^-1));
-      # size of double coset and
-      Add(sizes,[Size(a)*Size(b)/Size(lr),
-                 Length(OrbitsDomain(Image(hom,lr),[1..Length(t)],OnPoints))]);
-    od;
-    ps:=ShallowCopy(sizes);
-    sizes:=Set(sizes); # sizes corresponding to clusters
-    cluster:=List(sizes,s->Filtered([1..Length(r)],x->ps[x]=s));
-
-    # now process per cluster
-    for i in [1..Length(sizes)] do
-      sel:=cluster[i];
-      lr:=r{sel};
-      lstabs:=stabs{sel};
-      SortParallel(lr,lstabs); # quick find
-      IsSSortedList(lr);
-      ssizes:=List(lstabs,x->sifa/Size(x));
-      num:=Sum(ssizes)/sizes[i][1]; # number of double cosets to be created
-      if num>1 and sizes[i][1]/Size(a)<=10*Index(a,a2)^2 then
-        # fuse orbits together
-        lr:=List(lr,x->CanonicalRightCosetElement(a,x));
-        o:=DCFuseSubgroupOrbits(G,b,lr,function(r,g)
-            return CanonicalRightCosetElement(a,r*g);
-          end,1000,num);
-        for j in o do
-          # record double coset
-          if flip then
-            Add(dcs,[lr[j[1]]^(-1),sizes[i][1]]);
-          else
-            Add(dcs,[lr[j[1]],sizes[i][1]]);
-          fi;
-        od;
-        lr:=[];lstabs:=[];
-      else
-        while num>1 do
-          # take first representative as rep for double coset
-          #stab:=Intersection(b,a^lr[1]);
-
-          # check how does its double coset a*lr[1]*b split up into a2-DC's
-          o:=OrbitsDomain(Image(hom,Intersection(a,b^(lr[1]^-1))),
-                [1..Length(t)],OnPoints);
-
-          # identify which of the a2-cosets they are they are (so we can
-          # remove them)
-          o:=List(o,x->Position(lr,canrep(t[x[1]]*lr[1])));
-
-          # record double coset
-          if flip then
-            Add(dcs,[lr[1]^(-1),sizes[i][1]]);
-          else
-            Add(dcs,[lr[1],sizes[i][1]]);
-          fi;
-          sel:=Difference([1..Length(lr)],o);
-          lr:=lr{sel};lstabs:=lstabs{sel};
-
-          num:=num-1;
-        od;
-
-        # remainder must be a single double coset
-        if flip then
-          Add(dcs,[lr[1]^(-1),sizes[i][1]]);
-        else
-          Add(dcs,[lr[1],sizes[i][1]]);
-        fi;
-
-      fi;
-
-    od;
-  fi;
-
-  if AssertionLevel()>2 then
-    # test
-    bsz:=Size(G);
-    t:=[];
-    if flip then
-      # flip back
-      c:=a;
-      a:=b;
-      b:=c;
-    fi;
-    for i in dcs do
-      bsz:=bsz-i[2];
-      if AssertionLevel()>0 then
-        r:=CanonicalRightCosetElement(a,i[1]);
-        if ForAny(t,j->r in RepresentativesContainedRightCosets(j)) then
-          Error("duplicate!");
-        fi;
-      fi;
-      r:=DoubleCoset(a,i[1],b);
-      if AssertionLevel()>0 and Size(r)<>i[2] then
-        Error("size error!");
-      fi;
-      Add(t,r);
-    od;
-    if bsz<>0 then
-      Error("number");
-    fi;
-  fi;
+  # NOTE FROM MDS: The cano code is deleted as a priori not needed for us
 
   return dcs;
 end);
