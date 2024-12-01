@@ -68,14 +68,46 @@
   H u K = u H^u K with H^u = u^{-1} H u being the conjugate subgroup.
   The size of the double coset should thus be |H| x |K| / |K \cap H^u|
   ---If we had the cosets, then we could have another enumeration algorithm.
-  ---If H is a normal subgroup then HK is a subgroup and it becomes a coset
+  ---S: If H is a normal subgroup then HK is a subgroup and it becomes a coset
   algorithm.
-  ---If we compute the normalizer of H, how can that help?
-  ---The homomorphism method that we use for the Double Cosets is a workable
-     method that is actually used in the "CalcDoubleCosets" function.
-  ---
-     
+  ---Q: If we compute the normalizer of H, how can that help? Not clear.
+  ---S: The homomorphism method that we use for the orbit splitting
+  in the polyhedral code is a workable method that is actually used in the
+  "CalcDoubleCosets" function. So, it makes sense to look for such actions.
+  ---S: The TryMaximalSubgroupClassReps cannot be realistically used for us.
+  ---S: If H1 is a normal subgroup in H2 then we have with the cosets
+  H2 = H1 g1 \cup ... \cup H1 gK.
+  So, if we have H2 g K = H1 g1 g K \cup ... \cup H1 gK g K.
+  Since the group is normal, we have H1 g1 g K = g1 H1 g K.
+  Therefore all the double cosets H1 gI g K have the same size.
+  However, we can have two phenomenons (separate or at once):
+     ---A single coset H1 g1 g K could be equal to a H2 g K. Just that the
+     intersection decreases in size.
+     ---The coset H1 g1 g K is smaller than H2 g K.
+     Both situation are visible with a commutative group G.
+  ---Q: What is the algorithm used by the GAP in case of no homomorphism?
+  Not very clear.
 
+
+  Obtaining homomorphism:
+  ---If H is a subgroup of G, we want to find an action of G on a set X
+  such that H is the stabilizer of a point.
+  ---One way to do that is to use the cosets, that is quite workable.
+  The threshold in the GAP code is 1000000. So fairly high.
+  ---The groups we work with are permutation groups acting on a space X.
+  ---We can take decompose X under the action of H:
+     ---If there are several orbits, we can compute the stabilizers of
+     each of them.
+     ---If any one of the stabilizrs is intermediate between H and G.
+     then we should have detected that at the construction of ascending
+     chains.
+     ---So, if we have an orbit not completely stabilized, we can use
+     that for having the homomorphism. Things will proceed just as in the
+     polyhedral code.
+     ---Therefore the failing scenario is when the stabilizer of the
+     orbits under H are also orbits under G.
+  ---So, together, that gets us two reasonable strategies to get such
+  group actions on sets X.
 
  */
 
@@ -171,7 +203,6 @@ Kernel_RightTransversal_Direct_f(StabChain<Telt, Tidx_label> const &G,
   std::unordered_map<Telt, uint8_t> map;
   auto fInsert = [&](Telt const &x) -> void {
     Telt x_can = MinimalElementCosetStabChain(H, x);
-    //    std::cerr << "x=" << x << " x_can=" << x_can << "\n";
     uint8_t &pos = map[x_can];
     if (pos == 0) {
       pos = 1;
@@ -190,7 +221,6 @@ Kernel_RightTransversal_Direct_f(StabChain<Telt, Tidx_label> const &G,
   size_t pos = 0;
   while (true) {
     size_t len = ListTransversal.size();
-    //    std::cerr << "pos=" << pos << " len=" << len << "\n";
 #ifndef CHECK_COSET_ENUMERATION
     Tint n_coset = len;
     if (n_coset == index) {
@@ -204,7 +234,6 @@ Kernel_RightTransversal_Direct_f(StabChain<Telt, Tidx_label> const &G,
       // Copy is needed because the insertion into ListTransversal
       // invalidates the reference.
       Telt eTrans = ListTransversal[idx];
-      //      std::cerr << "idx=" << idx << " eTrans=" << eTrans << "\n";
       for (auto &eGen : LGen) {
         Telt eProd = eTrans * eGen;
         if (f_terminate(eProd)) {
@@ -847,8 +876,6 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
 
   # compute ascending chain and refine if necessarily (we anyhow need action
   # on cosets).
-  #c:=AscendingChain(G,a:refineChainActionLimit:=Index(G,a));
-  Print(NullMat(5));
 
   c:=AscendingChain(G,a:refineChainActionLimit:=actlimit,indoublecoset);
 
@@ -882,8 +909,6 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
           G1:=act[1];
           a1:=act[2];
         else
-          #Print(maxidx(c),obj,Length(Orbit(G,obj,act))," ",
-          #          Length(Orbit(a,obj,act)),"\n");
           G1:=Stabilizer(G,obj,act);
           if Index(G,G1)<maxidx(c) then
             a1:=Stabilizer(a,obj,act);
@@ -932,7 +957,6 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
 
       SortBy(r,a->-Size(a));
       for j in r do
-        #Print("j=",Size(j),"\n");
         t:=AscendingChain(G,j:refineIndex:=avoidlimit,
                               refineChainActionLimit:=actlimit,indoublecoset);
         if maxidx(t)<maxidx(c) and (maxidx(c)>badlimit or
@@ -960,9 +984,7 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
 
   # Do we want to keep result for a smaller group (as cheaper fuse is possible
   # outside function at a later stage)?
-  if ValueOption("noupfuse")=true then cano:=false;fi;
-
-  #if ValueOption("indoublecoset")<>true then Error("GNASH");fi;
+  if ValueOption("noupfuse")=true then cano:=false; fi;
 
   # calculate setup for once
   homs:=[];
@@ -977,7 +999,7 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
     tra[step]:=t;
 
     # is it worth using a permutation representation?
-    if (step>1 or cano) and Length(t)<badlimit and IsPermGroup(G) and
+    if step>1 and Length(t)<badlimit and IsPermGroup(G) and
       not normal then
       # in this case, we can beneficially compute the action once and then use
       # homomorphism methods to obtain the permutation image
@@ -1040,16 +1062,15 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
 
       posi:=0;
       while bsz>0 and cnt>0 do
-        cnt:=cnt-1;
+        cnt:=cnt - 1;
 
         # compute orbit and stabilizers for the next step
         # own Orbitalgorithm and stabilizer computation
 
-        #while blist[posi] do posi:=posi+1;od;
         posi:=Position(blist,false,posi);
         ps:=posi;
         blist[ps]:=true;
-        bsz:=bsz-1;
+        bsz:=bsz - 1;
         e:=t[ps];
         mop:=1;
         mo:=ps;
@@ -1058,15 +1079,15 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
         st := TrivialSubgroup(lst);
 
         o:=[ps];
-        if cano or compst then
+        if compst then
           oi:=[];
           oi[ps]:=1; # reverse index
         fi;
-        orbcnt:=orbcnt+1;
+        orbcnt:=orbcnt + 1;
 
         i:=1;
         while i<=Length(o)
-          # will not grab if nonreg,. orbiut and stabilizer not computed,
+          # will not grab if nonreg,. orbit and stabilizer not computed,
           # but comparatively low cost and huge help if hom=fail
           and Size(st)*Length(o)<Size(lst) do
           for j in [1..Length(lstgens)] do
@@ -1085,14 +1106,10 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
             else
               # new image
               blist[ps]:=true;
-              bsz:=bsz-1;
+              bsz:=bsz - 1;
               Add(o,ps);
-              if cano or compst then
-                Add(rep,rep[i]*lstgens[j]);
-                if cano and ps<mo then
-                  mo:=ps;
-                  mop:=Length(rep);
-                fi;
+              if compst then
+                Add(rep, rep[i] * lstgens[j]);
                 oi[ps]:=Length(o);
               fi;
             fi;
@@ -1100,15 +1117,15 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
           i:=i+1;
         od;
 
-        ep:=e*rep[mop]*p;
-        Add(nr,ep);
+        ep:=e * rep[mop] * p;
+        Add(nr, ep);
 
         if compst then
           st:=st^rep[mop];
-          Add(nstab,st);
+          Add(nstab, st);
         fi;
 
-        siz:=sifa*Length(o); #order
+        siz:=sifa*Length(o);
 
         if unten then
           if flip then
@@ -1124,10 +1141,10 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
         # in the normal case, we can obtain the other orbits easily via
         # the orbit theorem (same stabilizer)
         rt:=RightTransversal(lst,st);
-        Assert(1,Length(rt)=Length(o));
+        Assert(1, Length(rt)=Length(o));
 
-        while bsz>0 do
-          ps:=Position(blist,false);
+        while bsz > 0 do
+          ps:=Position(blist, false);
           e:=t[ps];
           blist[ps]:=true;
 
@@ -1136,15 +1153,8 @@ local c, flip, maxidx, refineChainActionLimit, cano, tryfct, p, r, t,
           mop:=ps;
           # tick off the orbit
           for i in rt do
-            #ps:=PositionCanonical(t,e*p*i/p);
             j:=ep*i/p;
             ps:=PositionCanonical(t,ep*i/p);
-            if cano then
-              if ps<mop then
-                mop:=ps;
-                mo:=j;
-              fi;
-            fi;
             blist[ps]:=true;
           od;
           bsz:=bsz-Length(rt);
