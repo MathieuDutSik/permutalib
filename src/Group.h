@@ -413,6 +413,17 @@ public:
     }
     return l_grp;
   }
+  std::vector<Group<Telt, Tint>> GetAscendingChainSubgroup(Group<Telt,Tint> const& H) const {
+    Telt id = S->comm->identity;
+    std::vector<StabChain<Telt, Tidx_label>> l_stab =
+      Kernel_AscendingChainPair<Telt, Tidx_label, Tint>(H.S, S);
+    std::vector<Group<Telt, Tint>> l_grp;
+    for (auto &e_s : l_stab) {
+      Group<Telt, Tint> eGRP(e_s);
+      l_grp.push_back(eGRP);
+    }
+    return l_grp;
+  }
   Group<Telt, Tint> Intersection(Group<Telt, Tint> const &H) const {
     return Group<Telt, Tint>(
         Kernel_Intersection<Telt, Tidx_label, Tint>(S, H.S));
