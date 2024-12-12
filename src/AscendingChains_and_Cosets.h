@@ -274,14 +274,16 @@ Kernel_RightTransversal_Direct_f(StabChain<Telt, Tidx_label> const &G,
 
 
 template<typename Tidx>
-std::vector<Tidx> get_belonging_vector(std::vector<std::vector<Tidx>> const& orbs, Tidx const& n) {
-  std::vector<Tidx> Vbelong(n);
-  Tidx pos = 0;
+std::vector<std::pair<Tidx,Tidx>> get_belonging_vector(std::vector<std::vector<Tidx>> const& orbs, Tidx const& n) {
+  std::vector<std::pair<Tidx,Tidx>> Vbelong(n);
+  Tidx i_block = 0;
   for (auto & orb : orbs) {
-    for (auto & val : orb) {
-      Vbelong[val] = pos;
+    Tidx len_orb = orb.size();
+    for (Tidx i_elt=0; i_elt<len_orb; i_elt++) {
+      Tidx val = orb{i_elt};
+      Vbelong[val] = {i_choice, i_elt};
     }
-    pos += 1;
+    i_block += 1;
   }
   return Vbelong;
 }
@@ -290,7 +292,7 @@ template<typename Telt, typename Tidx_label>
 struct AscendingEntry {
   StabChain<Telt, Tidx_label> g;
   std::vector<std::vector<typename Telt::Tidx>> orbs;
-  std::vector<typename Telt::Tidx> Vbelong;
+  std::vector<std::pair<typename Telt::Tidx,typename Telt::Tidx>> Vbelong;
   std::vector<Telt> l_gens_small;
   Tint ord;
 };
@@ -408,21 +410,71 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Alt(AscendingEn
 
 /*
  Try to find an intermediate group by using block decomposition.
- That is if the subgroup is 
+ That is if some orbit can be joined then we will find an intermediate subgroup.
  */
 template <typename Telt, typename Tidx_label, typename Tint>
-std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Gens(AscendingEntry<Telt,Tidx_label> const& ent_H,
-                                                                      AscendingEntry<Telt,Tidx_label> const& ent_G) {
+std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Block(AscendingEntry<Telt,Tidx_label> const& ent_H,
+                                                                       AscendingEntry<Telt,Tidx_label> const& ent_G) {
   using Tidx = typename Telt::Tidx;
-  for (auto & orb : ent_G.orbs) {
-    
+  Tidx miss_val = std::numeric_limits<Tidx>::max();
+  Tidx n_act = ent_H->comm.identity.n_act();
+  for (auto & orb_G : ent_G.orbs) {
+    size_t len = orb_G.size();
+    std::vector<std::vector<Tidx>> orbs_H;
+    Face f(len);
+    std::vector<Tidx> map_vert_block_H(n_act, miss_val);
+    Tidx i_block_dec = 0;
+    for (size_t i=0; i<len; i++) {
+      Tidx val = orb_G[i];
+      if (f[i] == 0) {
+        Tidx i_block_H = ent_H.Vbelong[val].first;
+        std::vector<Tidx> const& orb_H = ent_H.orbs[i_block_H];
+        for (auto & val : orb_H) {
+          Tidx pos = ent_G.Vbelong[val].second;
+          map_vert_block_H[val] = i_block_dec;
+          f[pos] = 1;
+        }
+        i_block_dec += 1;
+        orbs_H.push_back(orb_H);
+      }
+    }
+    BlockDecomposition<Tidx> blk1{orbs_H, map_vert_block_H};
+    //
+    std::vector<std::vector<Tidx>> orbs_G{orb_G};
+    std::vector<Tidx> map_vert_block_G(n_act, miss_val);
+    for (auto & val : orb_G) {
+      map_vert_block_G[val] = 0;
+    }
+    BlockDecomposition<Tidx> blk2{orbs_G, map_vert_block_G};
+    std::optional<BlockDecomposition<Tidx>> opt =
+      FindIntermediateBlockDecomposition(ent_G.l_gens_small, blk1, blk2);
+    if (opt) {
+      std::vector<Tidx> orb_found = opt->ListBlocks[0];
+      Face f(n_act);
+      for (auto & val : orb_found) {
+        f[val] = 1;
+      }
+      StabChain<Telt,Tidx_label> gBlk = Kernel_Stabilizer_OnSets<Telt,Tidx_label,Tint>(ent_G.g, f);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+        Tint size_blk = Order<Telt,Tidx_label,Tint>(gBlk);
+        Tint size_G = Order<Telt,Tidx_label,Tint>(G);
+        Tint size_H = Order<Telt,Tidx_label,Tint>(H);
+        if (size_H == size_blk || size_blk == size_G) {
+          std::cerr << "The sizes are not as they should be\n";
+          throw TerminalException{1};
+        }
+        if (!Kernel_IsSubgroup(gBlk, ent_H.g)) {
+          std::cerr << "H should be a subgroup of gBlk\n";
+          throw TerminalException{1};
+        }
+#endif
+        return gBlk;
+    }
   }
   return {};
 }
 
 
-
-  
 
 /*
   Try to find an intermediate group by having some generators inserted
@@ -450,10 +502,6 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Gens(AscendingE
 
 
 
-
-
-
-  
 
   /*
     Computes the orbits on the points.
@@ -496,6 +544,24 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Subset(StabChai
   return {};
 }
 
+template <typename Telt, typename Tidx_label, typename Tint>
+std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_All(StabChain<Telt, Tidx_label> const &H,
+                                                                     StabChain<Telt, Tidx_label> const &G) {
+  std::optional<StabChain<Telt, Tidx_label>> opt1 =
+    Kernel_AscendingChain_Subset(H, G);
+  if (opt1) {
+    return *opt1;
+  }
+  std::optional<StabChain<Telt, Tidx_label>> opt2 =
+    Kernel_AscendingChain_Subset(H, G);
+  if (opt1) {
+    return *opt1;
+  }
+
+}
+
+
+  
   /*
     Computes an ascending chain of subgroups from H to G.
     It is an heuristic program and there is no guarantee that we will get an optimal one.
@@ -520,15 +586,22 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Subset(StabChai
                       -------- Tactics --------
     Apply the following tactics:
     ---Orbit set stabilizers and see what we obtain. Basic strategy but should be powerful.
-    ---Group action on pairs of points could be powerful if the number is not too high.
+    ---Block decompositions strategies.
     ---GeneratorsOfGroup of course could help us get some intermediate.
     ---Computing the alternating subgroups of the action on orbits.
+    Limits:
     ---If the index is prime then nothing more can be done.
+    ---
    */
 template <typename Telt, typename Tidx_label, typename Tint>
 std::vector<StabChain<Telt, Tidx_label>> Kernel_AscendingChain(StabChain<Telt, Tidx_label> const &H,
                                                                StabChain<Telt, Tidx_label> const &G) {
   std::vector<StabChain<Telt, Tidx_label>> l_chain{H, G};
+  while(true) {
+    
+  }
+
+
 }
 
 
