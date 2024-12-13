@@ -623,8 +623,8 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_All(AscendingEn
 template <typename Telt, typename Tidx_label, typename Tint>
 std::vector<StabChain<Telt, Tidx_label>> Kernel_AscendingChainPair(StabChain<Telt, Tidx_label> const &H,
                                                                    StabChain<Telt, Tidx_label> const &G) {
-  AscendingEntry<Telt,Tidx_label,Tint> ent_H = get_ascending_entry(H);
-  AscendingEntry<Telt,Tidx_label,Tint> ent_G = get_ascending_entry(G);
+  AscendingEntry<Telt,Tidx_label,Tint> ent_H = get_ascending_entry<Telt,Tidx_label,Tint>(H);
+  AscendingEntry<Telt,Tidx_label,Tint> ent_G = get_ascending_entry<Telt,Tidx_label,Tint>(G);
   std::vector<AscendingEntry<Telt,Tidx_label,Tint>> l_chain{ent_H, ent_G};
   auto iter = l_chain.begin();
   size_t pos = 0;
@@ -638,7 +638,7 @@ std::vector<StabChain<Telt, Tidx_label>> Kernel_AscendingChainPair(StabChain<Tel
     };
     std::optional<StabChain<Telt, Tidx_label>> opt = get_intermediate();
     if (opt) {
-      AscendingEntry<Telt,Tidx_label,Tint> ent = get_ascending_entry(*opt);
+      AscendingEntry<Telt,Tidx_label,Tint> ent = get_ascending_entry<Telt,Tidx_label,Tint>(*opt);
       l_chain.insert(std::next(iter, 1), *opt);
     } else { // No method work, going to the next one.
       iter++;

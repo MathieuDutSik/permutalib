@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
       throw permutalib::PermutalibException{1};
     }
     std::string File_H = argv[1];
-    std::string File_H = argv[2];
+    std::string File_G = argv[2];
     //
     std::ifstream is1(File_H);
     Tgroup eH = permutalib::ReadGroupFromStream<Tgroup>(is1);
