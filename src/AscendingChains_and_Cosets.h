@@ -623,38 +623,43 @@ std::vector<StabChain<Telt, Tidx_label>> Kernel_AscendingChainPair(StabChain<Tel
                                                                    StabChain<Telt, Tidx_label> const &G) {
   AscendingEntry<Telt,Tidx_label,Tint> ent_H = get_ascending_entry<Telt,Tidx_label,Tint>(H);
   AscendingEntry<Telt,Tidx_label,Tint> ent_G = get_ascending_entry<Telt,Tidx_label,Tint>(G);
-  std::vector<AscendingEntry<Telt,Tidx_label,Tint>> l_chain{ent_H, ent_G};
-  auto iter = l_chain.begin();
+  std::vector<AscendingEntry<Telt,Tidx_label,Tint>> l_grp{ent_H, ent_G};
+  auto iter = l_grp.begin();
   iter++; // We will always insert, one step further.
   size_t pos = 0;
   while(true) {
     auto get_intermediate=[&]() -> std::optional<StabChain<Telt, Tidx_label>> {
-      Tint index = l_chain[pos+1].ord / l_chain[pos].ord;
+      Tint index = l_grp[pos+1].ord / l_grp[pos].ord;
       if (IsPrime(index)) { // Cannot improve when the index is prime
         return {};
       }
-      return Kernel_AscendingChain_All<Telt,Tidx_label,Tint>(l_chain[pos], l_chain[pos+1]);
+      return Kernel_AscendingChain_All<Telt,Tidx_label,Tint>(l_grp[pos], l_grp[pos+1]);
     };
     std::optional<StabChain<Telt, Tidx_label>> opt = get_intermediate();
     if (opt) {
       AscendingEntry<Telt,Tidx_label,Tint> ent = get_ascending_entry<Telt,Tidx_label,Tint>(*opt);
-      l_chain.insert(iter, ent);
+      l_grp.insert(iter, ent);
     } else { // No method work, going to the next one.
       iter++;
       pos++;
-      if (pos + 1 == l_chain.size()) {
+      if (pos + 1 == l_grp.size()) {
         break;
       }
     }
   }
-  std::vector<StabChain<Telt, Tidx_label>> chain_ret;
-  for (auto & ent : l_chain) {
-    chain_ret.push_back(ent.g);
+  std::vector<StabChain<Telt, Tidx_label>> chain;
+  for (auto & ent : l_grp) {
+    chain.push_back(ent.g);
   }
-  return chain_ret;
+  return chain;
 }
 
 
+
+
+
+
+  
 
 /*
   U is a subgroup of G.
@@ -706,8 +711,8 @@ Kernel_LeftTransversal_Direct(StabChain<Telt, Tidx_label> const &G,
 
 template <typename Telt, typename Tidx_label, typename Tint>
 void CheckRightCosets(StabChain<Telt, Tidx_label> const &G,
-                     StabChain<Telt, Tidx_label> const &H,
-                     std::vector<Telt> const& ListRightTransversal) {
+                      StabChain<Telt, Tidx_label> const &H,
+                      std::vector<Telt> const& ListRightTransversal) {
   std::vector<Telt> l_elt_g = get_all_elements(G);
   std::vector<Telt> l_elt_h = get_all_elements(H);
   std::unordered_set<Telt> set_elt;
@@ -732,9 +737,79 @@ void CheckRightCosets(StabChain<Telt, Tidx_label> const &G,
   }
 }
 
+template <typename Telt, typename Tidx_label, typename Tint>
+struct RightCosetIterator {
+private:
+  std::vector<std::vector<Telt>> ll_cos;
+  std::vector<size_t> l_size;
+  std::vector<size_t> l_pos;
+  Telt id;
+  size_t n_level;
+public:
+  RightCosetIterator(StabChain<Telt,Tidx_label>, const& H, StabChain<Telt,Tidx_label> const& G) {
+    std::vector<StabChain<Telt,Tidx_label>> chain = Kernel_AscendingChainPair(H, G);
+    n_level = chain.size() - 1;
+    for (size_t i_level=0; i_level<n_level; i_level++) {
+      std::vector<Telt> l_cos = Kernel_RightTransversal_Direct(chain[i_level + 1], chain[i_level]);
+      ll_cos.push_back(l_cos);
+      l_size.push_back(l_cos.size());
+      l_pos.push_back(0);
+    }
+    id = G->comm->identity;
+  }
+  Telt operator*() const {
+    Telt ret = id;
+    for (size_t i_level=0; i_level<n_level; i_level++) {
+      ret *= ll_cos[i_level][l_pos[i_level]];
+    }
+    return ret;
+  }
+  bool operator==(const RightCosetIterator<Telt,Tidx_label,Tint>& rci) const {
+    if (n_level != rci.n_level) {
+      return false;
+    }
+    for (size_t i_level=0; i_level<n_level; i_level++) {
+      if (l_pos[i_level] != rci.l_pos[i_level]) {
+        return false;
+      }
+    }
+    return true;
+  }
+  bool operator!=(const RightCosetIterator<Telt,Tidx_label,Tint>& rci) const {
+    if (n_level != rci.n_level) {
+      return true;
+    }
+    for (size_t i_level=0; i_level<n_level; i_level++) {
+      if (l_pos[i_level] != rci.l_pos[i_level]) {
+        return true;
+      }
+    }
+    return false;
+  }
+}
+
+template <typename Telt, typename Tidx_label, typename Tint>
+struct RightCosets {
+private:
+  std::vector<StabChain<Telt,Tidx_label>> chain;
+  size_t n_level;
+public:
+  RightCosets(StabChain<Telt,Tidx_label> const& H, StabChain<Telt,Tidx_label> const& G) {
+    chain = Kernel_AscendingChainPair(H, G);
+    n_level = chain.size() - 1;
+  }
+  RightCosetIterator<Telt,Tidx_label,Tint> begin() const {
+    
+  }
 
 
 
+  
+}
+
+
+
+  
 
 
 
