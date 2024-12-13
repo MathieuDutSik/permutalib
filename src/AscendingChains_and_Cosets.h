@@ -280,8 +280,8 @@ std::vector<std::pair<Tidx,Tidx>> get_belonging_vector(std::vector<std::vector<T
   for (auto & orb : orbs) {
     Tidx len_orb = orb.size();
     for (Tidx i_elt=0; i_elt<len_orb; i_elt++) {
-      Tidx val = orb{i_elt};
-      Vbelong[val] = {i_choice, i_elt};
+      Tidx val = orb[i_elt];
+      Vbelong[val] = {i_block, i_elt};
     }
     i_block += 1;
   }
@@ -299,9 +299,10 @@ struct AscendingEntry {
 
 template<typename Telt, typename Tidx_label, typename Tint>
 AscendingEntry<Telt,Tidx_label,Tint> get_ascending_entry(StabChain<Telt, Tidx_label> const& g) {
-  usint Tidx = typename Telt::Tidx;
+  using Tidx = typename Telt::Tidx;
+  Tidx n_act = g->comm.n_act();
   std::vector<Telt> l_gens_small = Kernel_SmallGeneratingSet<Telt, Tidx_label, Tint>(g);
-  std::vector<std::vector<typename Telt::Tidx>> orbs = OrbitsPerms(l_gens_snall, n_act);
+  std::vector<std::vector<typename Telt::Tidx>> orbs = OrbitsPerms(l_gens_small, n_act);
   std::vector<std::pair<Tidx,Tidx>> Vbelong = get_belonging_vector(orbs, n_act);
   Tint ord = Order<Telt,Tidx_label,Tint>(g);
   return {std::move(g), std::move(orbs), std::move(Vbelong), std::move(l_gens_small), std::move(ord)};
@@ -309,6 +310,7 @@ AscendingEntry<Telt,Tidx_label,Tint> get_ascending_entry(StabChain<Telt, Tidx_la
 
 template<typename Telt>
 bool is_alternating(std::vector<typename Telt::Tidx> const& v, Telt const& elt) {
+  using Tidx = typename Telt::Tidx;
   Tidx n_act = elt.n_act();
   Tidx miss_val = std::numeric_limits<Tidx>::max();
   std::vector<Tidx> V(n_act, miss_val);
@@ -362,7 +364,7 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Alt(AscendingEn
     }
     return true;
   };
-  let id = ent_H.g->comm.identity;
+  Telt id = ent_H.g->comm.identity;
   for (auto & orb : ent_G.orbs) {
     bool isalt_G = is_grp_alternating(ent_G.l_gens_small, orb);
     bool isalt_H = is_grp_alternating(ent_H.l_gens_small, orb);
@@ -370,14 +372,14 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Alt(AscendingEn
       Tint size = ent_H.ord * 2;
       if (size != ent_G.ord) {
         std::vector<Telt> l_alt, l_sym;
-        std::vector<int> l_sign
+        std::vector<int> l_sign;
         for (auto & eGen : ent_G.l_gens_small) {
           if (is_alternating(orb, eGen)) {
             l_alt.push_back(eGen);
-            l_sign.push(1);
+            l_sign.push_back(1);
           } else {
             l_sym.push_back(eGen);
-            l_sign.push(-1);
+            l_sign.push_back(-1);
           }
         }
         size_t n_gen = ent_G.l_gens_small.size();
@@ -403,7 +405,7 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Alt(AscendingEn
           }
         }
         StabChainOptions<Tint, Telt> options = GetStandardOptions<Tint, Telt>(id);
-        StabChain<Telt,Tidx_label> gAlt = StabChainOp_listgen<Telt, Tidx_label, Tint>(LGen, options);
+        StabChain<Telt,Tidx_label> gAlt = StabChainOp_listgen<Telt, Tidx_label, Tint>(LGenAlt, options);
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
         Tint size_target = 2 * Order<Telt,Tidx_label,Tint>(gAlt);
         if (size_target != ent_G.ord) {
@@ -494,9 +496,9 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Gens(AscendingE
                                                                       AscendingEntry<Telt,Tidx_label,Tint> const& ent_G) {
   Tint size_G = ent_G.ord;
   Tint size_H = ent_H.ord;
-  let id = ent_H.g->comm.identity;
+  Telt id = ent_H.g->comm.identity;
   StabChainOptions<Tint, Telt> options = GetStandardOptions<Tint, Telt>(id);
-  for (auto & eGen in GeneratorsOfGroup(ent_G.g)) {
+  for (auto & eGen: GeneratorsOfGroup(ent_G.g)) {
     if (!IsElementInStabChain(ent_H.g, eGen)) {
       std::vector<Telt> LGen = ent_H.l_gens_small;
       LGen.push_back(eGen);
@@ -520,7 +522,7 @@ template <typename Telt, typename Tidx_label, typename Tint>
 std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Subset(AscendingEntry<Telt,Tidx_label,Tint> const& ent_H,
                                                                         AscendingEntry<Telt,Tidx_label,Tint> const& ent_G) {
   using Tidx = typename Telt::Tidx;
-  Tidx n_act = G.n_act();
+  Tidx n_act = ent_G.n_act();
   std::vector<std::vector<Tidx>> const& orbs_H = ent_H.orbs;
   Tidx n_orb_H = orbs_H.size();
   std::vector<std::vector<Tidx>> const& orbs_G = ent_G.orbs;
@@ -542,7 +544,7 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Subset(Ascendin
         f[pt] = 1;
       }
     }
-    StabChain<Telt,Tidx_label> sub = Kernel_Stabilizer_OnSets<Telt,Tidx_label,Tint>(G, f);
+    StabChain<Telt,Tidx_label> sub = Kernel_Stabilizer_OnSets<Telt,Tidx_label,Tint>(ent_G.g, f);
     Tint size_sub = Order<Telt,Tidx_label,Tint>(sub);
     if (size_sub != size_G && size_sub != size_H) {
       return sub;
@@ -556,8 +558,8 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Subset(Ascendin
 // All of those methods can be iterated since they all can potentially
 // give more intermediate subgroups when reapplied.
 template <typename Telt, typename Tidx_label, typename Tint>
-std::optional<StabChain<Telt, Tidx_label> Kernel_AscendingChain_All(AscendingEntry<Telt,Tidx_label,Tint> const& ent_H,
-                                                                    AscendingEntry<Telt,Tidx_label,Tint> const& ent_G) {
+std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_All(AscendingEntry<Telt,Tidx_label,Tint> const& ent_H,
+                                                                     AscendingEntry<Telt,Tidx_label,Tint> const& ent_G) {
   // The method of computing the stabilizer of subset.
   std::optional<StabChain<Telt, Tidx_label>> opt1 =
     Kernel_AscendingChain_Subset(ent_H, ent_G);
@@ -624,30 +626,30 @@ std::vector<StabChain<Telt, Tidx_label>> Kernel_AscendingChainPair(StabChain<Tel
   AscendingEntry<Telt,Tidx_label,Tint> ent_H = get_ascending_entry(H);
   AscendingEntry<Telt,Tidx_label,Tint> ent_G = get_ascending_entry(G);
   std::vector<AscendingEntry<Telt,Tidx_label,Tint>> l_chain{ent_H, ent_G};
-  let iter = l_chains.begin();
+  auto iter = l_chain.begin();
   size_t pos = 0;
   while(true) {
     auto get_intermediate=[&]() -> std::optional<StabChain<Telt, Tidx_label>> {
-      Tint index = l_chains[pos+1].ord / l_chains[pos].ord;
+      Tint index = l_chain[pos+1].ord / l_chain[pos].ord;
       if (IsPrime(index)) { // Cannot improve when the index is prime
         return {};
       }
-      return Kernel_AscendingChain_All<Telt,Tidx_label,Tint>(l_chains[pos], l_chains[pos+1]);
+      return Kernel_AscendingChain_All<Telt,Tidx_label,Tint>(l_chain[pos], l_chain[pos+1]);
     };
     std::optional<StabChain<Telt, Tidx_label>> opt = get_intermediate();
     if (opt) {
       AscendingEntry<Telt,Tidx_label,Tint> ent = get_ascending_entry(*opt);
-      l_chains.insert(iter, *opt);
+      l_chain.insert(std::next(iter, 1), *opt);
     } else { // No method work, going to the next one.
       iter++;
       pos++;
-      if (pos + 1 == l_chains.size()) {
+      if (pos + 1 == l_chain.size()) {
         break;
       }
     }
   }
   std::vector<StabChain<Telt, Tidx_label>> chain_ret;
-  for (auto & ent : l_chains) {
+  for (auto & ent : l_chain) {
     chain_ret.push_back(ent.g);
   }
   return chain_ret;
