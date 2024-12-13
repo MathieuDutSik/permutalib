@@ -8,7 +8,7 @@
 
 namespace permutalib {
 
-template <typename T> T gcd(T a, T b) {
+template <typename T> T loc_gcd(T a, T b) {
   T remainder;
   while (b != 0) {
     remainder = a % b;
@@ -29,7 +29,7 @@ std::pair<bool, T> rho_pollard_factorize(T const &number) {
       diff = x - x_fixed;
       if (diff < 0)
         diff = -diff;
-      factor = gcd(diff, number);
+      factor = loc_gcd(diff, number);
     } while (--count && (factor == 1));
     size *= 2;
     x_fixed = x;
