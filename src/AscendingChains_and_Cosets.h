@@ -313,6 +313,17 @@ AscendingEntry<Telt,Tidx_label,Tint> get_ascending_entry(StabChain<Telt, Tidx_la
 template<typename Telt>
 bool is_alternating(std::vector<typename Telt::Tidx> const& v, Telt const& elt, typename Telt::Tidx const& n_act) {
   using Tidx = typename Telt::Tidx;
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "n_act=" << static_cast<size_t>(n_act) << " elt=" << elt << "\n";
+  std::cerr << "v =";
+  for (auto & val : v) {
+    std::cerr << " " << static_cast<size_t>(val);
+  }
+  std::cerr << "\n";
+  for (Tidx u=0; u<n_act; u++) {
+    std::cerr << "u=" << static_cast<size_t>(u) << " img=" << static_cast<size_t>(elt.at(u)) << "\n";
+  }
+#endif
   Tidx miss_val = std::numeric_limits<Tidx>::max();
   std::vector<Tidx> V(n_act, miss_val);
   Tidx pos = 0;
@@ -321,16 +332,34 @@ bool is_alternating(std::vector<typename Telt::Tidx> const& v, Telt const& elt, 
     pos += 1;
   }
   size_t len = v.size();
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "len=" << len << "\n";
+#endif
   Face f(len);
   int sign = 1;
   for (size_t i = 0; i<len; i++) {
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "i=" << i << "\n";
+#endif
     if (f[i] == 0) {
       Tidx val_first = v[i];
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+      std::cerr << "val_first=" << static_cast<size_t>(val_first) << "\n";
+#endif
       size_t len_cycle = 0;
       Tidx val_curr = val_first;
       while(true) {
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+        std::cerr << "val_curr=" << static_cast<size_t>(val_curr) << "\n";
+#endif
         f[val_curr] = 1;
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+        std::cerr << "f assigned, val_curr=" << static_cast<size_t>(val_curr) << "\n";
+#endif
         Tidx val_curr = elt.at(val_curr);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+        std::cerr << "Now val_curr=" << static_cast<size_t>(val_curr) << "\n";
+#endif
         len_cycle += 1;
         if (val_curr == val_first) {
           break;
@@ -412,7 +441,7 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Alt(AscendingEn
         Tint size_target = 2 * Order<Telt,Tidx_label,Tint>(gAlt);
         if (size_target != ent_G.ord) {
           std::cerr << "size_target is not of the right size\n";
-          throw TerminalException{1};
+          throw PermutalibException{1};
         }
 #endif
         return gAlt;
@@ -471,15 +500,15 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Block(Ascending
       StabChain<Telt,Tidx_label> gBlk = Kernel_Stabilizer_OnSets<Telt,Tidx_label,Tint>(ent_G.g, f);
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
         Tint size_blk = Order<Telt,Tidx_label,Tint>(gBlk);
-        Tint size_G = Order<Telt,Tidx_label,Tint>(G);
-        Tint size_H = Order<Telt,Tidx_label,Tint>(H);
+        Tint size_G = Order<Telt,Tidx_label,Tint>(ent_G.g);
+        Tint size_H = Order<Telt,Tidx_label,Tint>(ent_H.g);
         if (size_H == size_blk || size_blk == size_G) {
           std::cerr << "The sizes are not as they should be\n";
-          throw TerminalException{1};
+          throw PermutalibException{1};
         }
         if (!Kernel_IsSubgroup(gBlk, ent_H.g)) {
           std::cerr << "H should be a subgroup of gBlk\n";
-          throw TerminalException{1};
+          throw PermutalibException{1};
         }
 #endif
         return gBlk;
@@ -815,6 +844,27 @@ public:
       }
     }
     return false;
+  }
+  void single_increase() {
+    for (size_t i_level=0; i_level<n_level; i_level++) {
+      if (l_pos[i_level] < l_size[i_level] - 1) {
+        for (size_t j_level=0; j_level<i_level; j_level++) {
+          l_pos[j_level] = 0;
+        }
+        l_pos[i_level] += 1;
+        return;
+      }
+    }
+    is_end = true;
+  }
+  Telt operator++() {
+    single_increase();
+    return *this;
+  }
+  Telt operator++(int) {
+    Telt tmp = *this;
+    single_increase();
+    return tmp;
   }
 };
 

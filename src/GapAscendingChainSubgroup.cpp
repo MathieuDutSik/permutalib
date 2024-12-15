@@ -11,20 +11,17 @@ int main(int argc, char *argv[]) {
     using Telt = permutalib::SingleSidedPerm<Tidx>;
     using Tint = mpz_class;
     using Tgroup = permutalib::Group<Telt, Tint>;
-    if (argc != 3 && argc != 4) {
-      std::cerr << "GapAscendingChainPair [H] [G]\n";
+    if (argc != 2 && argc != 3) {
+      std::cerr << "GapAscendingChainPair [H_G]\n";
       std::cerr << "or\n";
-      std::cerr << "GapAscendingChainPair [H] [G] [OUT]\n";
+      std::cerr << "GapAscendingChainPair [H_G] [OUT]\n";
       throw permutalib::PermutalibException{1};
     }
-    std::string File_H = argv[1];
-    std::string File_G = argv[2];
+    std::string File_HG = argv[1];
     //
-    std::ifstream is1(File_H);
-    Tgroup eH = permutalib::ReadGroupFromStream<Tgroup>(is1);
-    //
-    std::ifstream is2(File_G);
-    Tgroup eG = permutalib::ReadGroupFromStream<Tgroup>(is2);
+    std::ifstream is(File_HG);
+    Tgroup eH = permutalib::ReadGroupFromStream<Tgroup>(is);
+    Tgroup eG = permutalib::ReadGroupFromStream<Tgroup>(is);
     //
     std::vector<Tgroup> ListGroup = eG.GetAscendingChainSubgroup(eH);
     auto prt = [&](std::ostream &os) -> void {

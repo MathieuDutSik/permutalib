@@ -2,9 +2,10 @@
 #PROGRAM	= TestCompilation TestSymmetricGroup TestStabilizerOnSet
 #PROGRAM	= TestStabilizerOnSet
 #PROGRAM	= TestRepresentativeActionOnSet
-PROGRAM	= GapCanonicalImage
+#PROGRAM	= GapCanonicalImage
 #PROGRAM	= GapCentralizerElt
 #PROGRAM	= SequenceSimplify
+PROGRAM	= GapAscendingChainSubgroup
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
@@ -15,13 +16,13 @@ OBJECTS		= $(PROGRAM:%=%.o)
 #          For GCC
 #CC             = g++ -std=c++17 -Wall -Wextra -O3 -g -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=bounds-strict -fsanitize=alignment
 #          For CLANG
-CC             = g++ -std=c++17 -Wall -Wextra -O3 -g -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=alignment
+CC             = g++ -std=c++17 -Wall -Wextra -g -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=alignment
 
 
 NOLINKFLAG 	= -c
 OUTPUTFLAG 	= -o
 
-CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK -DPERMUTALIB_TRACK_METHOD
+CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK -DPERMUTALIB_TRACK_METHOD -DDEBUG_ASCENDING_CHAINS_COSETS
 #CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK -DSYNCHRONIZED_DEBUG_GAP478
 
 CFLAGS 		= -I$(GMP_INCDIR) -I$(BOOST_INCDIR)
