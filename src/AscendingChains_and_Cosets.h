@@ -115,7 +115,9 @@
 
  */
 
-
+#ifdef DEBUG
+#define DEBUG_ASCENDING_CHAINS_COSETS
+#endif
 
 namespace permutalib {
 
@@ -562,27 +564,41 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_All(AscendingEn
   std::optional<StabChain<Telt, Tidx_label>> opt1 =
     Kernel_AscendingChain_Subset(ent_H, ent_G);
   if (opt1) {
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "ACC: Finding an intermediate subgroup from Subset method\n";
+#endif
     return *opt1;
   }
   //
   std::optional<StabChain<Telt, Tidx_label>> opt2 =
     Kernel_AscendingChain_Alt(ent_H, ent_G);
   if (opt2) {
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "ACC: Finding an intermediate subgroup from Alt method\n";
+#endif
     return *opt2;
   }
   //
   std::optional<StabChain<Telt, Tidx_label>> opt3 =
     Kernel_AscendingChain_Block(ent_H, ent_G);
   if (opt3) {
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "ACC: Finding an intermediate subgroup from Block method\n";
+#endif
     return *opt3;
   }
   //
   std::optional<StabChain<Telt, Tidx_label>> opt4 =
     Kernel_AscendingChain_Gens(ent_H, ent_G);
   if (opt4) {
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "ACC: Finding an intermediate subgroup from Gens method\n";
+#endif
     return *opt4;
   }
-  // Nothing works, returning nothing
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "ACC: Failing to find an intermediate subgroup\n";
+#endif
   return {};
 }
 
@@ -657,9 +673,6 @@ std::vector<StabChain<Telt, Tidx_label>> Kernel_AscendingChainPair(StabChain<Tel
 
 
 
-
-
-  
 
 /*
   U is a subgroup of G.
@@ -745,8 +758,9 @@ private:
   std::vector<size_t> l_pos;
   Telt id;
   size_t n_level;
+  bool is_end;
 public:
-  RightCosetIterator(StabChain<Telt,Tidx_label>, const& H, StabChain<Telt,Tidx_label> const& G) {
+  RightCosetIterator(StabChain<Telt,Tidx_label> const& H, StabChain<Telt,Tidx_label> const& G) {
     std::vector<StabChain<Telt,Tidx_label>> chain = Kernel_AscendingChainPair(H, G);
     n_level = chain.size() - 1;
     for (size_t i_level=0; i_level<n_level; i_level++) {
@@ -756,6 +770,10 @@ public:
       l_pos.push_back(0);
     }
     id = G->comm->identity;
+    is_end = false;
+  }
+  RightCosetIterator() {
+    is_end = true;
   }
   Telt operator*() const {
     Telt ret = id;
@@ -765,6 +783,12 @@ public:
     return ret;
   }
   bool operator==(const RightCosetIterator<Telt,Tidx_label,Tint>& rci) const {
+    if (is_end == rci.is_end) {
+      return true;
+    }
+    if (is_end || rci.is_end) {
+      return false;
+    }
     if (n_level != rci.n_level) {
       return false;
     }
@@ -776,6 +800,12 @@ public:
     return true;
   }
   bool operator!=(const RightCosetIterator<Telt,Tidx_label,Tint>& rci) const {
+    if (is_end == rci.is_end) {
+      return false;
+    }
+    if (is_end || rci.is_end) {
+      return true;
+    }
     if (n_level != rci.n_level) {
       return true;
     }
@@ -786,31 +816,23 @@ public:
     }
     return false;
   }
-}
+};
 
 template <typename Telt, typename Tidx_label, typename Tint>
 struct RightCosets {
 private:
-  std::vector<StabChain<Telt,Tidx_label>> chain;
-  size_t n_level;
+  StabChain<Telt,Tidx_label> H;
+  StabChain<Telt,Tidx_label> G;
 public:
-  RightCosets(StabChain<Telt,Tidx_label> const& H, StabChain<Telt,Tidx_label> const& G) {
-    chain = Kernel_AscendingChainPair(H, G);
-    n_level = chain.size() - 1;
+  RightCosets(StabChain<Telt,Tidx_label> const& _H, StabChain<Telt,Tidx_label> const& _G) : H(_H), G(_G) {
   }
   RightCosetIterator<Telt,Tidx_label,Tint> begin() const {
-    
+    return RightCosetIterator<Telt,Tidx_label,Tint>(H, G);
   }
-
-
-
-  
-}
-
-
-
-  
-
+  RightCosetIterator<Telt,Tidx_label,Tint> end() const {
+    return RightCosetIterator<Telt,Tidx_label,Tint>();
+  }
+};
 
 
 
