@@ -325,10 +325,13 @@ bool is_alternating(std::vector<typename Telt::Tidx> const& v, Telt const& elt, 
   }
 #endif
   Tidx miss_val = std::numeric_limits<Tidx>::max();
-  std::vector<Tidx> V(n_act, miss_val);
+  std::vector<Tidx> Vmap(n_act, miss_val);
   Tidx pos = 0;
   for (auto & val : v) {
-    V[val] = pos;
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "val=" << static_cast<size_t>(val)  << " pos=" << static_cast<size_t>(pos) << "\n";
+#endif
+    Vmap[val] = pos;
     pos += 1;
   }
   size_t len = v.size();
@@ -352,7 +355,11 @@ bool is_alternating(std::vector<typename Telt::Tidx> const& v, Telt const& elt, 
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
         std::cerr << "val_curr=" << static_cast<size_t>(val_curr) << "\n";
 #endif
-        f[val_curr] = 1;
+        Tidx pos = Vmap[val_curr];
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+        std::cerr << "pos=" << static_cast<size_t>(pos) << "\n";
+#endif
+        f[pos] = 1;
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
         std::cerr << "f assigned, val_curr=" << static_cast<size_t>(val_curr) << "\n";
 #endif
