@@ -315,22 +315,11 @@ bool is_alternating(std::vector<typename Telt::Tidx> const& v, Telt const& elt, 
   using Tidx = typename Telt::Tidx;
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
   std::cerr << "n_act=" << static_cast<size_t>(n_act) << " elt=" << elt << "\n";
-  std::cerr << "v =";
-  for (auto & val : v) {
-    std::cerr << " " << static_cast<size_t>(val);
-  }
-  std::cerr << "\n";
-  for (Tidx u=0; u<n_act; u++) {
-    std::cerr << "u=" << static_cast<size_t>(u) << " img=" << static_cast<size_t>(elt.at(u)) << "\n";
-  }
 #endif
   Tidx miss_val = std::numeric_limits<Tidx>::max();
   std::vector<Tidx> Vmap(n_act, miss_val);
   Tidx pos = 0;
   for (auto & val : v) {
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
-    std::cerr << "val=" << static_cast<size_t>(val)  << " pos=" << static_cast<size_t>(pos) << "\n";
-#endif
     Vmap[val] = pos;
     pos += 1;
   }
@@ -341,43 +330,31 @@ bool is_alternating(std::vector<typename Telt::Tidx> const& v, Telt const& elt, 
   Face f(len);
   int sign = 1;
   for (size_t i = 0; i<len; i++) {
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
-    std::cerr << "i=" << i << "\n";
-#endif
     if (f[i] == 0) {
       Tidx val_first = v[i];
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
-      std::cerr << "val_first=" << static_cast<size_t>(val_first) << "\n";
-#endif
       size_t len_cycle = 0;
       Tidx val_curr = val_first;
       while(true) {
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
-        std::cerr << "val_curr=" << static_cast<size_t>(val_curr) << "\n";
-#endif
         Tidx pos = Vmap[val_curr];
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
-        std::cerr << "pos=" << static_cast<size_t>(pos) << "\n";
-#endif
         f[pos] = 1;
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
-        std::cerr << "f assigned, val_curr=" << static_cast<size_t>(val_curr) << "\n";
-#endif
-        Tidx val_curr = elt.at(val_curr);
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
-        std::cerr << "Now val_curr=" << static_cast<size_t>(val_curr) << "\n";
-#endif
+        val_curr = elt.at(val_curr);
         len_cycle += 1;
         if (val_curr == val_first) {
           break;
         }
       }
       size_t res = len_cycle % 2;
-      if (res == 1) {
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+      std::cerr << "len_cycle=" << len_cycle << " res=" << res << " sign=" << sign << "\n";
+#endif
+      if (res == 0) {
         sign *= -1;
       }
     }
   }
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "Final sign=" << sign << "\n";
+#endif
   if (sign == 1) {
     return true;
   }

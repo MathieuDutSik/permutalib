@@ -606,7 +606,6 @@ public:
     return true;
   }
   Tidx at(Tidx const &i) const {
-    std::cerr << "Tidx at, |ListVal|=" << ListVal.size() << " i=" << static_cast<size_t>(i) << "\n";
     return ListVal[i];
   }
   Tidx atRev(Tidx const &i) const {
