@@ -22,8 +22,14 @@ int main(int argc, char *argv[]) {
     std::ifstream is(File_HG);
     Tgroup eH = permutalib::ReadGroupFromStream<Tgroup>(is);
     Tgroup eG = permutalib::ReadGroupFromStream<Tgroup>(is);
+    Tint size_G = eG.size();
+    Tint size_H = eH.size();
+    std::cerr << "size_G=" << size_G << " size_H=" << size_H << "\n";
     //
     std::vector<Tgroup> ListGroup = eG.GetAscendingChainSubgroup(eH);
+    for (size_t i = 0; i < ListGroup.size(); i++) {
+      std::cerr << "i=" << i << " |GRP|=" << ListGroup[i].size() << "\n";
+    }
     auto prt = [&](std::ostream &os) -> void {
       os << "return [";
       for (size_t i = 0; i < ListGroup.size(); i++) {
