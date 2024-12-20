@@ -378,6 +378,18 @@ BlockDecomposition<typename Telt::Tidx> get_block_decomposition(AscendingEntry<T
   return {orbs_H, map_vert_block_H};
 }
 
+template<typename Telt, typename Tidx_label, typename Tint>
+BlockDecomposition<typename Telt::Tidx> get_supercoarse_block_decomposition(AscendingEntry<Telt,Tidx_label,Tint> const& ent_H, std::vector<typename Telt::Tidx> const& orb_G) {
+  using Tidx = typename Telt::Tidx;
+  Tidx miss_val = std::numeric_limits<Tidx>::max();
+  Tidx n_act = ent_H.g->comm->n;
+  std::vector<std::vector<Tidx>> orbs_G{orb_G};
+  std::vector<Tidx> map_vert_block_G(n_act, miss_val);
+  for (auto & val : orb_G) {
+    map_vert_block_G[val] = 0;
+  }
+  return {orbs_G, map_vert_block_G};
+}
 
 template<typename Telt>
 bool is_alternating(std::vector<typename Telt::Tidx> const& v, Telt const& elt, typename Telt::Tidx const& n_act) {
@@ -446,64 +458,64 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Alt(AscendingEn
                                                                      AscendingEntry<Telt,Tidx_label,Tint> const& ent_G) {
   using Tidx = typename Telt::Tidx;
   Tidx n_act = ent_H.g->comm->n;
-  auto is_grp_alternating=[&](std::vector<Telt> const& LGen, std::vector<Tidx> const& orb) -> bool {
+  auto is_grp_symmetric=[&](std::vector<Telt> const& LGen, std::vector<Tidx> const& orb) -> std::optional<Telt> {
     for (auto & eGen : LGen) {
       if (!is_alternating(orb, eGen, n_act)) {
-        return false;
+        return eGen;
       }
     }
-    return true;
+    return {};
   };
   Telt id = ent_H.g->comm->identity;
   for (auto & orb : ent_G.orbs) {
-    bool isalt_G = is_grp_alternating(ent_G.l_gens_small, orb);
-    bool isalt_H = is_grp_alternating(ent_H.l_gens_small, orb);
-    if (isalt_H && !isalt_G) {
-      Tint size = ent_H.ord * 2;
-      if (size != ent_G.ord) {
-        std::vector<Telt> l_alt, l_sym;
-        std::vector<int> l_sign;
-        for (auto & eGen : ent_G.l_gens_small) {
-          if (is_alternating(orb, eGen, n_act)) {
-            l_alt.push_back(eGen);
-            l_sign.push_back(1);
-          } else {
-            l_sym.push_back(eGen);
-            l_sign.push_back(-1);
-          }
-        }
-        size_t n_gen = ent_G.l_gens_small.size();
-        Telt eGenRef = l_sym[0];
-        Telt eGenRefInv = Inverse(eGenRef);
-        std::vector<Telt> LCos{id, eGenRef};
-        std::vector<int> l_cos_sign{1, -1};
-        std::vector<Telt> LGenAlt;
-        for (size_t i_cos=0; i_cos<2; i_cos++) {
-          Telt const& eCos = LCos[i_cos];
-          int cos_sign = l_cos_sign[i_cos];
-          for (size_t i_gen=0; i_gen<n_gen; i_gen++) {
-            Telt u = ent_G.l_gens_small[i_gen];
-            int e_sign = l_sign[i_gen];
-            int tot_sign = cos_sign * e_sign;
-            if (tot_sign == 1) {
-              Telt eProd = eCos * u;
-              LGenAlt.push_back(eProd);
+    std::optional<Telt> opt_G = is_grp_symmetric(ent_G.l_gens_small, orb);
+    if (opt_G) { // We have a element that is not alternating.
+      Telt const& eGenRef = *opt_G;
+      Telt eGenRefInv = Inverse(eGenRef);
+      std::optional<Telt> opt_H = is_grp_symmetric(ent_H.l_gens_small, orb);
+      if (!opt_H) { // The subgroup is an alternating subgroup
+        Tint size = ent_H.ord * 2;
+        if (size != ent_G.ord) { // If equal then no chance to find an intermediate subgroup
+          size_t n_gen = ent_G.l_gens_small.size();
+          std::vector<int> l_sign;
+          for (auto & u: ent_G.l_gens_small) {
+            bool test = is_alternating(orb, u, n_act);
+            if (test) {
+              l_sign.push_back(1);
             } else {
-              Telt eProd = eCos * u * eGenRefInv;
-              LGenAlt.push_back(eProd);
+              l_sign.push_back(-1);
             }
           }
-        }
-        StabChainOptions<Tint, Telt> options = GetStandardOptions<Tint, Telt>(id);
-        StabChain<Telt,Tidx_label> gAlt = StabChainOp_listgen<Telt, Tidx_label, Tint>(LGenAlt, options);
+          std::vector<Telt> LCos{id, eGenRef};
+          std::vector<int> l_cos_sign{1, -1};
+          std::vector<Telt> LGenAlt;
+          for (size_t i_cos=0; i_cos<2; i_cos++) {
+            Telt const& eCos = LCos[i_cos];
+            int cos_sign = l_cos_sign[i_cos];
+            for (size_t i_gen=0; i_gen<n_gen; i_gen++) {
+              Telt u = ent_G.l_gens_small[i_gen];
+              int e_sign = l_sign[i_gen];
+              int tot_sign = cos_sign * e_sign;
+              if (tot_sign == 1) {
+                Telt eProd = eCos * u;
+                LGenAlt.push_back(eProd);
+              } else {
+                Telt eProd = eCos * u * eGenRefInv;
+                LGenAlt.push_back(eProd);
+              }
+            }
+          }
+          StabChainOptions<Tint, Telt> options = GetStandardOptions<Tint, Telt>(id);
+          StabChain<Telt,Tidx_label> gAlt = StabChainOp_listgen<Telt, Tidx_label, Tint>(LGenAlt, options);
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-        Tint size_target = 2 * Order<Telt,Tidx_label,Tint>(gAlt);
-        if (size_target != ent_G.ord) {
-          std::cerr << "size_target is not of the right size\n";
-          throw PermutalibException{1};
-        }
+          Tint size_target = 2 * Order<Telt,Tidx_label,Tint>(gAlt);
+          if (size_target != ent_G.ord) {
+            std::cerr << "size_target is not of the right size\n";
+            throw PermutalibException{1};
+          }
 #endif
-        return gAlt;
+          return gAlt;
+        }
       }
     }
   }
@@ -518,7 +530,6 @@ template <typename Telt, typename Tidx_label, typename Tint>
 std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Block(AscendingEntry<Telt,Tidx_label,Tint> const& ent_H,
                                                                        AscendingEntry<Telt,Tidx_label,Tint> const& ent_G) {
   using Tidx = typename Telt::Tidx;
-  Tidx miss_val = std::numeric_limits<Tidx>::max();
   Tidx n_act = ent_H.g->comm->n;
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
   print_orbits(ent_H, "H");
@@ -529,12 +540,7 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Block(Ascending
   for (auto & orb_G : ent_G.orbs) {
     BlockDecomposition<Tidx> blk1 = get_block_decomposition(ent_H, ent_G, orb_G);
     //
-    std::vector<std::vector<Tidx>> orbs_G{orb_G};
-    std::vector<Tidx> map_vert_block_G(n_act, miss_val);
-    for (auto & val : orb_G) {
-      map_vert_block_G[val] = 0;
-    }
-    BlockDecomposition<Tidx> blk2{orbs_G, map_vert_block_G};
+    BlockDecomposition<Tidx> blk2 = get_supercoarse_block_decomposition(ent_H, orb_G);
     std::optional<BlockDecomposition<Tidx>> opt =
       FindIntermediateBlockDecomposition(ent_G.l_gens_small, blk1, blk2);
     if (opt) {
