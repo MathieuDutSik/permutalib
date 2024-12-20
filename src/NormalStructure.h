@@ -10,6 +10,10 @@
 #include <utility>
 #include <vector>
 
+#ifdef DEBUG
+#define DEBUG_NORMAL_STRUCTURE
+#endif
+
 namespace permutalib {
 
 template <typename Telt, typename Tidx_label>
@@ -113,17 +117,23 @@ template <typename Telt, typename Tidx_label, typename Tint>
 std::vector<Telt>
 Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
   using Tidx = typename Telt::Tidx;
+  Tidx miss_val = std::numeric_limits<Tidx>::max();
   Telt id = G->comm->identity;
   Tidx n = id.size();
   std::unordered_set<Telt> gens_set;
   for (auto &eGen : Kernel_GeneratorsOfGroup(G))
     if (!eGen.isIdentity())
       gens_set.insert(eGen);
-  std::vector<Tidx> bas = BaseStabChain(G);
   std::vector<Telt> gens;
   for (auto &eGen : gens_set)
     gens.push_back(eGen);
-
+  if (gens.size() == 2) {
+    return gens;
+  }
+#ifdef DEBUG_NORMAL_STRUCTURE
+  std::cerr << "|gens|=" << gens.size() << "\n";
+#endif
+  std::vector<Tidx> bas = BaseStabChain(G);
   size_t len = gens.size();
   Face status_remove(len);
   for (size_t i = 0; i < len; i++) {
@@ -131,7 +141,7 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
       for (size_t j = 0; j < len; j++) {
         if (i != j && status_remove[j] == 0) {
           Tidx val = LogPerm(gens[i], gens[j]);
-          if (val != std::numeric_limits<Tidx>::max()) {
+          if (val != miss_val) {
             status_remove[j] = 1;
           }
         }
@@ -142,9 +152,18 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
   for (size_t i = 0; i < len; i++)
     if (status_remove[i] == 0)
       gens2.push_back(gens[i]);
+#ifdef DEBUG_NORMAL_STRUCTURE
+  std::cerr << "|gens2|=" << gens2.size() << "\n";
+#endif
 
   std::vector<Tidx> LMoved = MovedPoints(gens2, n);
+#ifdef DEBUG_NORMAL_STRUCTURE
+  std::cerr << "|LMoved|=" << LMoved.size() << "\n";
+#endif
   std::vector<std::vector<Tidx>> orb = OrbitsPerms(gens2, n, LMoved);
+#ifdef DEBUG_NORMAL_STRUCTURE
+  std::cerr << "|orb|=" << orb.size() << "\n";
+#endif
   size_t n_orb = orb.size();
   std::vector<size_t> orp;
   for (size_t i_orb = 0; i_orb < n_orb; i_orb++)
@@ -153,7 +172,13 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
 
   Tint order_G = Order<Telt, Tidx_label, Tint>(G);
 
+#ifdef DEBUG_NORMAL_STRUCTURE
+  std::cerr << "order_G=" << order_G << "\n";
+#endif
   std::map<Tidx, int> LFact = FactorsSizeStabChain(G);
+#ifdef DEBUG_NORMAL_STRUCTURE
+  std::cerr << "|LFact|=" << LFact.size() << "\n";
+#endif
   auto check_correctness_gens = [&](const std::vector<Telt> &LGen) -> bool {
     if (LMoved.size() != MovedPoints(LGen, n).size())
       return false;

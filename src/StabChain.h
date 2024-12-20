@@ -56,6 +56,7 @@
 // Other debugging.(but not currently in the gap stuff)
 #undef DEBUG_ADD_GEN_SCH
 #undef DEBUG_INV_REP
+#undef DEBUG_FACTORS_SIZE_STAB_CHAIN
 
 namespace permutalib {
 
@@ -735,9 +736,17 @@ FactorsSizeStabChain(StabChain<Telt, Tidx_label> const &S) {
     Tidx siz = Tidx(Sptr->orbit.size());
     if (siz == 0)
       break;
-    std::vector<Tidx> V = factorize(siz);
-    for (auto &eVal : V)
-      MapPrimeMult[eVal]++;
+#ifdef DEBUG_FACTORS_SIZE_STAB_CHAIN
+    std::cerr << "siz=" << static_cast<size_t>(siz) << "\n";
+#endif
+    if (siz > 1) {
+      std::vector<Tidx> V = factorize(siz);
+#ifdef DEBUG_FACTORS_SIZE_STAB_CHAIN
+      std::cerr << "We have V\n";
+#endif
+      for (auto &eVal : V)
+        MapPrimeMult[eVal]++;
+    }
     Sptr = Sptr->stabilizer;
   }
   return MapPrimeMult;

@@ -303,10 +303,25 @@ template<typename Telt, typename Tidx_label, typename Tint>
 AscendingEntry<Telt,Tidx_label,Tint> get_ascending_entry(StabChain<Telt, Tidx_label> const& g) {
   using Tidx = typename Telt::Tidx;
   Tidx n_act = g->comm->n;
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "ACC: get_ascending_entry, step 1\n";
+#endif
   std::vector<Telt> l_gens_small = Kernel_SmallGeneratingSet<Telt, Tidx_label, Tint>(g);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "ACC: get_ascending_entry, step 2\n";
+#endif
   std::vector<std::vector<typename Telt::Tidx>> orbs = OrbitsPerms(l_gens_small, n_act);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "ACC: get_ascending_entry, step 3\n";
+#endif
   std::vector<std::pair<Tidx,Tidx>> Vbelong = get_belonging_vector(orbs, n_act);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "ACC: get_ascending_entry, step 4\n";
+#endif
   Tint ord = Order<Telt,Tidx_label,Tint>(g);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "ACC: get_ascending_entry, step 5\n";
+#endif
   return {std::move(g), std::move(orbs), std::move(Vbelong), std::move(l_gens_small), std::move(ord)};
 }
 
@@ -395,7 +410,7 @@ template<typename Telt>
 bool is_alternating(std::vector<typename Telt::Tidx> const& v, Telt const& elt, typename Telt::Tidx const& n_act) {
   using Tidx = typename Telt::Tidx;
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-  std::cerr << "n_act=" << static_cast<size_t>(n_act) << " elt=" << elt << "\n";
+  //  std::cerr << "n_act=" << static_cast<size_t>(n_act) << " elt=" << elt << "\n";
 #endif
   Tidx miss_val = std::numeric_limits<Tidx>::max();
   std::vector<Tidx> Vmap(n_act, miss_val);
@@ -406,13 +421,13 @@ bool is_alternating(std::vector<typename Telt::Tidx> const& v, Telt const& elt, 
   }
   size_t len = v.size();
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-  std::cerr << "len=" << len << "\n";
+  //  std::cerr << "len=" << len << "\n";
 #endif
   Face f(len);
   int sign = 1;
   for (size_t i = 0; i<len; i++) {
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-    std::cerr << "i=" << i << "\n";
+    //    std::cerr << "i=" << i << "\n";
 #endif
     if (f[i] == 0) {
       Tidx val_first = v[i];
@@ -421,7 +436,7 @@ bool is_alternating(std::vector<typename Telt::Tidx> const& v, Telt const& elt, 
       while(true) {
         Tidx pos = Vmap[val_curr];
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-        std::cerr << "pos=" << static_cast<size_t>(pos) << "\n";
+        //        std::cerr << "pos=" << static_cast<size_t>(pos) << "\n";
 #endif
         f[pos] = 1;
         val_curr = elt.at(val_curr);
@@ -432,7 +447,7 @@ bool is_alternating(std::vector<typename Telt::Tidx> const& v, Telt const& elt, 
       }
       size_t res = len_cycle % 2;
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-      std::cerr << "len_cycle=" << len_cycle << " res=" << res << " sign=" << sign << "\n";
+      //      std::cerr << "len_cycle=" << len_cycle << " res=" << res << " sign=" << sign << "\n";
 #endif
       if (res == 0) {
         sign *= -1;
@@ -440,7 +455,7 @@ bool is_alternating(std::vector<typename Telt::Tidx> const& v, Telt const& elt, 
     }
   }
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-  std::cerr << "Final sign=" << sign << "\n";
+  //  std::cerr << "Final sign=" << sign << "\n";
 #endif
   if (sign == 1) {
     return true;
@@ -622,7 +637,6 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Subset(Ascendin
   Tint const& size_G = ent_G.ord;
   Tint const& size_H = ent_H.ord;
   std::vector<std::vector<Tidx>> const& orbs_H = ent_H.orbs;
-
   for (auto & orb_H: orbs_H) {
     Face f(n_act);
     for (auto & pt : orb_H) {
@@ -644,6 +658,9 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Subset(Ascendin
 template <typename Telt, typename Tidx_label, typename Tint>
 std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_All(AscendingEntry<Telt,Tidx_label,Tint> const& ent_H,
                                                                      AscendingEntry<Telt,Tidx_label,Tint> const& ent_G) {
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "ACC: Starting Kernel_AscendingChain_All\n";
+#endif
   // The method of computing the stabilizer of subset.
   std::optional<StabChain<Telt, Tidx_label>> opt1 =
     Kernel_AscendingChain_Subset(ent_H, ent_G);
@@ -658,8 +675,14 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_All(AscendingEn
 #endif
   }
   //
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "ACC: Before Kernel_AscendingChain_Alt\n";
+#endif
   std::optional<StabChain<Telt, Tidx_label>> opt2 =
     Kernel_AscendingChain_Alt(ent_H, ent_G);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "ACC: After Kernel_AscendingChain_Alt\n";
+#endif
   if (opt2) {
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
     std::cerr << "ACC: Finding an intermediate subgroup from Alt method\n";
@@ -741,7 +764,13 @@ std::vector<StabChain<Telt, Tidx_label>> Kernel_AscendingChainPair(StabChain<Tel
     if (opt) {
       auto iter = l_grp.begin();
       std::advance(iter, pos + 1);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+      std::cerr << "ACC: Before get_ascending_entry\n";
+#endif
       AscendingEntry<Telt,Tidx_label,Tint> ent = get_ascending_entry<Telt,Tidx_label,Tint>(*opt);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+      std::cerr << "ACC: After get_ascending_entry\n";
+#endif
       l_grp.insert(iter, ent);
     } else { // No method work, going to the next one.
       pos++;
