@@ -310,6 +310,75 @@ AscendingEntry<Telt,Tidx_label,Tint> get_ascending_entry(StabChain<Telt, Tidx_la
   return {std::move(g), std::move(orbs), std::move(Vbelong), std::move(l_gens_small), std::move(ord)};
 }
 
+template<typename Telt, typename Tidx_label, typename Tint>
+void print_orb_sizes(AscendingEntry<Telt,Tidx_label,Tint> const& u, std::string const& name) {
+  std::map<size_t, size_t> map_orbsize_mult;
+  for (auto & orb: u.orbs) {
+    map_orbsize_mult[orb.size()] += 1;
+  }
+  std::cerr << name << " |orbs| =";
+  for (auto & kv: map_orbsize_mult) {
+    std::cerr << " (" << kv.first << "," << kv.second << ")";
+  }
+  std::cerr << "\n";
+}
+
+template<typename Telt, typename Tidx_label, typename Tint>
+void print_orbits(AscendingEntry<Telt,Tidx_label,Tint> const& u, std::string const& name) {
+  std::map<size_t, std::vector<std::vector<size_t>>> map_mult_orbit;
+  for (auto & orb: u.orbs) {
+    std::vector<size_t> orb_s;
+    for (auto & val: orb) {
+      orb_s.push_back(val);
+    }
+    map_mult_orbit[orb.size()].push_back(orb_s);
+  }
+  std::cerr << name << " orbs =";
+  for (auto & kv : map_mult_orbit) {
+    for (auto & orb_s : kv.second) {
+      std::cerr << " [";
+      bool is_first = true;
+      for (auto & val : orb_s) {
+        if (!is_first)
+          std::cerr << ",";
+        is_first = false;
+        std::cerr << val;
+      }
+      std::cerr << "]";
+    }
+  }
+  std::cerr << "\n";
+}
+
+template<typename Telt, typename Tidx_label, typename Tint>
+BlockDecomposition<typename Telt::Tidx> get_block_decomposition(AscendingEntry<Telt,Tidx_label,Tint> const& ent_H,
+                                                                AscendingEntry<Telt,Tidx_label,Tint> const& ent_G, std::vector<typename Telt::Tidx> const& orb_G) {
+  using Tidx = typename Telt::Tidx;
+  Tidx miss_val = std::numeric_limits<Tidx>::max();
+  size_t len = orb_G.size();
+  Tidx n_act = ent_H.g->comm->n;
+  std::vector<std::vector<Tidx>> orbs_H;
+  Face f(len);
+  std::vector<Tidx> map_vert_block_H(n_act, miss_val);
+  Tidx i_block_dec = 0;
+  for (size_t i=0; i<len; i++) {
+    Tidx val = orb_G[i];
+    if (f[i] == 0) {
+      Tidx i_block_H = ent_H.Vbelong[val].first;
+      std::vector<Tidx> const& orb_H = ent_H.orbs[i_block_H];
+      for (auto & val : orb_H) {
+        Tidx pos = ent_G.Vbelong[val].second;
+        map_vert_block_H[val] = i_block_dec;
+        f[pos] = 1;
+      }
+      i_block_dec += 1;
+      orbs_H.push_back(orb_H);
+    }
+  }
+  return {orbs_H, map_vert_block_H};
+}
+
+
 template<typename Telt>
 bool is_alternating(std::vector<typename Telt::Tidx> const& v, Telt const& elt, typename Telt::Tidx const& n_act) {
   using Tidx = typename Telt::Tidx;
@@ -330,12 +399,18 @@ bool is_alternating(std::vector<typename Telt::Tidx> const& v, Telt const& elt, 
   Face f(len);
   int sign = 1;
   for (size_t i = 0; i<len; i++) {
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "i=" << i << "\n";
+#endif
     if (f[i] == 0) {
       Tidx val_first = v[i];
       size_t len_cycle = 0;
       Tidx val_curr = val_first;
       while(true) {
         Tidx pos = Vmap[val_curr];
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+        std::cerr << "pos=" << static_cast<size_t>(pos) << "\n";
+#endif
         f[pos] = 1;
         val_curr = elt.at(val_curr);
         len_cycle += 1;
@@ -445,27 +520,14 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Block(Ascending
   using Tidx = typename Telt::Tidx;
   Tidx miss_val = std::numeric_limits<Tidx>::max();
   Tidx n_act = ent_H.g->comm->n;
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  print_orbits(ent_H, "H");
+  print_orbits(ent_G, "G");
+  print_orb_sizes(ent_H, "H");
+  print_orb_sizes(ent_G, "G");
+#endif
   for (auto & orb_G : ent_G.orbs) {
-    size_t len = orb_G.size();
-    std::vector<std::vector<Tidx>> orbs_H;
-    Face f(len);
-    std::vector<Tidx> map_vert_block_H(n_act, miss_val);
-    Tidx i_block_dec = 0;
-    for (size_t i=0; i<len; i++) {
-      Tidx val = orb_G[i];
-      if (f[i] == 0) {
-        Tidx i_block_H = ent_H.Vbelong[val].first;
-        std::vector<Tidx> const& orb_H = ent_H.orbs[i_block_H];
-        for (auto & val : orb_H) {
-          Tidx pos = ent_G.Vbelong[val].second;
-          map_vert_block_H[val] = i_block_dec;
-          f[pos] = 1;
-        }
-        i_block_dec += 1;
-        orbs_H.push_back(orb_H);
-      }
-    }
-    BlockDecomposition<Tidx> blk1{orbs_H, map_vert_block_H};
+    BlockDecomposition<Tidx> blk1 = get_block_decomposition(ent_H, ent_G, orb_G);
     //
     std::vector<std::vector<Tidx>> orbs_G{orb_G};
     std::vector<Tidx> map_vert_block_G(n_act, miss_val);
@@ -481,21 +543,34 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Block(Ascending
       for (auto & val : orb_found) {
         f[val] = 1;
       }
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+      std::cerr << "orb_found = [";
+      bool is_first = true;
+      for (auto & val : orb_found) {
+        if (!is_first)
+          std::cerr << ",";
+        is_first = false;
+        std::cerr << static_cast<size_t>(val);
+      }
+      std::cerr << "]\n";
+#endif
       StabChain<Telt,Tidx_label> gBlk = Kernel_Stabilizer_OnSets<Telt,Tidx_label,Tint>(ent_G.g, f);
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-        Tint size_blk = Order<Telt,Tidx_label,Tint>(gBlk);
-        Tint size_G = Order<Telt,Tidx_label,Tint>(ent_G.g);
-        Tint size_H = Order<Telt,Tidx_label,Tint>(ent_H.g);
-        if (size_H == size_blk || size_blk == size_G) {
-          std::cerr << "The sizes are not as they should be\n";
-          throw PermutalibException{1};
-        }
-        if (!Kernel_IsSubgroup(gBlk, ent_H.g)) {
-          std::cerr << "H should be a subgroup of gBlk\n";
-          throw PermutalibException{1};
-        }
+      Tint size_blk = Order<Telt,Tidx_label,Tint>(gBlk);
+      Tint size_G = Order<Telt,Tidx_label,Tint>(ent_G.g);
+      Tint size_H = Order<Telt,Tidx_label,Tint>(ent_H.g);
+      if (size_H == size_blk || size_blk == size_G) {
+        std::cerr << "The sizes are not as they should be\n";
+        throw PermutalibException{1};
+      }
+      if (!Kernel_IsSubgroup(gBlk, ent_H.g)) {
+        std::cerr << "size_blk=" << size_blk << " size_G=" << size_G << " size_H=" << size_H << "\n";
+        std::cerr << "|orb_G|=" << orb_G.size() << " |orb_found|=" << orb_found.size() << "\n";
+        std::cerr << "H should be a subgroup of gBlk\n";
+        throw PermutalibException{1};
+      }
 #endif
-        return gBlk;
+      return gBlk;
     }
   }
   return {};
@@ -653,8 +728,6 @@ std::vector<StabChain<Telt, Tidx_label>> Kernel_AscendingChainPair(StabChain<Tel
   AscendingEntry<Telt,Tidx_label,Tint> ent_H = get_ascending_entry<Telt,Tidx_label,Tint>(H);
   AscendingEntry<Telt,Tidx_label,Tint> ent_G = get_ascending_entry<Telt,Tidx_label,Tint>(G);
   std::vector<AscendingEntry<Telt,Tidx_label,Tint>> l_grp{ent_H, ent_G};
-  auto iter = l_grp.begin();
-  iter++; // We will always insert, one step further.
   size_t pos = 0;
   while(true) {
     auto get_intermediate=[&]() -> std::optional<StabChain<Telt, Tidx_label>> {
@@ -666,10 +739,11 @@ std::vector<StabChain<Telt, Tidx_label>> Kernel_AscendingChainPair(StabChain<Tel
     };
     std::optional<StabChain<Telt, Tidx_label>> opt = get_intermediate();
     if (opt) {
+      auto iter = l_grp.begin();
+      std::advance(iter, pos + 1);
       AscendingEntry<Telt,Tidx_label,Tint> ent = get_ascending_entry<Telt,Tidx_label,Tint>(*opt);
       l_grp.insert(iter, ent);
     } else { // No method work, going to the next one.
-      iter++;
       pos++;
       if (pos + 1 == l_grp.size()) {
         break;
