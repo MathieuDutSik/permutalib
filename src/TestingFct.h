@@ -5,9 +5,9 @@
 namespace permutalib {
 
 template<typename T>
-struct TimeEval {
+struct TimeEval_perm {
   std::chrono::time_point<std::chrono::system_clock> time;
-  TimeEval() { time = std::chrono::system_clock::now(); }
+  TimeEval_perm() { time = std::chrono::system_clock::now(); }
   int64_t eval() {
     std::chrono::time_point<std::chrono::system_clock> timeNew =
         std::chrono::system_clock::now();
@@ -17,8 +17,14 @@ struct TimeEval {
   }
 };
 
-using MicrosecondTime = TimeEval<std::chrono::microseconds>;
-using NanosecondTime = TimeEval<std::chrono::nanoseconds>;
+template <typename T>
+std::ostream &operator<<(std::ostream &os, TimeEval_perm<T> &x) {
+  os << x.eval();
+  return os;
+}
+
+using MicrosecondTime_perm = TimeEval_perm<std::chrono::microseconds>;
+using NanosecondTime_perm = TimeEval_perm<std::chrono::nanoseconds>;
 
 
 // clang-format off

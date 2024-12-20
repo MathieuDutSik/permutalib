@@ -2,6 +2,7 @@
 #ifndef SRC_GAP_ASCENDINGCHAINS_AND_COSETS_H_
 #define SRC_GAP_ASCENDINGCHAINS_AND_COSETS_H_
 
+#include "TestingFct.h"
 #include <limits>
 #include <list>
 #include <unordered_set>
@@ -91,7 +92,6 @@
   ---S: The ascending chain being created is indeed ascending and the algorithm
   starts with the larger group and then downward.
   ---So, that is all about right cosets.
-     ---
 
   Obtaining homomorphism:
   ---If H is a subgroup of G, we want to find an action of G on a set X
@@ -117,6 +117,10 @@
 
 #ifdef DEBUG
 #define DEBUG_ASCENDING_CHAINS_COSETS
+#endif
+
+#ifdef TIMINGS
+#define TIMINGS_ASCENDING_CHAINS_COSETS
 #endif
 
 namespace permutalib {
@@ -658,22 +662,11 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Subset(Ascendin
 template <typename Telt, typename Tidx_label, typename Tint>
 std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_All(AscendingEntry<Telt,Tidx_label,Tint> const& ent_H,
                                                                      AscendingEntry<Telt,Tidx_label,Tint> const& ent_G) {
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
-  std::cerr << "ACC: Starting Kernel_AscendingChain_All\n";
+#ifdef TIMINGS_ASCENDING_CHAINS_COSETS
+  MicrosecondTime_perm time;
 #endif
-  // The method of computing the stabilizer of subset.
-  std::optional<StabChain<Telt, Tidx_label>> opt1 =
-    Kernel_AscendingChain_Subset(ent_H, ent_G);
-  if (opt1) {
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
-    std::cerr << "ACC: Finding an intermediate subgroup from Subset method\n";
-#endif
-    return *opt1;
-  } else {
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
-    std::cerr << "ACC: Failing to find an intermediate subgroup by the subset method\n";
-#endif
-  }
+  //
+  // First the alternating method as it is the cheapest one.
   //
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
   std::cerr << "ACC: Before Kernel_AscendingChain_Alt\n";
@@ -684,32 +677,101 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_All(AscendingEn
   std::cerr << "ACC: After Kernel_AscendingChain_Alt\n";
 #endif
   if (opt2) {
+#ifdef TIMINGS_ASCENDING_CHAINS_COSETS
+    std::cerr << "|ACC: Kernel_AscendingChain_Alt(A)|=" << time << "\n";
+#endif
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
     std::cerr << "ACC: Finding an intermediate subgroup from Alt method\n";
 #endif
     return *opt2;
   }
+#ifdef TIMINGS_ASCENDING_CHAINS_COSETS
+  std::cerr << "|ACC: Kernel_AscendingChain_Alt(B)|=" << time << "\n";
+#endif
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "ACC: Failing to find an intermediate subgroup by the alternating method\n";
+#endif
   //
+  // Next the Block method as it is not that expensive, especially when it fails.
+  //
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "ACC: Before Kernel_AscendingChain_Block\n";
+#endif
   std::optional<StabChain<Telt, Tidx_label>> opt3 =
     Kernel_AscendingChain_Block(ent_H, ent_G);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "ACC: After Kernel_AscendingChain_Block\n";
+#endif
   if (opt3) {
+#ifdef TIMINGS_ASCENDING_CHAINS_COSETS
+    std::cerr << "|ACC: Kernel_AscendingChain_Block(A)|=" << time << "\n";
+#endif
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
     std::cerr << "ACC: Finding an intermediate subgroup from Block method\n";
 #endif
     return *opt3;
   }
+#ifdef TIMINGS_ASCENDING_CHAINS_COSETS
+  std::cerr << "|ACC: Kernel_AscendingChain_Block(B)|=" << time << "\n";
+#endif
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "ACC: Failing to find an intermediate subgroup by the block method\n";
+#endif
   //
+  // Then the subset method as it is very powerful but relatively expensive.
+  //
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "ACC: Before Kernel_AscendingChain_Subset\n";
+#endif
+  std::optional<StabChain<Telt, Tidx_label>> opt1 =
+    Kernel_AscendingChain_Subset(ent_H, ent_G);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "ACC: After Kernel_AscendingChain_Subset\n";
+#endif
+  if (opt1) {
+#ifdef TIMINGS_ASCENDING_CHAINS_COSETS
+    std::cerr << "|ACC: Kernel_AscendingChain_Subset(A)|=" << time << "\n";
+#endif
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "ACC: Finding an intermediate subgroup from Subset method\n";
+#endif
+    return *opt1;
+  }
+#ifdef TIMINGS_ASCENDING_CHAINS_COSETS
+  std::cerr << "|ACC: Kernel_AscendingChain_Subset(B)|=" << time << "\n";
+#endif
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "ACC: Failing to find an intermediate subgroup by the subset method\n";
+#endif
+  //
+  // Latest is the gens method which works rarely and is relatively expensive
+  //
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "ACC: Before Kernel_AscendingChain_Gens\n";
+#endif
   std::optional<StabChain<Telt, Tidx_label>> opt4 =
     Kernel_AscendingChain_Gens(ent_H, ent_G);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "ACC: After Kernel_AscendingChain_Gens\n";
+#endif
   if (opt4) {
+#ifdef TIMINGS_ASCENDING_CHAINS_COSETS
+    std::cerr << "|ACC: Kernel_AscendingChain_Gens(A)|=" << time << "\n";
+#endif
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
     std::cerr << "ACC: Finding an intermediate subgroup from Gens method\n";
 #endif
     return *opt4;
   }
+#ifdef TIMINGS_ASCENDING_CHAINS_COSETS
+  std::cerr << "|ACC: Kernel_AscendingChain_Gens(B)|=" << time << "\n";
+#endif
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
   std::cerr << "ACC: Failing to find an intermediate subgroup\n";
 #endif
+  //
+  //
+  //
   return {};
 }
 
@@ -741,9 +803,16 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_All(AscendingEn
     ---Block decompositions strategies.
     ---GeneratorsOfGroup of course could help us get some intermediate.
     ---Computing the alternating subgroups of the action on orbits.
-    Limits:
-    ---If the index is prime then nothing more can be done.
-    ---
+    Objections:
+    ---If the index is prime then nothing more can be done. That is obvious. But could we
+    have more sophisticated criterion?
+    ---We have to factor out the cost of computing. Maybe sometimes it is not worth to
+    overly refine the decomposition. So, we may have something similar to the
+    ---The contruction Centralizer(G, Centre(H)) seems to be pretty efficient in finding
+    intermediate subgroups. It does not return a normalizing group, it just returns something
+    that it invariant under conjugation.
+    ---By contrast the Normalizer idea does not seem to be very powerful.
+    ---The alternating subgroup technique does not appear to ever succeed.
    */
 template <typename Telt, typename Tidx_label, typename Tint>
 std::vector<StabChain<Telt, Tidx_label>> Kernel_AscendingChainPair(StabChain<Telt, Tidx_label> const &H,
@@ -783,6 +852,14 @@ std::vector<StabChain<Telt, Tidx_label>> Kernel_AscendingChainPair(StabChain<Tel
   for (auto & ent : l_grp) {
     chain.push_back(ent.g);
   }
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  for (size_t i_grp=1; i_grp<chain.size(); i_grp++) {
+    if (!Kernel_IsSubgroup(chain[i_grp], chain[i_grp-1])) {
+      std::cerr << "ACC: Error in Kernel_AscendingChainPair at i_grp=" << i_grp << "\n";
+      throw PermutalibException{1};
+    }
+  }
+#endif
   return chain;
 }
 

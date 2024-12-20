@@ -20,6 +20,10 @@ int main(int argc, char *argv[]) {
     std::string File_HG = argv[1];
     //
     std::ifstream is(File_HG);
+    if (!is.good()) {
+      std::cerr << "is stream is invalid, not possible to read H_G\n";
+      throw permutalib::PermutalibException{1};
+    }
     Tgroup eH = permutalib::ReadGroupFromStream<Tgroup>(is);
     Tgroup eG = permutalib::ReadGroupFromStream<Tgroup>(is);
     Tint size_G = eG.size();
