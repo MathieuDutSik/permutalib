@@ -13,6 +13,10 @@
 #include <utility>
 #include <vector>
 
+#ifdef DEBUG
+#define DEBUG_BLOCK_SYSTEM
+#endif
+
 namespace permutalib {
 
 template <typename Tidx> struct BlockDecomposition {

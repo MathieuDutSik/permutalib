@@ -619,24 +619,14 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Subset(Ascendin
                                                                         AscendingEntry<Telt,Tidx_label,Tint> const& ent_G) {
   using Tidx = typename Telt::Tidx;
   Tidx n_act = ent_G.g->comm->n;
-  std::vector<std::vector<Tidx>> const& orbs_H = ent_H.orbs;
-  Tidx n_orb_H = orbs_H.size();
-  // The map maps the orbits for G (the bigger group) with the orbits for H that could be merged.
-  std::unordered_map<Tidx, std::vector<Tidx>> map;
-  for (Tidx i_orb_H=0; i_orb_H<n_orb_H; i_orb_H++) {
-    Tidx pt = orbs_H[i_orb_H][0];
-    Tidx i_orb_G = ent_G.Vbelong[pt].first;
-    map[i_orb_G].push_back(i_orb_H);
-  }
   Tint const& size_G = ent_G.ord;
   Tint const& size_H = ent_H.ord;
+  std::vector<std::vector<Tidx>> const& orbs_H = ent_H.orbs;
 
-  for (auto & kv: map) {
+  for (auto & orb_H: orbs_H) {
     Face f(n_act);
-    for (auto & i_orb_H : kv.second) {
-      for (auto & pt : orbs_H[i_orb_H]) {
-        f[pt] = 1;
-      }
+    for (auto & pt : orb_H) {
+      f[pt] = 1;
     }
     StabChain<Telt,Tidx_label> sub = Kernel_Stabilizer_OnSets<Telt,Tidx_label,Tint>(ent_G.g, f);
     Tint size_sub = Order<Telt,Tidx_label,Tint>(sub);
@@ -662,6 +652,10 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_All(AscendingEn
     std::cerr << "ACC: Finding an intermediate subgroup from Subset method\n";
 #endif
     return *opt1;
+  } else {
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "ACC: Failing to find an intermediate subgroup by the subset method\n";
+#endif
   }
   //
   std::optional<StabChain<Telt, Tidx_label>> opt2 =
