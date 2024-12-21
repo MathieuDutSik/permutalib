@@ -1150,7 +1150,15 @@ public:
   }
 };
 
-
+template <typename Telt, typename Tidx_label, typename Tint>
+std::vector<Telt> enumerate_right_cosets(StabChain<Telt,Tidx_label> const& H, StabChain<Telt,Tidx_label> const& G) {
+  std::vector<Telt> l_cos;
+  KernelRightCosets<Telt, Tidx_label, Tint> rc(H, G);
+  for (auto & eCos: rc) {
+    l_cos.push_back(eCos);
+  }
+  return l_cos;
+}
 
 template <typename Telt, typename Tidx_label, typename Tint>
 struct LeftCosetIterator {
@@ -1296,7 +1304,15 @@ public:
   }
 };
 
-
+template <typename Telt, typename Tidx_label, typename Tint>
+std::vector<Telt> enumerate_left_cosets(StabChain<Telt,Tidx_label> const& H, StabChain<Telt,Tidx_label> const& G) {
+  std::vector<Telt> l_cos;
+  KernelLeftCosets<Telt, Tidx_label, Tint> rc(H, G);
+  for (auto & eCos: rc) {
+    l_cos.push_back(eCos);
+  }
+  return l_cos;
+}
 
 /*
 

@@ -361,25 +361,17 @@ public:
     return *SmallGenSet;
   }
   // Compute cosets
-  std::vector<Telt> LeftTransversal_Direct(const Group<Telt,Tint>& H) const {
-    return Kernel_LeftTransversal_Direct<Telt,Tidx_label,Tint>(S, H.S);
-  }
-  std::vector<Telt> RightTransversal_Direct(const Group<Telt,Tint>& H) const {
-    return Kernel_RightTransversal_Direct<Telt,Tidx_label,Tint>(S, H.S);
-  }
-  template<typename Fterminate>
-  void LeftTransversal_Direct_f(const Group<Telt,Tint>& H, Fterminate f_terminate) const {
-    (void)Kernel_LeftTransversal_Direct_f<Telt,Tidx_label,Tint>(S, H.S, f_terminate);
-  }
-  template<typename Fterminate>
-  void RightTransversal_Direct_f(const Group<Telt,Tint>& H, Fterminate f_terminate) const {
-    (void)Kernel_RightTransversal_Direct_f<Telt,Tidx_label,Tint>(S, H.S, f_terminate);
-  }
   RightCosets<Telt,Tint> right_cosets(const Group<Telt,Tint>& H) const {
     return KernelRightCosets<Telt,Tidx_label,Tint>(H.S, S);
   }
   LeftCosets<Telt,Tint> left_cosets(const Group<Telt,Tint>& H) const {
     return KernelLeftCosets<Telt,Tidx_label,Tint>(H.S, S);
+  }
+  std::vector<Telt> get_all_right_cosets(const Group<Telt,Tint>& H) const {
+    return enumerate_right_cosets<Telt,Tidx_label,Tint>(H.S, S);
+  }
+  std::vector<Telt> get_all_left_cosets(const Group<Telt,Tint>& H) const {
+    return enumerate_left_cosets<Telt,Tidx_label,Tint>(H.S, S);
   }
   // Normal structure
   bool IsNormalSubgroup(const Group<Telt, Tint> &U) const {
