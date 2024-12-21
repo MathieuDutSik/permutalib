@@ -106,12 +106,6 @@ Telt RandomElement(const std::vector<Telt> &LGen, const Telt &id) {
   return eElt;
 }
 
-template <typename Telt, typename Tint>
-using RightCosets = KernelRightCosets<Telt,uint16_t,Tint>;
-
-template <typename Telt, typename Tint>
-using LeftCosets = KernelLeftCosets<Telt,uint16_t,Tint>;
-
 template <typename Telt_inp, typename Tint_inp> struct Group {
 public:
   // dependent types
@@ -119,6 +113,8 @@ public:
   using Tidx = typename Telt::Tidx;
   using Tint = Tint_inp;
   using Tidx_label = uint16_t;
+  using RightCosets = KernelRightCosets<Telt,Tidx_label,Tint>;
+  using LeftCosets = KernelLeftCosets<Telt,Tidx_label,Tint>;
 private:
   StabChain<Telt, Tidx_label> S;
   Tint size_tint;
@@ -361,10 +357,10 @@ public:
     return *SmallGenSet;
   }
   // Compute cosets
-  RightCosets<Telt,Tint> right_cosets(const Group<Telt,Tint>& H) const {
+  RightCosets right_cosets(const Group<Telt,Tint>& H) const {
     return KernelRightCosets<Telt,Tidx_label,Tint>(H.S, S);
   }
-  LeftCosets<Telt,Tint> left_cosets(const Group<Telt,Tint>& H) const {
+  LeftCosets left_cosets(const Group<Telt,Tint>& H) const {
     return KernelLeftCosets<Telt,Tidx_label,Tint>(H.S, S);
   }
   std::vector<Telt> get_all_right_cosets(const Group<Telt,Tint>& H) const {

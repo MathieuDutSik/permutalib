@@ -246,6 +246,17 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
       }
     }
   };
+  auto check_left_cosets = [&]() -> void {
+    for (int i=0; i<10; i++) {
+      Tgroup eSubGRP = eG.RandomSubgroup();
+      Tint index = eG.size() / eSubGRP.size();
+      std::cerr << "i=" << i << " |eG|=" << eG.size() << " |eSubGRP|=" << eSubGRP.size() << " index=" << index << "\n";
+      if (index < 100) {
+        std::vector<Telt> l_cos = eG.get_all_left_cosets(eSubGRP);
+        permutalib::KernelCheckLeftCosets<Telt,Tidx_label,Tint>(eG.stab_chain(), eSubGRP.stab_chain(), l_cos);
+      }
+    }
+  };
   auto timing_canonical_algorithms = [&]() -> void {
     std::vector<permutalib::Face> ListF;
     for (int64_t iter = 0; iter < n_iter; iter++) {
@@ -332,6 +343,8 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
     approximate_check_random_element();
   if (opt == "check_right_cosets")
     check_right_cosets();
+  if (opt == "check_left_cosets")
+    check_left_cosets();
   if (opt == "check_store_canonical")
     check_store_canonical();
   if (opt == "timing_canonical_algorithms")

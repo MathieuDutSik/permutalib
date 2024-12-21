@@ -13,6 +13,7 @@ int main(int argc, char *argv[]) {
     using Telt = permutalib::SingleSidedPerm<Tidx>;
     using Tint = mpz_class;
     using Tgroup = permutalib::Group<Telt, Tint>;
+    using LeftCosets = typename Tgroup::LeftCosets;
     using Tidx_label = typename Tgroup::Tidx_label;
     if (argc != 2 && argc != 3) {
       std::cerr << "TestLeftCosets [H_G]\n";
@@ -29,7 +30,11 @@ int main(int argc, char *argv[]) {
     }
     Tgroup eH = permutalib::ReadGroupFromStream<Tgroup>(is);
     Tgroup eG = permutalib::ReadGroupFromStream<Tgroup>(is);
-    std::vector<Telt> l_cos = eG.get_all_left_cosets(eH);
+    LeftCosets rc = eG.left_cosets(eH);
+    std::vector<Telt> l_cos;
+    for (auto & eCos : rc) {
+      l_cos.push_back(eCos);
+    }
     permutalib::KernelCheckLeftCosets<Telt,Tidx_label,Tint>(eG.stab_chain(), eH.stab_chain(), l_cos);
     //
     std::cerr << "CPP Normal completion of the program\n";
