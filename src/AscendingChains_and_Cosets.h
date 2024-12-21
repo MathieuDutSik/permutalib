@@ -897,21 +897,50 @@ void Kernel_LeftTransversal_Direct_f(StabChain<Telt, Tidx_label> const &G,
   (void)Kernel_RightTransversal_Direct_f<Telt,Tidx_label,Tint,decltype(f_terminate_right)>(G, H, f_terminate_right);
 }
 
-
-/*
-  U is a subgroup of G.
-  We compute the left transversals g H
-*/
 template <typename Telt, typename Tidx_label, typename Tint>
-std::vector<Telt>
-Kernel_LeftTransversal_Direct(StabChain<Telt, Tidx_label> const &G,
-                              StabChain<Telt, Tidx_label> const &H) {
-  std::vector<Telt> ListTransversal = Kernel_RightTransversal_Direct<Telt,Tidx_label,Tint>(G, H);
-  size_t len = ListTransversal.size();
-  std::vector<Telt> ListRet(len);
-  for (size_t i = 0; i < len; i++)
-    ListRet[i] = Inverse(ListTransversal[i]);
-  return ListRet;
+void KernelCheckLeftCosets(StabChain<Telt, Tidx_label> const &G,
+                           StabChain<Telt, Tidx_label> const &H,
+                           std::vector<Telt> const& ListLeftTransversal) {
+  std::vector<Telt> l_elt_g = get_all_elements(G);
+  std::vector<Telt> l_elt_h = get_all_elements(H);
+  std::unordered_set<Telt> set_elt;
+  size_t ProdSize = l_elt_h.size() * ListLeftTransversal.size();
+  if (ProdSize != l_elt_g.size()) {
+    std::cerr << "|l_elt_g|=" << l_elt_g.size() << "\n";
+    std::cerr << "|l_elt_h|=" << l_elt_h.size() << "\n";
+    std::cerr << "|ListLeftTransversal|=" << ListLeftTransversal.size() << "\n";
+    std::cerr << "ProdSize=" << ProdSize << "\n";
+    std::cerr << "Discrepancy at the order level\n";
+    throw PermutalibException{1};
+  }
+  std::vector<std::unordered_set<Telt>> l_cos;
+  for (auto & eElt : ListLeftTransversal) {
+    std::unordered_set<Telt> set;
+    for (auto & e_h : l_elt_h) {
+      Telt eProd = eElt * e_h;
+      if (set_elt.count(eProd) == 1) {
+        std::cerr << "The element eProd is already present\n";
+        throw PermutalibException{1};
+      }
+      set_elt.insert(eProd);
+      set.insert(eProd);
+    }
+    l_cos.push_back(set);
+  }
+  for (size_t i_cos=0; i_cos<l_cos.size(); i_cos++) {
+    for (size_t j_cos=i_cos+1; j_cos<l_cos.size(); j_cos++) {
+      size_t the_int = 0;
+      for (auto & val : l_cos[i_cos]) {
+        if (l_cos[j_cos].count(val) == 1) {
+          the_int += 1;
+        }
+      }
+      if (the_int > 0) {
+        std::cerr << "Intersection between i_cos=" << i_cos << " j_cos=" << j_cos << " has size " << the_int << "\n";
+        throw PermutalibException{1};
+      }
+    }
+  }
 }
 
 template <typename Telt, typename Tidx_label, typename Tint>
@@ -960,50 +989,20 @@ void KernelCheckRightCosets(StabChain<Telt, Tidx_label> const &G,
   }
 }
 
+/*
+  U is a subgroup of G.
+  We compute the left transversals g H
+*/
 template <typename Telt, typename Tidx_label, typename Tint>
-void KernelCheckLeftCosets(StabChain<Telt, Tidx_label> const &G,
-                           StabChain<Telt, Tidx_label> const &H,
-                           std::vector<Telt> const& ListLeftTransversal) {
-  std::vector<Telt> l_elt_g = get_all_elements(G);
-  std::vector<Telt> l_elt_h = get_all_elements(H);
-  std::unordered_set<Telt> set_elt;
-  size_t ProdSize = l_elt_h.size() * ListLeftTransversal.size();
-  if (ProdSize != l_elt_g.size()) {
-    std::cerr << "|l_elt_g|=" << l_elt_g.size() << "\n";
-    std::cerr << "|l_elt_h|=" << l_elt_h.size() << "\n";
-    std::cerr << "|ListLeftTransversal|=" << ListLeftTransversal.size() << "\n";
-    std::cerr << "ProdSize=" << ProdSize << "\n";
-    std::cerr << "Discrepancy at the order level\n";
-    throw PermutalibException{1};
-  }
-  std::vector<std::unordered_set<Telt>> l_cos;
-  for (auto & eElt : ListLeftTransversal) {
-    std::unordered_set<Telt> set;
-    for (auto & e_h : l_elt_h) {
-      Telt eProd = eElt * e_h;
-      if (set_elt.count(eProd) == 1) {
-        std::cerr << "The element eProd is already present\n";
-        throw PermutalibException{1};
-      }
-      set_elt.insert(eProd);
-      set.insert(eProd);
-    }
-    l_cos.push_back(set);
-  }
-  for (size_t i_cos=0; i_cos<l_cos.size(); i_cos++) {
-    for (size_t j_cos=i_cos+1; j_cos<l_cos.size(); j_cos++) {
-      size_t the_int = 0;
-      for (auto & val : l_cos[i_cos]) {
-        if (l_cos[j_cos].count(val) == 1) {
-          the_int += 1;
-        }
-      }
-      if (the_int > 0) {
-        std::cerr << "Intersection between i_cos=" << i_cos << " j_cos=" << j_cos << " has size " << the_int << "\n";
-        throw PermutalibException{1};
-      }
-    }
-  }
+std::vector<Telt>
+Kernel_LeftTransversal_Direct(StabChain<Telt, Tidx_label> const &G,
+                              StabChain<Telt, Tidx_label> const &H) {
+  std::vector<Telt> ListTransversal = Kernel_RightTransversal_Direct<Telt,Tidx_label,Tint>(G, H);
+  size_t len = ListTransversal.size();
+  std::vector<Telt> ListRet(len);
+  for (size_t i = 0; i < len; i++)
+    ListRet[i] = Inverse(ListTransversal[i]);
+  return ListRet;
 }
 
 template <typename Telt, typename Tidx_label, typename Tint>

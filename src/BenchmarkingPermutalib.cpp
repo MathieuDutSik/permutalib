@@ -241,12 +241,8 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
       Tint index = eG.size() / eSubGRP.size();
       std::cerr << "i=" << i << " |eG|=" << eG.size() << " |eSubGRP|=" << eSubGRP.size() << " index=" << index << "\n";
       if (index < 100) {
-        auto rc = eG.right_cosets(eSubGRP);
-        std::vector<Telt> l_cos;
-        for (auto &eCos : rc) {
-          l_cos.push_back(eCos);
-        }
-        KernelCheckRightCosets<Telt,Tidx_label,Tint>(eG.stab_chain(), eSubGRP.stab_chain(), l_cos);
+        std::vector<Telt> l_cos = eG.get_all_right_cosets(eSubGRP);
+        permutalib::KernelCheckRightCosets<Telt,Tidx_label,Tint>(eG.stab_chain(), eSubGRP.stab_chain(), l_cos);
       }
     }
   };

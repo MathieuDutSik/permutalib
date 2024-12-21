@@ -135,7 +135,6 @@ std::vector<Telt> get_all_elements(StabChain<Telt, Tidx_label> const& S) {
   return l_elt;
 }
 
-
 template<typename Telt, typename Tidx_label>
 Face exhaustive_minimum_face_orbit(StabChain<Telt, Tidx_label> const& S, Face const& f) {
   IteratorType<Telt,Tidx_label> iter = get_begin_iterator(S);

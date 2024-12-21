@@ -2,6 +2,8 @@
 #ifndef SRC_GAP_TESTINGFCT_H_
 #define SRC_GAP_TESTINGFCT_H_
 
+#include <chrono>
+
 namespace permutalib {
 
 template<typename T>
