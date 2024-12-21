@@ -954,10 +954,16 @@ private:
   bool is_end;
 public:
   RightCosetIterator(StabChain<Telt,Tidx_label> const& H, StabChain<Telt,Tidx_label> const& G) {
-    std::vector<StabChain<Telt,Tidx_label>> chain = Kernel_AscendingChainPair(H, G);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "RightCosetIterator, main constructor\n";
+#endif
+    std::vector<StabChain<Telt,Tidx_label>> chain = Kernel_AscendingChainPair<Telt,Tidx_label,Tint>(H, G);
     n_level = chain.size() - 1;
     for (size_t i_level=0; i_level<n_level; i_level++) {
-      std::vector<Telt> l_cos = Kernel_RightTransversal_Direct(chain[i_level + 1], chain[i_level]);
+      std::vector<Telt> l_cos = Kernel_RightTransversal_Direct<Telt,Tidx_label,Tint>(chain[i_level + 1], chain[i_level]);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+      std::cerr << "i_level=" << i_level << " |l_cos|=" << l_cos.size() << "\n";
+#endif
       ll_cos.push_back(l_cos);
       l_size.push_back(l_cos.size());
       l_pos.push_back(0);
@@ -966,6 +972,9 @@ public:
     is_end = false;
   }
   RightCosetIterator() {
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "RightCosetIterator, end constructor\n";
+#endif
     is_end = true;
   }
   Telt operator*() const {
@@ -1033,12 +1042,17 @@ public:
 };
 
 template <typename Telt, typename Tidx_label, typename Tint>
-struct RightCosets {
+struct KernelRightCosets {
 private:
   StabChain<Telt,Tidx_label> H;
   StabChain<Telt,Tidx_label> G;
 public:
-  RightCosets(StabChain<Telt,Tidx_label> const& _H, StabChain<Telt,Tidx_label> const& _G) : H(_H), G(_G) {
+  using iterator = RightCosetIterator<Telt,Tidx_label,Tint>;
+  using const_iterator = RightCosetIterator<Telt,Tidx_label,Tint>;
+  KernelRightCosets(StabChain<Telt,Tidx_label> const& _H, StabChain<Telt,Tidx_label> const& _G) : H(_H), G(_G) {
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "KernelRightCosets, constructor\n";
+#endif
   }
   RightCosetIterator<Telt,Tidx_label,Tint> begin() const {
     return RightCosetIterator<Telt,Tidx_label,Tint>(H, G);
