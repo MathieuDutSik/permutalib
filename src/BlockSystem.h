@@ -91,6 +91,7 @@ BlockDecomposition<Tidx> SupercoarseBlockDecomposition(Tidx const &n_vert) {
 
 template <typename Telt, typename Tidx>
 BlockDecomposition<Tidx> SpanBlockDecomposition(std::vector<Telt> const &LGen,
+                                                BlockDecomposition<Tidx> const &BlkDec1,
                                                 std::vector<Tidx> const &eBlock,
                                                 Tidx const &n_vert) {
   Tidx miss_val = std::numeric_limits<Tidx>::max();
@@ -128,8 +129,6 @@ BlockDecomposition<Tidx> SpanBlockDecomposition(std::vector<Telt> const &LGen,
       for (auto &val : NewV)
         map_vert_block[val] = pos;
       ListBlocks.emplace_back(std::move(NewV));
-      //      prt_status("1");
-      // We do something
       return true;
     } else {
       if (ListBlkMatch.size() == 1) {
@@ -138,8 +137,6 @@ BlockDecomposition<Tidx> SpanBlockDecomposition(std::vector<Telt> const &LGen,
           ListBlocks[iBlock].push_back(val);
           map_vert_block[val] = iBlock;
         }
-        //        prt_status("2");
-        // return true if something is new.
         return NewV.size() > 0;
       }
       std::vector<std::vector<Tidx>> NewListBlocks;
@@ -197,9 +194,47 @@ BlockDecomposition<Tidx> SpanBlockDecomposition(std::vector<Telt> const &LGen,
     }
     return true;
   };
-  while (true) {
-    if (merge_operation())
+  auto iter_merge=[&]() -> bool {
+    bool do_something = false;
+    while (true) {
+      bool test = merge_operation();
+      if (test) {
+        return do_something;
+      }
+      do_something = true;
+    }
+  };
+  auto set_as_coarser=[&]() -> bool {
+    for (auto & Block1 : BlkDec1.ListBlocks) {
+      std::unordered_set<Tidx> set_idx;
+      for (auto & val : Block1) {
+        Tidx i_blk = map_vert_block[val];
+        set_idx.insert(i_blk);
+      }
+      if (set_idx.size() > 1) {
+        std::vector<Tidx> MergedBlock;
+        for (auto & idx : set_idx) {
+          for (auto & val : ListBlocks[idx]) {
+            MergedBlock.push_back(val);
+          }
+        }
+        insert(MergedBlock);
+        return true;
+      }
+    }
+    return false;
+  };
+  while(true) {
+    size_t n_oper = 0;
+    if (iter_merge()) {
+      n_oper += 1;
+    }
+    if (set_as_coarser()) {
+      n_oper += 1;
+    }
+    if (n_oper == 0) {
       break;
+    }
   }
   return {std::move(ListBlocks), std::move(map_vert_block)};
 }
@@ -211,16 +246,28 @@ FindIntermediateBlockDecomposition_choice(
     BlockDecomposition<Tidx> const &BlkDec2, Tidx const &iBlk1,
     Tidx const &jBlk1) {
 #ifdef DEBUG_BLOCK_SYSTEM
-  std::cerr << "iBlk1=" << iBlk1 << " jBlk1=" << jBlk1 << "\n";
+  std::cerr << "BLK: iBlk1=" << iBlk1 << " jBlk1=" << jBlk1 << "\n";
+  for (size_t i_blk=0; i_blk<BlkDec1.ListBlocks.size(); i_blk++) {
+    std::cerr << "BLK: 1, i_blk=" << i_blk << " |BLK|=" << BlkDec1.ListBlocks[i_blk].size() << "\n";
+  }
 #endif
   std::vector<Tidx> eBlock;
   for (auto &val : BlkDec1.ListBlocks[iBlk1])
     eBlock.push_back(val);
   for (auto &val : BlkDec1.ListBlocks[jBlk1])
     eBlock.push_back(val);
+#ifdef DEBUG_BLOCK_SYSTEM
+  std::cerr << "BLK: |BlkDec1.ListBlocks[iBlk1]|=" << BlkDec1.ListBlocks[iBlk1].size() << "\n";
+  std::cerr << "BLK: |BlkDec1.ListBlocks[jBlk1]|=" << BlkDec1.ListBlocks[jBlk1].size() << "\n";
+  std::cerr << "BLK: eBlock=";
+  for (auto &val : eBlock) {
+    std::cerr << " " << static_cast<size_t>(val);
+  }
+  std::cerr << "\n";
+#endif
   Tidx n_vert = Tidx(BlkDec1.map_vert_block.size());
   BlockDecomposition<Tidx> BlkDecSpann =
-      SpanBlockDecomposition(LGen, eBlock, n_vert);
+    SpanBlockDecomposition(LGen, BlkDec1, eBlock, n_vert);
   if (TestEquality(BlkDecSpann, BlkDec2))
     return {};
   return BlkDecSpann;
@@ -231,12 +278,25 @@ std::optional<BlockDecomposition<Tidx>>
 FindIntermediateBlockDecomposition(std::vector<Telt> const &LGen,
                                    BlockDecomposition<Tidx> const &BlkDec1,
                                    BlockDecomposition<Tidx> const &BlkDec2) {
+#ifdef DEBUG_BLOCK_SYSTEM
+  std::cerr << "BLK: FindIntermediateBlockDecomposition BlkDec2\n";
+  for (size_t i_blk=0; i_blk<BlkDec2.ListBlocks.size(); i_blk++) {
+    std::cerr << "BLK: 2, i_blk=" << i_blk << " |BLK|=" << BlkDec2.ListBlocks[i_blk].size() << "\n";
+  }
+#endif
   std::unordered_set<Tidx> set_blk1_poss;
   for (auto &vert : BlkDec2.ListBlocks[0]) {
     Tidx iBlk1 = BlkDec1.map_vert_block[vert];
     set_blk1_poss.insert(iBlk1);
   }
   std::vector<Tidx> l_blk1_poss(set_blk1_poss.begin(), set_blk1_poss.end());
+#ifdef DEBUG_BLOCK_SYSTEM
+  std::cerr << "BLK: l_blk1_poss=";
+  for (auto & val : l_blk1_poss) {
+    std::cerr << " " << static_cast<size_t>(val);
+  }
+  std::cerr << "\n";
+#endif
   for (size_t i = 1; i < l_blk1_poss.size(); i++) {
     Tidx iBlk1 = l_blk1_poss[0];
     Tidx jBlk1 = l_blk1_poss[i];
