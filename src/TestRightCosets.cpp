@@ -32,9 +32,12 @@ int main(int argc, char *argv[]) {
     std::unordered_set<Telt> set;
     std::vector<std::unordered_set<Telt>> l_cos;
     for (auto &eCos : rc) {
+      //      std::cerr << "eCos=" << eCos << " eCos.siz=" << static_cast<size_t>(eCos.siz) << "\n";
       std::unordered_set<Telt> set;
-      for (auto x: H_elts) {
-        Telt p = eCos * x;
+      for (auto x_h: H_elts) {
+        //        std::cerr << "x_h=" << x_h << "\n";
+        Telt p = x_h * eCos;
+        //        std::cerr << "p=" << p << "\n";
         set.insert(p);
       }
       l_cos.push_back(set);

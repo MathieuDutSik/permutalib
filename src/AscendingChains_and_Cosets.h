@@ -949,13 +949,38 @@ private:
   std::vector<std::vector<Telt>> ll_cos;
   std::vector<size_t> l_size;
   std::vector<size_t> l_pos;
-  Telt id;
   size_t n_level;
   bool is_end;
+  Telt result;
+  void compute_position() {
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "compute_position, start\n";
+#endif
+    result = ll_cos[0][l_pos[0]];
+    for (size_t i_level=1; i_level<n_level; i_level++) {
+      result *= ll_cos[i_level][l_pos[i_level]];
+    }
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "compute_position, end\n";
+#endif
+  }
+  void single_increase() {
+    for (size_t i_level=0; i_level<n_level; i_level++) {
+      if (l_pos[i_level] < l_size[i_level] - 1) {
+        for (size_t j_level=0; j_level<i_level; j_level++) {
+          l_pos[j_level] = 0;
+        }
+        l_pos[i_level] += 1;
+        compute_position();
+        return;
+      }
+    }
+    is_end = true;
+  }
 public:
   RightCosetIterator(StabChain<Telt,Tidx_label> const& H, StabChain<Telt,Tidx_label> const& G) {
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-    std::cerr << "RightCosetIterator, main constructor\n";
+    std::cerr << "RightCosetIterator, begin constructor\n";
 #endif
     std::vector<StabChain<Telt,Tidx_label>> chain = Kernel_AscendingChainPair<Telt,Tidx_label,Tint>(H, G);
     n_level = chain.size() - 1;
@@ -968,8 +993,11 @@ public:
       l_size.push_back(l_cos.size());
       l_pos.push_back(0);
     }
-    id = G->comm->identity;
+    result = G->comm->identity;
     is_end = false;
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "RightCosetIterator, exit\n";
+#endif
   }
   RightCosetIterator() {
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
@@ -977,12 +1005,8 @@ public:
 #endif
     is_end = true;
   }
-  Telt operator*() const {
-    Telt ret = id;
-    for (size_t i_level=0; i_level<n_level; i_level++) {
-      ret *= ll_cos[i_level][l_pos[i_level]];
-    }
-    return ret;
+  Telt const& operator*() const {
+    return result;
   }
   bool operator==(const RightCosetIterator<Telt,Tidx_label,Tint>& rci) const {
     if (is_end == rci.is_end) {
@@ -1018,24 +1042,12 @@ public:
     }
     return false;
   }
-  void single_increase() {
-    for (size_t i_level=0; i_level<n_level; i_level++) {
-      if (l_pos[i_level] < l_size[i_level] - 1) {
-        for (size_t j_level=0; j_level<i_level; j_level++) {
-          l_pos[j_level] = 0;
-        }
-        l_pos[i_level] += 1;
-        return;
-      }
-    }
-    is_end = true;
-  }
   Telt operator++() {
     single_increase();
-    return *this;
+    return result;
   }
   Telt operator++(int) {
-    Telt tmp = *this;
+    Telt tmp = result;
     single_increase();
     return tmp;
   }
