@@ -32,33 +32,34 @@ int main(int argc, char *argv[]) {
     std::unordered_set<Telt> set;
     std::vector<std::unordered_set<Telt>> l_cos;
     for (auto &eCos : rc) {
-      //      std::cerr << "eCos=" << eCos << " eCos.siz=" << static_cast<size_t>(eCos.siz) << "\n";
+      std::cerr << "eCos=" << eCos << " eCos.siz=" << static_cast<size_t>(eCos.siz) << "\n";
       std::unordered_set<Telt> set;
       for (auto x_h: H_elts) {
-        //        std::cerr << "x_h=" << x_h << "\n";
         Telt p = x_h * eCos;
-        //        std::cerr << "p=" << p << "\n";
         set.insert(p);
       }
       l_cos.push_back(set);
     }
-    auto test_int=[&](size_t const& idx1, size_t const& idx2) -> bool {
+    auto size_int=[&](size_t const& idx1, size_t const& idx2) -> size_t {
+      size_t the_int = 0;
       for (auto & elt: l_cos[idx1]) {
         if (l_cos[idx2].count(elt) == 1) {
-          return true;
+          the_int += 1;
         }
       }
-      return false;
+      return the_int;
     };
+    std::cerr << "|l_cos|=" << l_cos.size() << "\n";
+    std::cerr << "|G|=" << eG.size() << " |H|=" << eH.size() << "\n";
     for (size_t i_cos=0; i_cos<l_cos.size(); i_cos++) {
       for (size_t j_cos=i_cos + 1; j_cos<l_cos.size(); j_cos++) {
-        if (test_int(i_cos, j_cos)) {
-          std::cerr << "Cosets i_cos=" << i_cos << " and j_cos=" << j_cos << " are intersecting\n";
+        size_t the_int = size_int(i_cos, j_cos);
+        if (the_int > 0) {
+          std::cerr << "Cosets i_cos=" << i_cos << " and j_cos=" << j_cos << " are intersecting, the_int=" << the_int << "\n";
           throw permutalib::PermutalibException{1};
         }
       }
     }
-    std::cerr << "|l_cos|=" << l_cos.size() << "\n";
     //
     std::cerr << "CPP Normal completion of the program\n";
   } catch (permutalib::PermutalibException const &e) {

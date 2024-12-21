@@ -779,7 +779,7 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_All(AscendingEn
   /*
     Computes an ascending chain of subgroups from H to G.
     It is an heuristic program and there is no guarantee that we will get an optimal one.
-    Order of function call (H, G) vs (G, H) is reverted compared to 
+    Order of function call (H, G) vs (G, H) is reverted compared to GAP.
                       --- What GAP is doing ---
     In GAP the following is done:
     ---Compute an ascending chain from the trivial subgroup and if one can restricy
@@ -864,9 +864,6 @@ std::vector<StabChain<Telt, Tidx_label>> Kernel_AscendingChainPair(StabChain<Tel
 }
 
 
-
-
-
 /*
   U is a subgroup of G.
   We compute the right transversals H g
@@ -931,7 +928,9 @@ void CheckRightCosets(StabChain<Telt, Tidx_label> const &G,
     std::cerr << "Discrepancy at the order level\n";
     throw PermutalibException{1};
   }
+  std::vector<std::unordered_set<Telt>> l_cos;
   for (auto & eElt : ListRightTransversal) {
+    std::unordered_set<Telt> set;
     for (auto & e_h : l_elt_h) {
       Telt eProd = e_h * eElt;
       if (set_elt.count(eProd) == 1) {
@@ -939,6 +938,22 @@ void CheckRightCosets(StabChain<Telt, Tidx_label> const &G,
         throw PermutalibException{1};
       }
       set_elt.insert(eProd);
+      set.insert(eProd);
+    }
+    l_cos.push_back(set);
+  }
+  for (size_t i_cos=0; i_cos<l_cos.size(); i_cos++) {
+    for (size_t j_cos=i_cos+1; j_cos<l_cos.size(); j_cos++) {
+      size_t the_int = 0;
+      for (auto & val : l_cos[i_cos]) {
+        if (l_cos[j_cos].count(val) == 1) {
+          the_int += 1;
+        }
+      }
+      if (the_int > 0) {
+        std::cerr << "Intersection between i_cos=" << i_cos << " j_cos=" << j_cos << " has size " << the_int << "\n";
+        throw PermutalibException{1};
+      }
     }
   }
 }
@@ -955,6 +970,11 @@ private:
   void compute_position() {
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
     std::cerr << "compute_position, start\n";
+    std::cerr << "l_pos/l_size =";
+    for (size_t i_level=0; i_level<n_level; i_level++) {
+      std::cerr << " (" << l_pos[i_level] << "|" << l_size[i_level] << ")";
+    }
+    std::cerr << "\n";
 #endif
     result = ll_cos[0][l_pos[0]];
     for (size_t i_level=1; i_level<n_level; i_level++) {
@@ -984,16 +1004,24 @@ public:
 #endif
     std::vector<StabChain<Telt,Tidx_label>> chain = Kernel_AscendingChainPair<Telt,Tidx_label,Tint>(H, G);
     n_level = chain.size() - 1;
+    result = G->comm->identity;
     for (size_t i_level=0; i_level<n_level; i_level++) {
       std::vector<Telt> l_cos = Kernel_RightTransversal_Direct<Telt,Tidx_label,Tint>(chain[i_level + 1], chain[i_level]);
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-      std::cerr << "i_level=" << i_level << " |l_cos|=" << l_cos.size() << "\n";
+      std::cerr << "i_level=" << i_level << " |l_cos|=" << l_cos.size()
+                << " ord1=" << Order<Telt,Tidx_label,Tint>(chain[i_level])
+                << " ord2=" << Order<Telt,Tidx_label,Tint>(chain[i_level + 1])
+                << "\n";
+      for (size_t idx=0; idx<l_cos.size(); idx++) {
+        std::cerr << " idx=" << idx << " eCos=" << l_cos[idx] << "\n";
+      }
+      CheckRightCosets<Telt,Tidx_label,Tint>(chain[i_level + 1], chain[i_level], l_cos);
 #endif
+      result *= l_cos[0];
       ll_cos.push_back(l_cos);
       l_size.push_back(l_cos.size());
       l_pos.push_back(0);
     }
-    result = G->comm->identity;
     is_end = false;
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
     std::cerr << "RightCosetIterator, exit\n";
