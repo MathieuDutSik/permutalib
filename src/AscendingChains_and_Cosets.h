@@ -309,23 +309,23 @@ template<typename Telt, typename Tidx_label, typename Tint>
 AscendingEntry<Telt,Tidx_label,Tint> get_ascending_entry(StabChain<Telt, Tidx_label> const& g) {
   using Tidx = typename Telt::Tidx;
   Tidx n_act = g->comm->n;
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
   std::cerr << "ACC: get_ascending_entry, step 1\n";
 #endif
   std::vector<Telt> l_gens_small = Kernel_SmallGeneratingSet<Telt, Tidx_label, Tint>(g);
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
   std::cerr << "ACC: get_ascending_entry, step 2\n";
 #endif
   std::vector<std::vector<typename Telt::Tidx>> orbs = OrbitsPerms(l_gens_small, n_act);
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
   std::cerr << "ACC: get_ascending_entry, step 3\n";
 #endif
   std::vector<std::pair<Tidx,Tidx>> Vbelong = get_belonging_vector(orbs, n_act);
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
   std::cerr << "ACC: get_ascending_entry, step 4\n";
 #endif
   Tint ord = Order<Telt,Tidx_label,Tint>(g);
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
   std::cerr << "ACC: get_ascending_entry, step 5\n";
 #endif
   return {std::move(g), std::move(orbs), std::move(Vbelong), std::move(l_gens_small), std::move(ord)};
@@ -1015,7 +1015,7 @@ private:
   bool is_end;
   Telt result;
   void compute_position() {
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
     std::cerr << "compute_position, start\n";
     std::cerr << "l_pos/l_size =";
     for (size_t i_level=0; i_level<n_level; i_level++) {
@@ -1027,7 +1027,7 @@ private:
     for (size_t i_level=1; i_level<n_level; i_level++) {
       result *= ll_cos[i_level][l_pos[i_level]];
     }
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
     std::cerr << "compute_position, end\n";
 #endif
   }
@@ -1051,17 +1051,19 @@ public:
 #endif
     std::vector<StabChain<Telt,Tidx_label>> chain = Kernel_AscendingChainPair<Telt,Tidx_label,Tint>(H, G);
     n_level = chain.size() - 1;
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    for (size_t i_level=0; i_level<=n_level; i_level++) {
+      std::cerr << "i_level=" << i_level << " ord=" << Order<Telt,Tidx_label,Tint>(chain[i_level]) << "\n";
+    }
+#endif
     result = G->comm->identity;
     for (size_t i_level=0; i_level<n_level; i_level++) {
       std::vector<Telt> l_cos = Kernel_RightTransversal_Direct<Telt,Tidx_label,Tint>(chain[i_level + 1], chain[i_level]);
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
       std::cerr << "i_level=" << i_level << " |l_cos|=" << l_cos.size()
                 << " ord1=" << Order<Telt,Tidx_label,Tint>(chain[i_level])
                 << " ord2=" << Order<Telt,Tidx_label,Tint>(chain[i_level + 1])
                 << "\n";
-      for (size_t idx=0; idx<l_cos.size(); idx++) {
-        std::cerr << " idx=" << idx << " eCos=" << l_cos[idx] << "\n";
-      }
       KernelCheckRightCosets<Telt,Tidx_label,Tint>(chain[i_level + 1], chain[i_level], l_cos);
 #endif
       result *= l_cos[0];
@@ -1169,7 +1171,7 @@ private:
   bool is_end;
   Telt result;
   void compute_position() {
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
     std::cerr << "compute_position, start\n";
     std::cerr << "l_pos/l_size =";
     for (size_t i_level=0; i_level<n_level; i_level++) {
@@ -1181,7 +1183,7 @@ private:
     for (size_t i_level=1; i_level<n_level; i_level++) {
       result = ll_cos[i_level][l_pos[i_level]] * result;
     }
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
     std::cerr << "compute_position, end\n";
 #endif
   }
@@ -1205,20 +1207,22 @@ public:
 #endif
     std::vector<StabChain<Telt,Tidx_label>> chain = Kernel_AscendingChainPair<Telt,Tidx_label,Tint>(H, G);
     n_level = chain.size() - 1;
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    for (size_t i_level=0; i_level<=n_level; i_level++) {
+      std::cerr << "i_level=" << i_level << " ord=" << Order<Telt,Tidx_label,Tint>(chain[i_level]) << "\n";
+    }
+#endif
     result = G->comm->identity;
     for (size_t i_level=0; i_level<n_level; i_level++) {
       std::vector<Telt> l_cos = Kernel_LeftTransversal_Direct<Telt,Tidx_label,Tint>(chain[i_level + 1], chain[i_level]);
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
       std::cerr << "i_level=" << i_level << " |l_cos|=" << l_cos.size()
                 << " ord1=" << Order<Telt,Tidx_label,Tint>(chain[i_level])
                 << " ord2=" << Order<Telt,Tidx_label,Tint>(chain[i_level + 1])
                 << "\n";
-      for (size_t idx=0; idx<l_cos.size(); idx++) {
-        std::cerr << " idx=" << idx << " eCos=" << l_cos[idx] << "\n";
-      }
       KernelCheckLeftCosets<Telt,Tidx_label,Tint>(chain[i_level + 1], chain[i_level], l_cos);
 #endif
-      result *= l_cos[0];
+      result = l_cos[0] * result;
       ll_cos.push_back(l_cos);
       l_size.push_back(l_cos.size());
       l_pos.push_back(0);
