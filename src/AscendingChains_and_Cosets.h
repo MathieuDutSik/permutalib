@@ -553,8 +553,8 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Block(Ascending
   using Tidx = typename Telt::Tidx;
   Tidx n_act = ent_H.g->comm->n;
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-  print_orbits(ent_H, "H");
-  print_orbits(ent_G, "G");
+  //  print_orbits(ent_H, "H");
+  //  print_orbits(ent_G, "G");
   print_orb_sizes(ent_H, "H");
   print_orb_sizes(ent_G, "G");
 #endif
@@ -670,103 +670,70 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_All(AscendingEn
   //
   // First the alternating method as it is the cheapest one.
   //
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
-  std::cerr << "ACC: Before Kernel_AscendingChain_Alt\n";
-#endif
   std::optional<StabChain<Telt, Tidx_label>> opt2 =
     Kernel_AscendingChain_Alt(ent_H, ent_G);
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
-  std::cerr << "ACC: After Kernel_AscendingChain_Alt\n";
-#endif
   if (opt2) {
 #ifdef TIMINGS_ASCENDING_CHAINS_COSETS
-    std::cerr << "|ACC: Kernel_AscendingChain_Alt(A)|=" << time << "\n";
+    std::cerr << "|ACC: Kernel_AscendingChain_Alt, success|=" << time << "\n";
 #endif
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-    std::cerr << "ACC: Finding an intermediate subgroup from Alt method\n";
+    std::cerr << "ACC: Finding an intermediate subgroup by Alt method\n";
 #endif
     return *opt2;
   }
 #ifdef TIMINGS_ASCENDING_CHAINS_COSETS
-  std::cerr << "|ACC: Kernel_AscendingChain_Alt(B)|=" << time << "\n";
-#endif
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
-  std::cerr << "ACC: Failing to find an intermediate subgroup by the alternating method\n";
+  std::cerr << "|ACC: Kernel_AscendingChain_Alt, failure|=" << time << "\n";
 #endif
   //
   // Next the Block method as it is not that expensive, especially when it fails.
   //
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
-  std::cerr << "ACC: Before Kernel_AscendingChain_Block\n";
-#endif
   std::optional<StabChain<Telt, Tidx_label>> opt3 =
     Kernel_AscendingChain_Block(ent_H, ent_G);
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
-  std::cerr << "ACC: After Kernel_AscendingChain_Block\n";
-#endif
   if (opt3) {
 #ifdef TIMINGS_ASCENDING_CHAINS_COSETS
-    std::cerr << "|ACC: Kernel_AscendingChain_Block(A)|=" << time << "\n";
+    std::cerr << "|ACC: Kernel_AscendingChain_Block, success|=" << time << "\n";
 #endif
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-    std::cerr << "ACC: Finding an intermediate subgroup from Block method\n";
+    std::cerr << "ACC: Finding an intermediate subgroup by the Block method\n";
 #endif
     return *opt3;
   }
 #ifdef TIMINGS_ASCENDING_CHAINS_COSETS
-  std::cerr << "|ACC: Kernel_AscendingChain_Block(B)|=" << time << "\n";
-#endif
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
-  std::cerr << "ACC: Failing to find an intermediate subgroup by the block method\n";
+  std::cerr << "|ACC: Kernel_AscendingChain_Block, failure|=" << time << "\n";
 #endif
   //
   // Then the subset method as it is very powerful but relatively expensive.
   //
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
-  std::cerr << "ACC: Before Kernel_AscendingChain_Subset\n";
-#endif
   std::optional<StabChain<Telt, Tidx_label>> opt1 =
     Kernel_AscendingChain_Subset(ent_H, ent_G);
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
-  std::cerr << "ACC: After Kernel_AscendingChain_Subset\n";
-#endif
   if (opt1) {
 #ifdef TIMINGS_ASCENDING_CHAINS_COSETS
-    std::cerr << "|ACC: Kernel_AscendingChain_Subset(A)|=" << time << "\n";
+    std::cerr << "|ACC: Kernel_AscendingChain_Subset, success|=" << time << "\n";
 #endif
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-    std::cerr << "ACC: Finding an intermediate subgroup from Subset method\n";
+    std::cerr << "ACC: Finding an intermediate subgroup by the Subset method\n";
 #endif
     return *opt1;
   }
 #ifdef TIMINGS_ASCENDING_CHAINS_COSETS
-  std::cerr << "|ACC: Kernel_AscendingChain_Subset(B)|=" << time << "\n";
-#endif
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
-  std::cerr << "ACC: Failing to find an intermediate subgroup by the subset method\n";
+  std::cerr << "|ACC: Kernel_AscendingChain_Subset, failure|=" << time << "\n";
 #endif
   //
   // Latest is the gens method which works rarely and is relatively expensive
   //
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
-  std::cerr << "ACC: Before Kernel_AscendingChain_Gens\n";
-#endif
   std::optional<StabChain<Telt, Tidx_label>> opt4 =
     Kernel_AscendingChain_Gens(ent_H, ent_G);
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
-  std::cerr << "ACC: After Kernel_AscendingChain_Gens\n";
-#endif
   if (opt4) {
 #ifdef TIMINGS_ASCENDING_CHAINS_COSETS
-    std::cerr << "|ACC: Kernel_AscendingChain_Gens(A)|=" << time << "\n";
+    std::cerr << "|ACC: Kernel_AscendingChain_Gens, success|=" << time << "\n";
 #endif
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-    std::cerr << "ACC: Finding an intermediate subgroup from Gens method\n";
+    std::cerr << "ACC: Finding an intermediate subgroup by Gens method\n";
 #endif
     return *opt4;
   }
 #ifdef TIMINGS_ASCENDING_CHAINS_COSETS
-  std::cerr << "|ACC: Kernel_AscendingChain_Gens(B)|=" << time << "\n";
+  std::cerr << "|ACC: Kernel_AscendingChain_Gens, failure|=" << time << "\n";
 #endif
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
   std::cerr << "ACC: Failing to find an intermediate subgroup\n";
