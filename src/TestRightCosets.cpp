@@ -11,6 +11,7 @@ int main(int argc, char *argv[]) {
     using Telt = permutalib::SingleSidedPerm<Tidx>;
     using Tint = mpz_class;
     using Tgroup = permutalib::Group<Telt, Tint>;
+    using Tidx_label = typename Tgroup::Tidx_label;
     using Tcosets = permutalib::RightCosets<Telt, Tint>;
     if (argc != 2 && argc != 3) {
       std::cerr << "TestRightCosets [H_G]\n";
@@ -28,12 +29,11 @@ int main(int argc, char *argv[]) {
     Tgroup eH = permutalib::ReadGroupFromStream<Tgroup>(is);
     Tgroup eG = permutalib::ReadGroupFromStream<Tgroup>(is);
     Tcosets rc = eG.right_cosets(eH);
-    std::vector<Telt> H_elts = eH.get_all_element();
     std::vector<Telt> l_cos;
     for (auto &eCos : rc) {
       l_cos.push_back(eCos);
     }
-    CheckRightCosets(eG.S, eH.S, l_cos);
+    KernelCheckRightCosets<Telt,Tidx_label,Tint>(eG.stab_chain(), eH.stab_chain(), l_cos);
     //
     std::cerr << "CPP Normal completion of the program\n";
   } catch (permutalib::PermutalibException const &e) {

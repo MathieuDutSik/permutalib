@@ -375,13 +375,11 @@ public:
   void RightTransversal_Direct_f(const Group<Telt,Tint>& H, Fterminate f_terminate) const {
     (void)Kernel_RightTransversal_Direct_f<Telt,Tidx_label,Tint>(S, H.S, f_terminate);
   }
-  void CheckRightTransversal_Direct(const Group<Telt,Tint>& H) const {
-    std::vector<Telt> ListTransversal = Kernel_RightTransversal_Direct<Telt,Tidx_label,Tint>(S, H.S);
-    std::cerr << "|eG|=" << this->size() << " |eSubGRP|=" << H.size() << " |ListTransveral|=" << ListTransversal.size() << "\n";
-    CheckRightCosets<Telt,Tidx_label,Tint>(S, H.S, ListTransversal);
-  }
-  RightCosets<Telt,Tint> right_cosets(const Group<Telt,Tint>& H) {
+  RightCosets<Telt,Tint> right_cosets(const Group<Telt,Tint>& H) const {
     return KernelRightCosets<Telt,Tidx_label,Tint>(H.S, S);
+  }
+  LeftCosets<Telt,Tint> left_cosets(const Group<Telt,Tint>& H) const {
+    return KernelLeftCosets<Telt,Tidx_label,Tint>(H.S, S);
   }
   // Normal structure
   bool IsNormalSubgroup(const Group<Telt, Tint> &U) const {

@@ -1,15 +1,18 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
+
+// clang-format off
 #include "Group.h"
 #include "Permutation.h"
+#include "TestingFct.h"
 #include "gmpxx.h"
 #include <fstream>
-#include "TestingFct.h"
-
+// clang-format on
 
 template<typename Tgroup>
 void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter, size_t & siz_control) {
   using Tint = typename Tgroup::Tint;
   using Telt = typename Tgroup::Telt;
+  using Tidx_label = typename Tgroup::Tidx_label;
   using Tidx = typename Telt::Tidx;
   Tidx n = eG.n_act();
   auto random_face = [](const Tidx &len) -> permutalib::Face {
@@ -238,9 +241,12 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
       Tint index = eG.size() / eSubGRP.size();
       std::cerr << "i=" << i << " |eG|=" << eG.size() << " |eSubGRP|=" << eSubGRP.size() << " index=" << index << "\n";
       if (index < 100) {
-        std::vector<Telt> ListTransversal = eG.RightTransversal_Direct(eSubGRP);
-        siz_control += ListTransversal.size();
-        eG.CheckRightTransversal_Direct(eSubGRP);
+        auto rc = eG.right_cosets(eSubGRP);
+        std::vector<Telt> l_cos;
+        for (auto &eCos : rc) {
+          l_cos.push_back(eCos);
+        }
+        KernelCheckRightCosets<Telt,Tidx_label,Tint>(eG.stab_chain(), eSubGRP.stab_chain(), l_cos);
       }
     }
   };
@@ -250,7 +256,7 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
       permutalib::Face eFace1 = random_face(n);
       ListF.push_back(eFace1);
     }
-    permutalib::NanosecondTime time;
+    permutalib::NanosecondTime_perm time;
     for (auto & f : ListF) {
       (void)eG.CanonicalImage(f);
     }
