@@ -826,7 +826,7 @@ std::vector<StabChain<Telt, Tidx_label>> Kernel_AscendingChainPair(StabChain<Tel
   while(true) {
     auto get_intermediate=[&]() -> std::optional<StabChain<Telt, Tidx_label>> {
       Tint index = l_grp[pos+1].ord / l_grp[pos].ord;
-      if (IsPrime(index)) { // Cannot improve when the index is prime
+      if (IsPrime_loc(index)) { // Cannot improve when the index is prime
         return {};
       }
       return Kernel_AscendingChain_All<Telt,Tidx_label,Tint>(l_grp[pos], l_grp[pos+1]);

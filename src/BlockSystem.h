@@ -392,7 +392,7 @@ Blocks(const std::vector<Telt> &acts, const typename Telt::Tidx &n) {
     std::cerr << "We need at least one generator for Blocks computation\n";
     throw PermutalibException{1};
   }
-  if (IsPrime(n)) {
+  if (IsPrime_loc(n)) {
     std::vector<Tidx> eVect(n);
     for (Tidx i = 0; i < n; i++)
       eVect[i] = i;

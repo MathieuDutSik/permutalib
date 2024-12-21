@@ -8,7 +8,7 @@
 
 namespace permutalib {
 
-template <typename T> T loc_gcd(T a, T b) {
+template <typename T> T gcd_loc(T a, T b) {
   T remainder;
   while (b != 0) {
     remainder = a % b;
@@ -19,7 +19,7 @@ template <typename T> T loc_gcd(T a, T b) {
 }
 
 template <typename T>
-std::pair<bool, T> rho_pollard_factorize(T const &number) {
+std::pair<bool, T> rho_pollard_factorize_loc(T const &number) {
   T count;
   T x_fixed = 2, x = 2, size = 2, factor, diff;
   do {
@@ -29,7 +29,7 @@ std::pair<bool, T> rho_pollard_factorize(T const &number) {
       diff = x - x_fixed;
       if (diff < 0)
         diff = -diff;
-      factor = loc_gcd(diff, number);
+      factor = gcd_loc(diff, number);
     } while (--count && (factor == 1));
     size *= 2;
     x_fixed = x;
@@ -41,14 +41,14 @@ std::pair<bool, T> rho_pollard_factorize(T const &number) {
   }
 }
 
-template <typename T> std::vector<T> successive_division_factorize(T const &N) {
+template <typename T> std::vector<T> successive_division_factorize_loc(T const &N) {
   T pos = 2;
   while (true) {
     T res = N % pos;
     if (res == 0) {
       T quot = N / pos;
       if (quot > 1) {
-        std::vector<T> eVect = successive_division_factorize(quot);
+        std::vector<T> eVect = successive_division_factorize_loc(quot);
         eVect.push_back(pos);
         return eVect;
       }
@@ -61,7 +61,7 @@ template <typename T> std::vector<T> successive_division_factorize(T const &N) {
   return {N};
 }
 
-template <typename T> bool successive_division_isprime(T const &N) {
+template <typename T> bool successive_division_isprime_loc(T const &N) {
   T pos = 2;
   while (true) {
     T res = N % pos;
@@ -75,7 +75,7 @@ template <typename T> bool successive_division_isprime(T const &N) {
 }
 
 template <typename T> std::vector<T> factorize(T const &N) {
-  std::pair<bool, T> epair = rho_pollard_factorize(N);
+  std::pair<bool, T> epair = rho_pollard_factorize_loc(N);
   if (epair.first) {
     T fact1 = epair.second;
     T fact2 = N / fact1;
@@ -86,16 +86,16 @@ template <typename T> std::vector<T> factorize(T const &N) {
     ListPrime.insert(ListPrime.end(), V2.begin(), V2.end());
     return ListPrime;
   } else {
-    return successive_division_factorize(N);
+    return successive_division_factorize_loc(N);
   }
 }
 
-template <typename T> bool IsPrime(const T &N) {
-  std::pair<bool, T> epair = rho_pollard_factorize(N);
+template <typename T> bool IsPrime_loc(const T &N) {
+  std::pair<bool, T> epair = rho_pollard_factorize_loc(N);
   if (epair.first) {
     return false;
   } else {
-    return successive_division_isprime(N);
+    return successive_division_isprime_loc(N);
   }
 }
 
