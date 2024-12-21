@@ -1,9 +1,11 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
+
+// clang-format off
+#include "Group.h"
 #include "Permutation.h"
 #include "gmpxx.h"
 #include <fstream>
-
-#include "Group.h"
+// clang-format on
 
 int main(int argc, char *argv[]) {
   try {
@@ -11,11 +13,11 @@ int main(int argc, char *argv[]) {
     using Telt = permutalib::SingleSidedPerm<Tidx>;
     using Tint = mpz_class;
     using Tgroup = permutalib::Group<Telt, Tint>;
-    using Tcosets = permutalib::RightCosets<Telt, Tint>;
+    using Tcosets = permutalib::LeftCosets<Telt, Tint>;
     if (argc != 2 && argc != 3) {
-      std::cerr << "TestRightCosets [H_G]\n";
+      std::cerr << "TestLeftCosets [H_G]\n";
       std::cerr << "or\n";
-      std::cerr << "TestRightCosets [H_G] [OUT]\n";
+      std::cerr << "TestLeftCosets [H_G] [OUT]\n";
       throw permutalib::PermutalibException{1};
     }
     std::string File_HG = argv[1];
@@ -27,13 +29,13 @@ int main(int argc, char *argv[]) {
     }
     Tgroup eH = permutalib::ReadGroupFromStream<Tgroup>(is);
     Tgroup eG = permutalib::ReadGroupFromStream<Tgroup>(is);
-    Tcosets rc = eG.right_cosets(eH);
+    Tcosets rc = eG.left_cosets(eH);
     std::vector<Telt> H_elts = eH.get_all_element();
     std::vector<Telt> l_cos;
     for (auto &eCos : rc) {
       l_cos.push_back(eCos);
     }
-    CheckRightCosets(eG.S, eH.S, l_cos);
+    CheckLeftCosets(eG.S, eH.S, l_cos);
     //
     std::cerr << "CPP Normal completion of the program\n";
   } catch (permutalib::PermutalibException const &e) {

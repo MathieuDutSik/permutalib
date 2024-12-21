@@ -109,6 +109,8 @@ Telt RandomElement(const std::vector<Telt> &LGen, const Telt &id) {
 template <typename Telt, typename Tint>
 using RightCosets = KernelRightCosets<Telt,uint16_t,Tint>;
 
+template <typename Telt, typename Tint>
+using LeftCosets = KernelLeftCosets<Telt,uint16_t,Tint>;
 
 template <typename Telt_inp, typename Tint_inp> struct Group {
 public:
@@ -206,6 +208,7 @@ public:
     return str_ret;
   }
   Tint size() const { return size_tint; }
+  StabChain<Telt, Tidx_label> stab_chain() const { return S; }
   std::map<Tidx, int> factor_size() const { return FactorsSizeStabChain(S); }
   Tidx n_act() const { return S->comm->n; }
   std::vector<Telt> get_all_element() const {

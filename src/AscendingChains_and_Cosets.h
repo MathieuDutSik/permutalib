@@ -2,12 +2,14 @@
 #ifndef SRC_GAP_ASCENDINGCHAINS_AND_COSETS_H_
 #define SRC_GAP_ASCENDINGCHAINS_AND_COSETS_H_
 
+// clang-format off
 #include "TestingFct.h"
 #include <limits>
 #include <list>
 #include <unordered_set>
 #include <utility>
 #include <vector>
+// clang-format on
 
 /*
   Computation of ascending chain:
@@ -913,9 +915,9 @@ Kernel_LeftTransversal_Direct(StabChain<Telt, Tidx_label> const &G,
 }
 
 template <typename Telt, typename Tidx_label, typename Tint>
-void CheckRightCosets(StabChain<Telt, Tidx_label> const &G,
-                      StabChain<Telt, Tidx_label> const &H,
-                      std::vector<Telt> const& ListRightTransversal) {
+void KernelCheckRightCosets(StabChain<Telt, Tidx_label> const &G,
+                            StabChain<Telt, Tidx_label> const &H,
+                            std::vector<Telt> const& ListRightTransversal) {
   std::vector<Telt> l_elt_g = get_all_elements(G);
   std::vector<Telt> l_elt_h = get_all_elements(H);
   std::unordered_set<Telt> set_elt;
@@ -933,6 +935,52 @@ void CheckRightCosets(StabChain<Telt, Tidx_label> const &G,
     std::unordered_set<Telt> set;
     for (auto & e_h : l_elt_h) {
       Telt eProd = e_h * eElt;
+      if (set_elt.count(eProd) == 1) {
+        std::cerr << "The element eProd is already present\n";
+        throw PermutalibException{1};
+      }
+      set_elt.insert(eProd);
+      set.insert(eProd);
+    }
+    l_cos.push_back(set);
+  }
+  for (size_t i_cos=0; i_cos<l_cos.size(); i_cos++) {
+    for (size_t j_cos=i_cos+1; j_cos<l_cos.size(); j_cos++) {
+      size_t the_int = 0;
+      for (auto & val : l_cos[i_cos]) {
+        if (l_cos[j_cos].count(val) == 1) {
+          the_int += 1;
+        }
+      }
+      if (the_int > 0) {
+        std::cerr << "Intersection between i_cos=" << i_cos << " j_cos=" << j_cos << " has size " << the_int << "\n";
+        throw PermutalibException{1};
+      }
+    }
+  }
+}
+
+template <typename Telt, typename Tidx_label, typename Tint>
+void KernelCheckLeftCosets(StabChain<Telt, Tidx_label> const &G,
+                           StabChain<Telt, Tidx_label> const &H,
+                           std::vector<Telt> const& ListLeftTransversal) {
+  std::vector<Telt> l_elt_g = get_all_elements(G);
+  std::vector<Telt> l_elt_h = get_all_elements(H);
+  std::unordered_set<Telt> set_elt;
+  size_t ProdSize = l_elt_h.size() * ListLeftTransversal.size();
+  if (ProdSize != l_elt_g.size()) {
+    std::cerr << "|l_elt_g|=" << l_elt_g.size() << "\n";
+    std::cerr << "|l_elt_h|=" << l_elt_h.size() << "\n";
+    std::cerr << "|ListLeftTransversal|=" << ListLeftTransversal.size() << "\n";
+    std::cerr << "ProdSize=" << ProdSize << "\n";
+    std::cerr << "Discrepancy at the order level\n";
+    throw PermutalibException{1};
+  }
+  std::vector<std::unordered_set<Telt>> l_cos;
+  for (auto & eElt : ListLeftTransversal) {
+    std::unordered_set<Telt> set;
+    for (auto & e_h : l_elt_h) {
+      Telt eProd = eElt * e_h;
       if (set_elt.count(eProd) == 1) {
         std::cerr << "The element eProd is already present\n";
         throw PermutalibException{1};
@@ -1015,7 +1063,7 @@ public:
       for (size_t idx=0; idx<l_cos.size(); idx++) {
         std::cerr << " idx=" << idx << " eCos=" << l_cos[idx] << "\n";
       }
-      CheckRightCosets<Telt,Tidx_label,Tint>(chain[i_level + 1], chain[i_level], l_cos);
+      KernelCheckRightCosets<Telt,Tidx_label,Tint>(chain[i_level + 1], chain[i_level], l_cos);
 #endif
       result *= l_cos[0];
       ll_cos.push_back(l_cos);
@@ -1102,6 +1150,151 @@ public:
   }
 };
 
+
+
+template <typename Telt, typename Tidx_label, typename Tint>
+struct LeftCosetIterator {
+private:
+  std::vector<std::vector<Telt>> ll_cos;
+  std::vector<size_t> l_size;
+  std::vector<size_t> l_pos;
+  size_t n_level;
+  bool is_end;
+  Telt result;
+  void compute_position() {
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "compute_position, start\n";
+    std::cerr << "l_pos/l_size =";
+    for (size_t i_level=0; i_level<n_level; i_level++) {
+      std::cerr << " (" << l_pos[i_level] << "|" << l_size[i_level] << ")";
+    }
+    std::cerr << "\n";
+#endif
+    result = ll_cos[0][l_pos[0]];
+    for (size_t i_level=1; i_level<n_level; i_level++) {
+      result = ll_cos[i_level][l_pos[i_level]] * result;
+    }
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "compute_position, end\n";
+#endif
+  }
+  void single_increase() {
+    for (size_t i_level=0; i_level<n_level; i_level++) {
+      if (l_pos[i_level] < l_size[i_level] - 1) {
+        for (size_t j_level=0; j_level<i_level; j_level++) {
+          l_pos[j_level] = 0;
+        }
+        l_pos[i_level] += 1;
+        compute_position();
+        return;
+      }
+    }
+    is_end = true;
+  }
+public:
+  LeftCosetIterator(StabChain<Telt,Tidx_label> const& H, StabChain<Telt,Tidx_label> const& G) {
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "RightCosetIterator, begin constructor\n";
+#endif
+    std::vector<StabChain<Telt,Tidx_label>> chain = Kernel_AscendingChainPair<Telt,Tidx_label,Tint>(H, G);
+    n_level = chain.size() - 1;
+    result = G->comm->identity;
+    for (size_t i_level=0; i_level<n_level; i_level++) {
+      std::vector<Telt> l_cos = Kernel_LeftTransversal_Direct<Telt,Tidx_label,Tint>(chain[i_level + 1], chain[i_level]);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+      std::cerr << "i_level=" << i_level << " |l_cos|=" << l_cos.size()
+                << " ord1=" << Order<Telt,Tidx_label,Tint>(chain[i_level])
+                << " ord2=" << Order<Telt,Tidx_label,Tint>(chain[i_level + 1])
+                << "\n";
+      for (size_t idx=0; idx<l_cos.size(); idx++) {
+        std::cerr << " idx=" << idx << " eCos=" << l_cos[idx] << "\n";
+      }
+      KernelCheckLeftCosets<Telt,Tidx_label,Tint>(chain[i_level + 1], chain[i_level], l_cos);
+#endif
+      result *= l_cos[0];
+      ll_cos.push_back(l_cos);
+      l_size.push_back(l_cos.size());
+      l_pos.push_back(0);
+    }
+    is_end = false;
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "LeftCosetIterator, exit\n";
+#endif
+  }
+  LeftCosetIterator() {
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "LeftCosetIterator, end constructor\n";
+#endif
+    is_end = true;
+  }
+  Telt const& operator*() const {
+    return result;
+  }
+  bool operator==(const LeftCosetIterator<Telt,Tidx_label,Tint>& rci) const {
+    if (is_end == rci.is_end) {
+      return true;
+    }
+    if (is_end || rci.is_end) {
+      return false;
+    }
+    if (n_level != rci.n_level) {
+      return false;
+    }
+    for (size_t i_level=0; i_level<n_level; i_level++) {
+      if (l_pos[i_level] != rci.l_pos[i_level]) {
+        return false;
+      }
+    }
+    return true;
+  }
+  bool operator!=(const LeftCosetIterator<Telt,Tidx_label,Tint>& rci) const {
+    if (is_end == rci.is_end) {
+      return false;
+    }
+    if (is_end || rci.is_end) {
+      return true;
+    }
+    if (n_level != rci.n_level) {
+      return true;
+    }
+    for (size_t i_level=0; i_level<n_level; i_level++) {
+      if (l_pos[i_level] != rci.l_pos[i_level]) {
+        return true;
+      }
+    }
+    return false;
+  }
+  Telt operator++() {
+    single_increase();
+    return result;
+  }
+  Telt operator++(int) {
+    Telt tmp = result;
+    single_increase();
+    return tmp;
+  }
+};
+
+template <typename Telt, typename Tidx_label, typename Tint>
+struct KernelLeftCosets {
+private:
+  StabChain<Telt,Tidx_label> H;
+  StabChain<Telt,Tidx_label> G;
+public:
+  using iterator = LeftCosetIterator<Telt,Tidx_label,Tint>;
+  using const_iterator = LeftCosetIterator<Telt,Tidx_label,Tint>;
+  KernelLeftCosets(StabChain<Telt,Tidx_label> const& _H, StabChain<Telt,Tidx_label> const& _G) : H(_H), G(_G) {
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "KernelLeftCosets, constructor\n";
+#endif
+  }
+  LeftCosetIterator<Telt,Tidx_label,Tint> begin() const {
+    return LeftCosetIterator<Telt,Tidx_label,Tint>(H, G);
+  }
+  LeftCosetIterator<Telt,Tidx_label,Tint> end() const {
+    return LeftCosetIterator<Telt,Tidx_label,Tint>();
+  }
+};
 
 
 

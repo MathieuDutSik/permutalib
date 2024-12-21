@@ -6,7 +6,7 @@
 #PROGRAM	= GapCentralizerElt
 #PROGRAM	= SequenceSimplify
 #PROGRAM	= GapAscendingChainSubgroup
-PROGRAM	= TestRightCosets
+PROGRAM	= TestRightCosets TestLeftCosets
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
