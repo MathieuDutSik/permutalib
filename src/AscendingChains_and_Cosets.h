@@ -927,10 +927,10 @@ void KernelCheckRightCosets(StabChain<Telt, Tidx_label> const &G,
     throw PermutalibException{1};
   }
   std::vector<std::unordered_set<Telt>> l_cos;
-  for (auto & eElt : ListRightTransversal) {
+  for (auto & eCos : ListRightTransversal) {
     std::unordered_set<Telt> set;
     for (auto & e_h : l_elt_h) {
-      Telt eProd = e_h * eElt;
+      Telt eProd = e_h * eCos;
       if (set_elt.count(eProd) == 1) {
         std::cerr << "The element eProd is already present\n";
         throw PermutalibException{1};
@@ -1283,6 +1283,186 @@ std::vector<Telt> enumerate_left_cosets(StabChain<Telt,Tidx_label> const& H, Sta
   }
   return l_cos;
 }
+
+/*
+  Computes the information for G as the union of U g_i V.
+  The decomposition is from U = H0 \subset H1 \subset ... Hm = G.
+  For that we need to do decompositions of the kind
+  H(i+1) = union H(i) g_k
+ */
+template<typename Telt, typename Tidx_label>
+struct DoubleCosetSplitEntry {
+  StabChain<Telt,Tidx_label> grp;
+  std::vector<Telt> l_cos;
+  std::unordered_map<Telt, size_t> map;
+  bool is_normal;
+};
+
+template<typename Telt, typename Tidx_label>
+struct DoubleCosetComputer {
+  std::vector<DoubleCosetSplitEntry<Telt,Tidx_label>> levels;
+  size_t n_level;
+};
+
+template<typename Telt, typename Tidx_label, typename Tint>
+DoubleCosetComputer<Telt,Tidx_label> get_double_coset_computer(StabChain<Telt,Tidx_label> const& G, StabChain<Telt,Tidx_label> const& U) {
+  std::vector<StabChain<Telt,Tidx_label>> chain = Kernel_AscendingChainPair<Telt,Tidx_label,Tint>(U, G);
+  std::vector<DoubleCosetSplitEntry<Telt,Tidx_label>> levels;
+  size_t n_level = chain.size() - 1;
+  for (size_t i_level=0; i_level<n_level; i_level++) {
+    std::vector<Telt> l_cos = Kernel_RightTransversal_Direct<Telt,Tidx_label,Tint>(chain[i_level + 1], chain[i_level]);
+    std::unordered_map<Telt, size_t> map;
+    for (size_t u=0; u<l_cos.size(); u++) {
+      map[l_cos[u]] = u;
+    }
+    bool is_normal = Kernel_IsNormalSubgroup(chain[i_level + 1], chain[i_level]);
+    DoubleCosetSplitEntry<Telt,Tidx_label> level{chain[i_level], l_cos, map, is_normal};
+    levels.push_back(level);
+  }
+  return {levels, n_level};
+}
+
+template<typename Telt>
+struct DccEntry {
+  Telt cos;
+  std::vector<Telt> stab_gens;
+};
+
+template<typename Telt, typename Tidx_label, typename Tint>
+std::vector<DccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_label> const& dcse, DccEntry<Telt> const& de, bool const& is_last_level, Telt const& id) {
+  std::vector<std::vector<size_t>> list_perm;
+  for (auto &eGen : de.stab_gens) {
+    std::vector<size_t> perm;
+    Telt cos_img = de.cos * de.eGen;
+    for (auto & eCos : dcse.l_cos) {
+      Telt prod = eCos * cos_img;
+      Telt prod_can = MinimalElementCosetStabChain(dcse.grp, prod);
+      size_t pos = dcse.at(prod_can);
+      perm.push_back(pos);
+    }
+    list_perm.push_back(perm);
+  }
+  size_t n_cos = dcse.l_cos.size();
+  std::vector<DccEntry<Telt>> dcc_entries;
+  if (is_last_level) {
+    // No need to compute the stabilizers here.
+    Face f_done(n_cos);
+    for (size_t i=0; i<n_cos; i++) {
+      if (f_done[i] == 0) {
+        Telt new_cos = dcse.l_cos[i] * de.cos;
+        DccEntry<Telt> new_de{new_cos,{}};
+        dcc_entries.push_back(new_de);
+        std::vector<size_t> l_idx;
+        auto f_insert=[&](size_t const& pos) -> void {
+          l_idx.push_back(pos);
+          f_done[pos] = 1;
+        };
+        size_t start = 0;
+        f_insert(i);
+        while(true) {
+          size_t len = l_idx.size();
+          for (auto & perm : list_perm) {
+            for (size_t u=start; u<len; u++) {
+              size_t img = perm[l_idx[u]];
+              if (f_done[img] == 0) {
+                f_insert(img);
+              }
+            }
+          }
+          start = len;
+          if (start == l_idx.size()) {
+            break;
+          }
+        }
+      }
+    }
+  } else {
+    // We go to the next step, so we need the stabilizers
+    // Not sure what to do for in the normal case.
+    Face f_done(n_cos);
+    for (size_t i=0; i<n_cos; i++) {
+      if (f_done[i] == 0) {
+        Telt new_cos = dcse.l_cos[i] * de.cos;
+        std::unordered_set<Telt> set_gens;
+        std::vector<std::pair<size_t,Telt>> l_idx;
+        std::unordered_map<size_t, size_t> map;
+        auto f_insert=[&](std::pair<size_t,Telt> const& ent) -> void {
+          size_t len = l_idx.size();
+          l_idx.push_back(ent);
+          f_done[ent.first] = 1;
+          map[ent.first] = len;
+        };
+        size_t start = 0;
+        f_insert(std::pair<size_t,Telt>{i, id});
+        while(true) {
+          size_t len = l_idx.size();
+          size_t n_gen = list_perm.size();
+          for (size_t i_gen=0; i_gen<n_gen; i_gen++) {
+            std::vector<size_t> const& perm = list_perm[i_gen];
+            Telt const& eGen = de.stab_gens[i_gen];
+            for (size_t u=start; u<len; u++) {
+              size_t img = perm[l_idx[u].first];
+              Telt imgGen = l_idx[u].second * eGen;
+              if (f_done[img] == 0) {
+                f_insert(std::pair<size_t,Telt>{img, imgGen});
+              } else {
+                size_t pos = map[img];
+                Telt newStabElt = l_idx[pos].second * Inverse(imgGen);
+                set_gens.insert(newStabElt);
+              }
+            }
+          }
+          start = len;
+          if (start == l_idx.size()) {
+            break;
+          }
+        }
+        std::vector<Telt> vect_gens(set_gens.begin(), set_gens.end());
+        StabChainOptions<Tint, Telt> options = GetStandardOptions<Tint, Telt>(id);
+        StabChain<Telt,Tidx_label> g = StabChainOp_listgen<Telt, Tidx_label, Tint>(vect_gens, options);
+        std::vector<Telt> vect_gens_red = Kernel_SmallGeneratingSet<Telt,Tidx_label,Tint>(g);
+        DccEntry<Telt> new_de{new_cos, vect_gens_red};
+        dcc_entries.push_back(new_de);
+      }
+    }
+  }
+  return dcc_entries;
+}
+
+
+/*
+  Computes the information for G as the union of U g_i V.
+  The decomposition is from U = H0 \subset H1 \subset ... Hm = G.
+  For that we need to do decompositions of the kind 
+ */
+template<typename Telt, typename Tidx_label, typename Tint>
+std::vector<Telt> ComputeDoubleCoset(DoubleCosetComputer<Telt,Tidx_label> const& dcc, StabChain<Telt,Tidx_label> const& V) {
+  Telt id = V->comm->identity;
+  size_t n_level = dcc.n_level;
+  std::vector<Telt> small_gens = Kernel_SmallGeneratingSet<Telt,Tidx_label,Tint>(V);
+  DccEntry<Telt> de{id, small_gens};
+  std::vector<DccEntry<Telt>> l_de{de};
+  for (size_t i_level=0; i_level<n_level; i_level++) {
+    size_t j_level = n_level - 1 - i_level;
+    DoubleCosetSplitEntry<Telt,Tidx_label> const& dcse = dcc.levels[j_level];
+    std::vector<DccEntry<Telt>> new_l_de;
+    bool is_last_level = false;
+    if (j_level == 0) {
+      is_last_level = true;
+    }
+    for (auto & de: l_de) {
+      std::vector<DccEntry<Telt>> elist = span_double_cosets<Telt,Tidx_label,Tint>(dcse, de, is_last_level, id);
+      new_l_de.insert(new_l_de.end(), elist.begin(), elist.end());
+    }
+    l_de = new_l_de;
+  }
+  std::vector<Telt> l_cos;
+  for (auto & de: l_de) {
+    l_cos.push_back(de.cos);
+  }
+  return l_cos;
+}
+
 
 /*
 
