@@ -1298,30 +1298,6 @@ struct DoubleCosetSplitEntry {
   bool is_normal;
 };
 
-template<typename Telt, typename Tidx_label>
-struct DoubleCosetComputer {
-  std::vector<DoubleCosetSplitEntry<Telt,Tidx_label>> levels;
-  size_t n_level;
-};
-
-template<typename Telt, typename Tidx_label, typename Tint>
-DoubleCosetComputer<Telt,Tidx_label> get_double_coset_computer(StabChain<Telt,Tidx_label> const& G, StabChain<Telt,Tidx_label> const& U) {
-  std::vector<StabChain<Telt,Tidx_label>> chain = Kernel_AscendingChainPair<Telt,Tidx_label,Tint>(U, G);
-  std::vector<DoubleCosetSplitEntry<Telt,Tidx_label>> levels;
-  size_t n_level = chain.size() - 1;
-  for (size_t i_level=0; i_level<n_level; i_level++) {
-    std::vector<Telt> l_cos = Kernel_RightTransversal_Direct<Telt,Tidx_label,Tint>(chain[i_level + 1], chain[i_level]);
-    std::unordered_map<Telt, size_t> map;
-    for (size_t u=0; u<l_cos.size(); u++) {
-      map[l_cos[u]] = u;
-    }
-    bool is_normal = Kernel_IsNormalSubgroup(chain[i_level + 1], chain[i_level]);
-    DoubleCosetSplitEntry<Telt,Tidx_label> level{chain[i_level], l_cos, map, is_normal};
-    levels.push_back(level);
-  }
-  return {levels, n_level};
-}
-
 template<typename Telt>
 struct DccEntry {
   Telt cos;
@@ -1333,11 +1309,11 @@ std::vector<DccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_l
   std::vector<std::vector<size_t>> list_perm;
   for (auto &eGen : de.stab_gens) {
     std::vector<size_t> perm;
-    Telt cos_img = de.cos * de.eGen;
+    Telt cos_img = de.cos * eGen;
     for (auto & eCos : dcse.l_cos) {
       Telt prod = eCos * cos_img;
       Telt prod_can = MinimalElementCosetStabChain(dcse.grp, prod);
-      size_t pos = dcse.at(prod_can);
+      size_t pos = dcse.map.at(prod_can);
       perm.push_back(pos);
     }
     list_perm.push_back(perm);
@@ -1430,40 +1406,99 @@ std::vector<DccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_l
 }
 
 
-/*
-  Computes the information for G as the union of U g_i V.
-  The decomposition is from U = H0 \subset H1 \subset ... Hm = G.
-  For that we need to do decompositions of the kind 
- */
+
+
 template<typename Telt, typename Tidx_label, typename Tint>
-std::vector<Telt> ComputeDoubleCoset(DoubleCosetComputer<Telt,Tidx_label> const& dcc, StabChain<Telt,Tidx_label> const& V) {
-  Telt id = V->comm->identity;
-  size_t n_level = dcc.n_level;
-  std::vector<Telt> small_gens = Kernel_SmallGeneratingSet<Telt,Tidx_label,Tint>(V);
-  DccEntry<Telt> de{id, small_gens};
-  std::vector<DccEntry<Telt>> l_de{de};
-  for (size_t i_level=0; i_level<n_level; i_level++) {
-    size_t j_level = n_level - 1 - i_level;
-    DoubleCosetSplitEntry<Telt,Tidx_label> const& dcse = dcc.levels[j_level];
-    std::vector<DccEntry<Telt>> new_l_de;
-    bool is_last_level = false;
-    if (j_level == 0) {
-      is_last_level = true;
+struct InnerDoubleCosetComputer {
+private:
+  std::vector<DoubleCosetSplitEntry<Telt,Tidx_label>> levels;
+  size_t n_level;
+  Telt id;
+public:
+  InnerDoubleCosetComputer(StabChain<Telt,Tidx_label> const& G, StabChain<Telt,Tidx_label> const& U) {
+    std::vector<StabChain<Telt,Tidx_label>> chain = Kernel_AscendingChainPair<Telt,Tidx_label,Tint>(U, G);
+    n_level = chain.size() - 1;
+    id = U->comm->identity;
+    for (size_t i_level=0; i_level<n_level; i_level++) {
+      std::vector<Telt> l_cos = Kernel_RightTransversal_Direct<Telt,Tidx_label,Tint>(chain[i_level + 1], chain[i_level]);
+      std::unordered_map<Telt, size_t> map;
+      for (size_t u=0; u<l_cos.size(); u++) {
+        map[l_cos[u]] = u;
+      }
+      bool is_normal = Kernel_IsNormalSubgroup(chain[i_level + 1], chain[i_level]);
+      DoubleCosetSplitEntry<Telt,Tidx_label> level{chain[i_level], l_cos, map, is_normal};
+      levels.push_back(level);
     }
+  }
+  std::vector<Telt> double_cosets(StabChain<Telt,Tidx_label> const& V) const {
+    std::vector<Telt> small_gens = Kernel_SmallGeneratingSet<Telt,Tidx_label,Tint>(V);
+    DccEntry<Telt> de{id, small_gens};
+    std::vector<DccEntry<Telt>> l_de{de};
+    for (size_t i_level=0; i_level<n_level; i_level++) {
+      size_t j_level = n_level - 1 - i_level;
+      DoubleCosetSplitEntry<Telt,Tidx_label> const& dcse = levels[j_level];
+      std::vector<DccEntry<Telt>> new_l_de;
+      bool is_last_level = false;
+      if (j_level == 0) {
+        is_last_level = true;
+      }
+      for (auto & de: l_de) {
+        std::vector<DccEntry<Telt>> elist = span_double_cosets<Telt,Tidx_label,Tint>(dcse, de, is_last_level, id);
+        new_l_de.insert(new_l_de.end(), elist.begin(), elist.end());
+      }
+      l_de = new_l_de;
+    }
+    std::vector<Telt> l_cos;
     for (auto & de: l_de) {
-      std::vector<DccEntry<Telt>> elist = span_double_cosets<Telt,Tidx_label,Tint>(dcse, de, is_last_level, id);
-      new_l_de.insert(new_l_de.end(), elist.begin(), elist.end());
+      l_cos.push_back(de.cos);
     }
-    l_de = new_l_de;
+    return l_cos;
   }
-  std::vector<Telt> l_cos;
-  for (auto & de: l_de) {
-    l_cos.push_back(de.cos);
+};
+
+
+template<typename Telt, typename Tidx_label>
+void KernelCheckDoubleCosets(StabChain<Telt,Tidx_label> const& G, StabChain<Telt,Tidx_label> const& U, StabChain<Telt,Tidx_label> const& V, std::vector<Telt> const& list_dcc) {
+  std::vector<Telt> l_elt_g = get_all_elements(G);
+  std::vector<Telt> l_elt_u = get_all_elements(U);
+  std::vector<Telt> l_elt_v = get_all_elements(V);
+  std::vector<std::unordered_set<Telt>> listfull_dcc;
+  size_t n_elt_dcc = 0;
+  for (auto & dcc: list_dcc) {
+    std::unordered_set<Telt> set;
+    for (auto & e_u: l_elt_u) {
+      for (auto & e_v: l_elt_v) {
+        Telt full_elt = e_u * dcc * e_v;
+        set.insert(full_elt);
+      }
+    }
+    n_elt_dcc += set.size();
+    listfull_dcc.push_back(set);
   }
-  return l_cos;
+  for (size_t i_dcc=0; i_dcc<list_dcc.size(); i_dcc++) {
+    for (size_t j_dcc=i_dcc+1; j_dcc<list_dcc.size(); j_dcc++) {
+      size_t the_int = 0;
+      for (auto & val : listfull_dcc[i_dcc]) {
+        if (listfull_dcc[j_dcc].count(val)) {
+          the_int += 1;
+        }
+      }
+      if (the_int > 0) {
+        std::cerr << "Non-trivial insersection between i_dcc=" << i_dcc << " and j_dcc=" << j_dcc << " the_int=" << the_int << "\n";
+        throw PermutalibException{1};
+      }
+    }
+  }
+  if (n_elt_dcc != l_elt_g.size()) {
+    std::cerr << "n_elt_dcc=" << n_elt_dcc << " |l_elt_g|=" << l_elt_g.size() << "\n";
+    std::cerr << "The double cosets do not cover the full group\n";
+    throw PermutalibException{1};
+  }
 }
 
 
+
+  
 /*
 
 #############################################################################

@@ -106,6 +106,21 @@ Telt RandomElement(const std::vector<Telt> &LGen, const Telt &id) {
   return eElt;
 }
 
+template <typename Telt, typename Tint> struct Group;
+
+template <typename Telt, typename Tint>
+struct KernelDoubleCosetComputer {
+private:
+  using Tidx_label = uint16_t;
+  InnerDoubleCosetComputer<Telt, Tidx_label, Tint> inner;
+public:
+  KernelDoubleCosetComputer(StabChain<Telt,Tidx_label> const& G, StabChain<Telt,Tidx_label> const& U) : inner(G, U) {
+  }
+  std::vector<Telt> double_cosets(Group<Telt,Tint> const& V) const {
+    return inner.double_cosets(V.stab_chain());
+  }
+};
+
 template <typename Telt_inp, typename Tint_inp> struct Group {
 public:
   // dependent types
@@ -115,6 +130,7 @@ public:
   using Tidx_label = uint16_t;
   using RightCosets = KernelRightCosets<Telt,Tidx_label,Tint>;
   using LeftCosets = KernelLeftCosets<Telt,Tidx_label,Tint>;
+  using DoubleCosetComputer = KernelDoubleCosetComputer<Telt,Tint>;
 private:
   StabChain<Telt, Tidx_label> S;
   Tint size_tint;
@@ -362,6 +378,9 @@ public:
   }
   LeftCosets left_cosets(const Group<Telt,Tint>& H) const {
     return KernelLeftCosets<Telt,Tidx_label,Tint>(H.S, S);
+  }
+  DoubleCosetComputer double_coset_computer(const Group<Telt,Tint>& U) const {
+    return KernelDoubleCosetComputer<Telt,Tint>(S, U.S);
   }
   std::vector<Telt> get_all_right_cosets(const Group<Telt,Tint>& H) const {
     return enumerate_right_cosets<Telt,Tidx_label,Tint>(H.S, S);
