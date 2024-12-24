@@ -1317,11 +1317,16 @@ std::vector<DccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_l
   auto f_can=[&](Telt const& u) -> Telt {
     return MinimalElementCosetStabChain(dcse.grp, u);
   };
+  std::vector<Telt> stab_gens_std;
+  Telt cos_inv = Inverse(de.cos);
   for (auto &eGen : de.stab_gens) {
+    Telt gen_std = de.cos * eGen * cos_inv;
+    stab_gens_std.push_back(gen_std);
+  }
+  for (auto &eGen : stab_gens_std) {
     std::vector<size_t> perm;
-    Telt cos_img = de.cos * eGen;
     for (auto & eCos : dcse.l_cos) {
-      Telt prod = eCos * cos_img;
+      Telt prod = eCos * eGen;
       Telt prod_can = f_can(prod);
       size_t pos = dcse.map.at(prod_can);
       perm.push_back(pos);
@@ -1449,21 +1454,32 @@ std::vector<DccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_l
           }
         }
         std::vector<Telt> vect_gens(set_gens.begin(), set_gens.end());
-        StabChainOptions<Tint, Telt> options = GetStandardOptions<Tint, Telt>(id);
-        StabChain<Telt,Tidx_label> g = StabChainOp_listgen<Telt, Tidx_label, Tint>(vect_gens, options);
+        auto get_reduced_vect_gens=[&]() -> std::vector<Telt> {
+          if (vect_gens.size() > 2) {
+            StabChainOptions<Tint, Telt> options = GetStandardOptions<Tint, Telt>(id);
+            StabChain<Telt,Tidx_label> g = StabChainOp_listgen<Telt, Tidx_label, Tint>(vect_gens, options);
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-        StabChain<Telt,Tidx_label> g_de_stabgens = StabChainOp_listgen<Telt, Tidx_label, Tint>(de.stab_gens, options);
-        Tint ord_g_de_sg = Order<Telt,Tidx_label,Tint>(g_de_stabgens);
-        Tint ord_g = Order<Telt,Tidx_label,Tint>(g);
-        Tint ord_l_cos = l_idx.size();
-        std::cerr << "span_double_cosets |vect_gens|=" << vect_gens.size() << " |g|=" << ord_g << " |l_cos|=" << ord_l_cos << " |de.stab_gens|=" << ord_g_de_sg << "\n";
-        if (ord_g * ord_l_cos != ord_g_de_sg) {
-          std::cerr << "incoherence of order : ord_g_de_sg=" << ord_g_de_sg << "\n";
-          throw PermutalibException{1};
-        }
+            StabChain<Telt,Tidx_label> g_de_stabgens = StabChainOp_listgen<Telt, Tidx_label, Tint>(de.stab_gens, options);
+            Tint ord_g_de_sg = Order<Telt,Tidx_label,Tint>(g_de_stabgens);
+            Tint ord_g = Order<Telt,Tidx_label,Tint>(g);
+            Tint ord_l_cos = l_idx.size();
+            std::cerr << "ACC: span_double_cosets |vect_gens|=" << vect_gens.size() << " |g|=" << ord_g << " |l_cos|=" << ord_l_cos << " |de.stab_gens|=" << ord_g_de_sg << "\n";
+            if (ord_g * ord_l_cos != ord_g_de_sg) {
+              std::cerr << "ACC: incoherence of order : ord_g_de_sg=" << ord_g_de_sg << "\n";
+              throw PermutalibException{1};
+            }
 #endif
-        std::vector<Telt> vect_gens_red = Kernel_SmallGeneratingSet<Telt,Tidx_label,Tint>(g);
-        DccEntry<Telt> new_de{new_cos_can, vect_gens_red};
+            std::vector<Telt> vect_gens_red = Kernel_SmallGeneratingSet<Telt,Tidx_label,Tint>(g);
+            return vect_gens_red;
+          } else {
+            return vect_gens;
+          }
+        };
+        std::vector<Telt> v_gens = get_reduced_vect_gens();
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+        std::cerr << "ACC: |v_gens|=" << v_gens.size() << "\n";
+#endif
+        DccEntry<Telt> new_de{new_cos_can, v_gens};
         dcc_entries.push_back(new_de);
       }
     }
