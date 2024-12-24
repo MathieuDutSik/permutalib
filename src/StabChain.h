@@ -1920,6 +1920,12 @@ bool IsFixedStabilizer(StabChain<Telt, Tidx_label> const &S,
   return true;
 }
 
+
+
+/*
+  Given an element g in or not in the group, find the element of
+  the coset H g that is minimal.
+ */
 template <typename Telt, typename Tidx_label>
 Telt MinimalElementCosetStabChain(StabChain<Telt, Tidx_label> const &Stot,
                                   Telt const &g) {

@@ -736,7 +736,7 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_All(AscendingEn
   std::cerr << "|ACC: Kernel_AscendingChain_Gens, failure|=" << time << "\n";
 #endif
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-  std::cerr << "ACC: Failing to find an intermediate subgroup\n";
+  std::cerr << "ACC: Failing to find an intermediate subgroup |H|=" << ent_H.ord << " |G|=" << ent_G.ord << "\n";
 #endif
   //
   //
@@ -793,7 +793,11 @@ std::vector<StabChain<Telt, Tidx_label>> Kernel_AscendingChainPair(StabChain<Tel
   while(true) {
     auto get_intermediate=[&]() -> std::optional<StabChain<Telt, Tidx_label>> {
       Tint index = l_grp[pos+1].ord / l_grp[pos].ord;
-      if (IsPrime_loc(index)) { // Cannot improve when the index is prime
+      bool is_prime = IsPrime_loc(index);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+      std::cerr << "ACC: index=" << index << " is_prime=" << is_prime << "\n";
+#endif
+      if (is_prime) { // Cannot improve when the index is prime
         return {};
       }
       return Kernel_AscendingChain_All<Telt,Tidx_label,Tint>(l_grp[pos], l_grp[pos+1]);
@@ -1307,26 +1311,51 @@ struct DccEntry {
 template<typename Telt, typename Tidx_label, typename Tint>
 std::vector<DccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_label> const& dcse, DccEntry<Telt> const& de, bool const& is_last_level, Telt const& id) {
   std::vector<std::vector<size_t>> list_perm;
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "---------------- span_double_cosets |dcse.grp|=" << Order<Telt,Tidx_label,Tint>(dcse.grp) << " ----------------\n";
+#endif
+  auto f_can=[&](Telt const& u) -> Telt {
+    return MinimalElementCosetStabChain(dcse.grp, u);
+  };
   for (auto &eGen : de.stab_gens) {
     std::vector<size_t> perm;
     Telt cos_img = de.cos * eGen;
     for (auto & eCos : dcse.l_cos) {
       Telt prod = eCos * cos_img;
-      Telt prod_can = MinimalElementCosetStabChain(dcse.grp, prod);
+      Telt prod_can = f_can(prod);
       size_t pos = dcse.map.at(prod_can);
       perm.push_back(pos);
     }
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "perm=[";
+    for (size_t i=0; i<perm.size(); i++) {
+      if (i>0)
+        std::cerr << ",";
+      std::cerr << perm[i];
+    }
+    std::cerr << "]\n";
+#endif
     list_perm.push_back(perm);
   }
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "span_double_cosets |list_perm|=" << list_perm.size() << "\n";
+#endif
   size_t n_cos = dcse.l_cos.size();
   std::vector<DccEntry<Telt>> dcc_entries;
   if (is_last_level) {
     // No need to compute the stabilizers here.
     Face f_done(n_cos);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "is_last_level=true n_cos=" << n_cos << "\n";
+#endif
     for (size_t i=0; i<n_cos; i++) {
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+      std::cerr << "is_last_level=true i=" << i << "/" << n_cos << "\n";
+#endif
       if (f_done[i] == 0) {
         Telt new_cos = dcse.l_cos[i] * de.cos;
-        DccEntry<Telt> new_de{new_cos,{}};
+        Telt new_cos_can = f_can(new_cos);
+        DccEntry<Telt> new_de{new_cos_can,{}};
         dcc_entries.push_back(new_de);
         std::vector<size_t> l_idx;
         auto f_insert=[&](size_t const& pos) -> void {
@@ -1337,6 +1366,9 @@ std::vector<DccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_l
         f_insert(i);
         while(true) {
           size_t len = l_idx.size();
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+          std::cerr << "is_last_level=true start=" << start << " len=" << len << "\n";
+#endif
           for (auto & perm : list_perm) {
             for (size_t u=start; u<len; u++) {
               size_t img = perm[l_idx[u]];
@@ -1356,10 +1388,30 @@ std::vector<DccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_l
     // We go to the next step, so we need the stabilizers
     // Not sure what to do for in the normal case.
     Face f_done(n_cos);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "n_cos=" << n_cos << "\n";
+#endif
     for (size_t i=0; i<n_cos; i++) {
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+      std::cerr << "i=" << i << "/" << n_cos << "\n";
+#endif
       if (f_done[i] == 0) {
         Telt new_cos = dcse.l_cos[i] * de.cos;
+        Telt new_cos_can = f_can(new_cos);
         std::unordered_set<Telt> set_gens;
+        auto f_insert_gen=[&](Telt const& eGen) -> void {
+          if (!eGen.isIdentity()) {
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+            Telt imgElt = new_cos_can * eGen;
+            Telt imgElt_can = f_can(imgElt);
+            if (imgElt_can != new_cos_can) {
+              std::cerr << "The element new_cos_can is not preserved\n";
+              throw PermutalibException{1};
+            }
+#endif
+            set_gens.insert(eGen);
+          }
+        };
         std::vector<std::pair<size_t,Telt>> l_idx;
         std::unordered_map<size_t, size_t> map;
         auto f_insert=[&](std::pair<size_t,Telt> const& ent) -> void {
@@ -1373,6 +1425,9 @@ std::vector<DccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_l
         while(true) {
           size_t len = l_idx.size();
           size_t n_gen = list_perm.size();
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+          std::cerr << "is_last_level=false start=" << start << " len=" << len << "\n";
+#endif
           for (size_t i_gen=0; i_gen<n_gen; i_gen++) {
             std::vector<size_t> const& perm = list_perm[i_gen];
             Telt const& eGen = de.stab_gens[i_gen];
@@ -1384,7 +1439,7 @@ std::vector<DccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_l
               } else {
                 size_t pos = map[img];
                 Telt newStabElt = l_idx[pos].second * Inverse(imgGen);
-                set_gens.insert(newStabElt);
+                f_insert_gen(newStabElt);
               }
             }
           }
@@ -1396,12 +1451,26 @@ std::vector<DccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_l
         std::vector<Telt> vect_gens(set_gens.begin(), set_gens.end());
         StabChainOptions<Tint, Telt> options = GetStandardOptions<Tint, Telt>(id);
         StabChain<Telt,Tidx_label> g = StabChainOp_listgen<Telt, Tidx_label, Tint>(vect_gens, options);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+        StabChain<Telt,Tidx_label> g_de_stabgens = StabChainOp_listgen<Telt, Tidx_label, Tint>(de.stab_gens, options);
+        Tint ord_g_de_sg = Order<Telt,Tidx_label,Tint>(g_de_stabgens);
+        Tint ord_g = Order<Telt,Tidx_label,Tint>(g);
+        Tint ord_l_cos = l_idx.size();
+        std::cerr << "span_double_cosets |vect_gens|=" << vect_gens.size() << " |g|=" << ord_g << " |l_cos|=" << ord_l_cos << " |de.stab_gens|=" << ord_g_de_sg << "\n";
+        if (ord_g * ord_l_cos != ord_g_de_sg) {
+          std::cerr << "incoherence of order : ord_g_de_sg=" << ord_g_de_sg << "\n";
+          throw PermutalibException{1};
+        }
+#endif
         std::vector<Telt> vect_gens_red = Kernel_SmallGeneratingSet<Telt,Tidx_label,Tint>(g);
-        DccEntry<Telt> new_de{new_cos, vect_gens_red};
+        DccEntry<Telt> new_de{new_cos_can, vect_gens_red};
         dcc_entries.push_back(new_de);
       }
     }
   }
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "Returning |dcc_entries|=" << dcc_entries.size() << "\n";
+#endif
   return dcc_entries;
 }
 
@@ -1418,6 +1487,9 @@ public:
   InnerDoubleCosetComputer(StabChain<Telt,Tidx_label> const& G, StabChain<Telt,Tidx_label> const& U) {
     std::vector<StabChain<Telt,Tidx_label>> chain = Kernel_AscendingChainPair<Telt,Tidx_label,Tint>(U, G);
     n_level = chain.size() - 1;
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "InnerDoubleCosetComputer, n_level=" << n_level << "\n";
+#endif
     id = U->comm->identity;
     for (size_t i_level=0; i_level<n_level; i_level++) {
       std::vector<Telt> l_cos = Kernel_RightTransversal_Direct<Telt,Tidx_label,Tint>(chain[i_level + 1], chain[i_level]);
@@ -1426,26 +1498,45 @@ public:
         map[l_cos[u]] = u;
       }
       bool is_normal = Kernel_IsNormalSubgroup(chain[i_level + 1], chain[i_level]);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+      std::cerr << "i_level=" << i_level
+                << " ord1=" << Order<Telt,Tidx_label,Tint>(chain[i_level])
+                << " ord2=" << Order<Telt,Tidx_label,Tint>(chain[i_level + 1])
+                << " |l_cos|=" << l_cos.size() << " is_normal=" << is_normal << "\n";
+#endif
       DoubleCosetSplitEntry<Telt,Tidx_label> level{chain[i_level], l_cos, map, is_normal};
       levels.push_back(level);
     }
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "---------------------------------------------------------\n";
+#endif
   }
   std::vector<Telt> double_cosets(StabChain<Telt,Tidx_label> const& V) const {
     std::vector<Telt> small_gens = Kernel_SmallGeneratingSet<Telt,Tidx_label,Tint>(V);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "double_cosets |V|=" << Order<Telt,Tidx_label,Tint>(V) << " |small_gens|=" << small_gens.size() << "\n";
+#endif
     DccEntry<Telt> de{id, small_gens};
     std::vector<DccEntry<Telt>> l_de{de};
     for (size_t i_level=0; i_level<n_level; i_level++) {
       size_t j_level = n_level - 1 - i_level;
       DoubleCosetSplitEntry<Telt,Tidx_label> const& dcse = levels[j_level];
-      std::vector<DccEntry<Telt>> new_l_de;
       bool is_last_level = false;
       if (j_level == 0) {
         is_last_level = true;
       }
+      is_last_level = false;
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+      std::cerr << "i_level=" << i_level << " is_last_level=" << is_last_level << " |l_de|=" << l_de.size() << "\n";
+#endif
+      std::vector<DccEntry<Telt>> new_l_de;
       for (auto & de: l_de) {
         std::vector<DccEntry<Telt>> elist = span_double_cosets<Telt,Tidx_label,Tint>(dcse, de, is_last_level, id);
         new_l_de.insert(new_l_de.end(), elist.begin(), elist.end());
       }
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+      std::cerr << "|new_l_de|=" << new_l_de.size() << "\n";
+#endif
       l_de = new_l_de;
     }
     std::vector<Telt> l_cos;
@@ -1497,8 +1588,6 @@ void KernelCheckDoubleCosets(StabChain<Telt,Tidx_label> const& G, StabChain<Telt
 }
 
 
-
-  
 /*
 
 #############################################################################

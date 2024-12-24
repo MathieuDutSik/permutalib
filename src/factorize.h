@@ -6,6 +6,10 @@
 #include <utility>
 #include <vector>
 
+#ifdef DEBUG
+#define DEBUG_FACTORIZE
+#endif
+
 namespace permutalib {
 
 template <typename T> T gcd_loc(T a, T b) {
@@ -63,6 +67,9 @@ template <typename T> std::vector<T> successive_division_factorize_loc(T const &
 
 template <typename T> bool successive_division_isprime_loc(T const &N) {
   T pos = 2;
+  if (N == pos) {
+    return true;
+  }
   while (true) {
     T res = N % pos;
     if (res == 0)

@@ -37,6 +37,7 @@ int main(int argc, char *argv[]) {
     //
     DoubleCosetComputer dcc = eG.double_coset_computer(eU);
     std::vector<Telt> list_dcc = dcc.double_cosets(eV);
+    std::cerr << "We have list_dcc, |list_dcc|=" << list_dcc.size() << "\n";
     KernelCheckDoubleCosets(eG.stab_chain(), eU.stab_chain(), eV.stab_chain(), list_dcc);
     //
     std::cerr << "CPP Normal completion of the program\n";
