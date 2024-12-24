@@ -113,11 +113,20 @@ struct KernelDoubleCosetComputer {
 private:
   using Tidx_label = uint16_t;
   InnerDoubleCosetComputer<Telt, Tidx_label, Tint> inner;
+  bool option;
 public:
-  KernelDoubleCosetComputer(StabChain<Telt,Tidx_label> const& G, StabChain<Telt,Tidx_label> const& U) : inner(G, U) {
+  KernelDoubleCosetComputer(StabChain<Telt,Tidx_label> const& G, StabChain<Telt,Tidx_label> const& U, bool const& _option) : inner(G, U), option(_option) {
   }
-  std::vector<Telt> double_cosets(Group<Telt,Tint> const& V) const {
-    return inner.double_cosets(V.stab_chain());
+  std::vector<Telt> double_cosets(Group<Telt,Tint> const& U_or_V) const {
+    if (option) {
+      return inner.double_cosets(U_or_V.stab_chain());
+    } else {
+      std::vector<Telt> l_cos;
+      for (auto & eCos: inner.double_cosets(U_or_V.stab_chain())) {
+        l_cos.push_back(Inverse(eCos));
+      }
+      return l_cos;
+    }
   }
 };
 
@@ -379,14 +388,17 @@ public:
   LeftCosets left_cosets(const Group<Telt,Tint>& H) const {
     return KernelLeftCosets<Telt,Tidx_label,Tint>(H.S, S);
   }
-  DoubleCosetComputer double_coset_computer(const Group<Telt,Tint>& U) const {
-    return KernelDoubleCosetComputer<Telt,Tint>(S, U.S);
-  }
   std::vector<Telt> get_all_right_cosets(const Group<Telt,Tint>& H) const {
     return enumerate_right_cosets<Telt,Tidx_label,Tint>(H.S, S);
   }
   std::vector<Telt> get_all_left_cosets(const Group<Telt,Tint>& H) const {
     return enumerate_left_cosets<Telt,Tidx_label,Tint>(H.S, S);
+  }
+  DoubleCosetComputer double_coset_computer_v(const Group<Telt,Tint>& U) const {
+    return KernelDoubleCosetComputer<Telt,Tint>(S, U.S, false);
+  }
+  DoubleCosetComputer double_coset_computer_u(const Group<Telt,Tint>& V) const {
+    return KernelDoubleCosetComputer<Telt,Tint>(S, V.S, true);
   }
   // Normal structure
   bool IsNormalSubgroup(const Group<Telt, Tint> &U) const {
