@@ -35,10 +35,15 @@ int main(int argc, char *argv[]) {
     Tint size_V = eV.size();
     std::cerr << "size_G=" << size_G << " size_U=" << size_U << " size_V=" << size_V << "\n";
     //
-    DoubleCosetComputer dcc = eG.double_coset_computer_v(eU);
-    std::vector<Telt> list_dcc = dcc.double_cosets(eV);
-    std::cerr << "We have list_dcc, |list_dcc|=" << list_dcc.size() << "\n";
-    KernelCheckDoubleCosets(eG.stab_chain(), eU.stab_chain(), eV.stab_chain(), list_dcc);
+    DoubleCosetComputer dcc_v = eG.double_coset_computer_v(eU);
+    std::vector<Telt> list_dcc1 = dcc_v.double_cosets(eV);
+    std::cerr << "We have list_dcc1, |list_dcc1|=" << list_dcc1.size() << "\n";
+    KernelCheckDoubleCosets(eG.stab_chain(), eU.stab_chain(), eV.stab_chain(), list_dcc1);
+    //
+    DoubleCosetComputer dcc_u = eG.double_coset_computer_u(eV);
+    std::vector<Telt> list_dcc2 = dcc_u.double_cosets(eU);
+    std::cerr << "We have list_dcc2, |list_dcc2|=" << list_dcc2.size() << "\n";
+    KernelCheckDoubleCosets(eG.stab_chain(), eU.stab_chain(), eV.stab_chain(), list_dcc2);
     //
     std::cerr << "CPP Normal completion of the program\n";
   } catch (permutalib::PermutalibException const &e) {

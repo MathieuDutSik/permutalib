@@ -395,10 +395,10 @@ public:
     return enumerate_left_cosets<Telt,Tidx_label,Tint>(H.S, S);
   }
   DoubleCosetComputer double_coset_computer_v(const Group<Telt,Tint>& U) const {
-    return KernelDoubleCosetComputer<Telt,Tint>(S, U.S, false);
+    return KernelDoubleCosetComputer<Telt,Tint>(S, U.S, true);
   }
   DoubleCosetComputer double_coset_computer_u(const Group<Telt,Tint>& V) const {
-    return KernelDoubleCosetComputer<Telt,Tint>(S, V.S, true);
+    return KernelDoubleCosetComputer<Telt,Tint>(S, V.S, false);
   }
   // Normal structure
   bool IsNormalSubgroup(const Group<Telt, Tint> &U) const {
