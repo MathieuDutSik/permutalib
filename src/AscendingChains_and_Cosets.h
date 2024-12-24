@@ -1355,7 +1355,7 @@ std::vector<DccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_l
 #endif
     for (size_t i=0; i<n_cos; i++) {
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-      std::cerr << "is_last_level=true i=" << i << "/" << n_cos << "\n";
+      std::cerr << "i=" << i << "/" << n_cos << "\n";
 #endif
       if (f_done[i] == 0) {
         Telt new_cos = dcse.l_cos[i] * de.cos;
@@ -1541,7 +1541,6 @@ public:
       if (j_level == 0) {
         is_last_level = true;
       }
-      is_last_level = false;
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
       std::cerr << "i_level=" << i_level << " is_last_level=" << is_last_level << " |l_de|=" << l_de.size() << "\n";
 #endif
