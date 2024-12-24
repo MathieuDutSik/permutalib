@@ -11,21 +11,20 @@ PROGRAM	= GapComputeDoubleCosets
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
-#CC		= icpc -std=c++11 -Wall -g -O2
-#CC		= clang++ -Weverything -std=c++11
-#CC		= g++ -std=c++11 -Wall -g -O2
-#CC		= g++ -std=c++17 -Wall -g -O2
+#CC		= g++ -std=c++11 -Wall -Wextra -g -O2
+CC		= g++ -std=c++17 -Wall -Wextra -g -O2
 #          For GCC
 #CC             = g++ -std=c++17 -Wall -Wextra -O3 -g -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=bounds-strict -fsanitize=alignment
 #          For CLANG
-CC             = g++ -std=c++17 -Wall -Wextra -g -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=alignment
+#CC             = g++ -std=c++17 -Wall -Wextra -g -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=alignment
 
 
 NOLINKFLAG 	= -c
 OUTPUTFLAG 	= -o
 
 #CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK -DPERMUTALIB_TRACK_METHOD -DDEBUG_ASCENDING_CHAINS_COSETS -DDEBUG_BLOCK_SYSTEM
-CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK -DPERMUTALIB_TRACK_METHOD -DDEBUG_ASCENDING_CHAINS_COSETS
+#CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK -DPERMUTALIB_TRACK_METHOD -DDEBUG_ASCENDING_CHAINS_COSETS
+CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK -DPERMUTALIB_TRACK_METHOD
 #CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK -DPERMUTALIB_TRACK_METHOD -DDEBUG
 #CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK -DPERMUTALIB_TRACK_METHOD -DDEBUG_ASCENDING_CHAINS_COSETS -DDEBUG_NORMAL_STRUCTURE -DTIMINGS_ASCENDING_CHAINS_COSETS
 #CLOCAL          = -DPERMUTALIB_BLOCKING_SANITY_CHECK -DPERMUTALIB_TRACK_METHOD

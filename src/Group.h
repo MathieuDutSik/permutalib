@@ -400,6 +400,15 @@ public:
   DoubleCosetComputer double_coset_computer_u(const Group<Telt,Tint>& V) const {
     return KernelDoubleCosetComputer<Telt,Tint>(S, V.S, false);
   }
+  std::vector<Telt> double_cosets(const Group<Telt,Tint>& U, const Group<Telt,Tint>& V) const {
+    if (U.size_tint > V.size_tint) {
+      KernelDoubleCosetComputer<Telt,Tint> dcc_v(S, U.S, true);
+      return dcc_v.double_cosets(V);
+    } else {
+      KernelDoubleCosetComputer<Telt,Tint> dcc_u(S, V.S, false);
+      return dcc_u.double_cosets(U);
+    }
+  }
   // Normal structure
   bool IsNormalSubgroup(const Group<Telt, Tint> &U) const {
     return Kernel_IsNormalSubgroup(S, U.S);
