@@ -38,7 +38,6 @@ Face FaceAct(Face const& f, Telt const& u) {
   return fret;
 }
 
-
 bool TestEqual(Face const& f1, Face const& f2) {
   size_t len = f1.size();
   if (len != f2.size())
@@ -48,7 +47,6 @@ bool TestEqual(Face const& f1, Face const& f2) {
       return false;
   return true;
 }
-
 
 Face ReadFace(std::istream &is) {
   if (!is.good()) {

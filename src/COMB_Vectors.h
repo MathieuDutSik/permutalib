@@ -11,18 +11,6 @@
 
 namespace permutalib {
 
-/*
-template<typename T>
-int PositionVect(std::vector<T> const& V, T const& eVal)
-{
-  size_t len=V.size();
-  for (size_t i=0; i<len; i++)
-    if (V[i] == eVal)
-      return i;
-  return -1;
-}
-*/
-
 template <typename T, typename Tui>
 Tui PositionVect_ui(std::vector<T> const &V, T const &eVal) {
   Tui len = Tui(V.size());

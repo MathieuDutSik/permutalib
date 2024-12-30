@@ -259,7 +259,7 @@ Telt RestrictedPermNC(Telt const &x, std::vector<int> const &listRes) {
   }
   std::vector<Tidx> eList(nbRes);
   for (size_t iRes = 0; iRes < nbRes; iRes++) {
-    Tidx ePt = listRes[iRes];
+    Tidx const& ePt = listRes[iRes];
     Tidx ePtImg = x.at(ePt);
     Tidx iResImg = MapRev[ePtImg];
     eList[iRes] = iResImg;

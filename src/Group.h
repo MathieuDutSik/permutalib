@@ -409,6 +409,10 @@ public:
       return dcc_u.double_cosets(U);
     }
   }
+  std::vector<DccEntry<Telt>> double_cosets_and_stabilizers(const Group<Telt,Tint>& U, const Group<Telt,Tint>& V) const {
+    KernelDoubleCosetComputer<Telt,Tint> dcc_v(S, U.S, true);
+    return dcc_v.double_cosets_and_stabilizers(V);
+  }
   // Normal structure
   bool IsNormalSubgroup(const Group<Telt, Tint> &U) const {
     return Kernel_IsNormalSubgroup(S, U.S);

@@ -1309,7 +1309,7 @@ struct DccEntry {
 };
 
 template<typename Telt, typename Tidx_label, typename Tint>
-std::vector<DccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_label> const& dcse, DccEntry<Telt> const& de, bool const& is_last_level, Telt const& id) {
+std::vector<DccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_label> const& dcse, DccEntry<Telt> const& de, bool const& compute_stabs, Telt const& id) {
   std::vector<std::vector<size_t>> list_perm;
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
   std::cerr << "---------------- span_double_cosets |dcse.grp|=" << Order<Telt,Tidx_label,Tint>(dcse.grp) << " ----------------\n";
@@ -1347,7 +1347,7 @@ std::vector<DccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_l
 #endif
   size_t n_cos = dcse.l_cos.size();
   std::vector<DccEntry<Telt>> dcc_entries;
-  if (is_last_level) {
+  if (!compute_stabs) {
     // No need to compute the stabilizers here.
     Face f_done(n_cos);
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
@@ -1372,7 +1372,7 @@ std::vector<DccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_l
         while(true) {
           size_t len = l_idx.size();
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-          std::cerr << "is_last_level=true start=" << start << " len=" << len << "\n";
+          std::cerr << "compute_stabs=false start=" << start << " len=" << len << "\n";
 #endif
           for (auto & perm : list_perm) {
             for (size_t u=start; u<len; u++) {
@@ -1431,7 +1431,7 @@ std::vector<DccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_l
           size_t len = l_idx.size();
           size_t n_gen = list_perm.size();
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-          std::cerr << "is_last_level=false start=" << start << " len=" << len << "\n";
+          std::cerr << "compute_stabs=true start=" << start << " len=" << len << "\n";
 #endif
           for (size_t i_gen=0; i_gen<n_gen; i_gen++) {
             std::vector<size_t> const& perm = list_perm[i_gen];
@@ -1527,7 +1527,7 @@ public:
     std::cerr << "---------------------------------------------------------\n";
 #endif
   }
-  std::vector<Telt> double_cosets(StabChain<Telt,Tidx_label> const& V) const {
+  std::vector<DccEntry<Telt>> double_cosets_kernel(StabChain<Telt,Tidx_label> const& V, bool const& do_last) const {
     std::vector<Telt> small_gens = Kernel_SmallGeneratingSet<Telt,Tidx_label,Tint>(V);
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
     std::cerr << "double_cosets |V|=" << Order<Telt,Tidx_label,Tint>(V) << " |small_gens|=" << small_gens.size() << "\n";
@@ -1537,16 +1537,16 @@ public:
     for (size_t i_level=0; i_level<n_level; i_level++) {
       size_t j_level = n_level - 1 - i_level;
       DoubleCosetSplitEntry<Telt,Tidx_label> const& dcse = levels[j_level];
-      bool is_last_level = false;
-      if (j_level == 0) {
-        is_last_level = true;
+      bool compute_stabs = true;
+      if (j_level == 0 && !do_last) {
+        compute_stabs = false;
       }
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
       std::cerr << "i_level=" << i_level << " is_last_level=" << is_last_level << " |l_de|=" << l_de.size() << "\n";
 #endif
       std::vector<DccEntry<Telt>> new_l_de;
       for (auto & de: l_de) {
-        std::vector<DccEntry<Telt>> elist = span_double_cosets<Telt,Tidx_label,Tint>(dcse, de, is_last_level, id);
+        std::vector<DccEntry<Telt>> elist = span_double_cosets<Telt,Tidx_label,Tint>(dcse, de, compute_stabs, id);
         new_l_de.insert(new_l_de.end(), elist.begin(), elist.end());
       }
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
@@ -1554,6 +1554,13 @@ public:
 #endif
       l_de = new_l_de;
     }
+    return l_de;
+  }
+  std::vector<DccEntry<Telt>> double_cosets_and_stabilizers(StabChain<Telt,Tidx_label> const& V) const {
+    return double_cosets_kernel(V, false);
+  }
+  std::vector<Telt> double_cosets(StabChain<Telt,Tidx_label> const& V) const {
+    std::vector<DccEntry<Telt>> l_de = double_cosets_kernel(V, false);
     std::vector<Telt> l_cos;
     for (auto & de: l_de) {
       l_cos.push_back(de.cos);

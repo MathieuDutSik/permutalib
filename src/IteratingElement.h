@@ -2,19 +2,14 @@
 #ifndef SRC_GAP_ITERATING_ELEMENT_H_
 #define SRC_GAP_ITERATING_ELEMENT_H_
 
-
 /*
-  We want to iterate over all group elements
-
+  Functionalities for iterating over all elements
+  and generating all the elements if needed.
  */
-
 #include "StabChainMain.h"
 #include "PermGroup.h"
 
-
-
 namespace permutalib {
-
 
 template<typename Telt, typename Tidx_label>
 struct IteratorType {
@@ -23,7 +18,6 @@ private:
   std::vector<size_t> ListPos;
   std::vector<size_t> ListSiz;
   std::vector<Telt> ListRes;
-
 public:
 IteratorType(std::vector<StabChain<Telt, Tidx_label>> ListS,
              std::vector<size_t> ListPos, std::vector<size_t> ListSiz,
