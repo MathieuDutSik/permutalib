@@ -1351,7 +1351,7 @@ std::vector<DccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_l
     // No need to compute the stabilizers here.
     Face f_done(n_cos);
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-    std::cerr << "is_last_level=true n_cos=" << n_cos << "\n";
+    std::cerr << "compute_stabs=false n_cos=" << n_cos << "\n";
 #endif
     for (size_t i=0; i<n_cos; i++) {
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
@@ -1542,7 +1542,7 @@ public:
         compute_stabs = false;
       }
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-      std::cerr << "i_level=" << i_level << " is_last_level=" << is_last_level << " |l_de|=" << l_de.size() << "\n";
+      std::cerr << "i_level=" << i_level << " compute_stabs=" << compute_stabs << " |l_de|=" << l_de.size() << "\n";
 #endif
       std::vector<DccEntry<Telt>> new_l_de;
       for (auto & de: l_de) {
