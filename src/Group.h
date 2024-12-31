@@ -128,7 +128,7 @@ public:
       return l_cos;
     }
   }
-  std::vector<DccEntry<Telt>> double_cosets_and_stabilizers(Group<Telt,Tint> const& V) const {
+  std::vector<KernelDccEntry<Telt>> double_cosets_and_stabilizers(Group<Telt,Tint> const& V) const {
     if (!option) {
       std::cerr << "The function can only be used on the V side\n";
       throw PermutalibException{1};
@@ -147,6 +147,7 @@ public:
   using RightCosets = KernelRightCosets<Telt,Tidx_label,Tint>;
   using LeftCosets = KernelLeftCosets<Telt,Tidx_label,Tint>;
   using DoubleCosetComputer = KernelDoubleCosetComputer<Telt,Tint>;
+  using DccEntry = KernelDccEntry<Telt>;
 private:
   StabChain<Telt, Tidx_label> S;
   Tint size_tint;
@@ -416,7 +417,7 @@ public:
       return dcc_u.double_cosets(U);
     }
   }
-  std::vector<DccEntry<Telt>> double_cosets_and_stabilizers(const Group<Telt,Tint>& U, const Group<Telt,Tint>& V) const {
+  std::vector<DccEntry> double_cosets_and_stabilizers(const Group<Telt,Tint>& U, const Group<Telt,Tint>& V) const {
     KernelDoubleCosetComputer<Telt,Tint> dcc_v(S, U.S, true);
     return dcc_v.double_cosets_and_stabilizers(V);
   }

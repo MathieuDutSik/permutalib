@@ -1303,13 +1303,13 @@ struct DoubleCosetSplitEntry {
 };
 
 template<typename Telt>
-struct DccEntry {
+struct KernelDccEntry {
   Telt cos;
   std::vector<Telt> stab_gens;
 };
 
 template<typename Telt, typename Tidx_label, typename Tint>
-std::vector<DccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_label> const& dcse, DccEntry<Telt> const& de, bool const& compute_stabs, Telt const& id) {
+std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_label> const& dcse, KernelDccEntry<Telt> const& de, bool const& compute_stabs, Telt const& id) {
   std::vector<std::vector<size_t>> list_perm;
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
   std::cerr << "---------------- span_double_cosets |dcse.grp|=" << Order<Telt,Tidx_label,Tint>(dcse.grp) << " ----------------\n";
@@ -1346,7 +1346,7 @@ std::vector<DccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_l
   std::cerr << "span_double_cosets |list_perm|=" << list_perm.size() << "\n";
 #endif
   size_t n_cos = dcse.l_cos.size();
-  std::vector<DccEntry<Telt>> dcc_entries;
+  std::vector<KernelDccEntry<Telt>> dcc_entries;
   if (!compute_stabs) {
     // No need to compute the stabilizers here.
     Face f_done(n_cos);
@@ -1360,7 +1360,7 @@ std::vector<DccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_l
       if (f_done[i] == 0) {
         Telt new_cos = dcse.l_cos[i] * de.cos;
         Telt new_cos_can = f_can(new_cos);
-        DccEntry<Telt> new_de{new_cos_can,{}};
+        KernelDccEntry<Telt> new_de{new_cos_can,{}};
         dcc_entries.push_back(new_de);
         std::vector<size_t> l_idx;
         auto f_insert=[&](size_t const& pos) -> void {
@@ -1479,7 +1479,7 @@ std::vector<DccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_l
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
         std::cerr << "ACC: |v_gens|=" << v_gens.size() << "\n";
 #endif
-        DccEntry<Telt> new_de{new_cos_can, v_gens};
+        KernelDccEntry<Telt> new_de{new_cos_can, v_gens};
         dcc_entries.push_back(new_de);
       }
     }
@@ -1527,13 +1527,13 @@ public:
     std::cerr << "---------------------------------------------------------\n";
 #endif
   }
-  std::vector<DccEntry<Telt>> double_cosets_kernel(StabChain<Telt,Tidx_label> const& V, bool const& do_last) const {
+  std::vector<KernelDccEntry<Telt>> double_cosets_kernel(StabChain<Telt,Tidx_label> const& V, bool const& do_last) const {
     std::vector<Telt> small_gens = Kernel_SmallGeneratingSet<Telt,Tidx_label,Tint>(V);
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
     std::cerr << "double_cosets |V|=" << Order<Telt,Tidx_label,Tint>(V) << " |small_gens|=" << small_gens.size() << "\n";
 #endif
-    DccEntry<Telt> de{id, small_gens};
-    std::vector<DccEntry<Telt>> l_de{de};
+    KernelDccEntry<Telt> de{id, small_gens};
+    std::vector<KernelDccEntry<Telt>> l_de{de};
     for (size_t i_level=0; i_level<n_level; i_level++) {
       size_t j_level = n_level - 1 - i_level;
       DoubleCosetSplitEntry<Telt,Tidx_label> const& dcse = levels[j_level];
@@ -1544,9 +1544,9 @@ public:
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
       std::cerr << "i_level=" << i_level << " compute_stabs=" << compute_stabs << " |l_de|=" << l_de.size() << "\n";
 #endif
-      std::vector<DccEntry<Telt>> new_l_de;
+      std::vector<KernelDccEntry<Telt>> new_l_de;
       for (auto & de: l_de) {
-        std::vector<DccEntry<Telt>> elist = span_double_cosets<Telt,Tidx_label,Tint>(dcse, de, compute_stabs, id);
+        std::vector<KernelDccEntry<Telt>> elist = span_double_cosets<Telt,Tidx_label,Tint>(dcse, de, compute_stabs, id);
         new_l_de.insert(new_l_de.end(), elist.begin(), elist.end());
       }
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
@@ -1556,11 +1556,11 @@ public:
     }
     return l_de;
   }
-  std::vector<DccEntry<Telt>> double_cosets_and_stabilizers(StabChain<Telt,Tidx_label> const& V) const {
+  std::vector<KernelDccEntry<Telt>> double_cosets_and_stabilizers(StabChain<Telt,Tidx_label> const& V) const {
     return double_cosets_kernel(V, false);
   }
   std::vector<Telt> double_cosets(StabChain<Telt,Tidx_label> const& V) const {
-    std::vector<DccEntry<Telt>> l_de = double_cosets_kernel(V, false);
+    std::vector<KernelDccEntry<Telt>> l_de = double_cosets_kernel(V, false);
     std::vector<Telt> l_cos;
     for (auto & de: l_de) {
       l_cos.push_back(de.cos);
