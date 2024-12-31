@@ -893,11 +893,11 @@ private:
 public:
   PreImagerElement(std::vector<TeltMatr> const &_ListMatrGens,
                    std::vector<TeltPerm> const &ListPermGens,
-                   TeltMatr const &_id_matr) : ListMatrGens(_ListMatrGens), id_matr(_id_matr) {
+                   TeltMatr const &_id_matr) : id_matr(_id_matr), ListMatrGens(_ListMatrGens) {
     size_t nGen = ListMatrGens.size();
     if (nGen > 0) {
       Tseq id_seq;
-      Tidx len = ListPermGens[0].n_act();
+      Tidx len = ListPermGens[0].size();
       TeltPerm id_perm(len);
       Telt idB(id_perm.getListVal(), id_seq);
       std::vector<Telt> ListGensB;
@@ -908,12 +908,12 @@ public:
         ListGensB.push_back(fPair);
         ListMatrGens_inv.push_back(Inverse(ListMatrGens[iGen]));
       }
-      GRP_B(ListGensB, idB);
+      GRP_B = TgroupB(ListGensB, idB);
     }
   }
   std::optional<TeltMatr> get_preimage(TeltPerm const& elt) const {
     if (ListMatrGens.size() == 0) {
-      if (elt.idIdentity()) {
+      if (elt.isIdentity()) {
         return id_matr;
       } else {
         return {};
