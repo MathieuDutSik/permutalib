@@ -781,7 +781,7 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
     std::vector<Tidx> const &V = res.getListVal();
     for (Tidx u = 0; u < len; u++) {
       if (V[u] != u) {
-        std::cerr << "The permutation residue is not the idenity at u=" << u
+        std::cerr << "The permutation residue is not the identity at u=" << u
                   << "\n";
         throw PermutalibException{1};
       }
@@ -877,6 +877,75 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
     return f_mapping_elt();
   }
 }
+
+template <typename TeltPerm, typename TeltMatr, typename Tint>
+struct PreImagerElement {
+private:
+  using Tidx = typename TeltPerm::Tidx;
+  using Tgroup = Group<TeltPerm, Tint>;
+  using Tseq = SequenceType<true>;
+  using Telt = PermutationElt<Tidx, Tseq>;
+  using TgroupB = Group<Telt, Tint>;
+  TeltMatr id_matr;
+  std::vector<TeltMatr> ListMatrGens;
+  std::vector<TeltMatr> ListMatrGens_inv;
+  TgroupB GRP_B;
+public:
+  PreImagerElement(std::vector<TeltMatr> const &_ListMatrGens,
+                   std::vector<TeltPerm> const &ListPermGens,
+                   TeltMatr const &_id_matr) : ListMatrGens(_ListMatrGens), id_matr(_id_matr) {
+    size_t nGen = ListMatrGens.size();
+    if (nGen > 0) {
+      Tseq id_seq;
+      Tidx len = ListPermGens[0].n_act();
+      TeltPerm id_perm(len);
+      Telt idB(id_perm.getListVal(), id_seq);
+      std::vector<Telt> ListGensB;
+      for (size_t iGen = 0; iGen < nGen; iGen++) {
+        std::vector<int64_t> ListIdx{int64_t(iGen) + 1};
+        Tseq e_seq(ListIdx);
+        Telt fPair(ListPermGens[iGen].getListVal(), e_seq);
+        ListGensB.push_back(fPair);
+        ListMatrGens_inv.push_back(Inverse(ListMatrGens[iGen]));
+      }
+      GRP_B(ListGensB, idB);
+    }
+  }
+  std::optional<TeltMatr> get_preimage(TeltPerm const& elt) const {
+    if (ListMatrGens.size() == 0) {
+      if (elt.idIdentity()) {
+        return id_matr;
+      } else {
+        return {};
+      }
+    }
+    Tseq id_seq;
+    Telt ePair(elt.getListVal(), id_seq);
+    Telt res = GRP_B.Sift(ePair);
+    if (!res.isIdentity()) {
+      return {};
+    }
+    Tseq ret_seq = Inverse(res.getElt());
+    TeltMatr ret_matr = id_matr;
+    const std::vector<int64_t>& ListIdx = ret_seq.getVect();
+    for (auto & eIdx : ListIdx) {
+      if (eIdx > 0) {
+        size_t iGen = eIdx - 1;
+        ret_matr *= ListMatrGens[iGen];
+      } else {
+        size_t iGen = (-eIdx) - 1;
+        ret_matr *= ListMatrGens_inv[iGen];
+      }
+    }
+    return ret_matr;
+  }
+
+
+};
+
+
+
+
 
 // clang-format off
 }  // namespace permutalib

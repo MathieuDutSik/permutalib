@@ -331,8 +331,6 @@ public:
   // The constructors
   //
   PermutationElt() : siz(0), ListVal(), elt() {
-    //    std::cerr << "PermutationElt 1\n";
-    //    NicePrint("Constructor 1", *this);
   }
   PermutationElt(std::vector<Tidx> &&v, Telt &&_elt) {
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
@@ -351,19 +349,15 @@ public:
     elt = _elt;
   }
   PermutationElt(PermutationElt const &ePermElt) {
-    //    std::cerr << "PermutationElt 4\n";
     siz = ePermElt.siz;
     ListVal = ePermElt.ListVal;
     elt = ePermElt.elt;
-    //    NicePrint("Constructor 4", *this);
   }
   PermutationElt(PermutationElt &&ePermElt) {
-    //    std::cerr << "PermutationElt 5\n";
     siz = ePermElt.siz;
     ListVal = std::move(ePermElt.ListVal);
     elt = std::move(ePermElt.elt);
     ePermElt.siz = 0;
-    //    NicePrint("Constructor 5", *this);
   }
   //
   // Copy operator
@@ -404,12 +398,6 @@ public:
       i1 = i2;
       i2 = ListVal[i2];
     }
-    /*
-    for (Tidx j=0; j<siz; j++)
-      if (ListVal[j] == i)
-        return j;
-    return std::numeric_limits<Tidx>::max();
-    */
   }
   const Tidx *getPtr() const { return ListVal.data(); }
   const std::vector<Tidx> &getListVal() const { return ListVal; }
