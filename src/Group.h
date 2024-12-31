@@ -889,7 +889,7 @@ private:
   TeltMatr id_matr;
   std::vector<TeltMatr> ListMatrGens;
   std::vector<TeltMatr> ListMatrGens_inv;
-  TgroupB GRP_B;
+  std::optional<TgroupB> opt;
 public:
   PreImagerElement(std::vector<TeltMatr> const &_ListMatrGens,
                    std::vector<TeltPerm> const &ListPermGens,
@@ -908,36 +908,39 @@ public:
         ListGensB.push_back(fPair);
         ListMatrGens_inv.push_back(Inverse(ListMatrGens[iGen]));
       }
-      GRP_B = TgroupB(ListGensB, idB);
+      TgroupB GRP_B(ListGensB, idB);
+      opt = GRP_B;
     }
   }
   std::optional<TeltMatr> get_preimage(TeltPerm const& elt) const {
-    if (ListMatrGens.size() == 0) {
+    if (opt) {
+      TgroupB const& GRP_B = *opt;
+      Tseq id_seq;
+      Telt ePair(elt.getListVal(), id_seq);
+      Telt res = GRP_B.Sift(ePair);
+      if (!res.isIdentity()) {
+        return {};
+      }
+      Tseq ret_seq = Inverse(res.getElt());
+      TeltMatr ret_matr = id_matr;
+      const std::vector<int64_t>& ListIdx = ret_seq.getVect();
+      for (auto & eIdx : ListIdx) {
+        if (eIdx > 0) {
+          size_t iGen = eIdx - 1;
+          ret_matr *= ListMatrGens[iGen];
+        } else {
+          size_t iGen = (-eIdx) - 1;
+          ret_matr *= ListMatrGens_inv[iGen];
+        }
+      }
+      return ret_matr;
+    } else {
       if (elt.isIdentity()) {
         return id_matr;
       } else {
         return {};
       }
     }
-    Tseq id_seq;
-    Telt ePair(elt.getListVal(), id_seq);
-    Telt res = GRP_B.Sift(ePair);
-    if (!res.isIdentity()) {
-      return {};
-    }
-    Tseq ret_seq = Inverse(res.getElt());
-    TeltMatr ret_matr = id_matr;
-    const std::vector<int64_t>& ListIdx = ret_seq.getVect();
-    for (auto & eIdx : ListIdx) {
-      if (eIdx > 0) {
-        size_t iGen = eIdx - 1;
-        ret_matr *= ListMatrGens[iGen];
-      } else {
-        size_t iGen = (-eIdx) - 1;
-        ret_matr *= ListMatrGens_inv[iGen];
-      }
-    }
-    return ret_matr;
   }
 
 
