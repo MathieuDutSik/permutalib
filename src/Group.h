@@ -128,6 +128,13 @@ public:
       return l_cos;
     }
   }
+  std::vector<DccEntry<Telt>> double_cosets_and_stabilizers(Group<Telt,Tint> const& V) const {
+    if (!option) {
+      std::cerr << "The function can only be used on the V side\n";
+      throw PermutalibException{1};
+    }
+    return inner.double_cosets_and_stabilizers(V.stab_chain());
+  }
 };
 
 template <typename Telt_inp, typename Tint_inp> struct Group {
