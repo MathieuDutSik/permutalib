@@ -3,11 +3,12 @@
 #PROGRAM	= TestStabilizerOnSet
 #PROGRAM	= TestRepresentativeActionOnSet
 #PROGRAM	= GapCanonicalImage
+PROGRAM	= GapEquivalenceOnSet
 #PROGRAM	= GapCentralizerElt
 #PROGRAM	= SequenceSimplify
 #PROGRAM	= GapAscendingChainSubgroup
 #PROGRAM	= TestRightCosets TestLeftCosets
-PROGRAM	= GapComputeDoubleCosets
+#PROGRAM	= GapComputeDoubleCosets
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

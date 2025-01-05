@@ -62,13 +62,12 @@ permPlusBool<Telt> ExtendedT(Telt const &t, typename Telt::Tidx const &pnt,
                              typename Telt::Tidx const &simg,
                              StabChainPlusLev<Telt, Tidx_label> const &S) {
   using Tidx = typename Telt::Tidx;
-  Tidx miss_val = std::numeric_limits<Tidx>::max();
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP ExtendedT sgs(S.Stot)="
             << GapStringTVectorB(SortVector(StrongGeneratorsStabChain(S.Stot)))
             << "\n";
 #endif
-  if (simg == miss_val) {
+  if (simg == std::numeric_limits<Tidx>::max()) {
     img = SlashAct(img, t);
   } else {
     img = simg;
@@ -94,7 +93,7 @@ permPlusBool<Telt> ExtendedT(Telt const &t, typename Telt::Tidx const &pnt,
       return {int_perm, std::move(t)};
     }
   }
-  if (S.Stot->transversal[img] == miss_val) {
+  if (S.Stot->transversal[img] == std::numeric_limits<Tidx_label>::max()) {
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP ExtendedT, return false 2\n";
 #endif
