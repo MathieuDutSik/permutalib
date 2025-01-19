@@ -24,15 +24,20 @@ int main(int argc, char *argv[]) {
       std::cerr << "is stream is invalid, not possible to read H_G\n";
       throw permutalib::PermutalibException{1};
     }
-    Tgroup eH = permutalib::ReadGroupFromStream<Tgroup>(is);
     Tgroup eG = permutalib::ReadGroupFromStream<Tgroup>(is);
+    Tgroup eH = permutalib::ReadGroupFromStream<Tgroup>(is);
     Tint size_G = eG.size();
     Tint size_H = eH.size();
     std::cerr << "size_G=" << size_G << " size_H=" << size_H << "\n";
     //
     std::vector<Tgroup> ListGroup = eG.GetAscendingChainSubgroup(eH);
     for (size_t i = 0; i < ListGroup.size(); i++) {
-      std::cerr << "i=" << i << " |GRP|=" << ListGroup[i].size() << "\n";
+      std::cerr << "i=" << i << " |GRP|=" << ListGroup[i].size();
+      if (i > 0) {
+        Tint index = ListGroup[i].size() / ListGroup[i - 1].size();
+        std::cerr << " index=" << index;
+      }
+      std::cerr << "\n";
     }
     auto prt = [&](std::ostream &os) -> void {
       os << "return [";

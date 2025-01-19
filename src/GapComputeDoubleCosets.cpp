@@ -37,12 +37,14 @@ int main(int argc, char *argv[]) {
     //
     permutalib::MicrosecondTime_perm time1;
     DoubleCosetComputer dcc_v = eG.double_coset_computer_v(eU);
+    std::cerr << "We have dcc_v\n";
     std::vector<Telt> list_dcc1 = dcc_v.double_cosets(eV);
     std::cerr << "We have list_dcc1, |list_dcc1|=" << list_dcc1.size() << " time=" << time1 << "\n";
     KernelCheckDoubleCosets(eG.stab_chain(), eU.stab_chain(), eV.stab_chain(), list_dcc1);
     //
     permutalib::MicrosecondTime_perm time2;
     DoubleCosetComputer dcc_u = eG.double_coset_computer_u(eV);
+    std::cerr << "We have dcc_u\n";
     std::vector<Telt> list_dcc2 = dcc_u.double_cosets(eU);
     std::cerr << "We have list_dcc2, |list_dcc2|=" << list_dcc2.size() << " time=" << time2 << "\n";
     KernelCheckDoubleCosets(eG.stab_chain(), eU.stab_chain(), eV.stab_chain(), list_dcc2);

@@ -119,6 +119,7 @@
 
 #ifdef DEBUG
 #define DEBUG_ASCENDING_CHAINS_COSETS
+#define DEBUG_SPAN_DOUBLE_COSETS
 #endif
 
 #ifdef TIMINGS
@@ -135,7 +136,6 @@ namespace permutalib {
   The stabilizer of O[0] is the subgroup H.
   We want to find a pyramid of block decompositions so as not just to test
   primitivity but get a sequence of groups.
-
  */
 template <typename Telt, typename Tidx_label, typename Tint>
 std::vector<StabChain<Telt, Tidx_label>>
@@ -1310,8 +1310,7 @@ struct KernelDccEntry {
 
 template<typename Telt, typename Tidx_label, typename Tint>
 std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_label> const& dcse, KernelDccEntry<Telt> const& de, bool const& compute_stabs, Telt const& id) {
-  std::vector<std::vector<size_t>> list_perm;
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+#ifdef DEBUG_SPAN_DOUBLE_COSETS
   std::cerr << "---------------- span_double_cosets |dcse.grp|=" << Order<Telt,Tidx_label,Tint>(dcse.grp) << " ----------------\n";
 #endif
   auto f_can=[&](Telt const& u) -> Telt {
@@ -1323,6 +1322,7 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
     Telt gen_std = de.cos * eGen * cos_inv;
     stab_gens_std.push_back(gen_std);
   }
+  std::vector<std::vector<size_t>> list_perm;
   for (auto &eGen : stab_gens_std) {
     std::vector<size_t> perm;
     for (auto & eCos : dcse.l_cos) {
@@ -1331,7 +1331,7 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
       size_t pos = dcse.map.at(prod_can);
       perm.push_back(pos);
     }
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+#ifdef DEBUG_SPAN_DOUBLE_COSETS
     std::cerr << "perm=[";
     for (size_t i=0; i<perm.size(); i++) {
       if (i>0)
@@ -1342,7 +1342,7 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
 #endif
     list_perm.push_back(perm);
   }
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+#ifdef DEBUG_SPAN_DOUBLE_COSETS
   std::cerr << "span_double_cosets |list_perm|=" << list_perm.size() << "\n";
 #endif
   size_t n_cos = dcse.l_cos.size();
@@ -1350,11 +1350,11 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
   if (!compute_stabs) {
     // No need to compute the stabilizers here.
     Face f_done(n_cos);
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+#ifdef DEBUG_SPAN_DOUBLE_COSETS
     std::cerr << "compute_stabs=false n_cos=" << n_cos << "\n";
 #endif
     for (size_t i=0; i<n_cos; i++) {
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+#ifdef DEBUG_SPAN_DOUBLE_COSETS
       std::cerr << "i=" << i << "/" << n_cos << "\n";
 #endif
       if (f_done[i] == 0) {
@@ -1371,7 +1371,7 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
         f_insert(i);
         while(true) {
           size_t len = l_idx.size();
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+#ifdef DEBUG_SPAN_DOUBLE_COSETS
           std::cerr << "compute_stabs=false start=" << start << " len=" << len << "\n";
 #endif
           for (auto & perm : list_perm) {
@@ -1393,11 +1393,11 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
     // We go to the next step, so we need the stabilizers
     // Not sure what to do for in the normal case.
     Face f_done(n_cos);
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+#ifdef DEBUG_SPAN_DOUBLE_COSETS
     std::cerr << "n_cos=" << n_cos << "\n";
 #endif
     for (size_t i=0; i<n_cos; i++) {
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+#ifdef DEBUG_SPAN_DOUBLE_COSETS
       std::cerr << "i=" << i << "/" << n_cos << "\n";
 #endif
       if (f_done[i] == 0) {
@@ -1406,7 +1406,7 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
         std::unordered_set<Telt> set_gens;
         auto f_insert_gen=[&](Telt const& eGen) -> void {
           if (!eGen.isIdentity()) {
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+#ifdef DEBUG_SPAN_DOUBLE_COSETS
             Telt imgElt = new_cos_can * eGen;
             Telt imgElt_can = f_can(imgElt);
             if (imgElt_can != new_cos_can) {
@@ -1430,7 +1430,7 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
         while(true) {
           size_t len = l_idx.size();
           size_t n_gen = list_perm.size();
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+#ifdef DEBUG_SPAN_DOUBLE_COSETS
           std::cerr << "compute_stabs=true start=" << start << " len=" << len << "\n";
 #endif
           for (size_t i_gen=0; i_gen<n_gen; i_gen++) {
@@ -1458,7 +1458,7 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
           if (vect_gens.size() > 2) {
             StabChainOptions<Tint, Telt> options = GetStandardOptions<Tint, Telt>(id);
             StabChain<Telt,Tidx_label> g = StabChainOp_listgen<Telt, Tidx_label, Tint>(vect_gens, options);
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+#ifdef DEBUG_SPAN_DOUBLE_COSETS
             StabChain<Telt,Tidx_label> g_de_stabgens = StabChainOp_listgen<Telt, Tidx_label, Tint>(de.stab_gens, options);
             Tint ord_g_de_sg = Order<Telt,Tidx_label,Tint>(g_de_stabgens);
             Tint ord_g = Order<Telt,Tidx_label,Tint>(g);
@@ -1476,7 +1476,7 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
           }
         };
         std::vector<Telt> v_gens = get_reduced_vect_gens();
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+#ifdef DEBUG_SPAN_DOUBLE_COSETS
         std::cerr << "ACC: |v_gens|=" << v_gens.size() << "\n";
 #endif
         KernelDccEntry<Telt> new_de{new_cos_can, v_gens};
@@ -1484,7 +1484,7 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
       }
     }
   }
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+#ifdef DEBUG_SPAN_DOUBLE_COSETS
   std::cerr << "Returning |dcc_entries|=" << dcc_entries.size() << "\n";
 #endif
   return dcc_entries;
@@ -1501,6 +1501,9 @@ private:
   Telt id;
 public:
   InnerDoubleCosetComputer(StabChain<Telt,Tidx_label> const& G, StabChain<Telt,Tidx_label> const& U) {
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "InnerDoubleCosetComputer, constructor\n";
+#endif
     std::vector<StabChain<Telt,Tidx_label>> chain = Kernel_AscendingChainPair<Telt,Tidx_label,Tint>(U, G);
     n_level = chain.size() - 1;
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
@@ -1557,7 +1560,7 @@ public:
     return l_de;
   }
   std::vector<KernelDccEntry<Telt>> double_cosets_and_stabilizers(StabChain<Telt,Tidx_label> const& V) const {
-    return double_cosets_kernel(V, false);
+    return double_cosets_kernel(V, true);
   }
   std::vector<Telt> double_cosets(StabChain<Telt,Tidx_label> const& V) const {
     std::vector<KernelDccEntry<Telt>> l_de = double_cosets_kernel(V, false);
