@@ -15,9 +15,9 @@ int main(int argc, char *argv[]) {
     using Tgroup = permutalib::Group<Telt, Tint>;
     using DoubleCosetComputer = typename Tgroup::DoubleCosetComputer;
     if (argc != 2 && argc != 3) {
-      std::cerr << "GapComputeDoubleCosets [H_UV]\n";
+      std::cerr << "TestComputeDoubleCosets [G_UV]\n";
       std::cerr << "or\n";
-      std::cerr << "GapComputeDoubleCosets [G_UV] [OUT]\n";
+      std::cerr << "TestComputeDoubleCosets [G_UV] [OUT]\n";
       throw permutalib::PermutalibException{1};
     }
     std::string File_G_UV = argv[1];
@@ -36,26 +36,24 @@ int main(int argc, char *argv[]) {
     std::cerr << "size_G=" << size_G << " size_U=" << size_U << " size_V=" << size_V << "\n";
     //
     permutalib::MicrosecondTime_perm time1;
-    std::vector<Telt> list_dcc = eG.double_cosets(eU, eV);
-    std::cerr << "We have list_dcc, |list_dcc|=" << list_dcc.size() << " time=" << time1 << "\n";
+    DoubleCosetComputer dcc_v = eG.double_coset_computer_v(eU);
+    std::cerr << "We have dcc_v\n";
+    std::vector<Telt> list_dcc1 = dcc_v.double_cosets(eV);
+    std::cerr << "We have list_dcc1, |list_dcc1|=" << list_dcc1.size() << " time=" << time1 << "\n";
+    KernelCheckDoubleCosets(eG.stab_chain(), eU.stab_chain(), eV.stab_chain(), list_dcc1);
     //
-    if (argc == 3) {
-      std::string FileO = argv[2];
-      std::ofstream osf(FileO);
-      osf << "return [";
-      bool IsFirst = true;
-      for (auto &dcc : list_dcc) {
-        if (!IsFirst) {
-          osf << ",";
-        }
-        if (IsFirst) {
-          IsFirst = false;
-        }
-        osf << dcc;
-      }
-      osf << "];\n";
-    }
-
+    permutalib::MicrosecondTime_perm time2;
+    DoubleCosetComputer dcc_u = eG.double_coset_computer_u(eV);
+    std::cerr << "We have dcc_u\n";
+    std::vector<Telt> list_dcc2 = dcc_u.double_cosets(eU);
+    std::cerr << "We have list_dcc2, |list_dcc2|=" << list_dcc2.size() << " time=" << time2 << "\n";
+    KernelCheckDoubleCosets(eG.stab_chain(), eU.stab_chain(), eV.stab_chain(), list_dcc2);
+    //
+    permutalib::MicrosecondTime_perm time3;
+    std::vector<Telt> list_dcc3 = eG.double_cosets(eU, eV);
+    std::cerr << "We have list_dcc3, |list_dcc3|=" << list_dcc3.size() << " time=" << time3 << "\n";
+    KernelCheckDoubleCosets(eG.stab_chain(), eU.stab_chain(), eV.stab_chain(), list_dcc3);
+    //
     std::cerr << "CPP Normal completion of the program\n";
   } catch (permutalib::PermutalibException const &e) {
     std::cerr << "Erroneous completion of the program\n";

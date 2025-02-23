@@ -1308,6 +1308,21 @@ struct KernelDccEntry {
   std::vector<Telt> stab_gens;
 };
 
+
+/*
+  This is the central function for computing the double cosets.
+  Input:
+  ---The DCSE is the description of the level (group, cosets, map)
+  ---The KernelDccEntry is the double coset entry.
+     de.cos is the coset
+     de.stab_gens is the stabilizer (of what exactly?)
+  ---compute_stabs is whether to compute the stabilizers.
+  Output:
+  ---The vector of KernelDccEntry is returned into output.
+           ------------
+  
+  DoubleCosetSplitEntry contains the
+ */
 template<typename Telt, typename Tidx_label, typename Tint>
 std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_label> const& dcse, KernelDccEntry<Telt> const& de, bool const& compute_stabs, Telt const& id) {
 #ifdef DEBUG_SPAN_DOUBLE_COSETS
@@ -1340,7 +1355,7 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
     }
     std::cerr << "]\n";
 #endif
-    list_perm.push_back(perm);
+    list_perm.emplace_back(std::move(perm));
   }
 #ifdef DEBUG_SPAN_DOUBLE_COSETS
   std::cerr << "span_double_cosets |list_perm|=" << list_perm.size() << "\n";
@@ -1571,7 +1586,6 @@ public:
     return l_cos;
   }
 };
-
 
 template<typename Telt, typename Tidx_label>
 void KernelCheckDoubleCosets(StabChain<Telt,Tidx_label> const& G, StabChain<Telt,Tidx_label> const& U, StabChain<Telt,Tidx_label> const& V, std::vector<Telt> const& list_dcc) {
