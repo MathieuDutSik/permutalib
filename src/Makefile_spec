@@ -8,8 +8,8 @@
 #PROGRAM	= SequenceSimplify
 #PROGRAM	= GapAscendingChainSubgroup
 #PROGRAM	= TestRightCosets TestLeftCosets
-#PROGRAM	= GapComputeDoubleCosets
-PROGRAM	= TestComputeDoubleCosetsStabilizers
+PROGRAM	= GapComputeDoubleCosets
+#PROGRAM	= TestComputeDoubleCosetsStabilizers
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

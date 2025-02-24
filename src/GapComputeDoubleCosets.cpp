@@ -13,14 +13,22 @@ int main(int argc, char *argv[]) {
     using Telt = permutalib::SingleSidedPerm<Tidx>;
     using Tint = mpz_class;
     using Tgroup = permutalib::Group<Telt, Tint>;
-    using DoubleCosetComputer = typename Tgroup::DoubleCosetComputer;
-    if (argc != 2 && argc != 3) {
+    if (argc != 2 && argc != 4) {
       std::cerr << "GapComputeDoubleCosets [H_UV]\n";
       std::cerr << "or\n";
-      std::cerr << "GapComputeDoubleCosets [G_UV] [OUT]\n";
+      std::cerr << "GapComputeDoubleCosets [G_UV] [OutFormat] [FileO]\n";
+      std::cerr << "\n";
+      std::cerr << "OutFormat: Count (default) or GAP\n";
+      std::cerr << "FileO: stderr (default), stdout or something else\n";
       throw permutalib::PermutalibException{1};
     }
     std::string File_G_UV = argv[1];
+    std::string OutFormat = "Count";
+    std::string FileO = "stderr";
+    if (argc == 4) {
+      OutFormat = argv[2];
+      FileO = argv[3];
+    }
     //
     std::ifstream is(File_G_UV);
     if (!is.good()) {
@@ -39,23 +47,39 @@ int main(int argc, char *argv[]) {
     std::vector<Telt> list_dcc = eG.double_cosets(eU, eV);
     std::cerr << "We have list_dcc, |list_dcc|=" << list_dcc.size() << " time=" << time1 << "\n";
     //
-    if (argc == 3) {
-      std::string FileO = argv[2];
-      std::ofstream osf(FileO);
-      osf << "return [";
-      bool IsFirst = true;
-      for (auto &dcc : list_dcc) {
-        if (!IsFirst) {
-          osf << ",";
-        }
-        if (IsFirst) {
-          IsFirst = false;
-        }
-        osf << dcc;
+    auto f=[&](std::ostream& osf) -> void {
+      if (OutFormat == "Count") {
+        osf << "|list_dcc|=" << list_dcc.size() << "\n";
+        return;
       }
-      osf << "];\n";
+      if (OutFormat == "GAP") {
+        osf << "return [";
+        bool IsFirst = true;
+        for (auto &dcc : list_dcc) {
+          if (!IsFirst) {
+            osf << ",";
+          }
+          if (IsFirst) {
+            IsFirst = false;
+          }
+          osf << dcc;
+        }
+        osf << "];\n";
+        return;
+      }
+      std::cerr << "Failed to find a matching entry for OutFormat=" << OutFormat << "\n";
+      throw permutalib::PermutalibException{1};
+    };
+    if (FileO == "stderr") {
+      f(std::cerr);
+    } else {
+      if (FileO == "stdout") {
+        f(std::cout);
+      } else {
+        std::ofstream osf(FileO);
+        f(osf);
+      }
     }
-
     std::cerr << "CPP Normal completion of the program\n";
   } catch (permutalib::PermutalibException const &e) {
     std::cerr << "Erroneous completion of the program\n";

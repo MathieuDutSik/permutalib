@@ -1315,13 +1315,13 @@ struct KernelDccEntry {
   ---The DCSE is the description of the level (group, cosets, map)
   ---The KernelDccEntry is the double coset entry.
      de.cos is the coset
-     de.stab_gens is the stabilizer (of what exactly?)
+     de.stab_gens is a generator set for a group of permutation x
+        such that G de.cos x = G de.cos
   ---compute_stabs is whether to compute the stabilizers.
   Output:
   ---The vector of KernelDccEntry is returned into output.
            ------------
   
-  DoubleCosetSplitEntry contains the
  */
 template<typename Telt, typename Tidx_label, typename Tint>
 std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_label> const& dcse, KernelDccEntry<Telt> const& de, bool const& compute_stabs, Telt const& id) {
