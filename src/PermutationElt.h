@@ -78,7 +78,7 @@ void SimplifySequence(std::vector<T> & V)
   V.resize(n_ent);
 }
 
-
+#ifdef DEBUG_PERMUTATION_ELT
 void PrintListIdx(std::string const& mesg, std::vector<int64_t> const& ListIdx) {
   size_t len = ListIdx.size();
   std::cerr << mesg << " " << len << ":[";
@@ -91,7 +91,7 @@ void PrintListIdx(std::string const& mesg, std::vector<int64_t> const& ListIdx) 
   }
   std::cerr << "]\n";
 }
-
+#endif
 
 template<typename T>
 bool IsSimplifiable(std::vector<T> const& V)
@@ -108,23 +108,33 @@ bool IsSimplifiable(std::vector<T> const& V)
 template<bool always_equal>
 struct SequenceType {
   SequenceType() : ListIdx() {
+#ifdef DEBUG_PERMUTATION_ELT
     PrintListIdx("default constructor", ListIdx);
+#endif
   }
   SequenceType(std::vector<int64_t> &&v) {
     ListIdx = v;
+#ifdef DEBUG_PERMUTATION_ELT
     PrintListIdx("constructor 1", ListIdx);
+#endif
   }
   SequenceType(std::vector<int64_t> const &v) {
     ListIdx = v;
+#ifdef DEBUG_PERMUTATION_ELT
     PrintListIdx("constructor 2", ListIdx);
+#endif
   }
   SequenceType(SequenceType<always_equal> const &seq) {
     ListIdx = seq.ListIdx;
+#ifdef DEBUG_PERMUTATION_ELT
     PrintListIdx("constructor 3", ListIdx);
+#endif
   }
   SequenceType(SequenceType<always_equal> &&seq) {
     ListIdx = std::move(seq.ListIdx);
+#ifdef DEBUG_PERMUTATION_ELT
     PrintListIdx("constructor 4", ListIdx);
+#endif
   }
   //
   // Copy operator
@@ -164,7 +174,9 @@ SequenceType<always_equal> operator*(SequenceType<always_equal> const& v1, Seque
   const std::vector<int64_t> &ListIdx2 = v2.getVect();
   ListIdx1.insert(ListIdx1.end(), ListIdx2.begin(), ListIdx2.end());
   SimplifySequence(ListIdx1);
+#ifdef DEBUG_PERMUTATION_ELT
   PrintListIdx("operator*", ListIdx1);
+#endif
   return SequenceType<always_equal>(std::move(ListIdx1));
 }
 
@@ -176,7 +188,9 @@ void operator*=(SequenceType<always_equal> &v1,
   const std::vector<int64_t> &ListIdx2 = v2.getVect();
   ListIdx1.insert(ListIdx1.end(), ListIdx2.begin(), ListIdx2.end());
   SimplifySequence(ListIdx1);
+#ifdef DEBUG_PERMUTATION_ELT
   PrintListIdx("operator*=", ListIdx1);
+#endif
 }
 
 
@@ -195,7 +209,9 @@ SequenceType<always_equal> Conjugation(SequenceType<always_equal> const &v1,
   for (size_t i=0; i<siz2; i++)
     ListIdx[siz2 + siz1 + i] = ListIdx2[i];
   SimplifySequence(ListIdx);
+#ifdef DEBUG_PERMUTATION_ELT
   PrintListIdx("Conjugation", ListIdx);
+#endif
   return SequenceType<always_equal>(std::move(ListIdx));
 }
 
@@ -213,7 +229,9 @@ SequenceType<always_equal> LeftQuotient(SequenceType<always_equal> const &a, Seq
   for (size_t i=0; i<siz_b; i++)
     ListIdx[siz_a + i] = Val_B[i];
   SimplifySequence(ListIdx);
+#ifdef DEBUG_PERMUTATION_ELT
   PrintListIdx("LeftQuotient", ListIdx);
+#endif
   return SequenceType<always_equal>(std::move(ListIdx));
 }
 
@@ -225,7 +243,9 @@ SequenceType<always_equal> operator~(SequenceType<always_equal> const &seq) {
   std::vector<int64_t> vret(len);
   for (size_t i=0; i<len; i++)
     vret[len - 1 - i] = - ListIdx[i];
+#ifdef DEBUG_PERMUTATION_ELT
   PrintListIdx("operator~", vret);
+#endif
   return SequenceType<always_equal>(std::move(vret));
 }
 

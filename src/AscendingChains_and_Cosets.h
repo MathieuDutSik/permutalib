@@ -1321,7 +1321,6 @@ struct KernelDccEntry {
   Output:
   ---The vector of KernelDccEntry is returned into output.
            ------------
-  
  */
 template<typename Telt, typename Tidx_label, typename Tint>
 std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_label> const& dcse, KernelDccEntry<Telt> const& de, bool const& compute_stabs, Telt const& id) {
@@ -1357,6 +1356,7 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
 #endif
     list_perm.emplace_back(std::move(perm));
   }
+  size_t n_gen = list_perm.size();
 #ifdef DEBUG_SPAN_DOUBLE_COSETS
   std::cerr << "span_double_cosets |list_perm|=" << list_perm.size() << "\n";
 #endif
@@ -1444,7 +1444,6 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
         f_insert(std::pair<size_t,Telt>{i, id});
         while(true) {
           size_t len = l_idx.size();
-          size_t n_gen = list_perm.size();
 #ifdef DEBUG_SPAN_DOUBLE_COSETS
           std::cerr << "compute_stabs=true start=" << start << " len=" << len << "\n";
 #endif
@@ -1484,8 +1483,7 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
               throw PermutalibException{1};
             }
 #endif
-            std::vector<Telt> vect_gens_red = Kernel_SmallGeneratingSet<Telt,Tidx_label,Tint>(g);
-            return vect_gens_red;
+            return Kernel_SmallGeneratingSet<Telt,Tidx_label,Tint>(g);
           } else {
             return vect_gens;
           }
@@ -1494,8 +1492,8 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
 #ifdef DEBUG_SPAN_DOUBLE_COSETS
         std::cerr << "ACC: |v_gens|=" << v_gens.size() << "\n";
 #endif
-        KernelDccEntry<Telt> new_de{new_cos_can, v_gens};
-        dcc_entries.push_back(new_de);
+        KernelDccEntry<Telt> new_de{std::move(new_cos_can), std::move(v_gens)};
+        dcc_entries.emplace_back(std::move(new_de));
       }
     }
   }
