@@ -13,7 +13,7 @@
 #include <utility>
 #include <vector>
 
-#ifdef DEBUG
+#ifdef DEBUG_DISABLE
 #define DEBUG_BLOCK_SYSTEM
 #endif
 
@@ -99,7 +99,7 @@ BlockDecomposition<Tidx> SpanBlockDecomposition(std::vector<Telt> const &LGen,
   std::vector<Tidx> map_vert_block(n_vert, miss_val);
 #ifdef DEBUG_BLOCK_SYSTEM
   auto prt_status=[&](std::string const& s) -> void {
-    std::cerr << s << " ListBlocks =";
+    std::cerr << "BLK: " << s << " ListBlocks =";
     for (auto & eBlock : ListBlocks)
       std::cerr << " " << GapStringIntVector(eBlock);
     std::cerr << " map_v_b=" << GapStringIntVector(map_vert_block) << "\n";
@@ -111,7 +111,7 @@ BlockDecomposition<Tidx> SpanBlockDecomposition(std::vector<Telt> const &LGen,
   auto insert = [&](std::vector<Tidx> const &vect) -> bool {
 #ifdef DEBUG_BLOCK_SYSTEM
     prt_status("begin");
-    std::cerr << "vect = " << GapStringIntVector(vect) << "\n";
+    std::cerr << "BLK: vect = " << GapStringIntVector(vect) << "\n";
 #endif
     ListBlkMatch.clear();
     std::vector<Tidx> NewV;
@@ -168,15 +168,15 @@ BlockDecomposition<Tidx> SpanBlockDecomposition(std::vector<Telt> const &LGen,
   auto merge_operation = [&]() -> bool {
     size_t n_block = ListBlocks.size();
 #ifdef DEBUG_BLOCK_SYSTEM
-    std::cerr << "n_block=" << n_block << "\n";
+    std::cerr << "BLK: n_block=" << n_block << "\n";
 #endif
     for (size_t iBlock = 0; iBlock < n_block; iBlock++) {
 #ifdef DEBUG_BLOCK_SYSTEM
-      std::cerr << "iBlock=" << iBlock << " / " << n_block << "\n";
+      std::cerr << "BLK: iBlock=" << iBlock << " / " << n_block << "\n";
 #endif
       for (auto &eGen : LGen) {
 #ifdef DEBUG_BLOCK_SYSTEM
-        std::cerr << "  eGen=" << eGen << "\n";
+        std::cerr << "BLK:  eGen=" << eGen << "\n";
 #endif
         std::vector<Tidx> BlockImg;
         BlockImg.reserve(ListBlocks[iBlock].size());
@@ -321,13 +321,13 @@ ComputeSequenceBlockDecomposition(std::vector<Telt> const &LGen,
   std::vector<uint8_t> status{0};
 #ifdef DEBUG_BLOCK_SYSTEM
   auto prt_status=[&]() -> void {
-    std::cerr << "status =";
+    std::cerr << "BLK: status =";
     for (auto & val : status)
       std::cerr << " " << int(val);
     std::cerr << "\n";
     size_t pos=0;
     for (auto & blk : ListBlk) {
-      std::cerr << "pos=" << pos << " BlkDec=" << blk << "\n";
+      std::cerr << "BLK: pos=" << pos << " BlkDec=" << blk << "\n";
       pos++;
     }
   };
@@ -337,11 +337,11 @@ ComputeSequenceBlockDecomposition(std::vector<Telt> const &LGen,
     size_t len = ListBlk.size() - 1;
     auto iter = ListBlk.begin();
 #ifdef DEBUG_BLOCK_SYSTEM
-    std::cerr << "|ListBlk|=" << ListBlk.size() << " |status|=" << status.size() << "\n";
+    std::cerr << "BLK: |ListBlk|=" << ListBlk.size() << " |status|=" << status.size() << "\n";
 #endif
     for (size_t i = 0; i < len; i++) {
 #ifdef DEBUG_BLOCK_SYSTEM
-      std::cerr << "refine i=" << i << " / " << len << "\n";
+      std::cerr << "BLK: refine i=" << i << " / " << len << "\n";
 #endif
       if (status[i] == 0) {
         BlockDecomposition<Tidx> const &BlkDec1 = *iter;
@@ -356,9 +356,9 @@ ComputeSequenceBlockDecomposition(std::vector<Telt> const &LGen,
           status.insert(status.begin() + i, 0);
           ListBlk.insert(iterInc, *opt);
 #ifdef DEBUG_BLOCK_SYSTEM
-          std::cerr << "  BlcDec1=" << BlkDec1 << "\n";
-          std::cerr << "  BlcDec2=" << BlkDec2 << "\n";
-          std::cerr << "  BlcDecS=" << *opt << "\n";
+          std::cerr << "BLK:   BlcDec1=" << BlkDec1 << "\n";
+          std::cerr << "BLK:   BlcDec2=" << BlkDec2 << "\n";
+          std::cerr << "BLK:   BlcDecS=" << *opt << "\n";
 #endif
           return false;
         }
@@ -389,7 +389,7 @@ Blocks(const std::vector<Telt> &acts, const typename Telt::Tidx &n) {
     return {V};
   }
   if (acts.size() == 0) {
-    std::cerr << "We need at least one generator for Blocks computation\n";
+    std::cerr << "BLK: We need at least one generator for Blocks computation\n";
     throw PermutalibException{1};
   }
   if (IsPrime_loc(n)) {
@@ -429,7 +429,7 @@ Blocks(const std::vector<Telt> &acts, const typename Telt::Tidx &n) {
 
   // check that the group is transitive
   if (Tidx(orbit.size()) != n) {
-    std::cerr << "G must operate transitively\n";
+    std::cerr << "BLK: G must operate transitively\n";
     throw PermutalibException{1};
   }
 
@@ -453,7 +453,7 @@ Blocks(const std::vector<Telt> &acts, const typename Telt::Tidx &n) {
   std::vector<std::vector<Tidx>> blocks;
   while (true) {
 #ifdef DEBUG_BLOCK_SYSTEM
-    std::cerr << "Passing by the while loop changed=" << changed << "\n";
+    std::cerr << "BLK: Passing by the while loop changed=" << changed << "\n";
 #endif
     // compute such an $H$ by taking random  Schreier generators  of $G_1$
     // and stop if 2 successive generators dont change the orbits any more
@@ -466,7 +466,7 @@ Blocks(const std::vector<Telt> &acts, const typename Telt::Tidx &n) {
       }
       Telt gen = rnd;
 #ifdef DEBUG_BLOCK_SYSTEM
-      std::cerr << "gen=" << gen << "\n";
+      std::cerr << "BLK: gen=" << gen << "\n";
 #endif
       Tidx d1g = PowAct(Tidx(0), gen);
       while (d1g != 0) {
@@ -503,7 +503,7 @@ Blocks(const std::vector<Telt> &acts, const typename Telt::Tidx &n) {
         }
       }
 #ifdef DEBUG_BLOCK_SYSTEM
-      std::cerr << "changed=" << changed << "\n";
+      std::cerr << "BLK: changed=" << changed << "\n";
 #endif
     }
     // take arbitrary point <cur>,  and an element <gen> taking 1 to <cur>
@@ -518,12 +518,12 @@ Blocks(const std::vector<Telt> &acts, const typename Telt::Tidx &n) {
     }
     gen_list = Reversed(gen_list);
 #ifdef DEBUG_BLOCK_SYSTEM
-    std::cerr << "|gen_list|=" << gen_list.size() << "\n";
+    std::cerr << "BLK: |gen_list|=" << gen_list.size() << "\n";
 #endif
     // compute an alleged block as orbit of 1 under $< H, gen >$
     Tidx pnt = cur;
 #ifdef DEBUG_BLOCK_SYSTEM
-    std::cerr << "cur=" << cur << "\n";
+    std::cerr << "BLK: cur=" << cur << "\n";
 #endif
     while (pnt != 0) {
       // compute the representative of the block containing the image
@@ -582,7 +582,7 @@ Blocks(const std::vector<Telt> &acts, const typename Telt::Tidx &n) {
       return blocks;
     }
 #ifdef DEBUG_BLOCK_SYSTEM
-    std::cerr << "|block|=" << block.size() << "\n";
+    std::cerr << "BLK: |block|=" << block.size() << "\n";
 #endif
     // quick test to see if the orbit can be a block
     if (orbit.size() % block.size() != 0) {
@@ -625,14 +625,14 @@ Blocks(const std::vector<Telt> &acts, const typename Telt::Tidx &n) {
       i++;
     }
 #ifdef DEBUG_BLOCK_SYSTEM
-    std::cerr << "Before until changed=" << changed << "\n";
+    std::cerr << "BLK: Before until changed=" << changed << "\n";
 #endif
     if (changed >= 0) {
       break;
     }
   }
 #ifdef DEBUG_BLOCK_SYSTEM
-  std::cerr << "|blocks|=" << blocks.size() << "\n";
+  std::cerr << "BLK: |blocks|=" << blocks.size() << "\n";
 #endif
   // return the block system
   return blocks;

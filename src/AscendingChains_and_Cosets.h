@@ -259,20 +259,20 @@ Kernel_RightTransversal_Direct_f(StabChain<Telt, Tidx_label> const &G,
 #ifdef CHECK_COSET_ENUMERATION
   Tint n_coset = ListTransversal.size();
   if (n_coset != index) {
-    std::cerr << "n_coset=" << n_coset << " index=" << index << "\n";
-    std::cerr << "G=[";
+    std::cerr << "ACC: n_coset=" << n_coset << " index=" << index << "\n";
+    std::cerr << "ACC: G=[";
     for (auto & eElt : get_all_elements(G))
       std::cerr << " " << eElt;
     std::cerr << " ]\n";
-    std::cerr << "H=[";
+    std::cerr << "ACC: H=[";
     for (auto & eElt : get_all_elements(H))
       std::cerr << " " << eElt;
     std::cerr << " ]\n";
-    std::cerr << "ListTransversal=[";
+    std::cerr << "ACC: ListTransversal=[";
     for (auto & eElt : ListTransversal)
       std::cerr << " " << eElt;
     std::cerr << " ]\n";
-    std::cerr << "The enumeration found a wrong number of cosets\n";
+    std::cerr << "ACC: The enumeration found a wrong number of cosets\n";
     throw PermutalibException{1};
   }
 #endif
@@ -531,7 +531,7 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Alt(AscendingEn
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
           Tint size_target = 2 * Order<Telt,Tidx_label,Tint>(gAlt);
           if (size_target != ent_G.ord) {
-            std::cerr << "size_target is not of the right size\n";
+            std::cerr << "ACC: size_target is not of the right size\n";
             throw PermutalibException{1};
           }
 #endif
@@ -571,7 +571,7 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Block(Ascending
         f[val] = 1;
       }
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-      std::cerr << "orb_found = [";
+      std::cerr << "ACC: orb_found = [";
       bool is_first = true;
       for (auto & val : orb_found) {
         if (!is_first)
@@ -587,13 +587,13 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_Block(Ascending
       Tint size_G = Order<Telt,Tidx_label,Tint>(ent_G.g);
       Tint size_H = Order<Telt,Tidx_label,Tint>(ent_H.g);
       if (size_H == size_blk || size_blk == size_G) {
-        std::cerr << "The sizes are not as they should be\n";
+        std::cerr << "ACC: The sizes are not as they should be\n";
         throw PermutalibException{1};
       }
       if (!Kernel_IsSubgroup(gBlk, ent_H.g)) {
-        std::cerr << "size_blk=" << size_blk << " size_G=" << size_G << " size_H=" << size_H << "\n";
-        std::cerr << "|orb_G|=" << orb_G.size() << " |orb_found|=" << orb_found.size() << "\n";
-        std::cerr << "H should be a subgroup of gBlk\n";
+        std::cerr << "ACC: size_blk=" << size_blk << " size_G=" << size_G << " size_H=" << size_H << "\n";
+        std::cerr << "ACC: |orb_G|=" << orb_G.size() << " |orb_found|=" << orb_found.size() << "\n";
+        std::cerr << "ACC: H should be a subgroup of gBlk\n";
         throw PermutalibException{1};
       }
 #endif
@@ -877,11 +877,11 @@ void KernelCheckLeftCosets(StabChain<Telt, Tidx_label> const &G,
   std::unordered_set<Telt> set_elt;
   size_t ProdSize = l_elt_h.size() * ListLeftTransversal.size();
   if (ProdSize != l_elt_g.size()) {
-    std::cerr << "|l_elt_g|=" << l_elt_g.size() << "\n";
-    std::cerr << "|l_elt_h|=" << l_elt_h.size() << "\n";
-    std::cerr << "|ListLeftTransversal|=" << ListLeftTransversal.size() << "\n";
-    std::cerr << "ProdSize=" << ProdSize << "\n";
-    std::cerr << "Discrepancy at the order level\n";
+    std::cerr << "ACC: |l_elt_g|=" << l_elt_g.size() << "\n";
+    std::cerr << "ACC: |l_elt_h|=" << l_elt_h.size() << "\n";
+    std::cerr << "ACC: |ListLeftTransversal|=" << ListLeftTransversal.size() << "\n";
+    std::cerr << "ACC: ProdSize=" << ProdSize << "\n";
+    std::cerr << "ACC: Discrepancy at the order level\n";
     throw PermutalibException{1};
   }
   std::vector<std::unordered_set<Telt>> l_cos;
@@ -890,7 +890,7 @@ void KernelCheckLeftCosets(StabChain<Telt, Tidx_label> const &G,
     for (auto & e_h : l_elt_h) {
       Telt eProd = eElt * e_h;
       if (set_elt.count(eProd) == 1) {
-        std::cerr << "The element eProd is already present\n";
+        std::cerr << "ACC: The element eProd is already present\n";
         throw PermutalibException{1};
       }
       set_elt.insert(eProd);
@@ -907,7 +907,7 @@ void KernelCheckLeftCosets(StabChain<Telt, Tidx_label> const &G,
         }
       }
       if (the_int > 0) {
-        std::cerr << "Intersection between i_cos=" << i_cos << " j_cos=" << j_cos << " has size " << the_int << "\n";
+        std::cerr << "ACC: Intersection between i_cos=" << i_cos << " j_cos=" << j_cos << " has size " << the_int << "\n";
         throw PermutalibException{1};
       }
     }
@@ -923,11 +923,11 @@ void KernelCheckRightCosets(StabChain<Telt, Tidx_label> const &G,
   std::unordered_set<Telt> set_elt;
   size_t ProdSize = l_elt_h.size() * ListRightTransversal.size();
   if (ProdSize != l_elt_g.size()) {
-    std::cerr << "|l_elt_g|=" << l_elt_g.size() << "\n";
-    std::cerr << "|l_elt_h|=" << l_elt_h.size() << "\n";
-    std::cerr << "|ListRightTransversal|=" << ListRightTransversal.size() << "\n";
-    std::cerr << "ProdSize=" << ProdSize << "\n";
-    std::cerr << "Discrepancy at the order level\n";
+    std::cerr << "ACC: |l_elt_g|=" << l_elt_g.size() << "\n";
+    std::cerr << "ACC: |l_elt_h|=" << l_elt_h.size() << "\n";
+    std::cerr << "ACC: |ListRightTransversal|=" << ListRightTransversal.size() << "\n";
+    std::cerr << "ACC: ProdSize=" << ProdSize << "\n";
+    std::cerr << "ACC: Discrepancy at the order level\n";
     throw PermutalibException{1};
   }
   std::vector<std::unordered_set<Telt>> l_cos;
@@ -936,7 +936,7 @@ void KernelCheckRightCosets(StabChain<Telt, Tidx_label> const &G,
     for (auto & e_h : l_elt_h) {
       Telt eProd = e_h * eCos;
       if (set_elt.count(eProd) == 1) {
-        std::cerr << "The element eProd is already present\n";
+        std::cerr << "ACC: The element eProd is already present\n";
         throw PermutalibException{1};
       }
       set_elt.insert(eProd);
@@ -953,7 +953,7 @@ void KernelCheckRightCosets(StabChain<Telt, Tidx_label> const &G,
         }
       }
       if (the_int > 0) {
-        std::cerr << "Intersection between i_cos=" << i_cos << " j_cos=" << j_cos << " has size " << the_int << "\n";
+        std::cerr << "ACC: Intersection between i_cos=" << i_cos << " j_cos=" << j_cos << " has size " << the_int << "\n";
         throw PermutalibException{1};
       }
     }
@@ -987,8 +987,8 @@ private:
   Telt result;
   void compute_position() {
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
-    std::cerr << "compute_position, start\n";
-    std::cerr << "l_pos/l_size =";
+    std::cerr << "ACC: compute_position, start\n";
+    std::cerr << "ACC: l_pos/l_size =";
     for (size_t i_level=0; i_level<n_level; i_level++) {
       std::cerr << " (" << l_pos[i_level] << "|" << l_size[i_level] << ")";
     }
@@ -999,7 +999,7 @@ private:
       result *= ll_cos[i_level][l_pos[i_level]];
     }
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
-    std::cerr << "compute_position, end\n";
+    std::cerr << "ACC: compute_position, end\n";
 #endif
   }
   void single_increase() {
@@ -1018,20 +1018,20 @@ private:
 public:
   RightCosetIterator(StabChain<Telt,Tidx_label> const& H, StabChain<Telt,Tidx_label> const& G) {
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-    std::cerr << "RightCosetIterator, begin constructor\n";
+    std::cerr << "ACC: RightCosetIterator, begin constructor\n";
 #endif
     std::vector<StabChain<Telt,Tidx_label>> chain = Kernel_AscendingChainPair<Telt,Tidx_label,Tint>(H, G);
     n_level = chain.size() - 1;
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
     for (size_t i_level=0; i_level<=n_level; i_level++) {
-      std::cerr << "i_level=" << i_level << " ord=" << Order<Telt,Tidx_label,Tint>(chain[i_level]) << "\n";
+      std::cerr << "ACC: i_level=" << i_level << " ord=" << Order<Telt,Tidx_label,Tint>(chain[i_level]) << "\n";
     }
 #endif
     result = G->comm->identity;
     for (size_t i_level=0; i_level<n_level; i_level++) {
       std::vector<Telt> l_cos = Kernel_RightTransversal_Direct<Telt,Tidx_label,Tint>(chain[i_level + 1], chain[i_level]);
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
-      std::cerr << "i_level=" << i_level << " |l_cos|=" << l_cos.size()
+      std::cerr << "ACC: i_level=" << i_level << " |l_cos|=" << l_cos.size()
                 << " ord1=" << Order<Telt,Tidx_label,Tint>(chain[i_level])
                 << " ord2=" << Order<Telt,Tidx_label,Tint>(chain[i_level + 1])
                 << "\n";
@@ -1044,12 +1044,12 @@ public:
     }
     is_end = false;
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-    std::cerr << "RightCosetIterator, exit\n";
+    std::cerr << "ACC: RightCosetIterator, exit\n";
 #endif
   }
   RightCosetIterator() {
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-    std::cerr << "RightCosetIterator, end constructor\n";
+    std::cerr << "ACC: RightCosetIterator, end constructor\n";
 #endif
     is_end = true;
   }
@@ -1111,7 +1111,7 @@ public:
   using const_iterator = RightCosetIterator<Telt,Tidx_label,Tint>;
   KernelRightCosets(StabChain<Telt,Tidx_label> const& _H, StabChain<Telt,Tidx_label> const& _G) : H(_H), G(_G) {
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-    std::cerr << "KernelRightCosets, constructor\n";
+    std::cerr << "ACC: KernelRightCosets, constructor\n";
 #endif
   }
   RightCosetIterator<Telt,Tidx_label,Tint> begin() const {
@@ -1143,8 +1143,8 @@ private:
   Telt result;
   void compute_position() {
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
-    std::cerr << "compute_position, start\n";
-    std::cerr << "l_pos/l_size =";
+    std::cerr << "ACC: compute_position, start\n";
+    std::cerr << "ACC: l_pos/l_size =";
     for (size_t i_level=0; i_level<n_level; i_level++) {
       std::cerr << " (" << l_pos[i_level] << "|" << l_size[i_level] << ")";
     }
@@ -1155,7 +1155,7 @@ private:
       result = ll_cos[i_level][l_pos[i_level]] * result;
     }
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
-    std::cerr << "compute_position, end\n";
+    std::cerr << "ACC: compute_position, end\n";
 #endif
   }
   void single_increase() {
@@ -1174,20 +1174,20 @@ private:
 public:
   LeftCosetIterator(StabChain<Telt,Tidx_label> const& H, StabChain<Telt,Tidx_label> const& G) {
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-    std::cerr << "RightCosetIterator, begin constructor\n";
+    std::cerr << "ACC: RightCosetIterator, begin constructor\n";
 #endif
     std::vector<StabChain<Telt,Tidx_label>> chain = Kernel_AscendingChainPair<Telt,Tidx_label,Tint>(H, G);
     n_level = chain.size() - 1;
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
     for (size_t i_level=0; i_level<=n_level; i_level++) {
-      std::cerr << "i_level=" << i_level << " ord=" << Order<Telt,Tidx_label,Tint>(chain[i_level]) << "\n";
+      std::cerr << "ACC: i_level=" << i_level << " ord=" << Order<Telt,Tidx_label,Tint>(chain[i_level]) << "\n";
     }
 #endif
     result = G->comm->identity;
     for (size_t i_level=0; i_level<n_level; i_level++) {
       std::vector<Telt> l_cos = Kernel_LeftTransversal_Direct<Telt,Tidx_label,Tint>(chain[i_level + 1], chain[i_level]);
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
-      std::cerr << "i_level=" << i_level << " |l_cos|=" << l_cos.size()
+      std::cerr << "ACC: i_level=" << i_level << " |l_cos|=" << l_cos.size()
                 << " ord1=" << Order<Telt,Tidx_label,Tint>(chain[i_level])
                 << " ord2=" << Order<Telt,Tidx_label,Tint>(chain[i_level + 1])
                 << "\n";
@@ -1200,12 +1200,12 @@ public:
     }
     is_end = false;
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-    std::cerr << "LeftCosetIterator, exit\n";
+    std::cerr << "ACC: LeftCosetIterator, exit\n";
 #endif
   }
   LeftCosetIterator() {
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-    std::cerr << "LeftCosetIterator, end constructor\n";
+    std::cerr << "ACC: LeftCosetIterator, end constructor\n";
 #endif
     is_end = true;
   }
@@ -1267,7 +1267,7 @@ public:
   using const_iterator = LeftCosetIterator<Telt,Tidx_label,Tint>;
   KernelLeftCosets(StabChain<Telt,Tidx_label> const& _H, StabChain<Telt,Tidx_label> const& _G) : H(_H), G(_G) {
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-    std::cerr << "KernelLeftCosets, constructor\n";
+    std::cerr << "ACC: KernelLeftCosets, constructor\n";
 #endif
   }
   LeftCosetIterator<Telt,Tidx_label,Tint> begin() const {
@@ -1325,7 +1325,7 @@ struct KernelDccEntry {
 template<typename Telt, typename Tidx_label, typename Tint>
 std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,Tidx_label> const& dcse, KernelDccEntry<Telt> const& de, bool const& compute_stabs, Telt const& id) {
 #ifdef DEBUG_SPAN_DOUBLE_COSETS
-  std::cerr << "---------------- span_double_cosets |dcse.grp|=" << Order<Telt,Tidx_label,Tint>(dcse.grp) << " ----------------\n";
+  std::cerr << "ACC: ---------------- span_double_cosets |dcse.grp|=" << Order<Telt,Tidx_label,Tint>(dcse.grp) << " ----------------\n";
 #endif
   auto f_can=[&](Telt const& u) -> Telt {
     return MinimalElementCosetStabChain(dcse.grp, u);
@@ -1346,7 +1346,7 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
       perm.push_back(pos);
     }
 #ifdef DEBUG_SPAN_DOUBLE_COSETS
-    std::cerr << "perm=[";
+    std::cerr << "ACC: perm=[";
     for (size_t i=0; i<perm.size(); i++) {
       if (i>0)
         std::cerr << ",";
@@ -1358,7 +1358,7 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
   }
   size_t n_gen = list_perm.size();
 #ifdef DEBUG_SPAN_DOUBLE_COSETS
-  std::cerr << "span_double_cosets |list_perm|=" << list_perm.size() << "\n";
+  std::cerr << "ACC: span_double_cosets |list_perm|=" << list_perm.size() << "\n";
 #endif
   size_t n_cos = dcse.l_cos.size();
   std::vector<KernelDccEntry<Telt>> dcc_entries;
@@ -1366,11 +1366,11 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
     // No need to compute the stabilizers here.
     Face f_done(n_cos);
 #ifdef DEBUG_SPAN_DOUBLE_COSETS
-    std::cerr << "compute_stabs=false n_cos=" << n_cos << "\n";
+    std::cerr << "ACC: compute_stabs=false n_cos=" << n_cos << "\n";
 #endif
     for (size_t i=0; i<n_cos; i++) {
 #ifdef DEBUG_SPAN_DOUBLE_COSETS
-      std::cerr << "i=" << i << "/" << n_cos << "\n";
+      std::cerr << "ACC: i=" << i << "/" << n_cos << "\n";
 #endif
       if (f_done[i] == 0) {
         Telt new_cos = dcse.l_cos[i] * de.cos;
@@ -1387,7 +1387,7 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
         while(true) {
           size_t len = l_idx.size();
 #ifdef DEBUG_SPAN_DOUBLE_COSETS
-          std::cerr << "compute_stabs=false start=" << start << " len=" << len << "\n";
+          std::cerr << "ACC: compute_stabs=false start=" << start << " len=" << len << "\n";
 #endif
           for (auto & perm : list_perm) {
             for (size_t u=start; u<len; u++) {
@@ -1409,11 +1409,11 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
     // Not sure what to do for in the normal case.
     Face f_done(n_cos);
 #ifdef DEBUG_SPAN_DOUBLE_COSETS
-    std::cerr << "n_cos=" << n_cos << "\n";
+    std::cerr << "ACC: n_cos=" << n_cos << "\n";
 #endif
     for (size_t i=0; i<n_cos; i++) {
 #ifdef DEBUG_SPAN_DOUBLE_COSETS
-      std::cerr << "i=" << i << "/" << n_cos << "\n";
+      std::cerr << "ACC: i=" << i << "/" << n_cos << "\n";
 #endif
       if (f_done[i] == 0) {
         Telt new_cos = dcse.l_cos[i] * de.cos;
@@ -1425,7 +1425,7 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
             Telt imgElt = new_cos_can * eGen;
             Telt imgElt_can = f_can(imgElt);
             if (imgElt_can != new_cos_can) {
-              std::cerr << "The element new_cos_can is not preserved\n";
+              std::cerr << "ACC: The element new_cos_can is not preserved\n";
               throw PermutalibException{1};
             }
 #endif
