@@ -873,7 +873,13 @@ void KernelCheckLeftCosets(StabChain<Telt, Tidx_label> const &G,
                            StabChain<Telt, Tidx_label> const &H,
                            std::vector<Telt> const& ListLeftTransversal) {
   std::vector<Telt> l_elt_g = get_all_elements(G);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "ACC: l_elt_g\n";
+#endif
   std::vector<Telt> l_elt_h = get_all_elements(H);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "ACC: l_elt_h\n";
+#endif
   std::unordered_set<Telt> set_elt;
   size_t ProdSize = l_elt_h.size() * ListLeftTransversal.size();
   if (ProdSize != l_elt_g.size()) {
@@ -897,9 +903,15 @@ void KernelCheckLeftCosets(StabChain<Telt, Tidx_label> const &G,
       set.insert(eProd);
     }
     l_cos.push_back(set);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "ACC: Now |l_cos|=" << l_cos.size() << "\n";
+#endif
   }
   for (size_t i_cos=0; i_cos<l_cos.size(); i_cos++) {
     for (size_t j_cos=i_cos+1; j_cos<l_cos.size(); j_cos++) {
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+      std::cerr << "ACC: Now i_cos=" << i_cos << " j_cos=" << j_cos << "\n";
+#endif
       size_t the_int = 0;
       for (auto & val : l_cos[i_cos]) {
         if (l_cos[j_cos].count(val) == 1) {
@@ -1585,11 +1597,28 @@ public:
   }
 };
 
+  /*
+    Checking the list of double cosets.
+    * We check that the pairwise intersection is empty.
+    * We check that the sum of the sizes of the double cosets is equal to the size of the full group.
+    The check is very expensive and with large groups will run forever.
+    But it is also very elementary so bugs revealed there will be in the code, not in the checking
+    code.
+   */
 template<typename Telt, typename Tidx_label>
-void KernelCheckDoubleCosets(StabChain<Telt,Tidx_label> const& G, StabChain<Telt,Tidx_label> const& U, StabChain<Telt,Tidx_label> const& V, std::vector<Telt> const& list_dcc) {
+void ExhaustiveCheck_DoubleCosets(StabChain<Telt,Tidx_label> const& G, StabChain<Telt,Tidx_label> const& U, StabChain<Telt,Tidx_label> const& V, std::vector<Telt> const& list_dcc) {
   std::vector<Telt> l_elt_g = get_all_elements(G);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "ACC: We have l_elt_g\n";
+#endif
   std::vector<Telt> l_elt_u = get_all_elements(U);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "ACC: We have l_elt_u\n";
+#endif
   std::vector<Telt> l_elt_v = get_all_elements(V);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "ACC: We have l_elt_v\n";
+#endif
   std::vector<std::unordered_set<Telt>> listfull_dcc;
   size_t n_elt_dcc = 0;
   for (auto & dcc: list_dcc) {
@@ -1602,9 +1631,15 @@ void KernelCheckDoubleCosets(StabChain<Telt,Tidx_label> const& G, StabChain<Telt
     }
     n_elt_dcc += set.size();
     listfull_dcc.push_back(set);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "ACC: |listfull_dcc|=" << listfull_dcc.size() << " set=" << set.size() << "\n";
+#endif
   }
   for (size_t i_dcc=0; i_dcc<list_dcc.size(); i_dcc++) {
     for (size_t j_dcc=i_dcc+1; j_dcc<list_dcc.size(); j_dcc++) {
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+      std::cerr << "ACC: i_dcc=" << i_dcc << " j_dcc=" << j_dcc << "\n";
+#endif
       size_t the_int = 0;
       for (auto & val : listfull_dcc[i_dcc]) {
         if (listfull_dcc[j_dcc].count(val)) {
@@ -1621,6 +1656,89 @@ void KernelCheckDoubleCosets(StabChain<Telt,Tidx_label> const& G, StabChain<Telt
     std::cerr << "n_elt_dcc=" << n_elt_dcc << " |l_elt_g|=" << l_elt_g.size() << "\n";
     std::cerr << "The double cosets do not cover the full group\n";
     throw PermutalibException{1};
+  }
+}
+
+  /*
+    Check that the sum of the sizes is equal to the size of the group.
+    It uses the computation of intersection. So, it is exposed to
+    possible errors in the computation of group Intersection.
+   */
+template<typename Telt, typename Tidx_label, typename Tint>
+void FastCheckSizes_DoubleCosets(StabChain<Telt,Tidx_label> const& G, StabChain<Telt,Tidx_label> const& U, StabChain<Telt,Tidx_label> const& V, std::vector<Telt> const& list_dcc) {
+  Telt id = V->comm->identity;
+  StabChainOptions<Tint, Telt> options = GetStandardOptions<Tint, Telt>(id);
+  std::vector<Telt> LGen_V = Kernel_SmallGeneratingSet<Telt,Tidx_label,Tint>(V);
+  Tint sum_sizes = 0;
+  Tint size_G = Order<Telt, Tidx_label, Tint>(G);
+  Tint size_U = Order<Telt, Tidx_label, Tint>(U);
+  Tint size_V = Order<Telt, Tidx_label, Tint>(V);
+  for (auto & dcc : list_dcc) {
+    Telt dcc_inv = Inverse(dcc);
+    std::vector<Telt> NewLGen;
+    for (auto & eGen: LGen_V) {
+      Telt NewGen = dcc * eGen * dcc_inv;
+      NewLGen.push_back(NewGen);
+    }
+    StabChain<Telt,Tidx_label> ConjV = StabChainOp_listgen<Telt, Tidx_label, Tint>(NewLGen, options);
+    StabChain<Telt,Tidx_label> eInt = Kernel_Intersection<Telt, Tidx_label, Tint>(U, ConjV);
+    Tint size_Int = Order<Telt, Tidx_label, Tint>(eInt);
+    Tint n_cos = size_V / size_Int;
+    Tint double_cos_size = size_U * n_cos;
+    sum_sizes += double_cos_size;
+  }
+  if (size_G != sum_sizes) {
+    std::cerr << "ACC: size_G=" << size_G << "\n";
+    std::cerr << "ACC: sum_sizes=" << sum_sizes << "\n";
+    std::cerr << "ACC: The double cosets do not cover the full group\n";
+    throw PermutalibException{1};
+  }
+}
+
+  /*
+    Check that the pairwise intersection of the double cosets
+    is empty.
+   */
+template<typename Telt, typename Tidx_label, typename Tint>
+void FastCheckIntersection_DoubleCosets(StabChain<Telt,Tidx_label> const& G, StabChain<Telt,Tidx_label> const& U, StabChain<Telt,Tidx_label> const& V, std::vector<Telt> const& list_dcc) {
+  Telt id = V->comm->identity;
+  StabChainOptions<Tint, Telt> options = GetStandardOptions<Tint, Telt>(id);
+  std::vector<Telt> LGen_V = Kernel_SmallGeneratingSet<Telt,Tidx_label,Tint>(V);
+  Tint size_G = Order<Telt, Tidx_label, Tint>(G);
+  Tint size_U = Order<Telt, Tidx_label, Tint>(U);
+  Tint size_V = Order<Telt, Tidx_label, Tint>(V);
+  std::vector<Telt> l_elt_u = get_all_elements(U);
+  std::vector<std::unordered_set<Telt>> l_elts_dcc;
+  for (auto & dcc: list_dcc) {
+    Telt dcc_inv = Inverse(dcc);
+    std::vector<Telt> NewLGen;
+    for (auto & eGen: LGen_V) {
+      Telt NewGen = dcc * eGen * dcc_inv;
+      NewLGen.push_back(NewGen);
+    }
+    StabChain<Telt,Tidx_label> ConjV = StabChainOp_listgen<Telt, Tidx_label, Tint>(NewLGen, options);
+    StabChain<Telt,Tidx_label> eInt = Kernel_Intersection<Telt, Tidx_label, Tint>(U, ConjV);
+    //
+    std::vector<Telt> l_cos = enumerate_right_cosets<Telt,Tidx_label,Tint>(eInt, ConjV);
+    std::unordered_set<Telt> set;
+    for (auto & eU : l_elt_u) {
+      for (auto & eCos : l_cos) {
+        Telt prod = eU * eCos;
+        set.insert(prod);
+      }
+    }
+    l_elts_dcc.push_back(set);
+  }
+  size_t n_dcc = list_dcc.size();
+  for (size_t i_dcc=0; i_dcc<n_dcc; i_dcc++) {
+    for (size_t j_dcc=i_dcc+1; j_dcc<n_dcc; j_dcc++) {
+      for (auto & eX : l_elts_dcc[i_dcc]) {
+        if (l_elts_dcc[j_dcc].count(eX) == 1) {
+          std::cerr << "The intersection is not empty i_dcc=" << i_dcc << " j_dcc=" << j_dcc << "\n";
+          throw PermutalibException{1};
+        }
+      }
+    }
   }
 }
 
