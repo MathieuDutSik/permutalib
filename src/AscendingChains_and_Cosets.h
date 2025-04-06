@@ -788,6 +788,9 @@ std::vector<StabChain<Telt, Tidx_label>> Kernel_AscendingChainPair(StabChain<Tel
                                                                    StabChain<Telt, Tidx_label> const &G) {
   AscendingEntry<Telt,Tidx_label,Tint> ent_H = get_ascending_entry<Telt,Tidx_label,Tint>(H);
   AscendingEntry<Telt,Tidx_label,Tint> ent_G = get_ascending_entry<Telt,Tidx_label,Tint>(G);
+  if (ent_H.ord == ent_G.ord) {
+    return {H};
+  }
   std::vector<AscendingEntry<Telt,Tidx_label,Tint>> l_grp{ent_H, ent_G};
   size_t pos = 0;
   while(true) {
@@ -1035,6 +1038,7 @@ public:
     std::vector<StabChain<Telt,Tidx_label>> chain = Kernel_AscendingChainPair<Telt,Tidx_label,Tint>(H, G);
     n_level = chain.size() - 1;
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "ACC: n_level=" << n_level << "\n";
     for (size_t i_level=0; i_level<=n_level; i_level++) {
       std::cerr << "ACC: i_level=" << i_level << " ord=" << Order<Telt,Tidx_label,Tint>(chain[i_level]) << "\n";
     }

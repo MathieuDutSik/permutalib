@@ -2953,25 +2953,11 @@ Kernel_Intersection(StabChain<Telt, Tidx_label> const &G,
     return H_red;
   if (InclusionTest(H_red, G_red))
     return G_red;
-  std::cerr << "n=" << n << "\n";
-  std::cerr << "Omega =";
-  for (auto &v : Omega)
-    std::cerr << " " << v;
-  std::cerr << "\n";
-  std::cerr << "OmegaC =";
-  for (auto &v : OmegaC)
-    std::cerr << " " << v;
-  std::cerr << "\n";
 
   std::vector<Tidx> eList = Omega;
   eList.insert(eList.end(), OmegaC.begin(), OmegaC.end());
-  std::cerr << "eList =";
-  for (auto &v : eList)
-    std::cerr << " " << v;
-  std::cerr << "\n";
   Telt eReordInv(eList);
   Telt eReordDir = Inverse(eReordInv);
-  std::cerr << "eReordInv=" << eReordInv << " eReordDir=" << eReordDir << "\n";
   ConjugateStabChain_Element(H_red, eReordDir);
   ConjugateStabChain_Element(G_red, eReordDir);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK

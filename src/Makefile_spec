@@ -9,7 +9,8 @@
 #PROGRAM	= GapAscendingChainSubgroup
 #PROGRAM	= TestRightCosets TestLeftCosets
 #PROGRAM	= GapComputeDoubleCosets
-PROGRAM	= TestComputeDoubleCosets
+#PROGRAM	= TestComputeDoubleCosets
+PROGRAM	= TestLeftCosets
 #PROGRAM	= TestComputeDoubleCosetsStabilizers
 
 OBJECTS		= $(PROGRAM:%=%.o)
