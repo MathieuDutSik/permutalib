@@ -24,6 +24,9 @@ template <typename T> T gcd_loc(T a, T b) {
 
 template <typename T>
 std::pair<bool, T> rho_pollard_factorize_loc(T const &number) {
+#ifdef DEBUG_FACTORIZE
+  std::cerr << "FACT: rho_pollard_factorize_loc, number=" << number << "\n";
+#endif
   T count;
   T x_fixed = 2, x = 2, size = 2, factor, diff;
   do {
@@ -46,16 +49,28 @@ std::pair<bool, T> rho_pollard_factorize_loc(T const &number) {
 }
 
 template <typename T> std::vector<T> successive_division_factorize_loc(T const &N) {
+#ifdef DEBUG_FACTORIZE
+  std::cerr << "FACT: successive_division_factorize_loc, N=" << N << "\n";
+#endif
   T pos = 2;
   while (true) {
     T res = N % pos;
+#ifdef DEBUG_FACTORIZE
+    std::cerr << "FACT: successive_division_factorize_loc, res=" << res << "\n";
+#endif
     if (res == 0) {
       T quot = N / pos;
+#ifdef DEBUG_FACTORIZE
+      std::cerr << "FACT: successive_division_factorize_loc, quot=" << quot << "\n";
+#endif
       if (quot > 1) {
         std::vector<T> eVect = successive_division_factorize_loc(quot);
         eVect.push_back(pos);
         return eVect;
       }
+#ifdef DEBUG_FACTORIZE
+      std::cerr << "FACT: successive_division_factorize_loc, returning {pos}\n";
+#endif
       return {pos};
     }
     pos++;
@@ -82,8 +97,17 @@ template <typename T> bool successive_division_isprime_loc(T const &N) {
 }
 
 template <typename T> std::vector<T> factorize(T const &N) {
+#ifdef DEBUG_FACTORIZE
+  std::cerr << "FACT: factorize, N=" << N << "\n";
+#endif
   std::pair<bool, T> epair = rho_pollard_factorize_loc(N);
+#ifdef DEBUG_FACTORIZE
+  std::cerr << "FACT: epair.first=" << epair.first << " epair.second=" << epair.second << "\n";
+#endif
   if (epair.first) {
+#ifdef DEBUG_FACTORIZE
+    std::cerr << "FACT: factorize(true)\n";
+#endif
     T fact1 = epair.second;
     T fact2 = N / fact1;
     std::vector<T> ListPrime;
@@ -93,11 +117,17 @@ template <typename T> std::vector<T> factorize(T const &N) {
     ListPrime.insert(ListPrime.end(), V2.begin(), V2.end());
     return ListPrime;
   } else {
+#ifdef DEBUG_FACTORIZE
+    std::cerr << "FACT: factorize(false), successive_division_factorize_loc\n";
+#endif
     return successive_division_factorize_loc(N);
   }
 }
 
 template <typename T> bool IsPrime_loc(const T &N) {
+#ifdef DEBUG_FACTORIZE
+  std::cerr << "FACT: IsPrime_loc, N=" << N << "\n";
+#endif
   std::pair<bool, T> epair = rho_pollard_factorize_loc(N);
   if (epair.first) {
     return false;

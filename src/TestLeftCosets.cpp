@@ -36,6 +36,7 @@ int main(int argc, char *argv[]) {
       l_cos.push_back(eCos);
     }
     permutalib::KernelCheckLeftCosets<Telt,Tidx_label,Tint>(eG.stab_chain(), eH.stab_chain(), l_cos);
+    std::cerr << "|l_cos|=" << l_cos.size() << "\n";
     //
     std::cerr << "CPP Normal completion of the program\n";
   } catch (permutalib::PermutalibException const &e) {

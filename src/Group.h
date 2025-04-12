@@ -13,6 +13,7 @@
 #include "AscendingChains_and_Cosets.h"
 // clang-format on
 #include <map>
+#include <fstream>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>

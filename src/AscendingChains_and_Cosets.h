@@ -788,6 +788,15 @@ std::vector<StabChain<Telt, Tidx_label>> Kernel_AscendingChainPair(StabChain<Tel
                                                                    StabChain<Telt, Tidx_label> const &G) {
   AscendingEntry<Telt,Tidx_label,Tint> ent_H = get_ascending_entry<Telt,Tidx_label,Tint>(H);
   AscendingEntry<Telt,Tidx_label,Tint> ent_G = get_ascending_entry<Telt,Tidx_label,Tint>(G);
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+  if (!Kernel_IsSubgroup(ent_G.g, ent_H.g)) {
+    std::cerr << "ACC: Kernel_AscendingChainPair, H should be a subgroup of G\n";
+  }
+#endif
+
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+  std::cerr << "ACC: Kernel_AscendingChainPair, ent_H.ord=" << ent_H.ord << " ent_G.ord=" << ent_G.ord << "\n";
+#endif
   if (ent_H.ord == ent_G.ord) {
     return {H};
   }
@@ -796,6 +805,10 @@ std::vector<StabChain<Telt, Tidx_label>> Kernel_AscendingChainPair(StabChain<Tel
   while(true) {
     auto get_intermediate=[&]() -> std::optional<StabChain<Telt, Tidx_label>> {
       Tint index = l_grp[pos+1].ord / l_grp[pos].ord;
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+      std::cerr << "ACC: Kernel_AscendingChainPair, l_grp[pos+1].ord=" << l_grp[pos+1].ord << " l_grp[pos].ord=" << l_grp[pos].ord << "\n";
+      std::cerr << "ACC: Kernel_AscendingChainPair, Before IsPrime_loc, pos=" << pos << " index=" << index << "\n";
+#endif
       bool is_prime = IsPrime_loc(index);
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
       std::cerr << "ACC: index=" << index << " is_prime=" << is_prime << "\n";
