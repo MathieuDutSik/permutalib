@@ -643,6 +643,16 @@ Tgroup ReadGroupFromStream(std::istream& is) {
   return Tgroup(LGen, id);
 }
 
+template <typename Tgroup>
+Tgroup ReadGroupFromFile(std::string const& eFile) {
+  std::ifstream is(eFile);
+  if (!is.good()) {
+    std::cerr << "is stream is invalid, not possible to read eFile=" << eFile << "\n";
+    throw permutalib::PermutalibException{1};
+  }
+  return permutalib::ReadGroupFromStream<Tgroup>(is);
+}
+
 Face ConvertStringToFace(std::string const& s) {
   size_t n = s.size();
   Face f(n);

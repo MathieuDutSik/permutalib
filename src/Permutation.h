@@ -640,6 +640,16 @@ bool operator==(SingleSidedPerm<Tidx> const &v1,
 }
 
 template <typename Tidx>
+bool IsIdentity(SingleSidedPerm<Tidx> const &x) {
+  return x.isIdentity();
+}
+
+template <typename Tidx>
+bool IsIdentity(DoubleSidedPerm<Tidx> const &x) {
+  return x.isIdentity();
+}
+
+template <typename Tidx>
 bool operator!=(SingleSidedPerm<Tidx> const &v1,
                 SingleSidedPerm<Tidx> const &v2) {
   Tidx siz = v1.size();
