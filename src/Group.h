@@ -694,8 +694,14 @@ PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
   }
   auto f_op = [&](size_t const &x, Telt const &u) -> Tobj {
     Telt prod = l_cos[x] * u;
-    Telt prod_red = f_can(prod);
-    size_t pos = map.at(prod_red);
+    Telt prod_can = f_can(prod);
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+    if (map.count(prod_can) == 0) {
+      std::cerr << "GRP: PreImageSubgroup, missing entry for f_op\n";
+      throw PermutalibException{1};
+    }
+#endif
+    size_t pos = map.at(prod_can);
     return pos;
   };
   std::vector<Telt> ListPermGens_cos;
@@ -704,6 +710,12 @@ PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
     for (auto & eCos : l_cos) {
       Telt prod = eCos * ePermGen;
       Telt prod_can = f_can(prod);
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+      if (map.count(prod_can) == 0) {
+        std::cerr << "GRP: PreImageSubgroup, missing entry in creation of ListPermGens_cos\n";
+        throw PermutalibException{1};
+      }
+#endif
       size_t pos = map.at(prod_can);
       eList.push_back(pos);
     }
@@ -711,8 +723,14 @@ PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
     ListPermGens_cos.push_back(ePerm);
   }
   Telt id = eGRP.get_identity();
-  Telt id_red = f_can(id);
-  size_t pos_id = map.at(id_red);
+  Telt id_can = f_can(id);
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+  if (map.count(id_can) == 0) {
+    std::cerr << "GRP: PreImageSubgroup, missing entry in creation of id_can\n";
+    throw PermutalibException{1};
+  }
+#endif
+  size_t pos_id = map.at(id_can);
   return PreImageSubgroupAction<Tgroup, TeltMatr, Tobj, decltype(f_op)>(
       ListMatrGens, ListPermGens, id_matr, eGRP, pos_id, f_op);
 }
@@ -863,7 +881,7 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
     };
     auto f_get_elt=[&](size_t const& pos) -> TeltMatr {
 #ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
-    std::cerr << "Beginning of f_get_elt\n";
+      std::cerr << "Beginning of f_get_elt\n";
 #endif
       size_t curr_pos = pos;
       std::vector<size_t> ListIGen;

@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
       }
     }
     std::cerr << "Pass the test of coset stabilization time=" << time << "\n";
-    KernelCheckDoubleCosets(eG.stab_chain(), eU.stab_chain(), eV.stab_chain(), list_dcc);
+    ExhaustiveCheck_DoubleCosets(eG.stab_chain(), eU.stab_chain(), eV.stab_chain(), list_dcc);
     std::cerr << "Pass KernelCheckDoubleCosets time=" << time << "\n";
     //
     std::cerr << "CPP Normal completion of the program\n";
