@@ -677,13 +677,44 @@ PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
                  std::vector<typename Tgroup::Telt> const &ListPermGens,
                  TeltMatr const &id_matr, Tgroup const &eGRP) {
   using Telt = typename Tgroup::Telt;
-  using Tobj = Telt;
-  auto f_op = [&](Tobj const &x, Telt const &u) -> Tobj {
-    return eGRP.Sift(Inverse(u) * x);
+  using Tidx = typename Telt::Tidx;
+  using Tobj = size_t;
+  Tidx n_act = eGRP.n_act();
+  Tgroup GRP_big(ListPermGens, n_act);
+  std::vector<Telt> l_cos = GRP_big.get_all_right_cosets(eGRP);
+  size_t n_cos = l_cos.size();
+  std::unordered_map<Telt, size_t> map;
+  auto f_can=[&](Telt const& x) -> Telt {
+    return MinimalElementCosetStabChain(eGRP.stab_chain(), x);
   };
+  for (size_t i_cos=0; i_cos<n_cos; i_cos++) {
+    Telt const& e_cos = l_cos[i_cos];
+    Telt f_cos = f_can(e_cos);
+    map[f_cos] = i_cos;
+  }
+  auto f_op = [&](size_t const &x, Telt const &u) -> Tobj {
+    Telt prod = l_cos[x] * u;
+    Telt prod_red = f_can(prod);
+    size_t pos = map.at(prod_red);
+    return pos;
+  };
+  std::vector<Telt> ListPermGens_cos;
+  for (auto & ePermGen : ListPermGens) {
+    std::vector<Tidx> eList;
+    for (auto & eCos : l_cos) {
+      Telt prod = eCos * ePermGen;
+      Telt prod_can = f_can(prod);
+      size_t pos = map.at(prod_can);
+      eList.push_back(pos);
+    }
+    Telt ePerm(eList);
+    ListPermGens_cos.push_back(ePerm);
+  }
   Telt id = eGRP.get_identity();
+  Telt id_red = f_can(id);
+  size_t pos_id = map.at(id_red);
   return PreImageSubgroupAction<Tgroup, TeltMatr, Tobj, decltype(f_op)>(
-      ListMatrGens, ListPermGens, id_matr, eGRP, id, f_op);
+      ListMatrGens, ListPermGens, id_matr, eGRP, pos_id, f_op);
 }
 
 template <typename TeltPerm, typename TeltMatr, typename Tint>

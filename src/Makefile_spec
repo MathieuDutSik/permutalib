@@ -10,9 +10,9 @@
 #PROGRAM	= TestRightCosets TestLeftCosets
 #PROGRAM	= GapComputeDoubleCosets
 #PROGRAM	= TestComputeDoubleCosets
-PROGRAM	= TestLeftCosets
+#PROGRAM	= TestLeftCosets
 #PROGRAM	= TestComputeDoubleCosetsStabilizers
-#PROGRAM	= TestPreImageSubgroup
+PROGRAM	= TestPreImageSubgroup
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
