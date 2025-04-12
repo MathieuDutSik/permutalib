@@ -1484,7 +1484,7 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
         while(true) {
           size_t len = l_idx.size();
 #ifdef DEBUG_SPAN_DOUBLE_COSETS
-          std::cerr << "compute_stabs=true start=" << start << " len=" << len << "\n";
+          std::cerr << "ACC: compute_stabs=true start=" << start << " len=" << len << "\n";
 #endif
           for (size_t i_gen=0; i_gen<n_gen; i_gen++) {
             std::vector<size_t> const& perm = list_perm[i_gen];
@@ -1537,7 +1537,7 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
     }
   }
 #ifdef DEBUG_SPAN_DOUBLE_COSETS
-  std::cerr << "Returning |dcc_entries|=" << dcc_entries.size() << "\n";
+  std::cerr << "ACC: Returning |dcc_entries|=" << dcc_entries.size() << "\n";
 #endif
   return dcc_entries;
 }
@@ -1554,12 +1554,12 @@ private:
 public:
   InnerDoubleCosetComputer(StabChain<Telt,Tidx_label> const& G, StabChain<Telt,Tidx_label> const& U) {
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-    std::cerr << "InnerDoubleCosetComputer, constructor\n";
+    std::cerr << "ACC: InnerDoubleCosetComputer, constructor\n";
 #endif
     std::vector<StabChain<Telt,Tidx_label>> chain = Kernel_AscendingChainPair<Telt,Tidx_label,Tint>(U, G);
     n_level = chain.size() - 1;
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-    std::cerr << "InnerDoubleCosetComputer, n_level=" << n_level << "\n";
+    std::cerr << "ACC: InnerDoubleCosetComputer, n_level=" << n_level << "\n";
 #endif
     id = U->comm->identity;
     for (size_t i_level=0; i_level<n_level; i_level++) {
@@ -1570,7 +1570,7 @@ public:
       }
       bool is_normal = Kernel_IsNormalSubgroup(chain[i_level + 1], chain[i_level]);
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-      std::cerr << "i_level=" << i_level
+      std::cerr << "ACC: i_level=" << i_level
                 << " ord1=" << Order<Telt,Tidx_label,Tint>(chain[i_level])
                 << " ord2=" << Order<Telt,Tidx_label,Tint>(chain[i_level + 1])
                 << " |l_cos|=" << l_cos.size() << " is_normal=" << is_normal << "\n";
@@ -1579,13 +1579,13 @@ public:
       levels.push_back(level);
     }
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-    std::cerr << "---------------------------------------------------------\n";
+    std::cerr << "ACC: ---------------------------------------------------------\n";
 #endif
   }
   std::vector<KernelDccEntry<Telt>> double_cosets_kernel(StabChain<Telt,Tidx_label> const& V, bool const& do_last) const {
     std::vector<Telt> small_gens = Kernel_SmallGeneratingSet<Telt,Tidx_label,Tint>(V);
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-    std::cerr << "double_cosets |V|=" << Order<Telt,Tidx_label,Tint>(V) << " |small_gens|=" << small_gens.size() << "\n";
+    std::cerr << "ACC: double_cosets |V|=" << Order<Telt,Tidx_label,Tint>(V) << " |small_gens|=" << small_gens.size() << "\n";
 #endif
     KernelDccEntry<Telt> de{id, small_gens};
     std::vector<KernelDccEntry<Telt>> l_de{de};
@@ -1597,7 +1597,7 @@ public:
         compute_stabs = false;
       }
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-      std::cerr << "i_level=" << i_level << " compute_stabs=" << compute_stabs << " |l_de|=" << l_de.size() << "\n";
+      std::cerr << "ACC: i_level=" << i_level << " compute_stabs=" << compute_stabs << " |l_de|=" << l_de.size() << "\n";
 #endif
       std::vector<KernelDccEntry<Telt>> new_l_de;
       for (auto & de: l_de) {
@@ -1605,7 +1605,7 @@ public:
         new_l_de.insert(new_l_de.end(), elist.begin(), elist.end());
       }
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
-      std::cerr << "|new_l_de|=" << new_l_de.size() << "\n";
+      std::cerr << "ACC: |new_l_de|=" << new_l_de.size() << "\n";
 #endif
       l_de = new_l_de;
     }
@@ -1674,14 +1674,14 @@ void ExhaustiveCheck_DoubleCosets(StabChain<Telt,Tidx_label> const& G, StabChain
         }
       }
       if (the_int > 0) {
-        std::cerr << "Non-trivial insersection between i_dcc=" << i_dcc << " and j_dcc=" << j_dcc << " the_int=" << the_int << "\n";
+        std::cerr << "ACC: Non-trivial insersection between i_dcc=" << i_dcc << " and j_dcc=" << j_dcc << " the_int=" << the_int << "\n";
         throw PermutalibException{1};
       }
     }
   }
   if (n_elt_dcc != l_elt_g.size()) {
-    std::cerr << "n_elt_dcc=" << n_elt_dcc << " |l_elt_g|=" << l_elt_g.size() << "\n";
-    std::cerr << "The double cosets do not cover the full group\n";
+    std::cerr << "ACC: n_elt_dcc=" << n_elt_dcc << " |l_elt_g|=" << l_elt_g.size() << "\n";
+    std::cerr << "ACC: The double cosets do not cover the full group\n";
     throw PermutalibException{1};
   }
 }
@@ -1761,7 +1761,7 @@ void FastCheckIntersection_DoubleCosets(StabChain<Telt,Tidx_label> const& G, Sta
     for (size_t j_dcc=i_dcc+1; j_dcc<n_dcc; j_dcc++) {
       for (auto & eX : l_elts_dcc[i_dcc]) {
         if (l_elts_dcc[j_dcc].count(eX) == 1) {
-          std::cerr << "The intersection is not empty i_dcc=" << i_dcc << " j_dcc=" << j_dcc << "\n";
+          std::cerr << "ACC: The intersection is not empty i_dcc=" << i_dcc << " j_dcc=" << j_dcc << "\n";
           throw PermutalibException{1};
         }
       }
