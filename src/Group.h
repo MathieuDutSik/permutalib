@@ -131,7 +131,7 @@ public:
   }
   std::vector<KernelDccEntry<Telt>> double_cosets_and_stabilizers(Group<Telt,Tint> const& V) const {
     if (!option) {
-      std::cerr << "The function can only be used on the V side\n";
+      std::cerr << "GRP: The function can only be used on the V side\n";
       throw PermutalibException{1};
     }
     return inner.double_cosets_and_stabilizers(V.stab_chain());
@@ -537,7 +537,7 @@ PreImageSubgroupActionGen(std::vector<TeltMatr> const &ListMatrGens,
   std::unordered_set<TeltMatr> SetMatrGens;
   size_t nGen = ListMatrGens.size();
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-  std::cerr << "nCoset=" << nCoset << " |ListMatrGens|=" << nGen << "\n";
+  std::cerr << "GRP: nCoset=" << nCoset << " |ListMatrGens|=" << nGen << "\n";
 #endif
   for (size_t iCoset = 0; iCoset < nCoset; iCoset++) {
     Tobj const &x_cos = ListPair[iCoset].first;
@@ -555,12 +555,12 @@ PreImageSubgroupActionGen(std::vector<TeltMatr> const &ListMatrGens,
       TeltPerm eGenPerm_new = eGenPerm * eGenPerm_B * Inverse(eElt.second);
       Tobj x_test = f_op(x, eGenPerm_new);
       if (x_test != x) {
-        std::cerr << "iGen=" << iGen << " / " << nGen << "  iCoset=" << iCoset
+        std::cerr << "GRP: iGen=" << iGen << " / " << nGen << "  iCoset=" << iCoset
                   << " / " << nCoset << "\n";
-        std::cerr << "x_test=" << x_test << " x=" << x << "\n";
-        std::cerr << "eGenPerm=" << eGenPerm << "\n";
-        std::cerr << "eElt.second=" << eElt.second << "\n";
-        std::cerr << "eGenPerm_new=" << eGenPerm_new << "\n";
+        std::cerr << "GRP: x_test=" << x_test << " x=" << x << "\n";
+        std::cerr << "GRP: eGenPerm=" << eGenPerm << "\n";
+        std::cerr << "GRP: eElt.second=" << eElt.second << "\n";
+        std::cerr << "GRP: eGenPerm_new=" << eGenPerm_new << "\n";
         throw PermutalibException{1};
       }
 #endif
@@ -569,7 +569,7 @@ PreImageSubgroupActionGen(std::vector<TeltMatr> const &ListMatrGens,
     }
   }
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-  std::cerr << "|SetMatrGens|=" << SetMatrGens.size() << "\n";
+  std::cerr << "GRP: |SetMatrGens|=" << SetMatrGens.size() << "\n";
 #endif
   std::vector<TeltMatr> ListMatrGens_ret;
   for (auto &eGen : SetMatrGens)
@@ -630,8 +630,8 @@ Tgroup ReadGroupFromStream(std::istream& is) {
       is >> eVal_i;
       Tidx eVal = Tidx(eVal_i);
       if (eVal >= n) {
-        std::cerr << "Values is above range\n";
-        std::cerr << "i=" << int(i) << " n=" << int(n)
+        std::cerr << "GRP: Values is above range\n";
+        std::cerr << "GRP: i=" << int(i) << " n=" << int(n)
                   << " eVal=" << int(eVal) << "\n";
         throw permutalib::PermutalibException{1};
       }
@@ -648,7 +648,7 @@ template <typename Tgroup>
 Tgroup ReadGroupFromFile(std::string const& eFile) {
   std::ifstream is(eFile);
   if (!is.good()) {
-    std::cerr << "is stream is invalid, not possible to read eFile=" << eFile << "\n";
+    std::cerr << "GRP: is stream is invalid, not possible to read eFile=" << eFile << "\n";
     throw permutalib::PermutalibException{1};
   }
   return permutalib::ReadGroupFromStream<Tgroup>(is);
@@ -660,8 +660,8 @@ Face ConvertStringToFace(std::string const& s) {
   for (size_t i=0; i<n; i++) {
     std::string eChar = s.substr(i,1);
     if (eChar != "1" && eChar != "0") {
-      std::cerr << "We have eChar=" << eChar << "\n";
-      std::cerr << "Allowed values are 0 and 1\n";
+      std::cerr << "GRP: We have eChar=" << eChar << "\n";
+      std::cerr << "GRP: Allowed values are 0 and 1\n";
       throw permutalib::PermutalibException{1};
     }
     if (eChar == "1") {
@@ -780,7 +780,7 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
                                      TeltMatr const &id_matr, Face const &f1,
                                      Face const &f2) {
 #ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
-  std::cerr << "Beginning of RepresentativeActionMatrixPermSubset\n";
+  std::cerr << "GRP: Beginning of RepresentativeActionMatrixPermSubset\n";
 #endif
   using Tidx = typename TeltPerm::Tidx;
   using Tgroup = Group<TeltPerm, Tint>;
@@ -788,12 +788,12 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
   Tidx len = f1.size();
   Tgroup GRP(ListPermGens, len);
 #ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
-  std::cerr << "We have GRP\n";
-  std::cerr << "GRP=" << GRP.GapString() << "\n";
+  std::cerr << "GRP: We have GRP\n";
+  std::cerr << "GRP: GRP=" << GRP.GapString() << "\n";
 #endif
   std::optional<TeltPerm> opt = GRP.RepresentativeAction_OnSets(f1, f2);
 #ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
-  std::cerr << "We have opt\n";
+  std::cerr << "GRP: We have opt\n";
 #endif
   if (!opt)
     return {};
@@ -802,7 +802,7 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
   Tint OrbitSize = GRP.size() / TheStab.size();
   Tint CritSize = 10000;
 #ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
-  std::cerr << "We have OrbitSize=" << OrbitSize << " CritSize=" << CritSize << "\n";
+  std::cerr << "GRP: We have OrbitSize=" << OrbitSize << " CritSize=" << CritSize << "\n";
 #endif
   TeltPerm const &elt = *opt;
   size_t nGen = ListPermGens.size();
@@ -825,23 +825,22 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
       ListMatrGens_inv[iGen] = Inverse(ListMatrGens[iGen]);
     }
 #ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
-    std::cerr << "We have ListGensB\n";
+    std::cerr << "GRP: We have ListGensB\n";
 #endif
     TgroupB GRP_B(ListGensB, idB);
 #ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
-    std::cerr << "We have GRP_B\n";
+    std::cerr << "GRP: We have GRP_B\n";
 #endif
     Telt res = GRP_B.Sift(ePair);
 #ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
-    std::cerr << "We have res\n";
+    std::cerr << "GRP: We have res\n";
 #endif
     //  NicePrint("res", res);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    //  std::cerr << "Doing the check\n";
     std::vector<Tidx> const &V = res.getListVal();
     for (Tidx u = 0; u < len; u++) {
       if (V[u] != u) {
-        std::cerr << "The permutation residue is not the identity at u=" << u
+        std::cerr << "GRP: The permutation residue is not the identity at u=" << u
                   << "\n";
         throw PermutalibException{1};
       }
@@ -849,7 +848,7 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
 #endif
     Tseq ret_seq = Inverse(res.getElt());
 #ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
-    std::cerr << "We have ret_seq\n";
+    std::cerr << "GRP: We have ret_seq\n";
 #endif
     TeltMatr ret_matr = id_matr;
     const std::vector<int64_t>& ListIdx = ret_seq.getVect();
@@ -863,9 +862,8 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
       }
     }
 #ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
-    std::cerr << "We have ret_matr\n";
+    std::cerr << "GRP: We have ret_matr\n";
 #endif
-    //  std::cerr << "Returning from RepresentativeActionMatrixPermSubset\n";
     return ret_matr;
   };
   auto f_build_orbit=[&]() -> TeltMatr {
@@ -881,7 +879,7 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
     };
     auto f_get_elt=[&](size_t const& pos) -> TeltMatr {
 #ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
-      std::cerr << "Beginning of f_get_elt\n";
+      std::cerr << "GRP: Beginning of f_get_elt\n";
 #endif
       size_t curr_pos = pos;
       std::vector<size_t> ListIGen;
@@ -900,7 +898,7 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
         ret_matr *= ListMatrGens[iGen];
       }
 #ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
-      std::cerr << "End of f_get_elt\n";
+      std::cerr << "GRP: End of f_get_elt\n";
 #endif
       return ret_matr;
     };
@@ -909,7 +907,7 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
     while(true) {
       size_t len = l_x_iorig_igen.size();
 #ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
-      std::cerr << "n_done=" << n_done << " len=" << len << "\n";
+      std::cerr << "GRP: n_done=" << n_done << " len=" << len << "\n";
 #endif
       if (n_done == len)
         break;
@@ -927,7 +925,7 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
       }
       n_done = len;
     }
-    std::cerr << "We should never reach that stage\n";
+    std::cerr << "GRP: We should never reach that stage\n";
     throw PermutalibException{1};
   };
 
