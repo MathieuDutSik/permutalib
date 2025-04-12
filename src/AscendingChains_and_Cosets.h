@@ -1366,6 +1366,9 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
     stab_gens_std.push_back(gen_std);
   }
   std::vector<std::vector<size_t>> list_perm;
+#ifdef DEBUG_SPAN_DOUBLE_COSETS
+  size_t iGen = 0;
+#endif
   for (auto &eGen : stab_gens_std) {
     std::vector<size_t> perm;
     for (auto & eCos : dcse.l_cos) {
@@ -1381,13 +1384,14 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
       perm.push_back(pos);
     }
 #ifdef DEBUG_SPAN_DOUBLE_COSETS
-    std::cerr << "ACC: perm=[";
+    std::cerr << "ACC: iGen=" << iGen << "/" << stab_gens_std.size() << " perm=[";
     for (size_t i=0; i<perm.size(); i++) {
       if (i>0)
         std::cerr << ",";
       std::cerr << perm[i];
     }
     std::cerr << "]\n";
+    iGen += 1;
 #endif
     list_perm.emplace_back(std::move(perm));
   }
