@@ -1371,6 +1371,12 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
     for (auto & eCos : dcse.l_cos) {
       Telt prod = eCos * eGen;
       Telt prod_can = f_can(prod);
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+      if (dcse.map.count(prod_can) == 0) {
+        std::cerr << "ACC: span_double_cosets, missing entry in list_perm construction\n";
+        throw PermutalibException{1};
+      }
+#endif
       size_t pos = dcse.map.at(prod_can);
       perm.push_back(pos);
     }
