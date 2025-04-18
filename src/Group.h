@@ -744,8 +744,30 @@ PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
     }
   }
 #endif
-  return PreImageSubgroupAction<TeltPerm, TeltMatr, Tobj, decltype(f_op)>(
-      ListMatrGens, ListPermGens, id_matr, id_perm, pos_id, f_op);
+  std::unordered_set<TeltMatr> SetMatrGens;
+  auto f_insert_gen=[&](std::pair<TeltMatr, TeltPerm> const& pair) -> void {
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+    if (!eGRP.isin(pair.second)) {
+      std::cerr << "pair.second should belong to the subgroup eGRP\n";
+      throw PermutalibException{1};
+    }
+#endif
+    if (!IsIdentity(pair.first)) {
+      SetMatrGens.insert(pair.first);
+    }
+  };
+  PreImageSubgroupActionGenA<TeltPerm,TeltMatr,Tobj,decltype(f_op),decltype(f_insert_gen)>(ListMatrGens,
+                                                                                           ListPermGens,
+                                                                                           id_matr, id_perm,
+                                                                                           pos_id, f_op, f_insert_gen);
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+  std::cerr << "GRP: |SetMatrGens|=" << SetMatrGens.size() << "\n";
+#endif
+  std::vector<TeltMatr> VectMatrGens;
+  for (auto &eGen : SetMatrGens) {
+    VectMatrGens.push_back(eGen);
+  }
+  return VectMatrGens;
 }
 
 template <typename Tgroup>
