@@ -664,7 +664,8 @@ PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
       size_t pos = map.at(prod_can);
       eList.push_back(pos);
     }
-    return ePerm(eList);
+    Telt ePerm(eList);
+    return ePerm;
   };
   std::vector<Telt> ListPermGens_cos;
   for (auto & ePermGen : ListPermGens) {
