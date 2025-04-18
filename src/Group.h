@@ -661,6 +661,9 @@ PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
   size_t pos_id = map.at(id_can);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   std::cerr << "GRP: PreImageSubgroup, pos_id=" << pos_id << "\n";
+  using Tint = typename Tgroup::Tint;
+  std::cerr << "GRP: PreImageSubgroup, |GRP_big|=" << GRP_big.size() << " |eGRP|=" << eGRP.size() << "\n";
+  KernelCheckRightCosets<Telt, uint16_t, Tint>(GRP_big.stab_chain(), eGRP.stab_chain(), l_cos);
   auto f_map_elt=[&](Telt const& u) -> Telt {
     std::vector<Tidx> eList;
     for (auto & eCos : l_cos) {
