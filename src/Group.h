@@ -494,22 +494,17 @@ public:
   }
 };
 
-template <typename Tgroup, typename TeltMatr, typename Tobj, typename Fop>
-std::pair<std::vector<TeltMatr>,std::vector<std::pair<Tobj, std::pair<TeltMatr, typename Tgroup::Telt>>>>
+template <typename TeltPerm, typename TeltMatr, typename Tobj, typename Fop>
+std::pair<std::vector<TeltMatr>,std::vector<std::pair<Tobj, std::pair<TeltMatr, TeltPerm>>>>
 PreImageSubgroupActionGen(std::vector<TeltMatr> const &ListMatrGens,
-                          std::vector<typename Tgroup::Telt> const &ListPermGens,
-                          TeltMatr const &id_matr, Tgroup const &stab,
+                          std::vector<TeltPerm> const &ListPermGens,
+                          TeltMatr const &id_matr, TeltPerm const &id_perm,
                           Tobj const &x_start, Fop const &f_op) {
-  using TeltPerm = typename Tgroup::Telt;
-  using Tidx = typename TeltPerm::Tidx;
   using Telt = std::pair<TeltMatr, TeltPerm>;
   auto f_prod = [](Telt const &x, Telt const &y) -> Telt {
     return {x.first * y.first, x.second * y.second};
   };
   //
-  TeltPerm id_perm = stab.get_identity();
-  Tidx len = id_perm.size();
-  Tgroup GRP(ListPermGens, len);
   auto f_act = [&](Tobj const &x, Telt const &u) -> Tobj {
     return f_op(x, u.second);
   };
@@ -579,16 +574,16 @@ PreImageSubgroupActionGen(std::vector<TeltMatr> const &ListMatrGens,
   return {std::move(VectMatrGens), std::move(ListPair)};
 }
 
-template <typename Tgroup, typename TeltMatr, typename Tobj, typename Fop>
+template <typename TeltPerm, typename TeltMatr, typename Tobj, typename Fop>
 std::vector<TeltMatr>
 PreImageSubgroupAction(std::vector<TeltMatr> const &ListMatrGens,
-                       std::vector<typename Tgroup::Telt> const &ListPermGens,
-                       TeltMatr const &id_matr, Tgroup const &stab,
+                       std::vector<TeltPerm> const &ListPermGens,
+                       TeltMatr const &id_matr, TeltPerm const &id_perm,
                        Tobj const &x, Fop const &f_op) {
-  std::pair<std::vector<TeltMatr>,std::vector<std::pair<Tobj, std::pair<TeltMatr, typename Tgroup::Telt>>>> pair =
+  std::pair<std::vector<TeltMatr>,std::vector<std::pair<Tobj, std::pair<TeltMatr, TeltPerm>>>> pair =
     PreImageSubgroupActionGen(ListMatrGens,
                               ListPermGens,
-                              id_matr, stab,
+                              id_matr, id_perm,
                               x, f_op);
   return pair.first;
 }
@@ -599,10 +594,12 @@ PreImageSubgroupRightCosetAction(std::vector<TeltMatr> const &ListMatrGens,
                                  std::vector<typename Tgroup::Telt> const &ListPermGens,
                                  TeltMatr const &id_matr, Tgroup const &stab,
                                  Tobj const &x, Fop const &f_op) {
-  std::pair<std::vector<TeltMatr>,std::vector<std::pair<Tobj, std::pair<TeltMatr, typename Tgroup::Telt>>>> pair =
+  using TeltPerm = typename Tgroup::Telt;
+  TeltPerm id_perm = stab.get_identity();
+  std::pair<std::vector<TeltMatr>,std::vector<std::pair<Tobj, std::pair<TeltMatr, TeltPerm>>>> pair =
     PreImageSubgroupActionGen(ListMatrGens,
                               ListPermGens,
-                              id_matr, stab,
+                              id_matr, id_perm,
                               x, f_op);
   // Is it Right or Left cosets? Unclear at present.
   // But we for sure really want the right cosets.
@@ -631,6 +628,7 @@ PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
   using Tidx = typename Telt::Tidx;
   using Tobj = size_t;
   Tidx n_act = eGRP.n_act();
+  Telt id_perm = eGRP.get_identity();
   Tgroup GRP_big(ListPermGens, n_act);
   std::vector<Telt> l_cos = GRP_big.get_all_right_cosets(eGRP);
   size_t n_cos = l_cos.size();
@@ -712,12 +710,8 @@ PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
     }
   }
 #endif
-
-
-
-  
-  return PreImageSubgroupAction<Tgroup, TeltMatr, Tobj, decltype(f_op)>(
-      ListMatrGens, ListPermGens, id_matr, eGRP, pos_id, f_op);
+  return PreImageSubgroupAction<Telt, TeltMatr, Tobj, decltype(f_op)>(
+      ListMatrGens, ListPermGens, id_matr, id_perm, pos_id, f_op);
 }
 
 template <typename Tgroup>
