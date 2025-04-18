@@ -497,7 +497,7 @@ public:
 
 // The function f_op needs to satisfy
 // f_op(f_op(x, u), v)  =  f_op(x, u * v)
-  template <typename TeltPerm, typename TeltMatr, typename Tobj, typename Fop, typename FinsertGen>
+template <typename TeltPerm, typename TeltMatr, typename Tobj, typename Fop, typename FinsertGen>
 std::vector<std::pair<Tobj, std::pair<TeltMatr, TeltPerm>>>
 PreImageSubgroupActionGenA(std::vector<TeltMatr> const &ListMatrGens,
                            std::vector<TeltPerm> const &ListPermGens,
@@ -648,11 +648,11 @@ PreImageSubgroupRightCosetAction(std::vector<TeltMatr> const &ListMatrGens,
 //
 // If the number of cosets is too large, we can maybe
 // use an ascending chain.
-template <typename Tgroup, typename TeltMatr>
-std::vector<TeltMatr>
-PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
-                 std::vector<typename Tgroup::Telt> const &ListPermGens,
-                 TeltMatr const &id_matr, Tgroup const &eGRP) {
+template <typename Tgroup, typename TeltMatr, typename Finsert>
+void PreImageSubgroupKernel(std::vector<TeltMatr> const &ListMatrGens,
+                            std::vector<typename Tgroup::Telt> const &ListPermGens,
+                            TeltMatr const &id_matr, Tgroup const &eGRP,
+                            Finsert const& f_insert) {
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   using Tint = typename Tgroup::Tint;
 #endif
@@ -744,7 +744,6 @@ PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
     }
   }
 #endif
-  std::unordered_set<TeltMatr> SetMatrGens;
   auto f_insert_gen=[&](std::pair<TeltMatr, TeltPerm> const& pair) -> void {
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
     if (!eGRP.isin(pair.second)) {
@@ -753,13 +752,29 @@ PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
     }
 #endif
     if (!IsIdentity(pair.first)) {
-      SetMatrGens.insert(pair.first);
+      f_insert(pair);
     }
   };
   PreImageSubgroupActionGenA<TeltPerm,TeltMatr,Tobj,decltype(f_op),decltype(f_insert_gen)>(ListMatrGens,
                                                                                            ListPermGens,
                                                                                            id_matr, id_perm,
                                                                                            pos_id, f_op, f_insert_gen);
+}
+
+template <typename Tgroup, typename TeltMatr>
+std::vector<TeltMatr>
+PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
+                 std::vector<typename Tgroup::Telt> const &ListPermGens,
+                 TeltMatr const &id_matr, Tgroup const &eGRP) {
+  using TeltPerm = typename Tgroup::Telt;
+  std::unordered_set<TeltMatr> SetMatrGens;
+  auto f_insert=[&](std::pair<TeltMatr, TeltPerm> const& pair) -> void {
+    SetMatrGens.insert(pair.first);
+  };
+  PreImageSubgroupKernel<Tgroup,TeltMatr,decltype(f_insert)>(ListMatrGens,
+                                                             ListPermGens,
+                                                             id_matr, eGRP,
+                                                             f_insert);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   std::cerr << "GRP: |SetMatrGens|=" << SetMatrGens.size() << "\n";
 #endif
