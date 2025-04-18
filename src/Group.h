@@ -650,6 +650,15 @@ PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
     size_t pos = map.at(prod_can);
     return pos;
   };
+  Telt id = eGRP.get_identity();
+  Telt id_can = f_can(id);
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+  if (map.count(id_can) == 0) {
+    std::cerr << "GRP: PreImageSubgroup, missing entry in creation of id_can\n";
+    throw PermutalibException{1};
+  }
+#endif
+  size_t pos_id = map.at(id_can);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   auto f_map_elt=[&](Telt const& u) -> Telt {
     std::vector<Tidx> eList;
@@ -689,21 +698,12 @@ PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
   }
   for (auto & u: eGRP.GeneratorsOfGroup()) {
     Telt eImg = f_map_elt(u);
-    if (!eImg.isIdentity()) {
-      std::cerr << "eImg should be the identity, because u belojngs to the group and so the coset action should be trivial\n";
+    if (eImg.at(pos_id) != pos_id) {
+      std::cerr << "eImg should map pos_id to pos_id\n";
       throw PermutalibException{1};
     }
   }
 #endif
-  Telt id = eGRP.get_identity();
-  Telt id_can = f_can(id);
-#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-  if (map.count(id_can) == 0) {
-    std::cerr << "GRP: PreImageSubgroup, missing entry in creation of id_can\n";
-    throw PermutalibException{1};
-  }
-#endif
-  size_t pos_id = map.at(id_can);
   return PreImageSubgroupAction<Tgroup, TeltMatr, Tobj, decltype(f_op)>(
       ListMatrGens, ListPermGens, id_matr, eGRP, pos_id, f_op);
 }
