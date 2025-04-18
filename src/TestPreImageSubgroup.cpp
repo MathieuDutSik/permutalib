@@ -39,9 +39,11 @@ int main(int argc, char *argv[]) {
     std::vector<Telt> LGen_pre = permutalib::PreImageSubgroup<Tgroup,Telt>(ListPermGens, ListPermGens, id, GRP_sma);
     Tgroup PreGroup = Tgroup(LGen_pre, id);
     std::cerr << "|PreGroup|=" << PreGroup.size() << "\n";
-
-
-
+    if (PreGroup == GRP_sma) {
+      std::cerr << "The groups are equal\n";
+    } else {
+      std::cerr << "The groups are NOT equal\n";
+    }
     //
     std::cerr << "CPP Normal completion of the program\n";
   } catch (permutalib::PermutalibException const &e) {

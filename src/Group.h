@@ -611,7 +611,82 @@ PreImageSubgroupRightCosetAction(std::vector<TeltMatr> const &ListMatrGens,
   return {std::move(pair.first), std::move(RightCosets)};
 }
 
-
+// We compute the right cosets which are of the form
+// G = \cup_{c\in C} H c
+// with C the set of right cosets.
+//
+// If the number of cosets is too large, we can maybe
+// use an ascending chain.
+template <typename Tgroup, typename TeltMatr>
+std::vector<TeltMatr>
+PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
+                 std::vector<typename Tgroup::Telt> const &ListPermGens,
+                 TeltMatr const &id_matr, Tgroup const &eGRP) {
+  using Telt = typename Tgroup::Telt;
+  using Tidx = typename Telt::Tidx;
+  using Tobj = size_t;
+  Tidx n_act = eGRP.n_act();
+  Tgroup GRP_big(ListPermGens, n_act);
+  std::vector<Telt> l_cos = GRP_big.get_all_right_cosets(eGRP);
+  size_t n_cos = l_cos.size();
+  std::unordered_map<Telt, size_t> map;
+  auto f_can=[&](Telt const& x) -> Telt {
+    return MinimalElementCosetStabChain(eGRP.stab_chain(), x);
+  };
+  for (size_t i_cos=0; i_cos<n_cos; i_cos++) {
+    Telt const& e_cos = l_cos[i_cos];
+    Telt f_cos = f_can(e_cos);
+    map[f_cos] = i_cos;
+  }
+  auto f_op = [&](size_t const &x, Telt const &u) -> Tobj {
+    Telt prod = l_cos[x] * u;
+    Telt prod_can = f_can(prod);
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+    if (map.count(prod_can) == 0) {
+      std::cerr << "GRP: PreImageSubgroup, missing entry for f_op\n";
+      throw PermutalibException{1};
+    }
+#endif
+    size_t pos = map.at(prod_can);
+    return pos;
+  };
+  auto f_map_elt=[&](Telt const& u) -> Telt {
+    std::vector<Tidx> eList;
+    for (auto & eCos : l_cos) {
+      Telt prod = eCos * u;
+      Telt prod_can = f_can(prod);
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+      if (map.count(prod_can) == 0) {
+        std::cerr << "GRP: PreImageSubgroup, missing entry in creation of ListPermGens_cos\n";
+        throw PermutalibException{1};
+      }
+#endif
+      size_t pos = map.at(prod_can);
+      eList.push_back(pos);
+    }
+    return ePerm(eList);
+  };
+  std::vector<Telt> ListPermGens_cos;
+  for (auto & ePermGen : ListPermGens) {
+    ListPermGens_cos.push_back(f_map_elt(ePermGen));
+  }
+  Telt id = eGRP.get_identity();
+  Telt id_can = f_can(id);
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+  if (map.count(id_can) == 0) {
+    std::cerr << "GRP: PreImageSubgroup, missing entry in creation of id_can\n";
+    throw PermutalibException{1};
+  }
+#endif
+  size_t pos_id = map.at(id_can);
+  std::vector<Telt> eGRP_gens_cos;
+  for (auto & u: eGRP.GeneratorsOfGroup()) {
+    eGRP_gens_cos.push_back(f_map_elt(u));
+  }
+  Tgroup eGRP_cos(eGRP_gens_cos, n_cos);
+  return PreImageSubgroupAction<Tgroup, TeltMatr, Tobj, decltype(f_op)>(
+      ListMatrGens, ListPermGens_cos, id_matr, eGRP_cos, pos_id, f_op);
+}
 
 template <typename Tgroup>
 Tgroup ReadGroupFromStream(std::istream& is) {
@@ -669,70 +744,6 @@ Face ConvertStringToFace(std::string const& s) {
     }
   }
   return f;
-}
-
-template <typename Tgroup, typename TeltMatr>
-std::vector<TeltMatr>
-PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
-                 std::vector<typename Tgroup::Telt> const &ListPermGens,
-                 TeltMatr const &id_matr, Tgroup const &eGRP) {
-  using Telt = typename Tgroup::Telt;
-  using Tidx = typename Telt::Tidx;
-  using Tobj = size_t;
-  Tidx n_act = eGRP.n_act();
-  Tgroup GRP_big(ListPermGens, n_act);
-  std::vector<Telt> l_cos = GRP_big.get_all_right_cosets(eGRP);
-  size_t n_cos = l_cos.size();
-  std::unordered_map<Telt, size_t> map;
-  auto f_can=[&](Telt const& x) -> Telt {
-    return MinimalElementCosetStabChain(eGRP.stab_chain(), x);
-  };
-  for (size_t i_cos=0; i_cos<n_cos; i_cos++) {
-    Telt const& e_cos = l_cos[i_cos];
-    Telt f_cos = f_can(e_cos);
-    map[f_cos] = i_cos;
-  }
-  auto f_op = [&](size_t const &x, Telt const &u) -> Tobj {
-    Telt prod = l_cos[x] * u;
-    Telt prod_can = f_can(prod);
-#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    if (map.count(prod_can) == 0) {
-      std::cerr << "GRP: PreImageSubgroup, missing entry for f_op\n";
-      throw PermutalibException{1};
-    }
-#endif
-    size_t pos = map.at(prod_can);
-    return pos;
-  };
-  std::vector<Telt> ListPermGens_cos;
-  for (auto & ePermGen : ListPermGens) {
-    std::vector<Tidx> eList;
-    for (auto & eCos : l_cos) {
-      Telt prod = eCos * ePermGen;
-      Telt prod_can = f_can(prod);
-#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-      if (map.count(prod_can) == 0) {
-        std::cerr << "GRP: PreImageSubgroup, missing entry in creation of ListPermGens_cos\n";
-        throw PermutalibException{1};
-      }
-#endif
-      size_t pos = map.at(prod_can);
-      eList.push_back(pos);
-    }
-    Telt ePerm(eList);
-    ListPermGens_cos.push_back(ePerm);
-  }
-  Telt id = eGRP.get_identity();
-  Telt id_can = f_can(id);
-#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-  if (map.count(id_can) == 0) {
-    std::cerr << "GRP: PreImageSubgroup, missing entry in creation of id_can\n";
-    throw PermutalibException{1};
-  }
-#endif
-  size_t pos_id = map.at(id_can);
-  return PreImageSubgroupAction<Tgroup, TeltMatr, Tobj, decltype(f_op)>(
-      ListMatrGens, ListPermGens, id_matr, eGRP, pos_id, f_op);
 }
 
 template <typename TeltPerm, typename TeltMatr, typename Tint>
