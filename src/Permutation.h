@@ -329,6 +329,7 @@ DoubleSidedPerm<Tidx> operator*(DoubleSidedPerm<Tidx> const &v1,
   size_t siz = v1.size();
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   if (siz != v2.size()) {
+    std::cerr << "siz=" << siz << " |v2.size()|=" << v2.size() << "\n";
     std::cerr << "Error in the DoubleSidedPerm product\n";
     throw PermutalibException{1};
   }

@@ -650,27 +650,51 @@ PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
     size_t pos = map.at(prod_can);
     return pos;
   };
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   auto f_map_elt=[&](Telt const& u) -> Telt {
     std::vector<Tidx> eList;
     for (auto & eCos : l_cos) {
       Telt prod = eCos * u;
       Telt prod_can = f_can(prod);
-#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
       if (map.count(prod_can) == 0) {
         std::cerr << "GRP: PreImageSubgroup, missing entry in creation of ListPermGens_cos\n";
         throw PermutalibException{1};
       }
-#endif
       size_t pos = map.at(prod_can);
       eList.push_back(pos);
     }
     Telt ePerm(eList);
     return ePerm;
   };
-  std::vector<Telt> ListPermGens_cos;
+  size_t n_act_s = n_act;
+  auto f_big_map_elt=[&](Telt const& u) -> Telt {
+    std::vector<Tidx> eListBig(n_act_s + n_cos);
+    Telt u_img = f_map_elt(u);
+    for (Tidx i_act=0; i_act<n_act; i_act++) {
+      eListBig[i_act] = u.at(i_act);
+    }
+    for (size_t i_cos=0; i_cos<n_cos; i_cos++) {
+      eListBig[n_act_s + i_cos] = n_act_s + u_img.at(i_cos);
+    }
+    return Telt(eListBig);
+  };
+  std::vector<Telt> ListPermGens_cos_dir;
   for (auto & ePermGen : ListPermGens) {
-    ListPermGens_cos.push_back(f_map_elt(ePermGen));
+    ListPermGens_cos_dir.push_back(f_big_map_elt(ePermGen));
   }
+  Tgroup FullGRPcos_dir(ListPermGens_cos_dir, n_act + n_cos);
+  if (FullGRPcos_dir.size() != GRP_big.size()) {
+    std::cerr << "GRP: PreImageSubgroup, FullGRPcos_dir should be equal to GRP_big in size\n";
+    throw PermutalibException{1};
+  }
+  for (auto & u: eGRP.GeneratorsOfGroup()) {
+    Telt eImg = f_map_elt(u);
+    if (!eImg.isIdentity()) {
+      std::cerr << "eImg should be the identity, because u belojngs to the group and so the coset action should be trivial\n";
+      throw PermutalibException{1};
+    }
+  }
+#endif
   Telt id = eGRP.get_identity();
   Telt id_can = f_can(id);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
@@ -680,13 +704,8 @@ PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
   }
 #endif
   size_t pos_id = map.at(id_can);
-  std::vector<Telt> eGRP_gens_cos;
-  for (auto & u: eGRP.GeneratorsOfGroup()) {
-    eGRP_gens_cos.push_back(f_map_elt(u));
-  }
-  Tgroup eGRP_cos(eGRP_gens_cos, n_cos);
   return PreImageSubgroupAction<Tgroup, TeltMatr, Tobj, decltype(f_op)>(
-      ListMatrGens, ListPermGens_cos, id_matr, eGRP_cos, pos_id, f_op);
+      ListMatrGens, ListPermGens, id_matr, eGRP, pos_id, f_op);
 }
 
 template <typename Tgroup>
