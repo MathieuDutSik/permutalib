@@ -499,7 +499,7 @@ std::pair<std::vector<TeltMatr>,std::vector<std::pair<Tobj, std::pair<TeltMatr, 
 PreImageSubgroupActionGen(std::vector<TeltMatr> const &ListMatrGens,
                           std::vector<typename Tgroup::Telt> const &ListPermGens,
                           TeltMatr const &id_matr, Tgroup const &stab,
-                          Tobj const &x, Fop const &f_op) {
+                          Tobj const &x_start, Fop const &f_op) {
   using TeltPerm = typename Tgroup::Telt;
   using Tidx = typename TeltPerm::Tidx;
   using Telt = std::pair<TeltMatr, TeltPerm>;
@@ -519,7 +519,7 @@ PreImageSubgroupActionGen(std::vector<TeltMatr> const &ListMatrGens,
     ListGens.push_back({ListMatrGens[iGen], ListPermGens[iGen]});
   }
   std::vector<std::pair<Tobj, Telt>> ListPair =
-      OrbitPairEltRepr(ListGens, id, x, f_prod, f_act);
+      OrbitPairEltRepr(ListGens, id, x_start, f_prod, f_act);
   std::unordered_map<Tobj, Telt> map;
   for (auto &kv : ListPair) {
     map[kv.first] = kv.second;
@@ -541,31 +541,32 @@ PreImageSubgroupActionGen(std::vector<TeltMatr> const &ListMatrGens,
 #endif
   for (size_t iCoset = 0; iCoset < nCoset; iCoset++) {
     Tobj const &x_cos = ListPair[iCoset].first;
-    TeltMatr const &eGenMatr = ListPair[iCoset].second.first;
+    TeltMatr const &eCosMatr = ListPair[iCoset].second.first;
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-    TeltPerm const &eGenPerm = ListPair[iCoset].second.second;
+    TeltPerm const &eCosPerm = ListPair[iCoset].second.second;
 #endif
     for (size_t iGen = 0; iGen < nGen; iGen++) {
       TeltMatr const &eGenMatr_B = ListMatrGens[iGen];
       TeltPerm const &eGenPerm_B = ListPermGens[iGen];
       Tobj x_img = f_op(x_cos, eGenPerm_B);
       Telt const &eElt = map[x_img];
-      TeltMatr eGenMatr_new = eGenMatr * eGenMatr_B * Inverse(eElt.first);
+      TeltMatr eGenMatr_new = eCosMatr * eGenMatr_B * Inverse(eElt.first);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-      TeltPerm eGenPerm_new = eGenPerm * eGenPerm_B * Inverse(eElt.second);
-      Tobj x_test = f_op(x, eGenPerm_new);
-      if (x_test != x) {
+      TeltPerm eGenPerm_new = eCosPerm * eGenPerm_B * Inverse(eElt.second);
+      Tobj x_test = f_op(x_start, eGenPerm_new);
+      if (x_test != x_start) {
         std::cerr << "GRP: iGen=" << iGen << " / " << nGen << "  iCoset=" << iCoset
                   << " / " << nCoset << "\n";
-        std::cerr << "GRP: x_test=" << x_test << " x=" << x << "\n";
-        std::cerr << "GRP: eGenPerm=" << eGenPerm << "\n";
+        std::cerr << "GRP: x_test=" << x_test << " x_start=" << x_start << "\n";
+        std::cerr << "GRP: eCosPerm=" << eCosPerm << "\n";
         std::cerr << "GRP: eElt.second=" << eElt.second << "\n";
         std::cerr << "GRP: eGenPerm_new=" << eGenPerm_new << "\n";
         throw PermutalibException{1};
       }
 #endif
-      if (!IsIdentity(eGenMatr_new))
+      if (!IsIdentity(eGenMatr_new)) {
         SetMatrGens.insert(eGenMatr_new);
+      }
     }
   }
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
@@ -622,6 +623,9 @@ std::vector<TeltMatr>
 PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
                  std::vector<typename Tgroup::Telt> const &ListPermGens,
                  TeltMatr const &id_matr, Tgroup const &eGRP) {
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+  using Tint = typename Tgroup::Tint;
+#endif
   using Telt = typename Tgroup::Telt;
   using Tidx = typename Telt::Tidx;
   using Tobj = size_t;
@@ -661,7 +665,6 @@ PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
   size_t pos_id = map.at(id_can);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   std::cerr << "GRP: PreImageSubgroup, pos_id=" << pos_id << "\n";
-  using Tint = typename Tgroup::Tint;
   std::cerr << "GRP: PreImageSubgroup, |GRP_big|=" << GRP_big.size() << " |eGRP|=" << eGRP.size() << "\n";
   KernelCheckRightCosets<Telt, uint16_t, Tint>(GRP_big.stab_chain(), eGRP.stab_chain(), l_cos);
   auto f_map_elt=[&](Telt const& u) -> Telt {
@@ -708,6 +711,10 @@ PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
     }
   }
 #endif
+
+
+
+  
   return PreImageSubgroupAction<Tgroup, TeltMatr, Tobj, decltype(f_op)>(
       ListMatrGens, ListPermGens, id_matr, eGRP, pos_id, f_op);
 }
