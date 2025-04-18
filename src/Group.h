@@ -518,6 +518,15 @@ PreImageSubgroupActionGen(std::vector<TeltMatr> const &ListMatrGens,
   }
   std::vector<std::pair<Tobj, Telt>> ListPair =
       OrbitPairEltRepr(ListGens, id, x_start, f_prod, f_act);
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+  for (auto & ePair : ListPair) {
+    Tobj img = f_act(x_start, ePair.second);
+    if (img != ePair.first) {
+      std::cerr << "img does not match the element\n";
+      throw PermutalibException{1};
+    }
+  }
+#endif
   std::unordered_map<Tobj, Telt> map;
   for (auto &kv : ListPair) {
     map[kv.first] = kv.second;
