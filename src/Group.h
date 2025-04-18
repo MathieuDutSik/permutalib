@@ -546,36 +546,37 @@ PreImageSubgroupActionGen(std::vector<TeltMatr> const &ListMatrGens,
     TeltPerm const &eCosPerm = ListPair[iCoset].second.second;
 #endif
     for (size_t iGen = 0; iGen < nGen; iGen++) {
-      TeltMatr const &eGenMatr_B = ListMatrGens[iGen];
-      TeltPerm const &eGenPerm_B = ListPermGens[iGen];
-      Tobj x_img = f_op(x_cos, eGenPerm_B);
+      TeltMatr const &eGenMatr = ListMatrGens[iGen];
+      TeltPerm const &eGenPerm = ListPermGens[iGen];
+      Tobj x_img = f_op(x_cos, eGenPerm);
       Telt const &eElt = map[x_img];
-      TeltMatr eGenMatr_new = eCosMatr * eGenMatr_B * Inverse(eElt.first);
+      TeltMatr eGenStabMatr = eCosMatr * eGenMatr * Inverse(eElt.first);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-      TeltPerm eGenPerm_new = eCosPerm * eGenPerm_B * Inverse(eElt.second);
-      Tobj x_test = f_op(x_start, eGenPerm_new);
+      TeltPerm eGenStabPerm = eCosPerm * eGenPerm * Inverse(eElt.second);
+      Tobj x_test = f_op(x_start, eGenStabPerm);
       if (x_test != x_start) {
         std::cerr << "GRP: iGen=" << iGen << " / " << nGen << "  iCoset=" << iCoset
                   << " / " << nCoset << "\n";
         std::cerr << "GRP: x_test=" << x_test << " x_start=" << x_start << "\n";
         std::cerr << "GRP: eCosPerm=" << eCosPerm << "\n";
         std::cerr << "GRP: eElt.second=" << eElt.second << "\n";
-        std::cerr << "GRP: eGenPerm_new=" << eGenPerm_new << "\n";
+        std::cerr << "GRP: eGenStabPerm=" << eGenStabPerm << "\n";
         throw PermutalibException{1};
       }
 #endif
-      if (!IsIdentity(eGenMatr_new)) {
-        SetMatrGens.insert(eGenMatr_new);
+      if (!IsIdentity(eGenStabMatr)) {
+        SetMatrGens.insert(eGenStabMatr);
       }
     }
   }
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   std::cerr << "GRP: |SetMatrGens|=" << SetMatrGens.size() << "\n";
 #endif
-  std::vector<TeltMatr> ListMatrGens_ret;
-  for (auto &eGen : SetMatrGens)
-    ListMatrGens_ret.push_back(eGen);
-  return {std::move(ListMatrGens_ret), std::move(ListPair)};
+  std::vector<TeltMatr> VectMatrGens;
+  for (auto &eGen : SetMatrGens) {
+    VectMatrGens.push_back(eGen);
+  }
+  return {std::move(VectMatrGens), std::move(ListPair)};
 }
 
 template <typename Tgroup, typename TeltMatr, typename Tobj, typename Fop>
