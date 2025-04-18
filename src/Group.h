@@ -660,6 +660,7 @@ PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
 #endif
   size_t pos_id = map.at(id_can);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+  std::cerr << "GRP: PreImageSubgroup, pos_id=" << pos_id << "\n";
   auto f_map_elt=[&](Telt const& u) -> Telt {
     std::vector<Tidx> eList;
     for (auto & eCos : l_cos) {
