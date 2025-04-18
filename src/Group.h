@@ -494,6 +494,9 @@ public:
   }
 };
 
+
+// The function f_op needs to satisfy
+// f_op(u, f_op(v, x)) = f_op(u * v, x)
 template <typename TeltPerm, typename TeltMatr, typename Tobj, typename Fop>
 std::pair<std::vector<TeltMatr>,std::vector<std::pair<Tobj, std::pair<TeltMatr, TeltPerm>>>>
 PreImageSubgroupActionGen(std::vector<TeltMatr> const &ListMatrGens,
@@ -642,7 +645,7 @@ PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
     map[f_cos] = i_cos;
   }
   auto f_op = [&](size_t const &x, TeltPerm const &u) -> Tobj {
-    TeltPerm prod = l_cos[x] * u;
+    TeltPerm prod = l_cos[x] * Inverse(u);
     TeltPerm prod_can = f_can(prod);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
     if (map.count(prod_can) == 0) {
@@ -682,6 +685,8 @@ PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
     return ePerm;
   };
   size_t n_act_s = n_act;
+  size_t n_act_tot = n_act_s + n_cos;
+  std::cerr << "GRP: PreImageSubgroup, n_act_tot=" << n_act_tot << "\n";
   auto f_big_map_elt=[&](TeltPerm const& u) -> TeltPerm {
     std::vector<Tidx> eListBig(n_act_s + n_cos);
     TeltPerm u_img = f_map_elt(u);
