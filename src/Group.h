@@ -785,6 +785,33 @@ PreImageSubgroup(std::vector<TeltMatr> const &ListMatrGens,
   return VectMatrGens;
 }
 
+
+
+template <typename Tgroup, typename TeltMatr>
+std::vector<std::pair<TeltMatr, typename Tgroup::Telt>>
+PreImageSubgroupTotal(std::vector<TeltMatr> const &ListMatrGens,
+                      std::vector<typename Tgroup::Telt> const &ListPermGens,
+                      TeltMatr const &id_matr, Tgroup const &eGRP) {
+  using TeltPerm = typename Tgroup::Telt;
+  using Telt = std::pair<TeltMatr, TeltPerm>;
+  std::unordered_set<Telt> SetGens;
+  auto f_insert=[&](Telt const& pair) -> void {
+    SetGens.insert(pair);
+  };
+  PreImageSubgroupKernel<Tgroup,TeltMatr,decltype(f_insert)>(ListMatrGens,
+                                                             ListPermGens,
+                                                             id_matr, eGRP,
+                                                             f_insert);
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+  std::cerr << "GRP: |SetGens|=" << SetGens.size() << "\n";
+#endif
+  std::vector<Telt> VectGens;
+  for (auto &eGen : SetGens) {
+    VectGens.push_back(eGen);
+  }
+  return VectGens;
+}
+
 template <typename Tgroup>
 Tgroup ReadGroupFromStream(std::istream& is) {
   using Telt = typename Tgroup::Telt;
