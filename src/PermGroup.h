@@ -299,9 +299,9 @@ std::vector<Tobj> Orbit(std::vector<Telt> const &ListGen, Tobj const &x,
 template <typename Telt, typename Tobj, typename Fprod, typename Fact>
 std::vector<std::pair<Tobj, Telt>>
 OrbitPairEltRepr(std::vector<Telt> const &ListGen, Telt const &id,
-                 Tobj const &x, Fprod f_prod, Fact f_act) {
-  std::vector<std::pair<Tobj, Telt>> ListPair{{x, id}};
-  std::unordered_set<Tobj> SetObj{x};
+                 Tobj const &x_start, Fprod f_prod, Fact f_act) {
+  std::vector<std::pair<Tobj, Telt>> ListPair{{x_start, id}};
+  std::unordered_set<Tobj> SetObj{x_start};
   size_t curr_pos = 0;
   while (true) {
     size_t len = ListPair.size();
@@ -321,6 +321,13 @@ OrbitPairEltRepr(std::vector<Telt> const &ListGen, Telt const &id,
           Telt eProd = f_prod(ListPair[u].second, eElt);
           ListPair.push_back({eImg, eProd});
           SetObj.insert(eImg);
+#ifdef DEBUG_PERM_GROUP
+          Tobj x_img = f_act(x_start, eProd);
+          if (x_img != eImg) {
+            std::cerr << "GRP: Inconsistency in image x_img=" << x_img << " eImg=" << eImg << "\n";
+            throw PermutalibException{1};
+          }
+#endif
         }
 #ifdef DEBUG_PERM_GROUP
         i_elt += 1;
