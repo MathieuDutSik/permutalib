@@ -672,7 +672,7 @@ void PreImageSubgroupKernel(std::vector<TeltMatr> const &ListMatrGens,
     map[f_cos] = i_cos;
   }
   auto f_op = [&](size_t const &x, TeltPerm const &u) -> Tobj {
-    TeltPerm prod = l_cos[x] * Inverse(u);
+    TeltPerm prod = l_cos[x] * u;
     TeltPerm prod_can = f_can(prod);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
     if (map.count(prod_can) == 0) {
