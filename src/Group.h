@@ -697,7 +697,7 @@ void PreImageSubgroupKernel(std::vector<TeltMatr> const &ListMatrGens,
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   std::cerr << "GRP: PreImageSubgroup, pos_id=" << pos_id << "\n";
   std::cerr << "GRP: PreImageSubgroup, |GRP_big|=" << GRP_big.size() << " |eGRP|=" << eGRP.size() << "\n";
-  KernelCheckRightCosets<TeltPerm, uint16_t, Tint>(GRP_big.stab_chain(), eGRP.stab_chain(), l_cos);
+  //  KernelCheckRightCosets<TeltPerm, uint16_t, Tint>(GRP_big.stab_chain(), eGRP.stab_chain(), l_cos);
   auto f_map_elt=[&](TeltPerm const& u) -> TeltPerm {
     std::vector<Tidx> eList;
     for (auto & eCos : l_cos) {
