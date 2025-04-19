@@ -550,9 +550,7 @@ PreImageSubgroupActionGenA(std::vector<TeltMatr> const &ListMatrGens,
   for (size_t iCoset = 0; iCoset < nCoset; iCoset++) {
     Tobj const &x_cos = ListPair[iCoset].first;
     TeltMatr const &eCosMatr = ListPair[iCoset].second.first;
-#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
     TeltPerm const &eCosPerm = ListPair[iCoset].second.second;
-#endif
     for (size_t iGen = 0; iGen < nGen; iGen++) {
       TeltMatr const &eGenMatr = ListMatrGens[iGen];
       TeltPerm const &eGenPerm = ListPermGens[iGen];
