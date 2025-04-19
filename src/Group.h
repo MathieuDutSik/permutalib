@@ -523,7 +523,8 @@ PreImageSubgroupActionGenA(std::vector<TeltMatr> const &ListMatrGens,
   for (auto & ePair : ListPair) {
     Tobj img = f_act(x_start, ePair.second);
     if (img != ePair.first) {
-      std::cerr << "img does not match the element\n";
+      std::cerr << "GRP: |ListPair|=" << ListPair.size() << "\n";
+      std::cerr << "GRP: img does not match the element\n";
       throw PermutalibException{1};
     }
   }
@@ -653,9 +654,6 @@ void PreImageSubgroupKernel(std::vector<TeltMatr> const &ListMatrGens,
                             std::vector<typename Tgroup::Telt> const &ListPermGens,
                             TeltMatr const &id_matr, Tgroup const &eGRP,
                             Finsert const& f_insert) {
-#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-  using Tint = typename Tgroup::Tint;
-#endif
   using TeltPerm = typename Tgroup::Telt;
   using Tidx = typename TeltPerm::Tidx;
   using Tobj = size_t;
@@ -697,7 +695,7 @@ void PreImageSubgroupKernel(std::vector<TeltMatr> const &ListMatrGens,
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   std::cerr << "GRP: PreImageSubgroup, pos_id=" << pos_id << "\n";
   std::cerr << "GRP: PreImageSubgroup, |GRP_big|=" << GRP_big.size() << " |eGRP|=" << eGRP.size() << "\n";
-  //  KernelCheckRightCosets<TeltPerm, uint16_t, Tint>(GRP_big.stab_chain(), eGRP.stab_chain(), l_cos);
+  //  KernelCheckRightCosets<TeltPerm, uint16_t, typename Tgroup::Tint>(GRP_big.stab_chain(), eGRP.stab_chain(), l_cos);
   auto f_map_elt=[&](TeltPerm const& u) -> TeltPerm {
     std::vector<Tidx> eList;
     for (auto & eCos : l_cos) {

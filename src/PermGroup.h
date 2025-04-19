@@ -10,6 +10,10 @@
 #include <utility>
 #include <vector>
 
+#ifdef DEBUG
+#define DEBUG_PERM_GROUP
+#endif
+
 namespace permutalib {
 
 //
@@ -301,16 +305,26 @@ OrbitPairEltRepr(std::vector<Telt> const &ListGen, Telt const &id,
   size_t curr_pos = 0;
   while (true) {
     size_t len = ListPair.size();
-    if (curr_pos == len)
+    if (curr_pos == len) {
       break;
+    }
     for (size_t u = curr_pos; u < len; u++) {
+#ifdef DEBUG_PERM_GROUP
+      size_t i_elt = 0;
+#endif
       for (auto &eElt : ListGen) {
         Tobj eImg = f_act(ListPair[u].first, eElt);
         if (SetObj.count(eImg) == 0) {
+#ifdef DEBUG_PERM_GROUP
+          std::cerr << "GRP: INSERT u=" << u << " curr_pos=" << curr_pos << " len=" << len << " i_elt=" << i_elt << "\n";
+#endif
           Telt eProd = f_prod(ListPair[u].second, eElt);
           ListPair.push_back({eImg, eProd});
           SetObj.insert(eImg);
         }
+#ifdef DEBUG_PERM_GROUP
+        i_elt += 1;
+#endif
       }
     }
     curr_pos = len;
