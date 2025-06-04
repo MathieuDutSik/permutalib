@@ -610,6 +610,24 @@ PreImageSubgroupActionGen(std::vector<TeltMatr> const &ListMatrGens,
   return {std::move(VectMatrGens), std::move(ListPair)};
 }
 
+template<typename TeltMatr>
+struct SeqTracker {
+  TeltMatr x;
+  SequenceType<true> seq;
+};
+
+template<typename TeltMatr>
+bool IsIdentity(SeqTracker<TeltMatr> const& v) {
+  return IsIdentity(v.x);
+}
+
+template<typename TeltMatr>
+SeqTracker<TeltMatr> operator*(SeqTracker<TeltMatr> const& v1, SeqTracker<TeltMatr> const& v2) {
+  TeltMatr x = v1.x * v2.x;
+  SequenceType<true> seq = v1.seq * v2.seq;
+  return {x, seq};
+}
+
 template <typename TeltPerm, typename TeltMatr, typename Tobj, typename Fop>
 std::vector<TeltMatr>
 PreImageSubgroupAction(std::vector<TeltMatr> const &ListMatrGens,
@@ -618,7 +636,7 @@ PreImageSubgroupAction(std::vector<TeltMatr> const &ListMatrGens,
                        Tobj const &x, Fop const &f_op) {
 #ifdef DEBUG_PRE_IMAGE_COMPLEXITY
   using Tseq = SequenceType<true>;
-  using TeltMatrComb = std::pair<TeltMatr, Tseq>;
+  using TeltMatrComb = SeqTracker<TeltMatr>;
   std::vector<TeltMatrComb> ListMatrGensComb;
   for (size_t i_elt=0; i_elt<ListMatrGens.size(); i_elt++) {
     std::vector<int64_t> ListIdx{int64_t(i_elt) + 1};
