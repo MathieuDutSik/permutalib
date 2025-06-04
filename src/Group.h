@@ -628,6 +628,13 @@ SeqTracker<TeltMatr> operator*(SeqTracker<TeltMatr> const& v1, SeqTracker<TeltMa
   return {x, seq};
 }
 
+template<typename TeltMatr>
+SeqTracker<TeltMatr> Inverse(SeqTracker<TeltMatr> const& v) {
+  TeltMatr x = Inverse(v.x);
+  SequenceType<true> seq = Inverse(v.seq);
+  return {x, seq};
+}
+
 template <typename TeltPerm, typename TeltMatr, typename Tobj, typename Fop>
 std::vector<TeltMatr>
 PreImageSubgroupAction(std::vector<TeltMatr> const &ListMatrGens,
@@ -656,8 +663,8 @@ PreImageSubgroupAction(std::vector<TeltMatr> const &ListMatrGens,
   size_t linf_complexity = 0;
   std::vector<TeltMatr> list_ret;
   for (auto & epair: pair.first) {
-    list_ret.push_back(epair.first);
-    size_t comp = epair.second.complexity();
+    list_ret.push_back(epair.x);
+    size_t comp = epair.seq.complexity();
     l1_complexity += comp;
     linf_complexity = std::max(linf_complexity, comp);
   }
