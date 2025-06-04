@@ -623,6 +623,8 @@ struct SeqTracker {
     std::vector<int64_t> ListIdx;
     seq = SequenceType<true>(ListIdx);
   }
+  SeqTracker(TeltMatr const& _x, SequenceType<true> const& _seq) : x(_x), seq(_seq) {
+  }
 };
 
 template<typename TeltMatr>
@@ -634,14 +636,19 @@ template<typename TeltMatr>
 SeqTracker<TeltMatr> operator*(SeqTracker<TeltMatr> const& v1, SeqTracker<TeltMatr> const& v2) {
   TeltMatr x = v1.x * v2.x;
   SequenceType<true> seq = v1.seq * v2.seq;
-  return {x, seq};
+  return SeqTracker(x, seq);
+}
+
+template<typename TeltMatr>
+bool operator==(SeqTracker<TeltMatr> const& v1, SeqTracker<TeltMatr> const& v2) {
+  return v1.x == v2.x;
 }
 
 template<typename TeltMatr>
 SeqTracker<TeltMatr> Inverse(SeqTracker<TeltMatr> const& v) {
   TeltMatr x = Inverse(v.x);
   SequenceType<true> seq = Inverse(v.seq);
-  return {x, seq};
+  return SeqTracker(x, seq);
 }
 
 template <typename TeltPerm, typename TeltMatr, typename Tobj, typename Fop>
@@ -657,12 +664,12 @@ PreImageSubgroupAction(std::vector<TeltMatr> const &ListMatrGens,
   for (size_t i_elt=0; i_elt<ListMatrGens.size(); i_elt++) {
     std::vector<int64_t> ListIdx{int64_t(i_elt) + 1};
     Tseq seq(ListIdx);
-    TeltMatrComb eComb{ListMatrGens[i_elt], seq};
+    TeltMatrComb eComb(ListMatrGens[i_elt], seq);
     ListMatrGensComb.push_back(eComb);
   }
   std::vector<int64_t> ListIdx{};
   Tseq seq(ListIdx);
-  TeltMatrComb id_matrComb{id_matr, seq};
+  TeltMatrComb id_matrComb(id_matr, seq);
   std::pair<std::vector<TeltMatrComb>,std::vector<std::pair<Tobj, std::pair<TeltMatrComb, TeltPerm>>>> pair =
     PreImageSubgroupActionGen<TeltPerm,TeltMatrComb,Tobj,Fop>(ListMatrGensComb,
                               ListPermGens,
