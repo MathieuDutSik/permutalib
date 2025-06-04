@@ -620,16 +620,19 @@ PreImageSubgroupAction(std::vector<TeltMatr> const &ListMatrGens,
   using Tseq = SequenceType<true>;
   using TeltMatrComb = std::pair<TeltMatr, Tseq>;
   std::vector<TeltMatrComb> ListMatrGensComb;
-  for (auto i_elt=0; i_elt<ListMatrGens.size(); i_elt++) {
+  for (size_t i_elt=0; i_elt<ListMatrGens.size(); i_elt++) {
     std::vector<int64_t> ListIdx{int64_t(i_elt) + 1};
     Tseq seq(ListIdx);
     TeltMatrComb eComb{ListMatrGens[i_elt], seq};
     ListMatrGensComb.push_back(eComb);
   }
+  std::vector<int64_t> ListIdx{};
+  Tseq seq(ListIdx);
+  TeltMatrComb id_matrComb{id_matr, seq};
   std::pair<std::vector<TeltMatrComb>,std::vector<std::pair<Tobj, std::pair<TeltMatrComb, TeltPerm>>>> pair =
     PreImageSubgroupActionGen<TeltPerm,TeltMatrComb,Tobj,Fop>(ListMatrGensComb,
                               ListPermGens,
-                              id_matr, id_perm,
+                              id_matrComb, id_perm,
                               x, f_op);
   size_t l1_complexity = 0;
   size_t linf_complexity = 0;
