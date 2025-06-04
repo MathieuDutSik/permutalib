@@ -98,6 +98,11 @@
 
  */
 
+
+
+
+
+
 namespace permutalib {
 
 template <typename Telt>
@@ -614,6 +619,10 @@ template<typename TeltMatr>
 struct SeqTracker {
   TeltMatr x;
   SequenceType<true> seq;
+  SeqTracker() {
+    std::vector<int64_t> ListIdx;
+    seq = SequenceType<true>(ListIdx);
+  }
 };
 
 template<typename TeltMatr>
@@ -1281,5 +1290,21 @@ std::istream &operator>>(std::istream &is, permutalib::Group<Telt, Tint> &grp) {
 
 // clang-format off
 }  // namespace permutalib
+
+
+
+
+namespace std {
+  template <typename TeltMatr> struct hash<permutalib::SeqTracker<TeltMatr>> {
+    std::size_t operator()(const permutalib::SeqTracker<TeltMatr> &v) const {
+      return std::hash<TeltMatr>()(v.x);
+    }
+  };
+// clang-format off
+}  // namespace std
+// clang-format on
+
+
+
 #endif  // SRC_GAP_GROUP_H_
 // clang-format on
