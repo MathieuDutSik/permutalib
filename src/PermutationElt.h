@@ -78,6 +78,9 @@ void SimplifySequence(std::vector<T> & V)
   V.resize(n_ent);
 }
 
+
+
+
 #ifdef DEBUG_PERMUTATION_ELT
 void PrintListIdx(std::string const& mesg, std::vector<int64_t> const& ListIdx) {
   size_t len = ListIdx.size();
@@ -103,7 +106,6 @@ bool IsSimplifiable(std::vector<T> const& V)
   }
   return false;
 }
-
 
 template<bool always_equal>
 struct SequenceType {
@@ -163,10 +165,12 @@ struct SequenceType {
   std::vector<int64_t>& getVect() {
     return ListIdx;
   }
+  size_t complexity() const {
+    return ListIdx.size();
+  }
 private:
   std::vector<int64_t> ListIdx;
 };
-
 
 template<bool always_equal>
 SequenceType<always_equal> operator*(SequenceType<always_equal> const& v1, SequenceType<always_equal> const& v2) {

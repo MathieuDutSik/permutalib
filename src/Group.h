@@ -34,6 +34,11 @@
 #include <boost/serialization/split_member.hpp>
 #include <boost/serialization/utility.hpp>
 
+#ifdef DEBUG
+#define DEBUG_STABCHAINMAIN
+#define DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
+#endif
+
 /*
   The Group class is far too rigid for us.
   ---We cannot handle different sizes occurring in some algorithm like
@@ -611,12 +616,40 @@ PreImageSubgroupAction(std::vector<TeltMatr> const &ListMatrGens,
                        std::vector<TeltPerm> const &ListPermGens,
                        TeltMatr const &id_matr, TeltPerm const &id_perm,
                        Tobj const &x, Fop const &f_op) {
+#ifdef DEBUG_PRE_IMAGE_COMPLEXITY
+  using Tseq = SequenceType<true>;
+  using TeltMatrComb = std::pair<TeltMatr, Tseq>;
+  std::vector<TeltMatrComb> ListMatrGensComb;
+  for (auto i_elt=0; i_elt<ListMatrGens.size(); i_elt++) {
+    std::vector<int64_t> ListIdx{int64_t(i_elt) + 1};
+    Tseq seq(ListIdx);
+    TeltMatrComb eComb{ListMatrGens[i_elt], seq};
+    ListMatrGensComb.push_back(eComb);
+  }
+  std::pair<std::vector<TeltMatrComb>,std::vector<std::pair<Tobj, std::pair<TeltMatrComb, TeltPerm>>>> pair =
+    PreImageSubgroupActionGen(ListMatrGens,
+                              ListPermGens,
+                              id_matr, id_perm,
+                              x, f_op);
+  size_t l1_complexity = 0;
+  size_t linf_complexity = 0;
+  std::vector<TeltMatr> list_ret;
+  for (auto & epair: pair.first) {
+    list_ret.push_back(epair.first);
+    size_t comp = epair.second.complexity();
+    l1_complexity += comp;
+    linf_complexity = std::max(linf_complexity, comp);
+  }
+  std::cerr << "permutalib::PreImageSubgroupAction, l1_complexity=" << l1_complexity << " linf_complexity=" << linf_complexity << "\n";
+  return list_ret;
+#else
   std::pair<std::vector<TeltMatr>,std::vector<std::pair<Tobj, std::pair<TeltMatr, TeltPerm>>>> pair =
     PreImageSubgroupActionGen(ListMatrGens,
                               ListPermGens,
                               id_matr, id_perm,
                               x, f_op);
   return pair.first;
+#endif
 }
 
 template <typename Tgroup, typename TeltMatr, typename Tobj, typename Fop>
@@ -983,6 +1016,9 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
     std::cerr << "GRP: We have ret_seq\n";
 #endif
     TeltMatr ret_matr = id_matr;
+#ifdef DEBUG_PRE_IMAGE_COMPLEXITY
+    std::cerr << "GRP: RepresentativeActionMatrixPermSubset, comp(ret_seq)=" << ret_seq.complexity() << "\n";
+#endif
     const std::vector<int64_t>& ListIdx = ret_seq.getVect();
     for (auto & eIdx : ListIdx) {
       if (eIdx > 0) {
@@ -1112,6 +1148,9 @@ public:
         return {};
       }
       Tseq ret_seq = Inverse(res.getElt());
+#ifdef DEBUG_PRE_IMAGE_COMPLEXITY
+      std::cerr << "GRP: get_preimage, comp(ret_seq)=" << ret_seq.complexity() << "\n";
+#endif
       TeltMatr ret_matr = id_matr;
       const std::vector<int64_t>& ListIdx = ret_seq.getVect();
       for (auto & eIdx : ListIdx) {
