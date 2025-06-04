@@ -627,7 +627,7 @@ PreImageSubgroupAction(std::vector<TeltMatr> const &ListMatrGens,
     ListMatrGensComb.push_back(eComb);
   }
   std::pair<std::vector<TeltMatrComb>,std::vector<std::pair<Tobj, std::pair<TeltMatrComb, TeltPerm>>>> pair =
-    PreImageSubgroupActionGen(ListMatrGens,
+    PreImageSubgroupActionGen<TeltPerm,TeltMatrComb,Tobj,Fop>(ListMatrGensComb,
                               ListPermGens,
                               id_matr, id_perm,
                               x, f_op);
@@ -644,7 +644,7 @@ PreImageSubgroupAction(std::vector<TeltMatr> const &ListMatrGens,
   return list_ret;
 #else
   std::pair<std::vector<TeltMatr>,std::vector<std::pair<Tobj, std::pair<TeltMatr, TeltPerm>>>> pair =
-    PreImageSubgroupActionGen(ListMatrGens,
+    PreImageSubgroupActionGen<TeltPerm,TeltMatr,Tobj,Fop>(ListMatrGens,
                               ListPermGens,
                               id_matr, id_perm,
                               x, f_op);
