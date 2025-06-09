@@ -286,7 +286,7 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
   std::cerr << "|NORM: Kernel_SmallGeneratingSet, final_update|=" << time << "\n";
 #endif
 #ifdef DEBUG_SMALL_GENERATING_SET
-  std::cerr << "NORM: |orb|=" << orb.size() << "\n";
+  std::cerr << "NORM: |gens2|=" << gens2.size() << "\n";
   std::cerr << "NORM: n_check_correctness_gens=" << n_check_correctness_gens << "\n";
 #endif
   return gens2;
