@@ -132,7 +132,11 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
   Telt id = G->comm->identity;
   Tidx n = id.size();
   std::unordered_set<Telt> gens_set;
-  for (auto &eGen : Kernel_GeneratorsOfGroup(G))
+  std::vector<Telt> start_gens = Kernel_GeneratorsOfGroup(G);
+#ifdef DEBUG_SMALL_GENERATING_SET
+  std::cerr << "NORM: Step 1, |start_gens|=" << start_gens.size() << "\n";
+#endif
+  for (auto &eGen : start_gens)
     if (!eGen.isIdentity())
       gens_set.insert(eGen);
   std::vector<Telt> gens;
@@ -145,7 +149,7 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
     return gens;
   }
 #ifdef DEBUG_SMALL_GENERATING_SET
-  std::cerr << "NORM: |gens|=" << gens.size() << "\n";
+  std::cerr << "NORM: Step 2, |gens|=" << gens.size() << "\n";
 #endif
   std::vector<Tidx> bas = BaseStabChain(G);
 #ifdef TIMINGS_SMALL_GENERATING_SET
@@ -176,15 +180,15 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
   std::cerr << "|NORM: Kernel_SmallGeneratingSet, gens2|=" << time << "\n";
 #endif
 #ifdef DEBUG_SMALL_GENERATING_SET
-  std::cerr << "NORM: |gens2|=" << gens2.size() << "\n";
+  std::cerr << "NORM: Step 3, |gens2|=" << gens2.size() << "\n";
 #endif
 
   std::vector<Tidx> LMoved = MovedPoints(gens2, n);
 #ifdef TIMINGS_SMALL_GENERATING_SET
-  std::cerr << "NORM: |NORM: Kernel_SmallGeneratingSet, LMoved|=" << time << "\n";
+  std::cerr << "|NORM: Kernel_SmallGeneratingSet, LMoved|=" << time << "\n";
 #endif
 #ifdef DEBUG_SMALL_GENERATING_SET
-  std::cerr << "NORM: |LMoved|=" << LMoved.size() << "\n";
+  std::cerr << "NORM: |LMoved|=" << LMoved.size() << " n=" << static_cast<size_t>(n) << "\n";
 #endif
   std::vector<std::vector<Tidx>> orb = OrbitsPerms(gens2, n, LMoved);
 #ifdef TIMINGS_SMALL_GENERATING_SET
@@ -265,6 +269,10 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
 #ifdef TIMINGS_SMALL_GENERATING_SET
   std::cerr << "|NORM: Kernel_SmallGeneratingSet, update_iife|=" << time << "\n";
 #endif
+#ifdef DEBUG_SMALL_GENERATING_SET
+  std::cerr << "NORM: Step 4, |gens2|=" << gens2.size() << "\n";
+  std::cerr << "NORM: n_check_correctness_gens(A)=" << n_check_correctness_gens << "\n";
+#endif
 
   size_t i = 1;
 
@@ -286,8 +294,8 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
   std::cerr << "|NORM: Kernel_SmallGeneratingSet, final_update|=" << time << "\n";
 #endif
 #ifdef DEBUG_SMALL_GENERATING_SET
-  std::cerr << "NORM: |gens2|=" << gens2.size() << "\n";
-  std::cerr << "NORM: n_check_correctness_gens=" << n_check_correctness_gens << "\n";
+  std::cerr << "NORM: Step 5, |gens2|=" << gens2.size() << "\n";
+  std::cerr << "NORM: n_check_correctness_gens(B)=" << n_check_correctness_gens << "\n";
 #endif
   return gens2;
 }
