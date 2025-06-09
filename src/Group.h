@@ -39,6 +39,10 @@
 #define DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
 #endif
 
+#ifdef TIMINGS
+#define TIMINGS_PRE_IMAGE
+#endif
+
 /*
   The Group class is far too rigid for us.
   ---We cannot handle different sizes occurring in some algorithm like
@@ -522,6 +526,9 @@ PreImageSubgroupActionGenA(std::vector<TeltMatr> const &ListMatrGens,
   auto f_act = [&](Tobj const &x, Telt const &u) -> Tobj {
     return f_op(x, u.second);
   };
+#ifdef TIMINGS_PRE_IMAGE
+  MicrosecondTime_perm time;
+#endif
   Telt id{id_matr, id_perm};
   std::vector<Telt> ListGens;
   for (size_t iGen = 0; iGen < ListMatrGens.size(); iGen++) {
@@ -529,6 +536,9 @@ PreImageSubgroupActionGenA(std::vector<TeltMatr> const &ListMatrGens,
   }
   std::vector<std::pair<Tobj, Telt>> ListPair =
       OrbitPairEltRepr(ListGens, id, x_start, f_prod, f_act);
+#ifdef TIMINGS_PRE_IMAGE
+  std::cerr << "|GRP: PreImageSubgroupActionGenA, OrbitPairEltRepr|=" << time << "\n";
+#endif
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   for (auto & ePair : ListPair) {
     Tobj img = f_act(x_start, ePair.second);
@@ -538,11 +548,17 @@ PreImageSubgroupActionGenA(std::vector<TeltMatr> const &ListMatrGens,
       throw PermutalibException{1};
     }
   }
+# ifdef TIMINGS_PRE_IMAGE
+  std::cerr << "|GRP: PreImageSubgroupActionGenA, check ListPair|=" << time << "\n";
+# endif
 #endif
   std::unordered_map<Tobj, Telt> map;
   for (auto &kv : ListPair) {
     map[kv.first] = kv.second;
   }
+#ifdef TIMINGS_PRE_IMAGE
+  std::cerr << "|GRP: PreImageSubgroupActionGenA, map|=" << time << "\n";
+#endif
   size_t nCoset = ListPair.size();
   //
   // We are using the Schreier lemma
@@ -554,6 +570,9 @@ PreImageSubgroupActionGenA(std::vector<TeltMatr> const &ListMatrGens,
   // is the stabilizer then we get O = x G = { x r1 , ..... , x rN }
   //
   size_t nGen = ListMatrGens.size();
+#ifdef TIMINGS_PRE_IMAGE
+  std::cerr << "|GRP: PreImageSubgroupActionGenA, nGen|=" << time << "\n";
+#endif
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   std::cerr << "GRP: nCoset=" << nCoset << " |ListMatrGens|=" << nGen << "\n";
 #endif
@@ -584,6 +603,9 @@ PreImageSubgroupActionGenA(std::vector<TeltMatr> const &ListMatrGens,
       f_insert_gen(pair);
     }
   }
+#ifdef TIMINGS_PRE_IMAGE
+  std::cerr << "|GRP: PreImageSubgroupActionGenA, f_insert oper|=" << time << "\n";
+#endif
   return ListPair;
 }
 
@@ -751,7 +773,7 @@ void PreImageSubgroupKernel(std::vector<TeltMatr> const &ListMatrGens,
     TeltPerm prod_can = f_can(prod);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
     if (map.count(prod_can) == 0) {
-      std::cerr << "GRP: PreImageSubgroup, missing entry for f_op\n";
+      std::cerr << "GRP: PreImageSubgroupKernel, missing entry for f_op\n";
       throw PermutalibException{1};
     }
 #endif
@@ -762,14 +784,14 @@ void PreImageSubgroupKernel(std::vector<TeltMatr> const &ListMatrGens,
   TeltPerm id_can = f_can(id);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
   if (map.count(id_can) == 0) {
-    std::cerr << "GRP: PreImageSubgroup, missing entry in creation of id_can\n";
+    std::cerr << "GRP: PreImageSubgroupKernel, missing entry in creation of id_can\n";
     throw PermutalibException{1};
   }
 #endif
   size_t pos_id = map.at(id_can);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-  std::cerr << "GRP: PreImageSubgroup, pos_id=" << pos_id << "\n";
-  std::cerr << "GRP: PreImageSubgroup, |GRP_big|=" << GRP_big.size() << " |eGRP|=" << eGRP.size() << "\n";
+  std::cerr << "GRP: PreImageSubgroupKernel, pos_id=" << pos_id << "\n";
+  std::cerr << "GRP: PreImageSubgroupKernel, |GRP_big|=" << GRP_big.size() << " |eGRP|=" << eGRP.size() << "\n";
   //  KernelCheckRightCosets<TeltPerm, uint16_t, typename Tgroup::Tint>(GRP_big.stab_chain(), eGRP.stab_chain(), l_cos);
   auto f_map_elt=[&](TeltPerm const& u) -> TeltPerm {
     std::vector<Tidx> eList;
@@ -777,7 +799,7 @@ void PreImageSubgroupKernel(std::vector<TeltMatr> const &ListMatrGens,
       TeltPerm prod = eCos * u;
       TeltPerm prod_can = f_can(prod);
       if (map.count(prod_can) == 0) {
-        std::cerr << "GRP: PreImageSubgroup, missing entry in creation of ListPermGens_cos\n";
+        std::cerr << "GRP: PreImageSubgroupKernel, missing entry in creation of ListPermGens_cos\n";
         throw PermutalibException{1};
       }
       size_t pos = map.at(prod_can);
@@ -788,7 +810,7 @@ void PreImageSubgroupKernel(std::vector<TeltMatr> const &ListMatrGens,
   };
   size_t n_act_s = n_act;
   size_t n_act_tot = n_act_s + n_cos;
-  std::cerr << "GRP: PreImageSubgroup, n_act_tot=" << n_act_tot << "\n";
+  std::cerr << "GRP: PreImageSubgroupKernel, n_act_tot=" << n_act_tot << "\n";
   auto f_big_map_elt=[&](TeltPerm const& u) -> TeltPerm {
     std::vector<Tidx> eListBig(n_act_s + n_cos);
     TeltPerm u_img = f_map_elt(u);
@@ -806,7 +828,7 @@ void PreImageSubgroupKernel(std::vector<TeltMatr> const &ListMatrGens,
   }
   Tgroup FullGRPcos_dir(ListPermGens_cos_dir, n_act + n_cos);
   if (FullGRPcos_dir.size() != GRP_big.size()) {
-    std::cerr << "GRP: PreImageSubgroup, FullGRPcos_dir should be equal to GRP_big in size\n";
+    std::cerr << "GRP: PreImageSubgroupKernel, FullGRPcos_dir should be equal to GRP_big in size\n";
     throw PermutalibException{1};
   }
   for (auto & u: eGRP.GeneratorsOfGroup()) {
