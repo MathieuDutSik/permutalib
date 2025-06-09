@@ -754,10 +754,16 @@ void PreImageSubgroupKernel(std::vector<TeltMatr> const &ListMatrGens,
   using TeltPerm = typename Tgroup::Telt;
   using Tidx = typename TeltPerm::Tidx;
   using Tobj = size_t;
+#ifdef TIMINGS_PRE_IMAGE
+  MicrosecondTime_perm time;
+#endif
   Tidx n_act = eGRP.n_act();
   TeltPerm id_perm = eGRP.get_identity();
   Tgroup GRP_big(ListPermGens, n_act);
   std::vector<TeltPerm> l_cos = GRP_big.get_all_right_cosets(eGRP);
+#ifdef TIMINGS_PRE_IMAGE
+  std::cerr << "|GRP: PreImageSubgroupKernel, l_cos|=" << time << "\n";
+#endif
   size_t n_cos = l_cos.size();
   std::unordered_map<TeltPerm, size_t> map;
   auto f_can=[&](TeltPerm const& x) -> TeltPerm {
@@ -768,6 +774,9 @@ void PreImageSubgroupKernel(std::vector<TeltMatr> const &ListMatrGens,
     TeltPerm f_cos = f_can(e_cos);
     map[f_cos] = i_cos;
   }
+#ifdef TIMINGS_PRE_IMAGE
+  std::cerr << "|GRP: PreImageSubgroupKernel, map|=" << time << "\n";
+#endif
   auto f_op = [&](size_t const &x, TeltPerm const &u) -> Tobj {
     TeltPerm prod = l_cos[x] * u;
     TeltPerm prod_can = f_can(prod);
@@ -850,6 +859,9 @@ void PreImageSubgroupKernel(std::vector<TeltMatr> const &ListMatrGens,
       f_insert(pair);
     }
   };
+#ifdef TIMINGS_PRE_IMAGE
+  std::cerr << "|GRP: PreImageSubgroupKernel, pre_work|=" << time << "\n";
+#endif
   PreImageSubgroupActionGenA<TeltPerm,TeltMatr,Tobj,decltype(f_op),decltype(f_insert_gen)>(ListMatrGens,
                                                                                            ListPermGens,
                                                                                            id_matr, id_perm,
