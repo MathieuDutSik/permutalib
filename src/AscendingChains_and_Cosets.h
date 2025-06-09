@@ -211,6 +211,9 @@ std::optional<std::vector<Telt>>
 Kernel_RightTransversal_Direct_f(StabChain<Telt, Tidx_label> const &G,
                                  StabChain<Telt, Tidx_label> const &H,
                                  Fterminate f_terminate) {
+#ifdef TIMINGS_ASCENDING_CHAINS_COSETS
+  MicrosecondTime_perm time;
+#endif
   std::vector<Telt> ListTransversal;
   std::unordered_map<Telt, uint8_t> map;
   auto fInsert = [&](Telt const &x) -> void {
@@ -222,10 +225,19 @@ Kernel_RightTransversal_Direct_f(StabChain<Telt, Tidx_label> const &G,
     }
   };
   Telt id = G->comm->identity;
+#ifdef TIMINGS_ASCENDING_CHAINS_COSETS
+  std::cerr << "|ACC: Kernel_RightTransversal_Direct_f, id|=" << time << "\n";
+#endif
   std::vector<Telt> LGen = Kernel_SmallGeneratingSet<Telt,Tidx_label,Tint>(G);
+#ifdef TIMINGS_ASCENDING_CHAINS_COSETS
+  std::cerr << "|ACC: Kernel_RightTransversal_Direct_f, LGen|=" << time << "\n";
+#endif
   Tint size_G = Order<Telt,Tidx_label,Tint>(G);
   Tint size_H = Order<Telt,Tidx_label,Tint>(H);
   Tint index = size_G / size_H;
+#ifdef TIMINGS_ASCENDING_CHAINS_COSETS
+  std::cerr << "|ACC: Kernel_RightTransversal_Direct_f, size_G / size_H / index|=" << time << "\n";
+#endif
   if (f_terminate(id)) {
     return {};
   }
@@ -275,6 +287,9 @@ Kernel_RightTransversal_Direct_f(StabChain<Telt, Tidx_label> const &G,
     std::cerr << "ACC: The enumeration found a wrong number of cosets\n";
     throw PermutalibException{1};
   }
+#endif
+#ifdef TIMINGS_ASCENDING_CHAINS_COSETS
+  std::cerr << "|ACC: Kernel_RightTransversal_Direct_f, ListTransversal|=" << time << "\n";
 #endif
   return ListTransversal;
 }
@@ -786,6 +801,9 @@ std::optional<StabChain<Telt, Tidx_label>> Kernel_AscendingChain_All(AscendingEn
 template <typename Telt, typename Tidx_label, typename Tint>
 std::vector<StabChain<Telt, Tidx_label>> Kernel_AscendingChainPair(StabChain<Telt, Tidx_label> const &H,
                                                                    StabChain<Telt, Tidx_label> const &G) {
+#ifdef TIMINGS_ASCENDING_CHAINS_COSETS
+  MicrosecondTime_perm time_total;
+#endif
   AscendingEntry<Telt,Tidx_label,Tint> ent_H = get_ascending_entry<Telt,Tidx_label,Tint>(H);
   AscendingEntry<Telt,Tidx_label,Tint> ent_G = get_ascending_entry<Telt,Tidx_label,Tint>(G);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
@@ -848,6 +866,9 @@ std::vector<StabChain<Telt, Tidx_label>> Kernel_AscendingChainPair(StabChain<Tel
       throw PermutalibException{1};
     }
   }
+#endif
+#ifdef TIMINGS_ASCENDING_CHAINS_COSETS
+  std::cerr << "|ACC: Kernel_AscendingChainPair|=" << time_total << "\n";
 #endif
   return chain;
 }
@@ -1049,6 +1070,9 @@ public:
     std::cerr << "ACC: RightCosetIterator, begin constructor\n";
 #endif
     std::vector<StabChain<Telt,Tidx_label>> chain = Kernel_AscendingChainPair<Telt,Tidx_label,Tint>(H, G);
+#ifdef TIMINGS_ASCENDING_CHAINS_COSETS
+    std::cerr << "|ACC: RightCosetIterator, chain|=" << time << "\n";
+#endif
     n_level = chain.size() - 1;
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
     std::cerr << "ACC: n_level=" << n_level << "\n";
@@ -1057,6 +1081,9 @@ public:
     }
 #endif
     result = G->comm->identity;
+#ifdef TIMINGS_ASCENDING_CHAINS_COSETS
+    std::cerr << "|ACC: RightCosetIterator, result|=" << time << "\n";
+#endif
     for (size_t i_level=0; i_level<n_level; i_level++) {
       std::vector<Telt> l_cos = Kernel_RightTransversal_Direct<Telt,Tidx_label,Tint>(chain[i_level + 1], chain[i_level]);
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
@@ -1071,6 +1098,9 @@ public:
       l_size.push_back(l_cos.size());
       l_pos.push_back(0);
     }
+#ifdef TIMINGS_ASCENDING_CHAINS_COSETS
+    std::cerr << "|ACC: RightCosetIterator, ll_cos / l_size / l_pos|=" << time << "\n";
+#endif
     is_end = false;
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
     std::cerr << "ACC: RightCosetIterator, exit\n";
