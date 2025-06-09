@@ -1066,6 +1066,9 @@ private:
   }
 public:
   RightCosetIterator(StabChain<Telt,Tidx_label> const& H, StabChain<Telt,Tidx_label> const& G) {
+#ifdef TIMINGS_ASCENDING_CHAINS_COSETS
+  MicrosecondTime_perm time;
+#endif
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
     std::cerr << "ACC: RightCosetIterator, begin constructor\n";
 #endif
