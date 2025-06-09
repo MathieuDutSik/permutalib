@@ -217,20 +217,35 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
   size_t n_check_correctness_gens = 0;
 #endif
   auto check_correctness_gens = [&](const std::vector<Telt> &LGen) -> bool {
+#ifdef TIMINGS_SMALL_GENERATING_SET
+    MicrosecondTime_perm time2;
+#endif
 #ifdef DEBUG_SMALL_GENERATING_SET
     n_check_correctness_gens += 1;
 #endif
     if (LMoved.size() != MovedPoints(LGen, n).size())
       return false;
+#ifdef TIMINGS_SMALL_GENERATING_SET
+    std::cerr << "|NORM: check_correctness_gens, LMoved|=" << time << "\n";
+#endif
     if (orb.size() != OrbitsPerms(LGen, n, LMoved).size())
       return false;
+#ifdef TIMINGS_SMALL_GENERATING_SET
+    std::cerr << "|NORM: check_correctness_gens, OrbitsPerms|=" << time << "\n";
+#endif
     for (auto &i_orb : orp)
       if (!IsPrimitive_Subset(LGen, orb[i_orb], n))
         return false;
+#ifdef TIMINGS_SMALL_GENERATING_SET
+    std::cerr << "|NORM: check_correctness_gens, IsPrimitive_Subset|=" << time << "\n";
+#endif
     StabChainOptions<Tint, Telt> options = GetStandardOptions<Tint, Telt>(id);
     StabChain<Telt, Tidx_label> U =
         StabChainOp_listgen<Telt, Tidx_label, Tint>(LGen, options);
     Tint order_U = Order<Telt, Tidx_label, Tint>(U);
+#ifdef TIMINGS_SMALL_GENERATING_SET
+    std::cerr << "|NORM: check_correctness_gens, order_U|=" << time << "\n";
+#endif
     return order_G == order_U;
   };
 
