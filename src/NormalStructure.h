@@ -97,9 +97,9 @@ Kernel_DerivedSubgroup(const StabChain<Telt, Tidx_label> &G) {
 }
 
 template <typename Telt>
-bool IsPrimitive_Subset(const std::vector<Telt> &LGen,
-                        const std::vector<typename Telt::Tidx> &subset,
-                        const typename Telt::Tidx &n) {
+size_t NrBlocks_Subset(const std::vector<Telt> &LGen,
+                       const std::vector<typename Telt::Tidx> &subset,
+                       const typename Telt::Tidx &n) {
   using Tidx = typename Telt::Tidx;
   std::vector<Tidx> subset_rev(n);
   Tidx len = Tidx(subset.size());
@@ -118,7 +118,14 @@ bool IsPrimitive_Subset(const std::vector<Telt> &LGen,
     gensB.emplace_back(eElt);
   }
   std::vector<std::vector<Tidx>> blocks = Blocks(gensB, len);
-  return blocks.size() == 1;
+  return blocks.size();
+}
+
+template <typename Telt>
+bool IsPrimitive_Subset(const std::vector<Telt> &LGen,
+                       const std::vector<typename Telt::Tidx> &subset,
+                       const typename Telt::Tidx &n) {
+  return NrBlocks_Subset(LGen, subset, n);
 }
 
 template <typename Telt, typename Tidx_label, typename Tint>
@@ -184,6 +191,7 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
 #endif
 
   std::vector<Tidx> LMoved = MovedPoints(gens2, n);
+  size_t n_moved = LMoved.size();
 #ifdef TIMINGS_SMALL_GENERATING_SET
   std::cerr << "|NORM: Kernel_SmallGeneratingSet, LMoved|=" << time << "\n";
 #endif
@@ -198,12 +206,13 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
   std::cerr << "NORM: |orb|=" << orb.size() << "\n";
 #endif
   size_t n_orb = orb.size();
-  std::vector<size_t> orp;
-  for (size_t i_orb = 0; i_orb < n_orb; i_orb++)
-    if (IsPrimitive_Subset(gens2, orb[i_orb], n))
-      orp.push_back(i_orb);
+  std::vector<size_t> l_nblock;
+  for (size_t i_orb = 0; i_orb < n_orb; i_orb++) {
+    size_t n_block = NrBlocks_Subset(gens2, orb[i_orb], n);
+    l_nblock.push_back(n_block);
+  }
 #ifdef TIMINGS_SMALL_GENERATING_SET
-  std::cerr << "|NORM: Kernel_SmallGeneratingSet, orp|=" << time << "\n";
+  std::cerr << "|NORM: Kernel_SmallGeneratingSet, l_nblock|=" << time << "\n";
 #endif
 
   Tint order_G = Order<Telt, Tidx_label, Tint>(G);
@@ -216,6 +225,18 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
   std::cerr << "NORM: |LFact|=" << LFact.size() << "\n";
   size_t n_check_correctness_gens = 0;
 #endif
+  bool is_comm = Kernel_IsCommutativeGenerators(gens2, bas);
+  auto test_comm=[&](std::vector<Telt> const& LGen) -> bool {
+    if (is_comm) {
+      // Since the group is commutative, a subset will always be commutative, so no point in checking
+      return true;
+    }
+    if (Kernel_IsCommutativeGenerators(LGen, bas)) {
+      // The subset is commutative, so not good
+      return false;
+    }
+    return true;
+  };
   auto check_correctness_gens = [&](const std::vector<Telt> &LGen) -> bool {
 #ifdef TIMINGS_SMALL_GENERATING_SET
     MicrosecondTime_perm time2;
@@ -223,21 +244,34 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
 #ifdef DEBUG_SMALL_GENERATING_SET
     n_check_correctness_gens += 1;
 #endif
-    if (LMoved.size() != MovedPoints(LGen, n).size())
+    if (!test_comm(LGen)) {
+      // Failed the commutativity test, returning false
       return false;
+    }
+#ifdef TIMINGS_SMALL_GENERATING_SET
+    std::cerr << "|NORM: check_correctness_gens, test_comm|=" << time << "\n";
+#endif
+    if (n_moved != NrMovedPoints(LGen, n)) {
+      // Discrepancy in number of moved points, returning false.
+      return false;
+    }
 #ifdef TIMINGS_SMALL_GENERATING_SET
     std::cerr << "|NORM: check_correctness_gens, LMoved|=" << time << "\n";
 #endif
-    if (orb.size() != OrbitsPerms(LGen, n, LMoved).size())
+    if (orb.size() != OrbitsPerms(LGen, n, LMoved).size()) {
       return false;
+    }
 #ifdef TIMINGS_SMALL_GENERATING_SET
     std::cerr << "|NORM: check_correctness_gens, OrbitsPerms|=" << time << "\n";
 #endif
-    for (auto &i_orb : orp)
-      if (!IsPrimitive_Subset(LGen, orb[i_orb], n))
+    for (size_t i_orb = 0; i_orb < n_orb; i_orb++) {
+      size_t n_block = NrBlocks_Subset(LGen, orb[i_orb], n);
+      if (n_block != l_nblock[i_orb]) {
         return false;
+      }
+    }
 #ifdef TIMINGS_SMALL_GENERATING_SET
-    std::cerr << "|NORM: check_correctness_gens, IsPrimitive_Subset|=" << time << "\n";
+    std::cerr << "|NORM: check_correctness_gens, NrBlocks_Subset|=" << time << "\n";
 #endif
     StabChainOptions<Tint, Telt> options = GetStandardOptions<Tint, Telt>(id);
     StabChain<Telt, Tidx_label> U =

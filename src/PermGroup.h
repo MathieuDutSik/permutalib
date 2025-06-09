@@ -357,6 +357,22 @@ std::vector<typename Telt::Tidx> MovedPoints(const std::vector<Telt> &LGen,
   return LMoved;
 }
 
+template <typename Telt>
+size_t NrMovedPoints(const std::vector<Telt> &LGen, const typename Telt::Tidx &n) {
+  using Tidx = typename Telt::Tidx;
+  auto IsMoved = [&](Tidx const &ePt) -> bool {
+    for (auto &eGen : LGen)
+      if (eGen.at(ePt) != ePt)
+        return true;
+    return false;
+  };
+  size_t n_moved = 0;
+  for (Tidx i = 0; i < n; i++)
+    if (IsMoved(i))
+      n_moved += 1;
+  return n_moved;
+}
+
 // clang-format off
 }  // namespace permutalib
 #endif  // SRC_GAP_PERMGROUP_H_
