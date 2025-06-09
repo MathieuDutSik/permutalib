@@ -145,7 +145,7 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
     return gens;
   }
 #ifdef DEBUG_SMALL_GENERATING_SET
-  std::cerr << "|gens|=" << gens.size() << "\n";
+  std::cerr << "NORM: |gens|=" << gens.size() << "\n";
 #endif
   std::vector<Tidx> bas = BaseStabChain(G);
 #ifdef TIMINGS_SMALL_GENERATING_SET
@@ -176,22 +176,22 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
   std::cerr << "|NORM: Kernel_SmallGeneratingSet, gens2|=" << time << "\n";
 #endif
 #ifdef DEBUG_SMALL_GENERATING_SET
-  std::cerr << "|gens2|=" << gens2.size() << "\n";
+  std::cerr << "NORM: |gens2|=" << gens2.size() << "\n";
 #endif
 
   std::vector<Tidx> LMoved = MovedPoints(gens2, n);
 #ifdef TIMINGS_SMALL_GENERATING_SET
-  std::cerr << "|NORM: Kernel_SmallGeneratingSet, LMoved|=" << time << "\n";
+  std::cerr << "NORM: |NORM: Kernel_SmallGeneratingSet, LMoved|=" << time << "\n";
 #endif
 #ifdef DEBUG_SMALL_GENERATING_SET
-  std::cerr << "|LMoved|=" << LMoved.size() << "\n";
+  std::cerr << "NORM: |LMoved|=" << LMoved.size() << "\n";
 #endif
   std::vector<std::vector<Tidx>> orb = OrbitsPerms(gens2, n, LMoved);
 #ifdef TIMINGS_SMALL_GENERATING_SET
   std::cerr << "|NORM: Kernel_SmallGeneratingSet, orb|=" << time << "\n";
 #endif
 #ifdef DEBUG_SMALL_GENERATING_SET
-  std::cerr << "|orb|=" << orb.size() << "\n";
+  std::cerr << "NORM: |orb|=" << orb.size() << "\n";
 #endif
   size_t n_orb = orb.size();
   std::vector<size_t> orp;
@@ -205,13 +205,17 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
   Tint order_G = Order<Telt, Tidx_label, Tint>(G);
 
 #ifdef DEBUG_SMALL_GENERATING_SET
-  std::cerr << "order_G=" << order_G << "\n";
+  std::cerr << "NORM: order_G=" << order_G << "\n";
 #endif
   std::map<Tidx, int> LFact = FactorsSizeStabChain(G);
 #ifdef DEBUG_SMALL_GENERATING_SET
-  std::cerr << "|LFact|=" << LFact.size() << "\n";
+  std::cerr << "NORM: |LFact|=" << LFact.size() << "\n";
+  size_t n_check_correctness_gens = 0;
 #endif
   auto check_correctness_gens = [&](const std::vector<Telt> &LGen) -> bool {
+#ifdef DEBUG_SMALL_GENERATING_SET
+    n_check_correctness_gens += 1;
+#endif
     if (LMoved.size() != MovedPoints(LGen, n).size())
       return false;
     if (orb.size() != OrbitsPerms(LGen, n, LMoved).size())
@@ -280,6 +284,10 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
   }
 #ifdef TIMINGS_SMALL_GENERATING_SET
   std::cerr << "|NORM: Kernel_SmallGeneratingSet, final_update|=" << time << "\n";
+#endif
+#ifdef DEBUG_SMALL_GENERATING_SET
+  std::cerr << "NORM: |orb|=" << orb.size() << "\n";
+  std::cerr << "NORM: n_check_correctness_gens=" << n_check_correctness_gens << "\n";
 #endif
   return gens2;
 }
