@@ -2,6 +2,8 @@
 #ifndef SRC_GAP_NORMALSTRUCTURE_H_
 #define SRC_GAP_NORMALSTRUCTURE_H_
 
+// clang-format off
+#include "TestingFct.h"
 #include "BlockSystem.h"
 #include "StabChainMain.h"
 #include <limits>
@@ -9,12 +11,16 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
+// clang-format on
 
 #ifdef DEBUG
 #define DEBUG_NORMAL_STRUCTURE
+#define DEBUG_SMALL_GENERATING_SET
 #endif
 
-#undef DEBUG_SMALL_GENERATING_SET
+#ifdef TIMINGS
+#define TIMINGS_SMALL_GENERATING_SET
+#endif
 
 namespace permutalib {
 
@@ -119,6 +125,9 @@ template <typename Telt, typename Tidx_label, typename Tint>
 std::vector<Telt>
 Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
   using Tidx = typename Telt::Tidx;
+#ifdef TIMINGS_SMALL_GENERATING_SET
+  MicrosecondTime_perm time;
+#endif
   Tidx miss_val = std::numeric_limits<Tidx>::max();
   Telt id = G->comm->identity;
   Tidx n = id.size();
@@ -129,6 +138,9 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
   std::vector<Telt> gens;
   for (auto &eGen : gens_set)
     gens.push_back(eGen);
+#ifdef TIMINGS_SMALL_GENERATING_SET
+  std::cerr << "|NORM: Kernel_SmallGeneratingSet, gens|=" << time << "\n";
+#endif
   if (gens.size() == 2) {
     return gens;
   }
@@ -136,6 +148,9 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
   std::cerr << "|gens|=" << gens.size() << "\n";
 #endif
   std::vector<Tidx> bas = BaseStabChain(G);
+#ifdef TIMINGS_SMALL_GENERATING_SET
+  std::cerr << "|NORM: Kernel_SmallGeneratingSet, bas|=" << time << "\n";
+#endif
   size_t len = gens.size();
   Face status_remove(len);
   for (size_t i = 0; i < len; i++) {
@@ -150,19 +165,31 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
       }
     }
   }
+#ifdef TIMINGS_SMALL_GENERATING_SET
+  std::cerr << "|NORM: Kernel_SmallGeneratingSet, status_remove|=" << time << "\n";
+#endif
   std::vector<Telt> gens2;
   for (size_t i = 0; i < len; i++)
     if (status_remove[i] == 0)
       gens2.push_back(gens[i]);
+#ifdef TIMINGS_SMALL_GENERATING_SET
+  std::cerr << "|NORM: Kernel_SmallGeneratingSet, gens2|=" << time << "\n";
+#endif
 #ifdef DEBUG_SMALL_GENERATING_SET
   std::cerr << "|gens2|=" << gens2.size() << "\n";
 #endif
 
   std::vector<Tidx> LMoved = MovedPoints(gens2, n);
+#ifdef TIMINGS_SMALL_GENERATING_SET
+  std::cerr << "|NORM: Kernel_SmallGeneratingSet, LMoved|=" << time << "\n";
+#endif
 #ifdef DEBUG_SMALL_GENERATING_SET
   std::cerr << "|LMoved|=" << LMoved.size() << "\n";
 #endif
   std::vector<std::vector<Tidx>> orb = OrbitsPerms(gens2, n, LMoved);
+#ifdef TIMINGS_SMALL_GENERATING_SET
+  std::cerr << "|NORM: Kernel_SmallGeneratingSet, orb|=" << time << "\n";
+#endif
 #ifdef DEBUG_SMALL_GENERATING_SET
   std::cerr << "|orb|=" << orb.size() << "\n";
 #endif
@@ -171,6 +198,9 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
   for (size_t i_orb = 0; i_orb < n_orb; i_orb++)
     if (IsPrimitive_Subset(gens2, orb[i_orb], n))
       orp.push_back(i_orb);
+#ifdef TIMINGS_SMALL_GENERATING_SET
+  std::cerr << "|NORM: Kernel_SmallGeneratingSet, orp|=" << time << "\n";
+#endif
 
   Tint order_G = Order<Telt, Tidx_label, Tint>(G);
 
@@ -200,6 +230,9 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
   size_t min = 1;
   if (!Kernel_IsCommutativeGenerators(gens2, bas))
     min = 2;
+#ifdef TIMINGS_SMALL_GENERATING_SET
+  std::cerr << "|NORM: Kernel_SmallGeneratingSet, min|=" << time << "\n";
+#endif
 
   // Generating elements at
   auto get_and_test = [&](const size_t &i) -> bool {
@@ -225,6 +258,9 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
     }
   };
   update_iife();
+#ifdef TIMINGS_SMALL_GENERATING_SET
+  std::cerr << "|NORM: Kernel_SmallGeneratingSet, update_iife|=" << time << "\n";
+#endif
 
   size_t i = 1;
 
@@ -242,6 +278,9 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
       i++;
     }
   }
+#ifdef TIMINGS_SMALL_GENERATING_SET
+  std::cerr << "|NORM: Kernel_SmallGeneratingSet, final_update|=" << time << "\n";
+#endif
   return gens2;
 }
 
