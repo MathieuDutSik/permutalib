@@ -183,9 +183,9 @@ Kernel_OrbitsPerms(const std::vector<Telt> &gens, Face &dom) {
       size_t posTot = orb.size();
       if (posTot == posDone)
         break;
-      for (size_t u = posDone; u < posTot; u++) {
-        Tidx pnt = orb[u];
-        for (auto &eGen : gens) {
+      for (auto &eGen : gens) {
+        for (size_t u = posDone; u < posTot; u++) {
+          Tidx pnt = orb[u];
           Tidx img = PowAct(pnt, eGen);
           if (dom[img] == 1)
             insert(img);
@@ -340,8 +340,8 @@ OrbitPairEltRepr(std::vector<Telt> const &ListGen, Telt const &id,
 }
 
 template <typename Telt>
-std::vector<typename Telt::Tidx> MovedPoints(const std::vector<Telt> &LGen,
-                                             const typename Telt::Tidx &n) {
+std::vector<typename Telt::Tidx> MovedPoints_V1(const std::vector<Telt> &LGen,
+                                                const typename Telt::Tidx &n) {
   using Tidx = typename Telt::Tidx;
   auto IsMoved = [&](Tidx const &ePt) -> bool {
     for (auto &eGen : LGen)
@@ -358,7 +358,7 @@ std::vector<typename Telt::Tidx> MovedPoints(const std::vector<Telt> &LGen,
 }
 
 template <typename Telt>
-size_t NrMovedPoints(const std::vector<Telt> &LGen, const typename Telt::Tidx &n) {
+size_t NrMovedPoints_V1(const std::vector<Telt> &LGen, const typename Telt::Tidx &n) {
   using Tidx = typename Telt::Tidx;
   auto IsMoved = [&](Tidx const &ePt) -> bool {
     for (auto &eGen : LGen)
@@ -371,6 +371,44 @@ size_t NrMovedPoints(const std::vector<Telt> &LGen, const typename Telt::Tidx &n
     if (IsMoved(i))
       n_moved += 1;
   return n_moved;
+}
+
+
+template <typename Telt>
+Face FaceMovedPoints(const std::vector<Telt> &LGen, const typename Telt::Tidx &n) {
+  using Tidx = typename Telt::Tidx;
+  Face f_moved(n);
+  for (auto & eGen : LGen) {
+    for (Tidx i=0; i<n; i++) {
+      if (f_moved[i] == 0) {
+        if (eGen.at(i) != i) {
+          f_moved[i] = 1;
+        }
+      }
+    }
+  }
+  return f_moved;
+}
+
+template <typename Telt>
+size_t NrMovedPoints(const std::vector<Telt> &LGen, const typename Telt::Tidx &n) {
+  Face f_moved = FaceMovedPoints(LGen, n);
+  return f_moved.count();
+}
+
+template <typename Telt>
+std::vector<typename Telt::Tidx> MovedPoints(const std::vector<Telt> &LGen,
+                                             const typename Telt::Tidx &n) {
+  using Tidx = typename Telt::Tidx;
+  Face f_moved = FaceMovedPoints(LGen, n);
+  std::vector<Tidx> LMoved;
+  LMoved.reserve(n);
+  for (Tidx i=0; i<n; i++) {
+    if (f_moved[i] == 1) {
+      LMoved.push_back(i);
+    }
+  }
+  return LMoved;
 }
 
 // clang-format off
