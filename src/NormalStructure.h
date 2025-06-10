@@ -245,13 +245,9 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
 #ifdef DEBUG_SMALL_GENERATING_SET
     n_check_correctness_gens += 1;
 #endif
-    if (!test_comm(LGen)) {
-      // Failed the commutativity test, returning false
-      return false;
-    }
-#ifdef TIMINGS_SMALL_GENERATING_SET
-    std::cerr << "|NORM: check_correctness_gens, test_comm|=" << time << "\n";
-#endif
+    //
+    // The nr moved points is the fastest step so let us do it first.
+    //
     if (n_moved != NrMovedPoints(LGen, n)) {
       // Discrepancy in number of moved points, returning false.
       return false;
@@ -259,12 +255,28 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
 #ifdef TIMINGS_SMALL_GENERATING_SET
     std::cerr << "|NORM: check_correctness_gens, LMoved|=" << time << "\n";
 #endif
+    //
+    // The orbits on the set of moved points is the next one in runtime
+    //
     if (orb.size() != OrbitsPerms(LGen, n, LMoved).size()) {
       return false;
     }
 #ifdef TIMINGS_SMALL_GENERATING_SET
     std::cerr << "|NORM: check_correctness_gens, OrbitsPerms|=" << time << "\n";
 #endif
+    //
+    // The commutativity check is fairly expensive, so it is there.
+    //
+    if (!test_comm(LGen)) {
+      // Failed the commutativity test, returning false
+      return false;
+    }
+#ifdef TIMINGS_SMALL_GENERATING_SET
+    std::cerr << "|NORM: check_correctness_gens, test_comm|=" << time << "\n";
+#endif
+    //
+    // Then computing the number of blocks
+    //
     for (size_t i_orb = 0; i_orb < n_orb; i_orb++) {
       size_t n_block = NrBlocks_Subset(LGen, orb[i_orb], n);
       if (n_block != l_nblock[i_orb]) {
