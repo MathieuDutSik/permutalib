@@ -224,6 +224,7 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
 #ifdef DEBUG_SMALL_GENERATING_SET
   std::cerr << "NORM: |LFact|=" << LFact.size() << "\n";
   size_t n_check_correctness_gens = 0;
+  size_t n_check_correctness_gens_full = 0;
 #endif
   bool is_comm = Kernel_IsCommutativeGenerators(gens2, bas);
   auto test_comm=[&](std::vector<Telt> const& LGen) -> bool {
@@ -280,6 +281,9 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
 #ifdef TIMINGS_SMALL_GENERATING_SET
     std::cerr << "|NORM: check_correctness_gens, order_U|=" << time << "\n";
 #endif
+#ifdef DEBUG_SMALL_GENERATING_SET
+    n_check_correctness_gens_full += 1;
+#endif
     return order_G == order_U;
   };
 
@@ -320,7 +324,7 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
 #endif
 #ifdef DEBUG_SMALL_GENERATING_SET
   std::cerr << "NORM: Step 4, |gens2|=" << gens2.size() << "\n";
-  std::cerr << "NORM: n_check_correctness_gens(A)=" << n_check_correctness_gens << "\n";
+  std::cerr << "NORM: A: n_check_correctness_gens=" << n_check_correctness_gens << " n_check_correctness_gens_full=" << n_check_correctness_gens_full << "\n";
 #endif
 
   size_t i = 1;
@@ -344,7 +348,7 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
 #endif
 #ifdef DEBUG_SMALL_GENERATING_SET
   std::cerr << "NORM: Step 5, |gens2|=" << gens2.size() << "\n";
-  std::cerr << "NORM: n_check_correctness_gens(B)=" << n_check_correctness_gens << "\n";
+  std::cerr << "NORM: B: n_check_correctness_gens=" << n_check_correctness_gens << " n_check_correctness_gens_full=" << n_check_correctness_gens_full << "\n";
 #endif
   return gens2;
 }
