@@ -278,6 +278,16 @@ SequenceType<always_equal> Inverse(SequenceType<always_equal> const &seq) {
   return ~seq;
 }
 
+template<bool always_equal>
+bool IsIdentity(SequenceType<always_equal> const &v) {
+  if (always_equal) {
+    return true;
+  } else {
+    const std::vector<int64_t> & LIdx = v.getVect();
+    size_t siz = LIdx.size();
+    return siz == 0;
+  }
+}
 
 template<bool always_equal>
 bool operator==(SequenceType<always_equal> const &v1,
