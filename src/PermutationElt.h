@@ -707,6 +707,20 @@ struct hash<permutalib::PermutationElt<Tidx, Telt>> {
   }
 };
 
+template <bool always_equal>
+struct hash<permutalib::SequenceType<always_equal>> {
+  std::size_t
+  operator()(const permutalib::SequenceType<always_equal> &x) const {
+    uint32_t seed = 0x1b873540;
+    std::vector<int64_t> const& V = x.getVect();
+    const int64_t *ptr1 = V.data();
+    const uint8_t *ptr2 = (const uint8_t *)ptr1;
+    size_t len = sizeof(int64_t) * V.size();
+    size_t hash = permutalib::robin_hood_hash_bytes(ptr2, len, seed);
+    return hash;
+  }
+};
+
 // clang-format off
 }  // namespace std
 #endif  // SRC_GAP_PERMUTATIONELT_H_
