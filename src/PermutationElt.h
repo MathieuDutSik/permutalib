@@ -184,6 +184,25 @@ SequenceType<always_equal> operator*(SequenceType<always_equal> const& v1, Seque
   return SequenceType<always_equal>(std::move(ListIdx1));
 }
 
+template<bool always_equal>
+bool operator<(SequenceType<always_equal> const& v1, SequenceType<always_equal> const& v2) {
+  std::vector<int64_t> const& ListIdx1 = v1.getVect();
+  std::vector<int64_t> const& ListIdx2 = v2.getVect();
+  size_t len1 = ListIdx1.size();
+  size_t len2 = ListIdx2.size();
+  if (len1 != len2) {
+    // Shorter entries are preferred.
+    return len1 < len2;
+  }
+  for (size_t i=0; i<len1; i++) {
+    int64_t val1 = ListIdx1[i];
+    int64_t val2 = ListIdx2[i];
+    if (val1 != val2) {
+      return val1 < val2;
+    }
+  }
+  return false;
+}
 
 template<bool always_equal>
 void operator*=(SequenceType<always_equal> &v1,

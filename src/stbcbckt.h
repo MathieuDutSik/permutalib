@@ -606,6 +606,7 @@ bool MeetPartitionStrat(
     Partition<typename Telt::Tidx> const &S, Telt const &g,
     std::vector<singStrat<typename Telt::Tidx>> const &strat) {
   using Tidx = typename Telt::Tidx;
+  Tidx miss_val = std::numeric_limits<Tidx>::max();
 #ifdef DEBUG_STBCBCKT
   std::cerr << "CPP Running MeetPartitionStrat\n";
 #endif
@@ -615,13 +616,12 @@ bool MeetPartitionStrat(
 #ifdef DEBUG_STBCBCKT
     std::cerr << "CPP ProcessFixpoint_image, Case MeetPartitionStrat\n";
 #endif
-    if (pRec.p == std::numeric_limits<Tidx>::max()) {
+    if (pRec.p == miss_val) {
       Tidx eFix = FixpointCellNo(image.partition, pRec.i);
-      if (!ProcessFixpoint_image(image, pRec.s, eFix,
-                                 std::numeric_limits<Tidx>::max()))
+      if (!ProcessFixpoint_image(image, pRec.s, eFix, miss_val))
         return false;
     }
-    if (pRec.p != std::numeric_limits<Tidx>::max() &&
+    if (pRec.p != miss_val &&
         SplitCell_Partition_e(image.partition, pRec.p, S, pRec.s, g, pRec.i) !=
             pRec.i)
       return false;
@@ -809,6 +809,7 @@ StratMeetPartition_r_p_p(rbaseType<Telt, Tidx_label, Trfm> &rbase,
                          Partition<typename Telt::Tidx> &P,
                          Partition<typename Telt::Tidx> const &S) {
   using Tidx = typename Telt::Tidx;
+  Tidx miss_val = std::numeric_limits<Tidx>::max();
   std::vector<singStrat<Tidx>> strat;
   std::vector<Tidx> cellsP = P.cellno;
   // If <S> is just a set, it is interpreted as partition ( <S>|<S>^compl ).
@@ -834,8 +835,7 @@ StratMeetPartition_r_p_p(rbaseType<Telt, Tidx_label, Trfm> &rbase,
     }
     for (auto &pVal : splits) {
       // Last argument true means that the cell will split.
-      Tidx i =
-          SplitCell_Partition(P, pVal, S, s, std::numeric_limits<Tidx>::max());
+      Tidx i =SplitCell_Partition(P, pVal, S, s, miss_val);
       strat.push_back({pVal, s, i});
       // If  we have one  or two  new fixpoints, put  them  into the base.
       if (i == 1) {
@@ -848,7 +848,7 @@ StratMeetPartition_r_p_p(rbaseType<Telt, Tidx_label, Trfm> &rbase,
         std::cerr << "CPP FixpointCellNo - NumberCells\n";
 #endif
         ProcessFixpoint_rbase(rbase, pnt);
-        strat.push_back({std::numeric_limits<Tidx>::max(), pnt, iPart});
+        strat.push_back({miss_val, pnt, iPart});
         if (IsTrivialRBase(rbase))
           return strat;
       }
@@ -858,7 +858,7 @@ StratMeetPartition_r_p_p(rbaseType<Telt, Tidx_label, Trfm> &rbase,
         std::cerr << "CPP FixpointCellNo - pVal\n";
 #endif
         ProcessFixpoint_rbase(rbase, pnt);
-        strat.push_back({std::numeric_limits<Tidx>::max(), pnt, pVal});
+        strat.push_back({miss_val, pnt, pVal});
         if (IsTrivialRBase(rbase))
           return strat;
       }
