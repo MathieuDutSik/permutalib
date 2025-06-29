@@ -38,6 +38,9 @@ int main(int argc, char *argv[]) {
       std::ofstream os(argv[2]);
       prt(os);
     }
+    for (size_t i = 0; i < ListGroup.size(); i++) {
+      std::cerr << "i=" << i << " |eGRP|=" << ListGroup[i].size() << "\n";
+    }
     //
     std::cerr << "CPP Normal completion of the program\n";
   } catch (permutalib::PermutalibException const &e) {
