@@ -18,6 +18,20 @@ namespace permutalib {
     This is for containing words.
    */
 
+  template<typename T>
+  void AppendSequence(std::vector<T> &V, T const& val) {
+    size_t len = V.size();
+    if (len == 0) {
+      V.push_back(val);
+    } else {
+      if (V[len-1] == -val) {
+        V.pop_back();
+      } else {
+        V.push_back(val);
+      }
+    }
+  }
+
 template<typename T>
 void SimplifySequence(std::vector<T> & V)
 {
@@ -175,9 +189,9 @@ private:
 template<bool always_equal>
 SequenceType<always_equal> operator*(SequenceType<always_equal> const& v1, SequenceType<always_equal> const& v2) {
   std::vector<int64_t> ListIdx1 = v1.getVect();
-  const std::vector<int64_t> &ListIdx2 = v2.getVect();
-  ListIdx1.insert(ListIdx1.end(), ListIdx2.begin(), ListIdx2.end());
-  SimplifySequence(ListIdx1);
+  for (auto & val2 : v2.getVect()) {
+    AppendSequence(ListIdx1, val2);
+  }
 #ifdef DEBUG_PERMUTATION_ELT
   PrintListIdx("operator*", ListIdx1);
 #endif
@@ -209,8 +223,9 @@ void operator*=(SequenceType<always_equal> &v1,
                 SequenceType<always_equal> const &v2) {
   std::vector<int64_t> &ListIdx1 = v1.getVect();
   const std::vector<int64_t> &ListIdx2 = v2.getVect();
-  ListIdx1.insert(ListIdx1.end(), ListIdx2.begin(), ListIdx2.end());
-  SimplifySequence(ListIdx1);
+  for (auto & val2: ListIdx2) {
+    AppendSequence(ListIdx1, val2);
+  }
 #ifdef DEBUG_PERMUTATION_ELT
   PrintListIdx("operator*=", ListIdx1);
 #endif
@@ -224,14 +239,17 @@ SequenceType<always_equal> Conjugation(SequenceType<always_equal> const &v1,
   const std::vector<int64_t> &ListIdx2 = v2.getVect();
   size_t siz1 = ListIdx1.size();
   size_t siz2 = ListIdx2.size();
-  std::vector<int64_t> ListIdx(siz2 + siz1 + siz2);
-  for (size_t i=0; i<siz2; i++)
-    ListIdx[i] = - ListIdx2[siz2 - 1 - i];
-  for (size_t i=0; i<siz1; i++)
-    ListIdx[siz2 + i] = ListIdx1[i];
-  for (size_t i=0; i<siz2; i++)
-    ListIdx[siz2 + siz1 + i] = ListIdx2[i];
-  SimplifySequence(ListIdx);
+  std::vector<int64_t> ListIdx;
+  ListIdx.reserve(siz2 + siz1 + siz2);
+  for (size_t i=0; i<siz2; i++) {
+    ListIdx.push_back(- ListIdx2[siz2 - 1 - i]);
+  }
+  for (auto & val1: ListIdx1) {
+    AppendSequence(ListIdx, val1);
+  }
+  for (auto & val2: ListIdx2) {
+    AppendSequence(ListIdx, val2);
+  }
 #ifdef DEBUG_PERMUTATION_ELT
   PrintListIdx("Conjugation", ListIdx);
 #endif
@@ -246,12 +264,14 @@ SequenceType<always_equal> LeftQuotient(SequenceType<always_equal> const &a, Seq
   const std::vector<int64_t> &Val_B = b.getVect();
   size_t siz_a = Val_A.size();
   size_t siz_b = Val_B.size();
-  std::vector<int64_t> ListIdx(siz_a + siz_b);
-  for (size_t i=0; i<siz_a; i++)
-    ListIdx[i] = - Val_A[siz_a - 1 - i];
-  for (size_t i=0; i<siz_b; i++)
-    ListIdx[siz_a + i] = Val_B[i];
-  SimplifySequence(ListIdx);
+  std::vector<int64_t> ListIdx;
+  ListIdx.reserve(siz_a + siz_b);
+  for (size_t i=0; i<siz_a; i++) {
+    ListIdx.push_back( - Val_A[siz_a - 1 - i]);
+  }
+  for (auto & val_b: Val_B) {
+    ListIdx.push_back(val_b);
+  }
 #ifdef DEBUG_PERMUTATION_ELT
   PrintListIdx("LeftQuotient", ListIdx);
 #endif
