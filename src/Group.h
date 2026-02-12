@@ -1216,6 +1216,9 @@ public:
       opt = GRP_B;
     }
   }
+  std::vector<TeltMatr> const& get_list_matr_gens() const {
+    return ListMatrGens;
+  }
   std::optional<TeltMatr> get_preimage(TeltPerm const& elt) const {
     if (opt) {
       TgroupB const& GRP_B = *opt;

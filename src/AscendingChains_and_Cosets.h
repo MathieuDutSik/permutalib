@@ -1434,12 +1434,12 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
 #endif
   size_t n_cos = dcse.l_cos.size();
   std::vector<KernelDccEntry<Telt>> dcc_entries;
+  Face f_done(n_cos);
+#ifdef DEBUG_SPAN_DOUBLE_COSETS
+  std::cerr << "ACC: compute_stabs=" << compute_stabs << " n_cos=" << n_cos << "\n";
+#endif
   if (!compute_stabs) {
     // No need to compute the stabilizers here.
-    Face f_done(n_cos);
-#ifdef DEBUG_SPAN_DOUBLE_COSETS
-    std::cerr << "ACC: compute_stabs=false n_cos=" << n_cos << "\n";
-#endif
     for (size_t i=0; i<n_cos; i++) {
 #ifdef DEBUG_SPAN_DOUBLE_COSETS
       std::cerr << "ACC: i=" << i << "/" << n_cos << "\n";
@@ -1479,10 +1479,6 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
   } else {
     // We go to the next step, so we need the stabilizers
     // Not sure what to do for in the normal case.
-    Face f_done(n_cos);
-#ifdef DEBUG_SPAN_DOUBLE_COSETS
-    std::cerr << "ACC: n_cos=" << n_cos << "\n";
-#endif
     for (size_t i=0; i<n_cos; i++) {
 #ifdef DEBUG_SPAN_DOUBLE_COSETS
       std::cerr << "ACC: i=" << i << "/" << n_cos << "\n";
