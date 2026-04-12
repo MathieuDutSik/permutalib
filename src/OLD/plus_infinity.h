@@ -13,7 +13,7 @@ template <typename T> struct Tplusinfinity {
     value = val;
   }
   void SetToInfinity() { IsInf = true; }
-  Tplusinfinity<T> operator=(Tplusinfinity<T> const &x) {
+  Tplusinfinity<T>& operator=(Tplusinfinity<T> const &x) {
     IsInf = x.IsInf;
     value = x.value;
     return *this;

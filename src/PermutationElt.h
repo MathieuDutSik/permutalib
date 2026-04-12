@@ -155,11 +155,11 @@ struct SequenceType {
   //
   // Copy operator
   //
-  SequenceType operator=(SequenceType<always_equal> const &seq) {
+  SequenceType& operator=(SequenceType<always_equal> const &seq) {
     ListIdx = seq.ListIdx;
     return *this;
   }
-  SequenceType operator=(SequenceType<always_equal> &&seq) {
+  SequenceType& operator=(SequenceType<always_equal> &&seq) {
     ListIdx = std::move(seq.ListIdx);
     return *this;
   }
@@ -435,14 +435,14 @@ public:
   //
   // Copy operator
   //
-  PermutationElt<Tidx, Telt>
+  PermutationElt<Tidx, Telt>&
   operator=(PermutationElt<Tidx, Telt> const &ePermElt) {
     siz = ePermElt.siz;
     ListVal = ePermElt.ListVal;
     elt = ePermElt.elt;
     return *this;
   }
-  PermutationElt<Tidx, Telt> operator=(PermutationElt<Tidx, Telt> &&ePermElt) {
+  PermutationElt<Tidx, Telt>& operator=(PermutationElt<Tidx, Telt> &&ePermElt) {
     siz = ePermElt.siz;
     ListVal = std::move(ePermElt.ListVal);
     elt = std::move(ePermElt.elt);

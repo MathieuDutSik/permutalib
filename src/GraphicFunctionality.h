@@ -56,7 +56,7 @@ public:
     HasVertexColor = eG.GetHasVertexColor();
     ListVertexColor = eG.GetListVertexColor();
   }
-  GraphSparseImmutable operator=(GraphSparseImmutable const &eG) {
+  GraphSparseImmutable& operator=(GraphSparseImmutable const &eG) {
     nbVert = eG.GetNbVert();
     ListStart = eG.GetListStart();
     ListListAdj = eG.GetListListAdj();

@@ -237,13 +237,13 @@ public:
   //
   // Copy operator
   //
-  DoubleSidedPerm<Tidx> operator=(DoubleSidedPerm const &ePerm) {
+  DoubleSidedPerm<Tidx>& operator=(DoubleSidedPerm const &ePerm) {
     siz = ePerm.siz;
     ListVal = ePerm.ListVal;
     ListRev = ePerm.ListRev;
     return *this;
   }
-  DoubleSidedPerm<Tidx> operator=(DoubleSidedPerm &&ePerm) {
+  DoubleSidedPerm<Tidx>& operator=(DoubleSidedPerm &&ePerm) {
     siz = ePerm.siz;
     ListVal = std::move(ePerm.ListVal);
     ListRev = std::move(ePerm.ListRev);
@@ -377,9 +377,9 @@ DoubleSidedPerm<Tidx> Conjugation(DoubleSidedPerm<Tidx> const &v1,
 #endif
   std::vector<Tidx> v(siz);
   for (size_t i = 0; i < siz; i++) {
-    int j = v1[i];
-    int i2 = v2[i];
-    int j2 = v2[j];
+    Tidx j = v1[i];
+    Tidx i2 = v2[i];
+    Tidx j2 = v2[j];
     v[i2] = j2;
   }
   return DoubleSidedPerm<Tidx>(v);
@@ -582,12 +582,12 @@ public:
   //
   // Copy operator
   //
-  SingleSidedPerm<Tidx> operator=(SingleSidedPerm const &ePerm) {
+  SingleSidedPerm<Tidx>& operator=(SingleSidedPerm const &ePerm) {
     siz = ePerm.siz;
     ListVal = ePerm.ListVal;
     return *this;
   }
-  SingleSidedPerm<Tidx> operator=(SingleSidedPerm &&ePerm) {
+  SingleSidedPerm<Tidx>& operator=(SingleSidedPerm &&ePerm) {
     siz = ePerm.siz;
     ListVal = std::move(ePerm.ListVal);
     ePerm.siz = 0;

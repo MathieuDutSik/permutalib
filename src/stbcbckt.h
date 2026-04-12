@@ -191,8 +191,9 @@ bool UnderscoreNature([[maybe_unused]] Trfm const &rfm) {
 template <typename Tidx> struct dataType_opset {
   Partition<Tidx> &P;
   dataType_opset(Partition<Tidx> &_P) : P(_P) {}
-  dataType_opset<Tidx> operator=(dataType_opset<Tidx> &data) {
-    return dataType_opset(data.P);
+  dataType_opset<Tidx>& operator=(dataType_opset<Tidx> &data) {
+    P = data.P;
+    return *this;
   }
 };
 
@@ -202,8 +203,10 @@ template <typename Telt> struct dataType_opperm {
   dataType_opperm(Partition<typename Telt::Tidx> &_P,
                   const std::vector<Telt> &_f)
       : P(_P), f(_f) {}
-  dataType_opperm<Telt> operator=(dataType_opperm<Telt> &data) {
-    return dataType_opperm(data.P, data.f);
+  dataType_opperm<Telt>& operator=(dataType_opperm<Telt> &data) {
+    P = data.P;
+    f = data.f;
+    return *this;
   }
 };
 
