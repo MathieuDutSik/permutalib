@@ -100,8 +100,8 @@ GetListValRev(std::string const &estr) {
       }
     }
     for (size_t pos = ListVal.size(); pos < maxlen; pos++) {
-      ListVal[pos] = pos;
-      ListRev[pos] = pos;
+      ListVal.push_back(pos);
+      ListRev.push_back(pos);
     }
     size_t len = LVal.size();
     for (size_t i = 0; i < len; i++) {

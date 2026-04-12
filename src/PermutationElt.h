@@ -36,6 +36,8 @@ template<typename T>
 void SimplifySequence(std::vector<T> & V)
 {
   size_t len = V.size();
+  if (len < 2)
+    return;
   std::vector<uint8_t> status(len,1);
   size_t miss_val = std::numeric_limits<size_t>::max();
   std::vector<size_t> next(len,1);
