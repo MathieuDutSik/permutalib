@@ -4,8 +4,10 @@
 
 // clang-format off
 #include "TestingFct.h"
+#include <functional>
 #include <limits>
 #include <list>
+#include <optional>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -1372,6 +1374,193 @@ struct KernelDccEntry {
 
 
 /*
+  Iterator counterpart to span_double_cosets: lazily produces the
+  KernelDccEntry one by one, without storing all of them at once.
+  The same algorithm as span_double_cosets is implemented incrementally:
+  precomputed list_perm and f_done are kept as state, and operator++
+  advances cur_i to the next not-yet-marked coset and computes one
+  entry (and its orbit, which marks more cosets as done).
+ */
+template<typename Telt, typename Tidx_label, typename Tint>
+struct SpanDoubleCosetsIterator {
+private:
+  std::optional<std::reference_wrapper<const DoubleCosetSplitEntry<Telt,Tidx_label>>> dcse_ref;
+  KernelDccEntry<Telt> de;
+  bool compute_stabs;
+  Telt id;
+  std::vector<std::vector<size_t>> list_perm;
+  size_t n_cos;
+  size_t n_gen;
+  Face f_done;
+  size_t cur_i;
+  bool is_end;
+  KernelDccEntry<Telt> current;
+  void compute_entry_at(size_t i) {
+    DoubleCosetSplitEntry<Telt,Tidx_label> const& dcse = dcse_ref->get();
+    auto f_can=[&](Telt const& u) -> Telt {
+      return MinimalElementCosetStabChain(dcse.grp, u);
+    };
+    if (!compute_stabs) {
+      Telt new_cos = dcse.l_cos[i] * de.cos;
+      Telt new_cos_can = f_can(new_cos);
+      std::vector<size_t> l_idx;
+      auto f_insert=[&](size_t const& pos) -> void {
+        l_idx.push_back(pos);
+        f_done[pos] = 1;
+      };
+      size_t start = 0;
+      f_insert(i);
+      while(true) {
+        size_t len = l_idx.size();
+        for (auto & perm : list_perm) {
+          for (size_t u=start; u<len; u++) {
+            size_t img = perm[l_idx[u]];
+            if (f_done[img] == 0) {
+              f_insert(img);
+            }
+          }
+        }
+        start = len;
+        if (start == l_idx.size()) {
+          break;
+        }
+      }
+      current = KernelDccEntry<Telt>{std::move(new_cos_can), {}};
+    } else {
+      Telt new_cos = dcse.l_cos[i] * de.cos;
+      Telt new_cos_can = f_can(new_cos);
+      std::unordered_set<Telt> set_gens;
+      auto f_insert_gen=[&](Telt const& eGen) -> void {
+        if (!eGen.isIdentity()) {
+          set_gens.insert(eGen);
+        }
+      };
+      std::vector<std::pair<size_t,Telt>> l_idx;
+      std::unordered_map<size_t, size_t> map;
+      auto f_insert=[&](std::pair<size_t,Telt> const& ent) -> void {
+        size_t len = l_idx.size();
+        l_idx.push_back(ent);
+        f_done[ent.first] = 1;
+        map[ent.first] = len;
+      };
+      size_t start = 0;
+      f_insert(std::pair<size_t,Telt>{i, id});
+      while(true) {
+        size_t len = l_idx.size();
+        for (size_t i_gen=0; i_gen<n_gen; i_gen++) {
+          std::vector<size_t> const& perm = list_perm[i_gen];
+          Telt const& eGen = de.stab_gens[i_gen];
+          for (size_t u=start; u<len; u++) {
+            size_t img = perm[l_idx[u].first];
+            Telt imgGen = l_idx[u].second * eGen;
+            if (f_done[img] == 0) {
+              f_insert(std::pair<size_t,Telt>{img, imgGen});
+            } else {
+              size_t pos = map[img];
+              Telt newStabElt = l_idx[pos].second * Inverse(imgGen);
+              f_insert_gen(newStabElt);
+            }
+          }
+        }
+        start = len;
+        if (start == l_idx.size()) {
+          break;
+        }
+      }
+      std::vector<Telt> vect_gens(set_gens.begin(), set_gens.end());
+      auto get_reduced_vect_gens=[&]() -> std::vector<Telt> {
+        if (vect_gens.size() > 2) {
+          StabChainOptions<Tint, Telt> options = GetStandardOptions<Tint, Telt>(id);
+          StabChain<Telt,Tidx_label> g = StabChainOp_listgen<Telt, Tidx_label, Tint>(vect_gens, options);
+          return Kernel_SmallGeneratingSet<Telt,Tidx_label,Tint>(g);
+        } else {
+          return vect_gens;
+        }
+      };
+      std::vector<Telt> v_gens = get_reduced_vect_gens();
+      current = KernelDccEntry<Telt>{std::move(new_cos_can), std::move(v_gens)};
+    }
+  }
+  void advance() {
+    while (cur_i < n_cos) {
+      if (f_done[cur_i] == 0) {
+        compute_entry_at(cur_i);
+        cur_i++;
+        return;
+      }
+      cur_i++;
+    }
+    is_end = true;
+  }
+public:
+  SpanDoubleCosetsIterator() : compute_stabs(false), n_cos(0), n_gen(0), cur_i(0), is_end(true) {}
+  SpanDoubleCosetsIterator(DoubleCosetSplitEntry<Telt,Tidx_label> const& dcse_in, KernelDccEntry<Telt> const& de_in, bool const& compute_stabs_in, Telt const& id_in) : dcse_ref(std::cref(dcse_in)), de(de_in), compute_stabs(compute_stabs_in), id(id_in) {
+    DoubleCosetSplitEntry<Telt,Tidx_label> const& dcse = dcse_ref->get();
+    auto f_can=[&](Telt const& u) -> Telt {
+      return MinimalElementCosetStabChain(dcse.grp, u);
+    };
+    Telt cos_inv = Inverse(de.cos);
+    std::vector<Telt> stab_gens_std;
+    for (auto &eGen : de.stab_gens) {
+      Telt gen_std = de.cos * eGen * cos_inv;
+      stab_gens_std.push_back(gen_std);
+    }
+    for (auto &eGen : stab_gens_std) {
+      std::vector<size_t> perm;
+      for (auto & eCos : dcse.l_cos) {
+        Telt prod = eCos * eGen;
+        Telt prod_can = f_can(prod);
+#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
+        if (dcse.map.count(prod_can) == 0) {
+          std::cerr << "ACC: SpanDoubleCosetsIterator, missing entry in list_perm construction\n";
+          throw PermutalibException{1};
+        }
+#endif
+        size_t pos = dcse.map.at(prod_can);
+        perm.push_back(pos);
+      }
+      list_perm.emplace_back(std::move(perm));
+    }
+    n_gen = list_perm.size();
+    n_cos = dcse.l_cos.size();
+    f_done = Face(n_cos);
+    cur_i = 0;
+    is_end = false;
+    advance();
+  }
+  KernelDccEntry<Telt> const& operator*() const {
+    return current;
+  }
+  SpanDoubleCosetsIterator<Telt,Tidx_label,Tint>& operator++() {
+    advance();
+    return *this;
+  }
+  SpanDoubleCosetsIterator<Telt,Tidx_label,Tint> operator++(int) {
+    SpanDoubleCosetsIterator<Telt,Tidx_label,Tint> tmp = *this;
+    advance();
+    return tmp;
+  }
+  bool operator==(SpanDoubleCosetsIterator<Telt,Tidx_label,Tint> const& other) const {
+    if (is_end != other.is_end) {
+      return false;
+    }
+    if (is_end) {
+      return true;
+    }
+    return cur_i == other.cur_i;
+  }
+  bool operator!=(SpanDoubleCosetsIterator<Telt,Tidx_label,Tint> const& other) const {
+    return !(*this == other);
+  }
+};
+
+template<typename Telt, typename Tidx_label, typename Tint>
+SpanDoubleCosetsIterator<Telt,Tidx_label,Tint> span_double_cosets_iter(DoubleCosetSplitEntry<Telt,Tidx_label> const& dcse, KernelDccEntry<Telt> const& de, bool const& compute_stabs, Telt const& id) {
+  return SpanDoubleCosetsIterator<Telt,Tidx_label,Tint>(dcse, de, compute_stabs, id);
+}
+
+
+/*
   This is the central function for computing the double cosets.
   Input:
   ---The DCSE is the description of the level (group, cosets, map)
@@ -1389,181 +1578,12 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
 #ifdef DEBUG_SPAN_DOUBLE_COSETS
   std::cerr << "ACC: ---------------- span_double_cosets |dcse.grp|=" << Order<Telt,Tidx_label,Tint>(dcse.grp) << " ----------------\n";
 #endif
-  auto f_can=[&](Telt const& u) -> Telt {
-    return MinimalElementCosetStabChain(dcse.grp, u);
-  };
-  std::vector<Telt> stab_gens_std;
-  Telt cos_inv = Inverse(de.cos);
-  for (auto &eGen : de.stab_gens) {
-    Telt gen_std = de.cos * eGen * cos_inv;
-    stab_gens_std.push_back(gen_std);
-  }
-  std::vector<std::vector<size_t>> list_perm;
-#ifdef DEBUG_SPAN_DOUBLE_COSETS
-  size_t iGen = 0;
-#endif
-  for (auto &eGen : stab_gens_std) {
-    std::vector<size_t> perm;
-    for (auto & eCos : dcse.l_cos) {
-      Telt prod = eCos * eGen;
-      Telt prod_can = f_can(prod);
-#ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
-      if (dcse.map.count(prod_can) == 0) {
-        std::cerr << "ACC: span_double_cosets, missing entry in list_perm construction\n";
-        throw PermutalibException{1};
-      }
-#endif
-      size_t pos = dcse.map.at(prod_can);
-      perm.push_back(pos);
-    }
-#ifdef DEBUG_SPAN_DOUBLE_COSETS
-    std::cerr << "ACC: iGen=" << iGen << "/" << stab_gens_std.size() << " perm=[";
-    for (size_t i=0; i<perm.size(); i++) {
-      if (i>0)
-        std::cerr << ",";
-      std::cerr << perm[i];
-    }
-    std::cerr << "]\n";
-    iGen += 1;
-#endif
-    list_perm.emplace_back(std::move(perm));
-  }
-  size_t n_gen = list_perm.size();
-#ifdef DEBUG_SPAN_DOUBLE_COSETS
-  std::cerr << "ACC: span_double_cosets |list_perm|=" << list_perm.size() << "\n";
-#endif
-  size_t n_cos = dcse.l_cos.size();
   std::vector<KernelDccEntry<Telt>> dcc_entries;
-  Face f_done(n_cos);
-#ifdef DEBUG_SPAN_DOUBLE_COSETS
-  std::cerr << "ACC: compute_stabs=" << compute_stabs << " n_cos=" << n_cos << "\n";
-#endif
-  if (!compute_stabs) {
-    // No need to compute the stabilizers here.
-    for (size_t i=0; i<n_cos; i++) {
-#ifdef DEBUG_SPAN_DOUBLE_COSETS
-      std::cerr << "ACC: i=" << i << "/" << n_cos << "\n";
-#endif
-      if (f_done[i] == 0) {
-        Telt new_cos = dcse.l_cos[i] * de.cos;
-        Telt new_cos_can = f_can(new_cos);
-        KernelDccEntry<Telt> new_de{new_cos_can,{}};
-        dcc_entries.push_back(new_de);
-        std::vector<size_t> l_idx;
-        auto f_insert=[&](size_t const& pos) -> void {
-          l_idx.push_back(pos);
-          f_done[pos] = 1;
-        };
-        size_t start = 0;
-        f_insert(i);
-        while(true) {
-          size_t len = l_idx.size();
-#ifdef DEBUG_SPAN_DOUBLE_COSETS
-          std::cerr << "ACC: compute_stabs=false start=" << start << " len=" << len << "\n";
-#endif
-          for (auto & perm : list_perm) {
-            for (size_t u=start; u<len; u++) {
-              size_t img = perm[l_idx[u]];
-              if (f_done[img] == 0) {
-                f_insert(img);
-              }
-            }
-          }
-          start = len;
-          if (start == l_idx.size()) {
-            break;
-          }
-        }
-      }
-    }
-  } else {
-    // We go to the next step, so we need the stabilizers
-    // Not sure what to do for in the normal case.
-    for (size_t i=0; i<n_cos; i++) {
-#ifdef DEBUG_SPAN_DOUBLE_COSETS
-      std::cerr << "ACC: i=" << i << "/" << n_cos << "\n";
-#endif
-      if (f_done[i] == 0) {
-        Telt new_cos = dcse.l_cos[i] * de.cos;
-        Telt new_cos_can = f_can(new_cos);
-        std::unordered_set<Telt> set_gens;
-        auto f_insert_gen=[&](Telt const& eGen) -> void {
-          if (!eGen.isIdentity()) {
-#ifdef DEBUG_SPAN_DOUBLE_COSETS
-            Telt imgElt = new_cos_can * eGen;
-            Telt imgElt_can = f_can(imgElt);
-            if (imgElt_can != new_cos_can) {
-              std::cerr << "ACC: The element new_cos_can is not preserved\n";
-              throw PermutalibException{1};
-            }
-#endif
-            set_gens.insert(eGen);
-          }
-        };
-        std::vector<std::pair<size_t,Telt>> l_idx;
-        std::unordered_map<size_t, size_t> map;
-        auto f_insert=[&](std::pair<size_t,Telt> const& ent) -> void {
-          size_t len = l_idx.size();
-          l_idx.push_back(ent);
-          f_done[ent.first] = 1;
-          map[ent.first] = len;
-        };
-        size_t start = 0;
-        f_insert(std::pair<size_t,Telt>{i, id});
-        while(true) {
-          size_t len = l_idx.size();
-#ifdef DEBUG_SPAN_DOUBLE_COSETS
-          std::cerr << "ACC: compute_stabs=true start=" << start << " len=" << len << "\n";
-#endif
-          for (size_t i_gen=0; i_gen<n_gen; i_gen++) {
-            std::vector<size_t> const& perm = list_perm[i_gen];
-            Telt const& eGen = de.stab_gens[i_gen];
-            for (size_t u=start; u<len; u++) {
-              size_t img = perm[l_idx[u].first];
-              Telt imgGen = l_idx[u].second * eGen;
-              if (f_done[img] == 0) {
-                f_insert(std::pair<size_t,Telt>{img, imgGen});
-              } else {
-                size_t pos = map[img];
-                Telt newStabElt = l_idx[pos].second * Inverse(imgGen);
-                f_insert_gen(newStabElt);
-              }
-            }
-          }
-          start = len;
-          if (start == l_idx.size()) {
-            break;
-          }
-        }
-        std::vector<Telt> vect_gens(set_gens.begin(), set_gens.end());
-        auto get_reduced_vect_gens=[&]() -> std::vector<Telt> {
-          if (vect_gens.size() > 2) {
-            StabChainOptions<Tint, Telt> options = GetStandardOptions<Tint, Telt>(id);
-            StabChain<Telt,Tidx_label> g = StabChainOp_listgen<Telt, Tidx_label, Tint>(vect_gens, options);
-#ifdef DEBUG_SPAN_DOUBLE_COSETS
-            StabChain<Telt,Tidx_label> g_de_stabgens = StabChainOp_listgen<Telt, Tidx_label, Tint>(de.stab_gens, options);
-            Tint ord_g_de_sg = Order<Telt,Tidx_label,Tint>(g_de_stabgens);
-            Tint ord_g = Order<Telt,Tidx_label,Tint>(g);
-            Tint ord_l_cos = l_idx.size();
-            std::cerr << "ACC: span_double_cosets |vect_gens|=" << vect_gens.size() << " |g|=" << ord_g << " |l_cos|=" << ord_l_cos << " |de.stab_gens|=" << ord_g_de_sg << "\n";
-            if (ord_g * ord_l_cos != ord_g_de_sg) {
-              std::cerr << "ACC: incoherence of order : ord_g_de_sg=" << ord_g_de_sg << "\n";
-              throw PermutalibException{1};
-            }
-#endif
-            return Kernel_SmallGeneratingSet<Telt,Tidx_label,Tint>(g);
-          } else {
-            return vect_gens;
-          }
-        };
-        std::vector<Telt> v_gens = get_reduced_vect_gens();
-#ifdef DEBUG_SPAN_DOUBLE_COSETS
-        std::cerr << "ACC: |v_gens|=" << v_gens.size() << "\n";
-#endif
-        KernelDccEntry<Telt> new_de{std::move(new_cos_can), std::move(v_gens)};
-        dcc_entries.emplace_back(std::move(new_de));
-      }
-    }
+  SpanDoubleCosetsIterator<Telt,Tidx_label,Tint> iter = span_double_cosets_iter<Telt,Tidx_label,Tint>(dcse, de, compute_stabs, id);
+  SpanDoubleCosetsIterator<Telt,Tidx_label,Tint> end_iter;
+  while (iter != end_iter) {
+    dcc_entries.push_back(*iter);
+    ++iter;
   }
 #ifdef DEBUG_SPAN_DOUBLE_COSETS
   std::cerr << "ACC: Returning |dcc_entries|=" << dcc_entries.size() << "\n";
@@ -1573,6 +1593,133 @@ std::vector<KernelDccEntry<Telt>> span_double_cosets(DoubleCosetSplitEntry<Telt,
 
 
 
+
+/*
+  Iterator over the double cosets (with stabilizers when do_last) produced
+  by chaining SpanDoubleCosetsIterator across the levels of the ascending
+  chain. The iterator maintains a stack of SpanDoubleCosetsIterator, one
+  per level: stack[d] iterates the span of levels[n_level-1-d] applied to
+  the current entry of stack[d-1] (or the initial entry when d == 0).
+  The current produced entry is *stack.back(). Advancing pops/pushes
+  iterators depth-first, like a nested for-loop unrolled into a state
+  machine.
+ */
+template<typename Telt, typename Tidx_label, typename Tint>
+struct DoubleCosetsKernelIterator {
+private:
+  std::optional<std::reference_wrapper<const std::vector<DoubleCosetSplitEntry<Telt,Tidx_label>>>> levels_ref;
+  size_t n_level;
+  bool do_last;
+  Telt id;
+  KernelDccEntry<Telt> initial_entry;
+  std::vector<SpanDoubleCosetsIterator<Telt,Tidx_label,Tint>> stack;
+  bool is_end;
+  bool compute_stabs_at_depth(size_t depth) const {
+    size_t j_level = n_level - 1 - depth;
+    if (j_level == 0 && !do_last) {
+      return false;
+    }
+    return true;
+  }
+  bool push_to_full() {
+    std::vector<DoubleCosetSplitEntry<Telt,Tidx_label>> const& levels = levels_ref->get();
+    SpanDoubleCosetsIterator<Telt,Tidx_label,Tint> end_iter;
+    while (stack.size() < n_level) {
+      size_t d = stack.size();
+      KernelDccEntry<Telt> const& parent = (d == 0) ? initial_entry : *stack[d-1];
+      size_t j_level = n_level - 1 - d;
+      SpanDoubleCosetsIterator<Telt,Tidx_label,Tint> iter(levels[j_level], parent, compute_stabs_at_depth(d), id);
+      if (iter == end_iter) {
+        return false;
+      }
+      stack.push_back(std::move(iter));
+    }
+    return true;
+  }
+  void advance() {
+    SpanDoubleCosetsIterator<Telt,Tidx_label,Tint> end_iter;
+    while (true) {
+      if (stack.empty()) {
+        is_end = true;
+        return;
+      }
+      ++stack.back();
+      if (stack.back() != end_iter) {
+        if (push_to_full()) {
+          return;
+        }
+      } else {
+        stack.pop_back();
+      }
+    }
+  }
+public:
+  DoubleCosetsKernelIterator() : n_level(0), do_last(false), is_end(true) {}
+  DoubleCosetsKernelIterator(std::vector<DoubleCosetSplitEntry<Telt,Tidx_label>> const& levels_in, size_t n_level_in, bool do_last_in, Telt const& id_in, KernelDccEntry<Telt> const& initial_in) : levels_ref(std::cref(levels_in)), n_level(n_level_in), do_last(do_last_in), id(id_in), initial_entry(initial_in), is_end(false) {
+    if (n_level == 0) {
+      return;
+    }
+    if (!push_to_full()) {
+      advance();
+    }
+  }
+  KernelDccEntry<Telt> const& operator*() const {
+    if (n_level == 0) {
+      return initial_entry;
+    }
+    return *stack.back();
+  }
+  DoubleCosetsKernelIterator<Telt,Tidx_label,Tint>& operator++() {
+    if (n_level == 0) {
+      is_end = true;
+    } else {
+      advance();
+    }
+    return *this;
+  }
+  DoubleCosetsKernelIterator<Telt,Tidx_label,Tint> operator++(int) {
+    DoubleCosetsKernelIterator<Telt,Tidx_label,Tint> tmp = *this;
+    ++(*this);
+    return tmp;
+  }
+  bool operator==(DoubleCosetsKernelIterator<Telt,Tidx_label,Tint> const& other) const {
+    return is_end == other.is_end;
+  }
+  bool operator!=(DoubleCosetsKernelIterator<Telt,Tidx_label,Tint> const& other) const {
+    return is_end != other.is_end;
+  }
+};
+
+/*
+  Wraps DoubleCosetsKernelIterator to expose only the coset element (Telt),
+  used to enumerate double cosets when stabilizers are not needed.
+ */
+template<typename Telt, typename Tidx_label, typename Tint>
+struct DoubleCosetsIterator {
+private:
+  DoubleCosetsKernelIterator<Telt,Tidx_label,Tint> inner;
+public:
+  DoubleCosetsIterator() : inner() {}
+  DoubleCosetsIterator(DoubleCosetsKernelIterator<Telt,Tidx_label,Tint> inner_in) : inner(std::move(inner_in)) {}
+  Telt const& operator*() const {
+    return (*inner).cos;
+  }
+  DoubleCosetsIterator<Telt,Tidx_label,Tint>& operator++() {
+    ++inner;
+    return *this;
+  }
+  DoubleCosetsIterator<Telt,Tidx_label,Tint> operator++(int) {
+    DoubleCosetsIterator<Telt,Tidx_label,Tint> tmp = *this;
+    ++inner;
+    return tmp;
+  }
+  bool operator==(DoubleCosetsIterator<Telt,Tidx_label,Tint> const& other) const {
+    return inner == other.inner;
+  }
+  bool operator!=(DoubleCosetsIterator<Telt,Tidx_label,Tint> const& other) const {
+    return inner != other.inner;
+  }
+};
 
 template<typename Telt, typename Tidx_label, typename Tint>
 struct InnerDoubleCosetComputer {
@@ -1611,7 +1758,7 @@ public:
     std::cerr << "ACC: ---------------------------------------------------------\n";
 #endif
   }
-  std::vector<KernelDccEntry<Telt>> double_cosets_kernel(StabChain<Telt,Tidx_label> const& V, bool const& do_last) const {
+  std::vector<KernelDccEntry<Telt>> double_cosets_kernel_V1(StabChain<Telt,Tidx_label> const& V, bool const& do_last) const {
     std::vector<Telt> small_gens = Kernel_SmallGeneratingSet<Telt,Tidx_label,Tint>(V);
 #ifdef DEBUG_ASCENDING_CHAINS_COSETS
     std::cerr << "ACC: double_cosets |V|=" << Order<Telt,Tidx_label,Tint>(V) << " |small_gens|=" << small_gens.size() << "\n";
@@ -1640,14 +1787,62 @@ public:
     }
     return l_de;
   }
-  std::vector<KernelDccEntry<Telt>> double_cosets_and_stabilizers(StabChain<Telt,Tidx_label> const& V) const {
-    return double_cosets_kernel(V, true);
+  std::vector<KernelDccEntry<Telt>> double_cosets_and_stabilizers_V1(StabChain<Telt,Tidx_label> const& V) const {
+    return double_cosets_kernel_V1(V, true);
   }
-  std::vector<Telt> double_cosets(StabChain<Telt,Tidx_label> const& V) const {
-    std::vector<KernelDccEntry<Telt>> l_de = double_cosets_kernel(V, false);
+  std::vector<Telt> double_cosets_V1(StabChain<Telt,Tidx_label> const& V) const {
+    std::vector<KernelDccEntry<Telt>> l_de = double_cosets_kernel_V1(V, false);
     std::vector<Telt> l_cos;
     for (auto & de: l_de) {
       l_cos.push_back(de.cos);
+    }
+    return l_cos;
+  }
+  DoubleCosetsIterator<Telt,Tidx_label,Tint> begin_elt(StabChain<Telt,Tidx_label> const& V) const {
+    std::vector<Telt> small_gens = Kernel_SmallGeneratingSet<Telt,Tidx_label,Tint>(V);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "ACC: begin_elt |V|=" << Order<Telt,Tidx_label,Tint>(V) << " |small_gens|=" << small_gens.size() << "\n";
+#endif
+    KernelDccEntry<Telt> de{id, small_gens};
+    return DoubleCosetsIterator<Telt,Tidx_label,Tint>(DoubleCosetsKernelIterator<Telt,Tidx_label,Tint>(levels, n_level, false, id, de));
+  }
+  DoubleCosetsIterator<Telt,Tidx_label,Tint> end_elt() const {
+    return DoubleCosetsIterator<Telt,Tidx_label,Tint>();
+  }
+  DoubleCosetsKernelIterator<Telt,Tidx_label,Tint> begin_elt_stab(StabChain<Telt,Tidx_label> const& V) const {
+    std::vector<Telt> small_gens = Kernel_SmallGeneratingSet<Telt,Tidx_label,Tint>(V);
+#ifdef DEBUG_ASCENDING_CHAINS_COSETS
+    std::cerr << "ACC: begin_elt_stab |V|=" << Order<Telt,Tidx_label,Tint>(V) << " |small_gens|=" << small_gens.size() << "\n";
+#endif
+    KernelDccEntry<Telt> de{id, small_gens};
+    return DoubleCosetsKernelIterator<Telt,Tidx_label,Tint>(levels, n_level, true, id, de);
+  }
+  DoubleCosetsKernelIterator<Telt,Tidx_label,Tint> end_elt_stab() const {
+    return DoubleCosetsKernelIterator<Telt,Tidx_label,Tint>();
+  }
+  std::vector<KernelDccEntry<Telt>> double_cosets_kernel(StabChain<Telt,Tidx_label> const& V, bool const& do_last) const {
+    std::vector<Telt> small_gens = Kernel_SmallGeneratingSet<Telt,Tidx_label,Tint>(V);
+    KernelDccEntry<Telt> de{id, small_gens};
+    DoubleCosetsKernelIterator<Telt,Tidx_label,Tint> iter(levels, n_level, do_last, id, de);
+    DoubleCosetsKernelIterator<Telt,Tidx_label,Tint> end_iter;
+    std::vector<KernelDccEntry<Telt>> l_de;
+    while (iter != end_iter) {
+      l_de.push_back(*iter);
+      ++iter;
+    }
+    return l_de;
+  }
+  std::vector<KernelDccEntry<Telt>> double_cosets_and_stabilizers(StabChain<Telt,Tidx_label> const& V) const {
+    std::vector<KernelDccEntry<Telt>> l_de;
+    for (auto it = begin_elt_stab(V); it != end_elt_stab(); ++it) {
+      l_de.push_back(*it);
+    }
+    return l_de;
+  }
+  std::vector<Telt> double_cosets(StabChain<Telt,Tidx_label> const& V) const {
+    std::vector<Telt> l_cos;
+    for (auto it = begin_elt(V); it != end_elt(); ++it) {
+      l_cos.push_back(*it);
     }
     return l_cos;
   }
