@@ -32,13 +32,13 @@ int main(int argc, char *argv[]) {
     Tgroup eV = permutalib::ReadGroupFromStream<Tgroup>(is);
     auto check_dcc=[&](std::vector<Telt> const& list_dcc) -> void {
       if (meth_check == "exhaustive") {
-        return ExhaustiveCheck_DoubleCosets(eG.stab_chain(), eU.stab_chain(), eV.stab_chain(), list_dcc);
+        return permutalib::ExhaustiveCheck_DoubleCosets(eG.stab_chain(), eU.stab_chain(), eV.stab_chain(), list_dcc);
       }
       if (meth_check == "fast_check_sizes") {
-        return FastCheckSizes_DoubleCosets<Telt,Tidx_label,Tint>(eG.stab_chain(), eU.stab_chain(), eV.stab_chain(), list_dcc);
+        return permutalib::FastCheckSizes_DoubleCosets<Telt,Tidx_label,Tint>(eG.stab_chain(), eU.stab_chain(), eV.stab_chain(), list_dcc);
       }
       if (meth_check == "fast_check_intersection") {
-        return FastCheckIntersection_DoubleCosets<Telt,Tidx_label,Tint>(eG.stab_chain(), eU.stab_chain(), eV.stab_chain(), list_dcc);
+        return permutalib::FastCheckIntersection_DoubleCosets<Telt,Tidx_label,Tint>(eG.stab_chain(), eU.stab_chain(), eV.stab_chain(), list_dcc);
       }
       if (meth_check == "nothing") {
         return;
