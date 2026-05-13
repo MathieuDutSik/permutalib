@@ -161,7 +161,7 @@ std::vector<Telt> InverseAsWord(std::vector<Telt> const &word,
                                 std::vector<Telt> const &inverselist) {
   int siz = word.size();
   if (siz == 1) {
-    if (word[0].isIdentity())
+    if (word[0].is_identity())
       return word;
   }
   int sizList = list.size();
@@ -391,7 +391,7 @@ void SCRMakeStabStrong(StabChain<Telt, Tidx_label> &S,
     for (size_t iGen = 0; iGen < nbGen; iGen++) {
       size_t jGen = nbGen - 1 - iGen;
       Telt g = SCRSift(S, newgens[jGen]);
-      if (!g.isIdentity()) {
+      if (!g.is_identity()) {
         SCRMakeStabStrong(S->stabilizer, {g}, param, orbits, where, basesize,
                           base, correct, missing, false);
         S->diam = S->treedepth + S->stabilizer->diam;
@@ -424,7 +424,7 @@ void SCRMakeStabStrong(StabChain<Telt, Tidx_label> &S,
     std::vector<Telt> coset = CosetRepAsWord(S->comm->labels, S->orbit[0],
                                              S->orbit[ran], S->transversal);
     coset = InverseAsWord(coset, gen, inv);
-    if (!w.isIdentity()) {
+    if (!w.is_identity()) {
       coset.push_back(w);
       std::pair<std::vector<Telt>, int> residue = SiftAsWord(S, coset);
       if (residue.second > 0) {
@@ -548,7 +548,7 @@ Telt SCRStrongGenTest(StabChain<Telt, Tidx_label> const &S,
       int i = 0;
       while (i < 2) {
         i++;
-        if (!w[i - 1].isIdentity()) {
+        if (!w[i - 1].is_identity()) {
           ranword.push_back(w[i - 1]);
           std::pair<std::vector<Telt>, int> residue = SiftAsWord(S, ranword);
           if (residue.second > 0) {
@@ -628,10 +628,10 @@ Telt SCRStrongGenTest2(StabChain<Telt, Tidx_label> const &S,
       int i = 0;
       while (i < 2) {
         i++;
-        if (!w[i - 1].isIdentity()) {
+        if (!w[i - 1].is_identity()) {
           ranelement = ranelement * w[i - 1];
           Telt residue = SCRSift(S, ranelement);
-          if (!residue.isIdentity())
+          if (!residue.is_identity())
             return residue;
         }
       }
@@ -703,7 +703,7 @@ Telt VerifyStabilizer(StabChain<Telt, Tidx_label> const &S, Telt const &z,
   size_t nbLeader = leaders.size();
   size_t missSiz = missing.size();
   for (size_t j = 0; j < nbLeader; j++) {
-    if (result.isIdentity()) {
+    if (result.is_identity()) {
       int i = leaders[nbLeader - 1 - j];
       ChangeStabChain(chain, {i}, false);
       Telt w1, w1inv;
@@ -718,7 +718,7 @@ Telt VerifyStabilizer(StabChain<Telt, Tidx_label> const &S, Telt const &z,
       }
       for (const Tidx_label &iGen : chain->stabilizer->genlabels) {
         const Telt &g = chain->comm->labels[iGen];
-        if (result.isIdentity()) {
+        if (result.is_identity()) {
           if (correct) {
             // There is a possible source of problems here
             std::pair<std::vector<Telt>, int> residue =
@@ -727,7 +727,7 @@ Telt VerifyStabilizer(StabChain<Telt, Tidx_label> const &S, Telt const &z,
               result = Product(residue.first);
             } else {
               size_t l = 0;
-              while (l < missSiz && result.isIdentity()) {
+              while (l < missSiz && result.is_identity()) {
                 if (ImageInWord(missing[l], residue.first) != missing[l])
                   result = Product(residue.first);
                 l++;
@@ -740,11 +740,11 @@ Telt VerifyStabilizer(StabChain<Telt, Tidx_label> const &S, Telt const &z,
       }
     }
   }
-  if (result.isIdentity()) {
+  if (result.is_identity()) {
     StabChain<Telt, Tidx_label> stabpt2 = chain->stabilizer;
     Face where2(where1.size());
     for (auto &i : S->orbit) {
-      if (result.isIdentity() && !where2[i]) {
+      if (result.is_identity() && !where2[i]) {
         orb = {i};
         where2[i] = 1;
         for (auto &pnt : orb) {
@@ -795,7 +795,7 @@ Telt VerifyStabilizer(StabChain<Telt, Tidx_label> const &S, Telt const &z,
             result = Product(residue.first);
           } else {
             size_t l = 0;
-            while (l < missSiz && result.isIdentity()) {
+            while (l < missSiz && result.is_identity()) {
               if (ImageInWord(missing[l], residue.first) != missing[l]) {
                 result = Product(residue.first);
               }
@@ -917,11 +917,11 @@ StabChain<Telt, Tidx_label> StabChainRandomPermGroup(
             result = SCRStrongGenTest2(S, param);
           }
           std::pair<bool, Telt> resultComp = {true, result};
-          if (result.isIdentity()) {
+          if (result.is_identity()) {
             resultComp = VerifySGS(S, missing, correct);
             result = resultComp.second;
           }
-          if (resultComp.first && result.isIdentity()) {
+          if (resultComp.first && result.is_identity()) {
             // There are mysterious things going on here
             std::cerr << "Warning, computed and given size differ\n";
             ready = true;
@@ -930,7 +930,7 @@ StabChain<Telt, Tidx_label> StabChainRandomPermGroup(
               while (true) {
                 paramOpt param{0, 0, 1, 10 / S->diam, 0, 0};
                 result = SCRStrongGenTest2(S, param);
-                if (!result.isIdentity())
+                if (!result.is_identity())
                   break;
               }
             }
@@ -939,7 +939,7 @@ StabChain<Telt, Tidx_label> StabChainRandomPermGroup(
         } else {
           warning = 0;
           if (correct) {
-            while (result.isIdentity()) {
+            while (result.is_identity()) {
               warning++;
               if (warning > 5)
                 std::cerr << "Warning, computed and given size differ\n";
@@ -947,13 +947,13 @@ StabChain<Telt, Tidx_label> StabChainRandomPermGroup(
                                         correct, missing);
             }
           } else {
-            while (result.isIdentity()) {
+            while (result.is_identity()) {
               warning++;
               if (warning > 5)
                 std::cerr << "Warning, computed and given size differ\n";
               result = SCRStrongGenTest(S, param, orbits, basesize, base,
                                         correct, missing);
-              if (result.isIdentity())
+              if (result.is_identity())
                 result = SCRStrongGenTest2(S, param);
             }
           }
@@ -970,18 +970,18 @@ StabChain<Telt, Tidx_label> StabChainRandomPermGroup(
             result = SCRStrongGenTest2(S, param);
           }
           std::pair<bool, Telt> resultComp = {true, result};
-          if (resultComp.first && result.isIdentity()) {
+          if (resultComp.first && result.is_identity()) {
             resultComp = VerifySGS(S, missing, correct);
             result = resultComp.second;
           }
-          if (resultComp.first && result.isIdentity()) {
+          if (resultComp.first && result.is_identity()) {
             ready = true;
           } else {
             if (!resultComp.first) {
               while (true) {
                 paramOpt param{0, 0, 1, 10 / S->diam, 0, 0};
                 result = SCRStrongGenTest2(S, param);
-                if (!result.isIdentity())
+                if (!result.is_identity())
                   break;
               }
             }
@@ -990,14 +990,14 @@ StabChain<Telt, Tidx_label> StabChainRandomPermGroup(
         } else {
           result = SCRStrongGenTest(S, param, orbits, basesize, base, correct,
                                     missing);
-          if (!result.isIdentity()) {
+          if (!result.is_identity()) {
             eNew = {result};
           } else {
             if (correct) {
               ready = true;
             } else {
               result = SCRStrongGenTest2(S, param);
-              if (result.isIdentity()) {
+              if (result.is_identity()) {
                 ready = true;
               } else {
                 eNew = {result};
@@ -1027,12 +1027,12 @@ std::pair<bool, Telt> VerifySGS(StabChain<Telt, Tidx_label> const &S,
     TotSet[i] = i;
   //
   int i = 0;
-  while (i < len && result.second.isIdentity()) {
+  while (i < len && result.second.is_identity()) {
     StabChain<Telt, Tidx_label> temp = StructuralCopy(list[len - 1 - i]);
     InsertTrivialStabilizer(temp, list[len - i]->orbit[0]);
     int gencount = 0;
     while (gencount < static_cast<int>(list[len - i]->genlabels.size()) &&
-           result.second.isIdentity()) {
+           result.second.is_identity()) {
       gencount++;
       Tidx_label posgen = list[len - i]->genlabels[gencount - 1];
       const Telt &gen = S->comm->labels[posgen];
@@ -1044,7 +1044,7 @@ std::pair<bool, Telt> VerifySGS(StabChain<Telt, Tidx_label> const &S,
             result.second = Product(residue.first);
           } else {
             size_t l = 0;
-            while (l < missing.size() && result.second.isIdentity()) {
+            while (l < missing.size() && result.second.is_identity()) {
               if (ImageInWord(missing[l], residue.first) != missing[l]) {
                 result.second = Product(residue.first);
               }
@@ -1084,7 +1084,7 @@ std::pair<bool, Telt> VerifySGS(StabChain<Telt, Tidx_label> const &S,
           result.second = PowerGroupElement(newgen, eLen);
           AddGeneratorsExtendSchreierTree(temp2, {newgen});
         } else {
-          if (result.second.isIdentity()) {
+          if (result.second.is_identity()) {
             AddGeneratorsExtendSchreierTree(temp2, {newgen});
             std::vector<std::vector<int>> blks =
                 Blocks_without_seed(temp2->comm->labels, temp2->orbit);
@@ -1111,7 +1111,7 @@ std::pair<bool, Telt> VerifySGS(StabChain<Telt, Tidx_label> const &S,
                 AddGeneratorsExtendSchreierTree(temp, {gen});
               }
             }
-            if (!result.second.isIdentity() && temp2->orbit[0] >= n) {
+            if (!result.second.is_identity() && temp2->orbit[0] >= n) {
               result.second = RestrictedPermNC(result.second, TotSet);
             }
           }

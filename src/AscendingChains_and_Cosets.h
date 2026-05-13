@@ -1431,7 +1431,7 @@ private:
       Telt new_cos_can = f_can(new_cos);
       std::unordered_set<Telt> set_gens;
       auto f_insert_gen=[&](Telt const& eGen) -> void {
-        if (!eGen.isIdentity()) {
+        if (!eGen.is_identity()) {
           set_gens.insert(eGen);
         }
       };

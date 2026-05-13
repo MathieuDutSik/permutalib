@@ -674,7 +674,7 @@ std::vector<singStrat<typename Telt::Tidx>> StratMeetPartition_r_p_p_e(
   using Tidx = typename Telt::Tidx;
   std::vector<singStrat<Tidx>> strat;
   std::vector<Tidx> cellsP = P.cellno;
-  if (!g.isIdentity()) {
+  if (!g.is_identity()) {
     for (Tidx i = 0; i < NumberCells(P); i++) {
       std::vector<Tidx> cell = Cell(P, i);
       for (auto &eVal : cell) {
@@ -711,7 +711,7 @@ std::vector<singStrat<typename Telt::Tidx>> StratMeetPartition_r_p_p_e(
 #ifdef DEBUG_STBCBCKT
       std::cerr << "CPP g=" << g << " i=" << i << "\n";
 #endif
-      if (!g.isIdentity()) {
+      if (!g.is_identity()) {
         std::vector<Tidx> cell = Cell(P, NumberCells(P));
         for (auto &eVal : cell) {
           Tidx img = PowAct(eVal, g);
@@ -757,7 +757,7 @@ StratMeetPartition_p_p_e(Partition<typename Telt::Tidx> &P,
   using Tidx = typename Telt::Tidx;
   std::vector<singStrat<Tidx>> strat;
   std::vector<Tidx> cellsP = P.cellno;
-  if (!g.isIdentity()) {
+  if (!g.is_identity()) {
     for (Tidx i = 0; i < NumberCells(P); i++) {
       std::vector<Tidx> cell = Cell(P, i);
       for (auto &eVal : cell) {
@@ -794,7 +794,7 @@ StratMeetPartition_p_p_e(Partition<typename Telt::Tidx> &P,
 #ifdef DEBUG_STBCBCKT
       std::cerr << "CPP g=" << g << " i=" << i << "\n";
 #endif
-      if (!g.isIdentity()) {
+      if (!g.is_identity()) {
         std::vector<Tidx> cell = Cell(P, NumberCells(P));
         for (auto &eVal : cell) {
           Tidx img = PowAct(eVal, g);
@@ -1575,7 +1575,7 @@ ResultPBT<Telt, Tidx_label> PartitionBacktrack(
           if (image.level2.status != int_false) {
             if (SiftedPermutation(image.level2.Stot,
                                   prm.val * Inverse(image.perm2.val))
-                    .isIdentity()) {
+                    .is_identity()) {
 #ifdef DEBUG_STBCBCKT
               std::cerr << "CPP PBEnumerate, EXIT 3\n";
 #endif
@@ -2807,7 +2807,7 @@ RepOpElmTuplesPermGroup(const StabChain<Telt, Tidx_label> &G,
   std::vector<Tidx> baspts = BaseStabChain(G);
 
   auto test_isin = [&](const Telt &g) -> bool {
-    return SiftedPermutation(G, g).isIdentity();
+    return SiftedPermutation(G, g).is_identity();
   };
   auto is_corr = [&]() -> bool {
     for (auto &i : e)

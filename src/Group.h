@@ -60,7 +60,7 @@
   in this case.
   ---When implementing (for example MyMatrix), we need to have a custom type
   that allows for
-     ---isIdentity
+     ---is_identity
      ---Default constructor that gives the right entry (e.g. the
   IdentityMat<T>(dim))
      ---The inverse
@@ -585,7 +585,7 @@ PreImageSubgroupActionGenA(std::vector<TeltMatr> const &ListMatrGens,
       TeltPerm const &eGenPerm = ListPermGens[iGen];
       Tobj x_img = f_op(x_cos, eGenPerm);
       Telt const &eElt = map[x_img];
-      TeltMatr eGenStabMatr = eCosMatr * eGenMatr * Inverse(eElt.first);
+      TeltMatr eGenStabMatr = eCosMatr * eGenMatr * eElt.first.inverse();
       TeltPerm eGenStabPerm = eCosPerm * eGenPerm * Inverse(eElt.second);
 #ifdef PERMUTALIB_BLOCKING_SANITY_CHECK
       Tobj x_test = f_op(x_start, eGenStabPerm);
@@ -618,7 +618,7 @@ PreImageSubgroupActionGen(std::vector<TeltMatr> const &ListMatrGens,
   using Telt = std::pair<TeltMatr, TeltPerm>;
   std::unordered_set<TeltMatr> SetMatrGens;
   auto f_insert_gen=[&](std::pair<TeltMatr, TeltPerm> const& pair) -> void {
-    if (!IsIdentity(pair.first)) {
+    if (!pair.first.is_identity()) {
       SetMatrGens.insert(pair.first);
     }
   };
@@ -647,11 +647,19 @@ struct SeqTracker {
   }
   SeqTracker(TeltMatr const& _x, SequenceType<true> const& _seq) : x(_x), seq(_seq) {
   }
+  bool is_identity() const {
+    return IsIdentity(x);
+  }
+  SeqTracker<TeltMatr> inverse() const {
+    TeltMatr x_ret = Inverse(x);
+    SequenceType<true> seq_ret = Inverse(seq);
+    return SeqTracker(x_ret, seq_ret);
+  }
 };
 
 template<typename TeltMatr>
 bool IsIdentity(SeqTracker<TeltMatr> const& v) {
-  return IsIdentity(v.x);
+  return v.is_identity();
 }
 
 template<typename TeltMatr>
@@ -668,9 +676,7 @@ bool operator==(SeqTracker<TeltMatr> const& v1, SeqTracker<TeltMatr> const& v2) 
 
 template<typename TeltMatr>
 SeqTracker<TeltMatr> Inverse(SeqTracker<TeltMatr> const& v) {
-  TeltMatr x = Inverse(v.x);
-  SequenceType<true> seq = Inverse(v.seq);
-  return SeqTracker(x, seq);
+  return v.inverse();
 }
 
 template <typename TeltPerm, typename TeltMatr, typename Tobj, typename Fop>
@@ -855,7 +861,7 @@ void PreImageSubgroupKernel(std::vector<TeltMatr> const &ListMatrGens,
       throw PermutalibException{1};
     }
 #endif
-    if (!IsIdentity(pair.first)) {
+    if (!pair.first.is_identity()) {
       f_insert(pair);
     }
   };
@@ -1065,7 +1071,7 @@ RepresentativeActionMatrixPermSubset(std::vector<TeltMatr> const &ListMatrGens,
       Tseq e_seq(ListIdx);
       Telt fPair(ListPermGens[iGen].getListVal(), e_seq);
       ListGensB.push_back(fPair);
-      ListMatrGens_inv[iGen] = Inverse(ListMatrGens[iGen]);
+      ListMatrGens_inv[iGen] = ListMatrGens[iGen].inverse();
     }
 #ifdef DEBUG_REPRESENTATIVE_ACTION_MATRIX_PERM_SUBSET
     std::cerr << "GRP: We have ListGensB\n";
@@ -1210,7 +1216,7 @@ public:
         Tseq e_seq(ListIdx);
         Telt fPair(ListPermGens[iGen].getListVal(), e_seq);
         ListGensB.push_back(fPair);
-        ListMatrGens_inv.push_back(Inverse(ListMatrGens[iGen]));
+        ListMatrGens_inv.push_back(ListMatrGens[iGen].inverse());
       }
       TgroupB GRP_B(ListGensB, idB);
       opt = GRP_B;
@@ -1225,7 +1231,7 @@ public:
       Tseq id_seq;
       Telt ePair(elt.getListVal(), id_seq);
       Telt res = GRP_B.Sift(ePair);
-      if (!res.isIdentity()) {
+      if (!res.is_identity()) {
         return {};
       }
       Tseq ret_seq = Inverse(res.getElt());
@@ -1245,7 +1251,7 @@ public:
       }
       return ret_matr;
     } else {
-      if (elt.isIdentity()) {
+      if (elt.is_identity()) {
         return id_matr;
       } else {
         return {};

@@ -172,7 +172,7 @@ struct SequenceType {
   //
   // Other stuff
   //
-  bool isIdentity() const {
+  bool is_identity() const {
     return ListIdx.size() == 0;
   }
   const std::vector<int64_t>& getVect() const {
@@ -458,7 +458,7 @@ public:
   //
   // The other functionalities
   //
-  bool isIdentity() const {
+  bool is_identity() const {
     for (Tidx i = 0; i < siz; i++)
       if (ListVal[i] != i)
         return false;

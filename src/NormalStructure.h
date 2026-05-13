@@ -144,7 +144,7 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
   std::cerr << "NORM: Step 1, |start_gens|=" << start_gens.size() << "\n";
 #endif
   for (auto &eGen : start_gens)
-    if (!eGen.isIdentity())
+    if (!eGen.is_identity())
       gens_set.insert(eGen);
   std::vector<Telt> gens;
   for (auto &eGen : gens_set)
@@ -434,7 +434,7 @@ StabChain<Telt, Tidx_label> Stabilizer_OnTuples_CorrectStabChain(
 
 template <typename Telt> bool IsTrivialListGen(const std::vector<Telt> &LGen) {
   for (auto &eGen : LGen)
-    if (!eGen.isIdentity())
+    if (!eGen.is_identity())
       return false;
   return true;
 }

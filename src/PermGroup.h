@@ -61,14 +61,14 @@ template <typename Telt> Telt PowerGroupElement(Telt const &u, int const &n) {
 
 template <typename Telt> typename Telt::Tidx OrderElement(const Telt &x) {
   using Tidx = typename Telt::Tidx;
-  if (x.isIdentity())
+  if (x.is_identity())
     return 1;
   Telt xw = x;
   Tidx ord = 1;
   while (true) {
     xw *= x;
     ord++;
-    if (xw.isIdentity())
+    if (xw.is_identity())
       return ord;
   }
 }
@@ -80,8 +80,8 @@ template <typename Telt> typename Telt::Tidx OrderElement(const Telt &x) {
 template <typename Telt>
 typename Telt::Tidx LogPerm(const Telt &a, const Telt &b) {
   using Tidx = typename Telt::Tidx;
-  if (a.isIdentity()) {
-    if (b.isIdentity())
+  if (a.is_identity()) {
+    if (b.is_identity())
       return 1;
     else
       return std::numeric_limits<Tidx>::max();
@@ -93,7 +93,7 @@ typename Telt::Tidx LogPerm(const Telt &a, const Telt &b) {
     ord++;
     if (apow == b)
       return ord;
-    if (apow.isIdentity())
+    if (apow.is_identity())
       return std::numeric_limits<Tidx>::max();
   }
 }

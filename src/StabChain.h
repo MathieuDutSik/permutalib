@@ -653,7 +653,7 @@ Telt SiftedPermutation(StabChain<Telt, Tidx_label> const &S, Telt const &g) {
   Telt gW = g;
   StabChain<Telt, Tidx_label> Sptr = S;
   while (true) {
-    if (Sptr->stabilizer == nullptr || gW.isIdentity())
+    if (Sptr->stabilizer == nullptr || gW.is_identity())
       return gW;
     Tidx bpt = Sptr->orbit[0];
     Tidx img = PowAct(bpt, gW);
@@ -672,7 +672,7 @@ Telt SiftedPermutation(StabChain<Telt, Tidx_label> const &S, Telt const &g) {
 template <typename Telt, typename Tidx_label>
 bool IsElementInStabChain(StabChain<Telt, Tidx_label> const &S, Telt const &g) {
   Telt res = SiftedPermutation(S, g);
-  return res.isIdentity();
+  return res.is_identity();
 }
 
 // Testing that H is a subset of G
@@ -681,7 +681,7 @@ bool InclusionTest(const StabChain<Telt, Tidx_label> &G,
                    const StabChain<Telt, Tidx_label> &H) {
   for (auto &eGen : Kernel_GeneratorsOfGroup(H)) {
     Telt res = SiftedPermutation(G, eGen);
-    if (!res.isIdentity())
+    if (!res.is_identity())
       return false;
   }
   return true;
@@ -842,7 +842,7 @@ StabChainOptions<Tint, Telt> GetStandardOptions(Telt const &id) {
 
 template <typename Telt> bool IsTrivial_ListGen(std::vector<Telt> const &LGen) {
   for (auto &eElt : LGen)
-    if (!eElt.isIdentity())
+    if (!eElt.is_identity())
       return false;
   return true;
 }
@@ -880,7 +880,7 @@ bool IsTrivial(StabChain<Telt, Tidx_label> const &G) {
   StabChain<Telt, Tidx_label> Sptr = G;
   while (Sptr != nullptr) {
     for (auto &eIdx : Sptr->genlabels)
-      if (!Sptr->comm->labels[eIdx].isIdentity())
+      if (!Sptr->comm->labels[eIdx].is_identity())
         return false;
     Sptr = Sptr->stabilizer;
   }
@@ -1258,7 +1258,7 @@ void StabChainStrong(StabChain<Telt, Tidx_label> &S,
     std::cerr << "CPP eGen=" << eGen << " eGen=" << GapStyleString(eGen)
               << "\n";
 #endif
-    if (!eGen.isIdentity() && PowAct(pnt, eGen) == pnt) {
+    if (!eGen.is_identity() && PowAct(pnt, eGen) == pnt) {
 #ifdef DEBUG_STABCHAIN
       std::cerr << "CPP   1: Calling StabChainStrong with eGen="
                 << GapStyleString(eGen) << "\n";
@@ -1307,7 +1307,7 @@ void StabChainStrong(StabChain<Telt, Tidx_label> &S,
 #ifdef DEBUG_STABCHAIN
         std::cerr << "CPP sch=" << sch << " g=" << g << " rep=" << rep << "\n";
 #endif
-        if (!sch.isIdentity())
+        if (!sch.is_identity())
           StabChainStrong(S->stabilizer, {sch}, options);
       }
     }
@@ -1321,7 +1321,7 @@ template <typename Telt, typename Tidx_label, typename Tint>
 void ClosureGroup_options(StabChain<Telt, Tidx_label> &S, Telt const &g,
                           StabChainOptions<Tint, Telt> const &options) {
   Telt sch = SiftedPermutation(S, g);
-  if (!sch.isIdentity())
+  if (!sch.is_identity())
     StabChainStrong(S, {sch}, options);
 }
 
@@ -1808,7 +1808,7 @@ bool ChangeStabChain(StabChain<Telt, Tidx_label> &Gptr,
   KeyUpdating("After the loop");
   std::cerr << "CPP Before ConjugateStabChain cnj=" << cnj << "\n";
 #endif
-  if (!cnj.isIdentity())
+  if (!cnj.is_identity())
     ConjugateStabChain_Element(Gptr, cnj);
 #ifdef DEBUG_CHANGE_STAB_CHAIN
   KeyUpdating("After ConjugateStabChain");

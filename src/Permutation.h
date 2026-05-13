@@ -257,11 +257,14 @@ public:
   //
   // The functionality
   //
-  bool isIdentity() const {
+  bool is_identity() const {
     for (Tidx i = 0; i < siz; i++)
       if (ListVal[i] != i)
         return false;
     return true;
+  }
+  DoubleSidedPerm<Tidx> inverse() const {
+    return DoubleSidedPerm<Tidx>(ListRev, ListVal);
   }
   Tidx at(Tidx const &i) const { return ListVal[i]; }
   Tidx atRev(Tidx const &i) const { return ListRev[i]; }
@@ -319,7 +322,7 @@ bool operator<(DoubleSidedPerm<Tidx> const &v1,
 
 template <typename Tidx>
 DoubleSidedPerm<Tidx> operator~(DoubleSidedPerm<Tidx> const &ePerm) {
-  return DoubleSidedPerm<Tidx>(ePerm.getListRev(), ePerm.getListVal());
+  return ePerm.inverse();
 }
 
 // Form the product v1 * v2
@@ -432,7 +435,7 @@ template <typename Tidx> DoubleSidedPerm<Tidx> SCRandomPerm(int const &d) {
 
 template <typename Tidx>
 DoubleSidedPerm<Tidx> Inverse(DoubleSidedPerm<Tidx> const &ePerm) {
-  return ~ePerm;
+  return ePerm.inverse();
 }
 
 // Input / Output
@@ -600,11 +603,17 @@ public:
   //
   // The destructor
   //
-  bool isIdentity() const {
+  bool is_identity() const {
     for (Tidx i = 0; i < siz; i++)
       if (ListVal[i] != i)
         return false;
     return true;
+  }
+  SingleSidedPerm<Tidx> inverse() const {
+    std::vector<Tidx> v(siz);
+    for (Tidx i = 0; i < siz; i++)
+      v[ListVal[i]] = i;
+    return SingleSidedPerm<Tidx>(std::move(v));
   }
   Tidx at(Tidx const &i) const {
     return ListVal[i];
@@ -642,12 +651,12 @@ bool operator==(SingleSidedPerm<Tidx> const &v1,
 
 template <typename Tidx>
 bool IsIdentity(SingleSidedPerm<Tidx> const &x) {
-  return x.isIdentity();
+  return x.is_identity();
 }
 
 template <typename Tidx>
 bool IsIdentity(DoubleSidedPerm<Tidx> const &x) {
-  return x.isIdentity();
+  return x.is_identity();
 }
 
 template <typename Tidx>
@@ -679,12 +688,7 @@ bool operator<(SingleSidedPerm<Tidx> const &v1,
 
 template <typename Tidx>
 SingleSidedPerm<Tidx> operator~(SingleSidedPerm<Tidx> const &ePerm) {
-  Tidx siz = ePerm.size();
-  const std::vector<Tidx> &LVal = ePerm.getListVal();
-  std::vector<Tidx> v(siz);
-  for (Tidx i = 0; i < siz; i++)
-    v[LVal[i]] = i;
-  return SingleSidedPerm<Tidx>(std::move(v));
+  return ePerm.inverse();
 }
 
 // Form the product v1 * v2
