@@ -14,7 +14,7 @@ namespace permutalib {
 
 template <typename T> T gcd_loc(T a, T b) {
   T remainder;
-  while (b != 0) {
+  while (b != T(0)) {
     remainder = a % b;
     a = b;
     b = remainder;
@@ -28,21 +28,22 @@ std::pair<bool, T> rho_pollard_factorize_loc(T const &number) {
   std::cerr << "FACT: rho_pollard_factorize_loc, number=" << number << "\n";
 #endif
   T count;
-  T x_fixed = 2, x = 2, size = 2, factor, diff;
+  T x_fixed(2), x(2), size(2), factor, diff;
   do {
     count = size;
     do {
-      x = (x * x + 1) % number;
+      x = (x * x + T(1)) % number;
       diff = x - x_fixed;
-      if (diff < 0)
+      if (diff < T(0))
         diff = -diff;
       factor = gcd_loc(diff, number);
-    } while (--count && (factor == 1));
-    size *= 2;
+      --count;
+    } while (count != T(0) && (factor == T(1)));
+    size *= T(2);
     x_fixed = x;
-  } while (factor == 1);
+  } while (factor == T(1));
   if (factor == number) {
-    return {false, -1};
+    return {false, T(-1)};
   } else {
     return {true, factor};
   }
