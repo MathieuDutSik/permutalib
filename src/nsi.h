@@ -2,7 +2,6 @@
 #ifndef SRC_GAP_NSI_H_
 #define SRC_GAP_NSI_H_
 
-#include "NumberTheory.h"
 #include "StabChain.h"
 #include "stbcbckt.h"
 #include <algorithm>
@@ -77,6 +76,14 @@ template <typename Telt> struct ResultCanonicalization {
   std::vector<int> set;
   Telt g;
 };
+
+template <typename Tint, typename Tidx>
+Tint ComputePower(const Tint &x, const Tidx &expo) {
+  Tint ret = 1;
+  for (Tidx i = 0; i < expo; i++)
+    ret *= x;
+  return ret;
+}
 
 template <typename Telt, typename T>
 Telt PermListList(std::vector<T> const &list1, std::vector<T> const &list2) {
