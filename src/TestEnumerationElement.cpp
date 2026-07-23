@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
           size_t n_iter = 0;
           for (auto &elt : eG) {
             ListElt.insert(elt);
-            if (Tint(ListElt.size()) > eG.size()) {
+            if (permutalib::UnsignedToTint<Tint>(ListElt.size()) > eG.size()) {
               std::cerr << "We found more elements\n";
               std::cerr << "than the group order\n";
               throw permutalib::PermutalibException{1};
@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
             std::cerr << "Some elements were found several times. Clear bug\n";
             throw permutalib::PermutalibException{1};
           }
-          if (Tint(n_iter) != eG.size()) {
+          if (permutalib::UnsignedToTint<Tint>(n_iter) != eG.size()) {
             std::cerr << "Some elements were missed. Clear bug\n";
             throw permutalib::PermutalibException{1};
           }
