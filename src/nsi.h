@@ -193,11 +193,11 @@ NewCanonicImage(StabChain<Telt, Tidx_label> const &g,
       } else {
         if (b.orbSize == 1)
           return false;
-        Tint pow1 = ComputePower(Tint(a.orbCount), b.orbSize);
+        Tint pow1 = ComputePower(UnsignedToTint<Tint>(a.orbCount), b.orbSize);
         //        std::cerr << "pow1=" << pow1 << " a.orbCount=" <<
         //        Tidx(a.orbCount) << " b.orbSize=" << size_t(b.orbSize) <<
         //        "\n";
-        Tint pow2 = ComputePower(Tint(b.orbCount), a.orbSize);
+        Tint pow2 = ComputePower(UnsignedToTint<Tint>(b.orbCount), a.orbSize);
         //        std::cerr << "pow2=" << pow2 << " b.orbCount=" <<
         //        Tidx(b.orbCount) << " a.orbSize=" << size_t(a.orbSize) <<
         //        "\n";
@@ -221,11 +221,11 @@ NewCanonicImage(StabChain<Telt, Tidx_label> const &g,
       } else {
         if (b.orbSize == 1)
           return false;
-        Tint pow1 = ComputePower(Tint(a.orbCount), b.orbSize);
+        Tint pow1 = ComputePower(UnsignedToTint<Tint>(a.orbCount), b.orbSize);
         //        std::cerr << "pow1=" << pow1 << " a.orbCount=" <<
         //        Tidx(a.orbCount) << " b.orbSize=" << size_t(b.orbSize) <<
         //        "\n";
-        Tint pow2 = ComputePower(Tint(b.orbCount), a.orbSize);
+        Tint pow2 = ComputePower(UnsignedToTint<Tint>(b.orbCount), a.orbSize);
         //        std::cerr << "pow2=" << pow2 << " b.orbCount=" <<
         //        Tidx(b.orbCount) << " a.orbSize=" << size_t(a.orbSize) <<
         //        "\n";
@@ -852,11 +852,11 @@ NewCanonicImageInitialTriv(StabChain<Telt, Tidx_label> const &g,
       } else {
         if (b.orbSize == 1)
           return false;
-        Tint pow1 = ComputePower(Tint(a.orbCount), b.orbSize);
+        Tint pow1 = ComputePower(UnsignedToTint<Tint>(a.orbCount), b.orbSize);
         //        std::cerr << "pow1=" << pow1 << " a.orbCount=" <<
         //        Tidx(a.orbCount) << " b.orbSize=" << size_t(b.orbSize) <<
         //        "\n";
-        Tint pow2 = ComputePower(Tint(b.orbCount), a.orbSize);
+        Tint pow2 = ComputePower(UnsignedToTint<Tint>(b.orbCount), a.orbSize);
         //        std::cerr << "pow2=" << pow2 << " b.orbCount=" <<
         //        Tidx(b.orbCount) << " a.orbSize=" << size_t(a.orbSize) <<
         //        "\n";
@@ -880,11 +880,11 @@ NewCanonicImageInitialTriv(StabChain<Telt, Tidx_label> const &g,
       } else {
         if (b.orbSize == 1)
           return false;
-        Tint pow1 = ComputePower(Tint(a.orbCount), b.orbSize);
+        Tint pow1 = ComputePower(UnsignedToTint<Tint>(a.orbCount), b.orbSize);
         //        std::cerr << "pow1=" << pow1 << " a.orbCount=" <<
         //        Tidx(a.orbCount) << " b.orbSize=" << size_t(b.orbSize) <<
         //        "\n";
-        Tint pow2 = ComputePower(Tint(b.orbCount), a.orbSize);
+        Tint pow2 = ComputePower(UnsignedToTint<Tint>(b.orbCount), a.orbSize);
         //        std::cerr << "pow2=" << pow2 << " b.orbCount=" <<
         //        Tidx(b.orbCount) << " a.orbSize=" << size_t(a.orbSize) <<
         //        "\n";

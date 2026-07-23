@@ -717,7 +717,7 @@ Tint SizeStabChain(StabChain<Telt, Tidx_label> const &S) {
   Tint size = 1;
   StabChain<Telt, Tidx_label> Sptr = S;
   while (Sptr != nullptr) {
-    Tint siz_i = Tint(Sptr->orbit.size());
+    Tint siz_i = UnsignedToTint<Tint>(Sptr->orbit.size());
     if (siz_i == 0)
       break;
     size *= siz_i;
