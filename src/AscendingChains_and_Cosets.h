@@ -248,7 +248,7 @@ Kernel_RightTransversal_Direct_f(StabChain<Telt, Tidx_label> const &G,
   while (true) {
     size_t len = ListTransversal.size();
 #ifndef CHECK_COSET_ENUMERATION
-    Tint n_coset = len;
+    Tint n_coset = UnsignedToTint<Tint>(len);
     if (n_coset == index) {
       // Early termination is possible
       break;
@@ -271,7 +271,7 @@ Kernel_RightTransversal_Direct_f(StabChain<Telt, Tidx_label> const &G,
     pos = len;
   }
 #ifdef CHECK_COSET_ENUMERATION
-  Tint n_coset = ListTransversal.size();
+  Tint n_coset = UnsignedToTint<Tint>(ListTransversal.size());
   if (n_coset != index) {
     std::cerr << "ACC: n_coset=" << n_coset << " index=" << index << "\n";
     std::cerr << "ACC: G=[";
