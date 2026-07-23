@@ -1,0 +1,45 @@
+name: CI(10) Windows / MinGW compile test
+
+# Compile-only check of the library on Windows (MSYS2 / MINGW64). The test
+# programs instantiate the group templates with Tint = mpz_class, so this
+# exercises the gmpxx code paths that differ on LLP64. Binaries are not run.
+
+on:
+  # One time per month
+  schedule:
+    - cron: "0 0 10 * *"
+  # Manually triggered
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    timeout-minutes: 120
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    env:
+      GMP_INCDIR: /mingw64/include
+      BOOST_INCDIR: /mingw64/include
+      GMP_CXX_LINK: "-lgmpxx -lgmp -lm"
+      BOOST_LINK: "-lboost_serialization"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up MSYS2 (MINGW64)
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            base-devel
+            git
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-gmp
+            mingw-w64-x86_64-boost
+
+      - name: Build all test programs
+        run: |
+          cd src && make all
