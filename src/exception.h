@@ -3,14 +3,15 @@
 #define SRC_GAP_EXCEPTION_H_
 
 #include <cstdint>
+#include <cstdlib>
 #include <type_traits>
 
-#if defined(_WIN32)
-// MinGW / Windows provides no POSIX random() / srandom(). permutalib calls the
-// unqualified global random(); supply portable equivalents built on rand().
-// POSIX random() returns a value in [0, 2^31-1], but MinGW RAND_MAX is only
-// 32767, so combine two rand() draws to widen the range.
-#include <cstdlib>
+// permutalib calls the unqualified global random(). On POSIX and on MinGW,
+// <cstdlib> declares it; including it here (before the templates that use it)
+// satisfies two-phase name lookup. Only non-MinGW Windows (e.g. MSVC) lacks
+// POSIX random()/srandom(), so provide a shim there built on rand(). RAND_MAX
+// can be as low as 32767, so combine two draws to widen the range.
+#if defined(_WIN32) && !defined(__MINGW32__)
 inline long random() {
   return (static_cast<long>(std::rand()) << 15) ^ static_cast<long>(std::rand());
 }
