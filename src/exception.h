@@ -39,10 +39,15 @@ inline Tint UnsignedToTint(Tin const &val) {
   if constexpr (sizeof(Tin) <= 4) {
     return Tint(val);
   } else {
+    // 64-bit source: gmpxx has no long long constructor (ambiguous on LLP64),
+    // so build the value from 32-bit halves. Multiply by 2^16 twice rather than
+    // using <<= or a 2^32 literal: some Tint types (e.g. SafeInt64) provide no
+    // operator<<=, and 2^32 is itself a long long literal that gmpxx would find
+    // ambiguous.
     uint64_t v = static_cast<uint64_t>(val);
     Tint ret = Tint(static_cast<uint32_t>(v >> 32));
-    ret <<= 32;
-    ret += Tint(static_cast<uint32_t>(v & 0xFFFFFFFFu));
+    ret = ret * Tint(65536) * Tint(65536);
+    ret = ret + Tint(static_cast<uint32_t>(v & 0xFFFFFFFFu));
     return ret;
   }
 }
