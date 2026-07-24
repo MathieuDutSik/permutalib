@@ -423,7 +423,7 @@ template <typename Tidx> DoubleSidedPerm<Tidx> SCRandomPerm(int const &d) {
   for (int i = 0; i < d; i++) {
     int idx = d - i;
     int res = d - i;
-    int k = random() % res;
+    int k = permutalib_random() % res;
     if (k != idx) {
       int tmp = rnd[idx];
       rnd[idx] = rnd[k];
@@ -775,7 +775,7 @@ template <typename Tidx> SingleSidedPerm<Tidx> SCRandomPerm(Tidx const &d) {
   for (Tidx i = 0; i < d; i++) {
     Tidx idx = d - i;
     Tidx res = d - i;
-    Tidx k = random() % res;
+    Tidx k = permutalib_random() % res;
     if (k != idx) {
       Tidx tmp = rnd[idx];
       rnd[idx] = rnd[k];

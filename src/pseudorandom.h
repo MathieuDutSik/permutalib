@@ -53,9 +53,9 @@ InfoPseudoRandom *GetPseudoRandom() {
 
 template <typename T> T RandomInteger(T const &val) {
 #ifdef TRUE_RANDOM
-  return T(random()) % val;
+  return T(permutalib_random()) % val;
 #else
-  return T(random()) % val;
+  return T(permutalib_random()) % val;
 #endif
 }
 
@@ -78,7 +78,7 @@ Face Extract01vector(InfoPseudoRandom *R) {
 
 template <typename Telt> Telt Random(std::vector<Telt> const &V) {
   size_t siz = V.size();
-  size_t pos = size_t(random()) % siz;
+  size_t pos = size_t(permutalib_random()) % siz;
   return V[pos];
 }
 

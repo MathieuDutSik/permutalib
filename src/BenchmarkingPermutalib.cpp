@@ -18,7 +18,7 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
   auto random_face = [](const Tidx &len) -> permutalib::Face {
     permutalib::Face eFace(len);
     for (Tidx i = 0; i < len; i++) {
-      int eVal = Tidx(random()) % 2;
+      int eVal = Tidx(permutalib::permutalib_random()) % 2;
       eFace[i] = eVal;
     }
     return eFace;
@@ -39,15 +39,15 @@ void full_check(Tgroup const& eG, std::string const& opt, int64_t const& n_iter,
   };
   auto bench_pointstabilizer = [&]() -> void {
     for (int64_t iter = 0; iter < n_iter; iter++) {
-      Tidx pos = Tidx(random()) % n;
+      Tidx pos = Tidx(permutalib::permutalib_random()) % n;
       Tgroup eG2 = eG.Stabilizer_OnPoints(pos);
       siz_control += size_t(pos);
     }
   };
   auto bench_pointrepresentative = [&]() -> void {
     for (int64_t iter = 0; iter < n_iter; iter++) {
-      Tidx pos1 = Tidx(random()) % n;
-      Tidx pos2 = Tidx(random()) % n;
+      Tidx pos1 = Tidx(permutalib::permutalib_random()) % n;
+      Tidx pos2 = Tidx(permutalib::permutalib_random()) % n;
       std::optional<Telt> eP = eG.RepresentativeAction_OnPoints(pos1, pos2);
       siz_control += size_t(pos1) + size_t(pos2);
       if (eP)

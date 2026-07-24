@@ -2033,7 +2033,7 @@ Telt UniformRandomElement(StabChain<Telt, Tidx_label> const &S) {
 
 template <typename Telt, typename Tidx_label>
 std::vector<Telt> UsefulRandomSubgroupGenerators(StabChain<Telt, Tidx_label> const &S) {
-  size_t n_gen = 1 + (random() % 2);
+  size_t n_gen = 1 + (permutalib_random() % 2);
   std::vector<Telt> LGen;
   for (size_t i_gen=0; i_gen<n_gen; i_gen++) {
     Telt eGen = UniformRandomElement(S);

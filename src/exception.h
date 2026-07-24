@@ -6,23 +6,25 @@
 #include <cstdlib>
 #include <type_traits>
 
-// permutalib calls the unqualified global random(). On POSIX and on MinGW,
-// <cstdlib> declares it; including it here (before the templates that use it)
-// satisfies two-phase name lookup. Only non-MinGW Windows (e.g. MSVC) lacks
-// POSIX random()/srandom(), so provide a shim there built on rand(). RAND_MAX
-// can be as low as 32767, so combine two draws to widen the range.
-#if defined(_WIN32) && !defined(__MINGW32__)
-inline long random() {
-  return (static_cast<long>(std::rand()) << 15) ^ static_cast<long>(std::rand());
-}
-inline void srandom(unsigned int seed) { std::srand(seed); }
-#endif
-
 namespace permutalib {
 
 struct PermutalibException {
   int eVal;
 };
+
+// Portable pseudo-random source. POSIX random() is unavailable on Windows
+// (MinGW / MSVC), and defining a global random() shim collides with other
+// libraries that provide their own (e.g. basic_common_cpp), so use a namespaced
+// helper instead. On platforms that have POSIX random() we keep it; on Windows
+// we combine two std::rand() draws (RAND_MAX can be as low as 32767) to widen
+// the range to the [0, 2^31 - 1] that callers expect.
+inline long permutalib_random() {
+#if defined(_WIN32)
+  return (static_cast<long>(std::rand()) << 15) ^ static_cast<long>(std::rand());
+#else
+  return random();
+#endif
+}
 
 // Construct an integer type Tint from an unsigned (size / count) value. On LLP64
 // (Windows) size_t and other 64-bit types are `long long`, for which gmpxx
