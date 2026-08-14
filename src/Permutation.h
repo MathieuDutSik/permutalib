@@ -5,6 +5,7 @@
 #include "Face_basic.h"
 #include "exception.h"
 #include "hash_fct.h"
+#include <format>
 #include <iostream>
 #include <limits>
 #include <stdlib.h>
@@ -839,16 +840,37 @@ std::ostream &operator<<(std::ostream &os, SingleSidedPerm<Tidx> const &ePerm) {
 
 } // namespace permutalib
 
-namespace std {
+// std::format support for the permutation types.
+//
+// Not overloads of std::to_string: adding a function to namespace std is
+// undefined behaviour whatever its argument type ([namespace.std]/1). The
+// permission of [namespace.std]/2 covers specializations of standard class
+// templates that depend on a program-defined type, and std::formatter is such
+// a template, so this is the sanctioned way of making a type printable.
+//
+// Both render exactly what the previous to_string returned, and what the
+// operator<< above writes: GapStyleStringShift(ePerm, 1).
 template <typename Tidx>
-std::string to_string(permutalib::DoubleSidedPerm<Tidx> const &ePerm) {
-  return GapStyleStringShift(ePerm, 1);
-}
+struct std::formatter<permutalib::DoubleSidedPerm<Tidx>>
+    : std::formatter<std::string> {
+  template <typename FormatContext>
+  auto format(permutalib::DoubleSidedPerm<Tidx> const &ePerm,
+              FormatContext &ctx) const {
+    return std::formatter<std::string>::format(
+        permutalib::GapStyleStringShift(ePerm, 1), ctx);
+  }
+};
+
 template <typename Tidx>
-std::string to_string(permutalib::SingleSidedPerm<Tidx> const &ePerm) {
-  return GapStyleStringShift(ePerm, 1);
-}
-} // namespace std
+struct std::formatter<permutalib::SingleSidedPerm<Tidx>>
+    : std::formatter<std::string> {
+  template <typename FormatContext>
+  auto format(permutalib::SingleSidedPerm<Tidx> const &ePerm,
+              FormatContext &ctx) const {
+    return std::formatter<std::string>::format(
+        permutalib::GapStyleStringShift(ePerm, 1), ctx);
+  }
+};
 
 namespace std {
 template <typename Tidx> struct hash<permutalib::SingleSidedPerm<Tidx>> {

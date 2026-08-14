@@ -20,24 +20,24 @@ PROGRAM	= GapRepresentativeActionOnSet GapStabilizerOnSet GapEquivalenceOnSet Ga
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
-#CC		= icpc -std=c++17 -Wall -g -O2
-#CC		= clang++ -Weverything -std=c++17
-#CC		= clang++ -Weverything -fsanitize=thread -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fsanitize=bounds -fsanitize=return -fsanitize=null -std=c++17
-#CC		= g++ -I $(BOOST_INCDIR)    -std=c++17 -Wall -g -O2
-#CC		= g++ -std=c++17 -Wall -g -O2 -fsanitize=address -fsanitize=undefined -fsanitize=bool -fstack-protector-all
-#CC		= g++ -std=c++17 -Wall -g -O3 -fsanitize=address -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fstack-protector-all
-CC		= g++ -std=c++17 -Wall -Wextra -O3
-#CC		= g++ -std=c++17 -Wall -g -O2 -fsanitize=address -fsanitize=undefined -fstack-protector-all
-#CC		= g++ -std=c++17 -Wall -g -O2 -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=bounds-strict -fsanitize=alignment -fsanitize=leak -Wstrict-aliasing
-#CC		= g++ -std=c++17 -Wall -Wextra -O3
-#CC		= g++ -pg -std=c++17 -Wall -g -O3
-#CC		= g++ -std=c++17 -Wall -g -O3
-#CC		= g++ -std=c++17 -Wall -Wconversion -g -O3
-#CC		= g++ -std=c++17 -Wall -Wextra -g -O3
-#CC		= clang++ -std=c++17 -Wall -Wconversion -g -O3
-#CC		= clang++ -std=c++17 -O3 -fprofile-instr-generate
-#CC		= clang++ -std=c++17 -O3 -fprofile-instr-use=a.profdata
-#CC		= clang++ -std=c++17 -O3
+#CC		= icpc -std=c++20 -Wall -g -O2
+#CC		= clang++ -Weverything -std=c++20
+#CC		= clang++ -Weverything -fsanitize=thread -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fsanitize=bounds -fsanitize=return -fsanitize=null -std=c++20
+#CC		= g++ -I $(BOOST_INCDIR)    -std=c++20 -Wall -g -O2
+#CC		= g++ -std=c++20 -Wall -g -O2 -fsanitize=address -fsanitize=undefined -fsanitize=bool -fstack-protector-all
+#CC		= g++ -std=c++20 -Wall -g -O3 -fsanitize=address -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fstack-protector-all
+CC		= g++ -std=c++20 -Wall -Wextra -O3
+#CC		= g++ -std=c++20 -Wall -g -O2 -fsanitize=address -fsanitize=undefined -fstack-protector-all
+#CC		= g++ -std=c++20 -Wall -g -O2 -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=bounds-strict -fsanitize=alignment -fsanitize=leak -Wstrict-aliasing
+#CC		= g++ -std=c++20 -Wall -Wextra -O3
+#CC		= g++ -pg -std=c++20 -Wall -g -O3
+#CC		= g++ -std=c++20 -Wall -g -O3
+#CC		= g++ -std=c++20 -Wall -Wconversion -g -O3
+#CC		= g++ -std=c++20 -Wall -Wextra -g -O3
+#CC		= clang++ -std=c++20 -Wall -Wconversion -g -O3
+#CC		= clang++ -std=c++20 -O3 -fprofile-instr-generate
+#CC		= clang++ -std=c++20 -O3 -fprofile-instr-use=a.profdata
+#CC		= clang++ -std=c++20 -O3
 
 NOLINKFLAG 	= -c
 OUTPUTFLAG 	= -o

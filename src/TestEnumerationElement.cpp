@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
           std::chrono::time_point<std::chrono::system_clock> time1 =
               std::chrono::system_clock::now();
           size_t n_iter = 0;
-          for (auto &elt : eG) {
+          for ([[maybe_unused]] auto &elt : eG) {
             n_iter++;
           }
           std::chrono::time_point<std::chrono::system_clock> time2 =

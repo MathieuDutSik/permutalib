@@ -17,11 +17,11 @@ PROGRAM	= TestPreImageSubgroup
 OBJECTS		= $(PROGRAM:%=%.o)
 
 #CC		= g++ -std=c++11 -Wall -Wextra -g -O2
-#CC		= g++ -std=c++17 -Wall -Wextra -g -O2
+#CC		= g++ -std=c++20 -Wall -Wextra -g -O2
 #          For GCC
-#CC             = g++ -std=c++17 -Wall -Wextra -O3 -g -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=bounds-strict -fsanitize=alignment
+#CC             = g++ -std=c++20 -Wall -Wextra -O3 -g -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=bounds-strict -fsanitize=alignment
 #          For CLANG
-CC             = g++ -std=c++17 -Wall -Wextra -g -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=alignment
+CC             = g++ -std=c++20 -Wall -Wextra -g -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=alignment
 
 
 NOLINKFLAG 	= -c
