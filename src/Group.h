@@ -371,6 +371,12 @@ public:
   }
   std::optional<Telt> RepresentativeAction_OnSets(const Face &f1,
                                                   const Face &f2) const {
+    if (f1 == f2) {
+      return S->comm->identity;
+    }
+    if (size_tint == 1) {
+      return {};
+    }
     return Kernel_RepresentativeAction_OnSets<Telt, Tidx_label, Tint>(S, f1,
                                                                       f2);
   }
