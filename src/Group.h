@@ -363,6 +363,12 @@ public:
   }
   std::optional<Telt> RepresentativeAction_OnPoints(const Tidx &x1,
                                                     const Tidx &x2) const {
+    if (x1 == x2) {
+      return S->comm->identity;
+    }
+    if (size_tint == 1) {
+      return {};
+    }
     return Kernel_RepresentativeAction_OnPoints<Telt, Tidx_label, Tint>(S, x1,
                                                                         x2);
   }
