@@ -312,7 +312,9 @@ Kernel_SmallGeneratingSet(const StabChain<Telt, Tidx_label> &G) {
     std::vector<Telt> gensB;
     for (size_t u = 0; u < i; u++) {
       Telt g = RandomElement(gens2, id);
-      gensB.push_back(std::move(g));
+      if (!g.is_identity()) {
+        gensB.push_back(std::move(g));
+      }
     }
     if (check_correctness_gens(gensB)) {
       gens2 = gensB;
