@@ -2915,8 +2915,14 @@ Kernel_Intersection(StabChain<Telt, Tidx_label> const &G,
         return true;
     return false;
   };
-  StabChain<Telt, Tidx_label> G_red = G;
-  StabChain<Telt, Tidx_label> H_red = H;
+  /*
+    The chains have to be copied: G_red and H_red are reduced and then
+    conjugated in place by ConjugateStabChain_Element. Since StabChain is a
+    shared_ptr, working directly on G and H would replace the groups of the
+    caller by conjugates of them.
+   */
+  StabChain<Telt, Tidx_label> G_red = CopyStabChain(G);
+  StabChain<Telt, Tidx_label> H_red = CopyStabChain(H);
   std::vector<Tidx> Omega;
   std::vector<Tidx> OmegaC;
   while (true) {
@@ -3012,7 +3018,7 @@ Kernel_Intersection(StabChain<Telt, Tidx_label> const &G,
   StabChain<Telt, Tidx_label> retGRP =
       PartitionBacktrack<Telt, Tidx_label, Tdata, Trfm, Tint, false,
                          decltype(Pr), decltype(nextLevel)>(
-          G, Pr, nextLevel, rbase, data, TrivGrp, TrivGrp)
+          G_red, Pr, nextLevel, rbase, data, TrivGrp, TrivGrp)
           .stab;
   ConjugateStabChain_Element(retGRP, eReordInv);
   return retGRP;
