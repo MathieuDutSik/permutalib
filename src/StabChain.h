@@ -855,7 +855,10 @@ MovedPoints(StabChain<Telt, Tidx_label> const &S) {
   StabChain<Telt, Tidx_label> Sptr = S;
   while (Sptr != nullptr) {
     for (auto &eIdx : Sptr->genlabels) {
-      Telt eGen = S->comm->labels[eIdx];
+      // The genlabels of a level index the labels of that same level. The
+      // levels of a chain do not always share their comm, so using
+      // S->comm->labels here can read out of range.
+      Telt eGen = Sptr->comm->labels[eIdx];
       LGen.insert(eGen);
     }
     Sptr = Sptr->stabilizer;

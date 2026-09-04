@@ -1947,8 +1947,11 @@ void FastCheckSizes_DoubleCosets(StabChain<Telt,Tidx_label> const& G, StabChain<
 }
 
   /*
-    Check that the pairwise intersection of the double cosets
-    is empty.
+    Check that the pairwise intersection of the double cosets is empty
+    and that they cover the full group.
+    The double cosets are enumerated from the intersection U inter ConjV,
+    so unlike ExhaustiveCheck_DoubleCosets the elements of V are never
+    enumerated.
    */
 template<typename Telt, typename Tidx_label, typename Tint>
 void FastCheckIntersection_DoubleCosets(StabChain<Telt,Tidx_label> const& G, StabChain<Telt,Tidx_label> const& U, StabChain<Telt,Tidx_label> const& V, std::vector<Telt> const& list_dcc) {
@@ -1956,10 +1959,9 @@ void FastCheckIntersection_DoubleCosets(StabChain<Telt,Tidx_label> const& G, Sta
   StabChainOptions<Tint, Telt> options = GetStandardOptions<Tint, Telt>(id);
   std::vector<Telt> LGen_V = Kernel_SmallGeneratingSet<Telt,Tidx_label,Tint>(V);
   Tint size_G = Order<Telt, Tidx_label, Tint>(G);
-  Tint size_U = Order<Telt, Tidx_label, Tint>(U);
-  Tint size_V = Order<Telt, Tidx_label, Tint>(V);
   std::vector<Telt> l_elt_u = get_all_elements(U);
   std::vector<std::unordered_set<Telt>> l_elts_dcc;
+  Tint n_elt_dcc = 0;
   for (auto & dcc: list_dcc) {
     Telt dcc_inv = Inverse(dcc);
     std::vector<Telt> NewLGen;
@@ -1971,13 +1973,20 @@ void FastCheckIntersection_DoubleCosets(StabChain<Telt,Tidx_label> const& G, Sta
     StabChain<Telt,Tidx_label> eInt = Kernel_Intersection<Telt, Tidx_label, Tint>(U, ConjV);
     //
     std::vector<Telt> l_cos = enumerate_right_cosets<Telt,Tidx_label,Tint>(eInt, ConjV);
+    /*
+      The double coset is U * dcc * V. Since ConjV = dcc * V * dcc^{-1}, we
+      have dcc * V = ConjV * dcc and so U * dcc * V = U * ConjV * dcc. The
+      right cosets of eInt = U inter ConjV in ConjV give the elements of
+      U * ConjV without repetition, so the trailing dcc has to be applied.
+     */
     std::unordered_set<Telt> set;
     for (auto & eU : l_elt_u) {
       for (auto & eCos : l_cos) {
-        Telt prod = eU * eCos;
+        Telt prod = eU * eCos * dcc;
         set.insert(prod);
       }
     }
+    n_elt_dcc += Tint(set.size());
     l_elts_dcc.push_back(set);
   }
   size_t n_dcc = list_dcc.size();
@@ -1990,6 +1999,11 @@ void FastCheckIntersection_DoubleCosets(StabChain<Telt,Tidx_label> const& G, Sta
         }
       }
     }
+  }
+  if (n_elt_dcc != size_G) {
+    std::cerr << "ACC: n_elt_dcc=" << n_elt_dcc << " size_G=" << size_G << "\n";
+    std::cerr << "ACC: The double cosets do not cover the full group\n";
+    throw PermutalibException{1};
   }
 }
 
