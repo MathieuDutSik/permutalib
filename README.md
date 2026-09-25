@@ -73,6 +73,41 @@ Face subset1_can = eG.CanonicalImage(subset1);
 * See Group.h for the full functionality and the examples.
 
 
+Group resolutions
+-----------------
+
+`Resolution.h` computes free ZG-resolutions of Z for a finite permutation
+group G, following the algorithm of G. Ellis, "Computing group resolutions",
+J. Symbolic Computation 38 (2004), as implemented by `ResolutionFiniteGroup`
+in the GAP package HAP. It is used as
+
+```cpp
+permutalib::FiniteGroupResolution<Telt, Tint> R(eG, 5);
+size_t rank2 = R.dimension(2);                      // rank of R_2
+permutalib::ResolutionChain const& d = R.boundary(2, 0); // boundary of the first generator of R_2
+std::vector<Tint> H3 = R.integral_homology(3);      // abelian invariants of H_3(G, Z)
+R.extend();                                          // one more term
+```
+
+A chain is a list of terms `coeff * (elt . e_cell)` with `elt` an index in
+`R.elements()`. The contracting homotopy is available as `R.homotopy(i, term)`
+and `R.GapString()` prints the resolution in the word format of HAP.
+
+The homology is returned in the divisibility form `d_1 | d_2 | ...` of
+`Homology(TensorWithIntegers(R), n)` in HAP; `R.integral_homology_prime_power(n)`
+gives the prime power form of `AbelianInvariants` in GAP. The dimension of
+`H_n(G, F_p)` is `R.homology_dimension_mod_p(n, p)` and
+`R.check_homology_consistency(n)` verifies the finiteness of the homology, the
+universal coefficient theorem and the abelianization (these checks run
+automatically when compiling with `-DDEBUG_RESOLUTION`). With the same
+generators, the resolution is the one of `ResolutionFiniteGroup` in HAP; for
+instance `SymmetricGroup(5)` with length 5 gives the ranks `[1,4,10,20,35,56]`
+and sizes `[8,38,100,204,340]` recorded in the tests of HAP.
+`TestResolution` checks the resolutions of the groups in
+`CI_tests/11_TestResolution/GroupsHomology` against values from HAP and the
+literature, and `GapResolution` writes a resolution for comparison with HAP.
+
+
 
 
 Rationale

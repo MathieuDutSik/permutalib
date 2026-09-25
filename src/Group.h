@@ -937,9 +937,11 @@ PreImageSubgroupTotal(std::vector<TeltMatr> const &ListMatrGens,
   return VectGens;
 }
 
-template <typename Tgroup>
-Tgroup ReadGroupFromStream(std::istream& is) {
-  using Telt = typename Tgroup::Telt;
+// Reads the generators of a group in the format "n nbGen" followed by the
+// nbGen permutations as lists of images. Returns the generators and the
+// identity.
+template <typename Telt>
+std::pair<std::vector<Telt>, Telt> ReadListGenFromStream(std::istream& is) {
   using Tidx = typename Telt::Tidx;
   size_t nbGen;
   int n_i;
@@ -965,7 +967,14 @@ Tgroup ReadGroupFromStream(std::istream& is) {
     LGen[iGen] = ePerm;
   }
   Telt id(n);
-  return Tgroup(LGen, id);
+  return {std::move(LGen), std::move(id)};
+}
+
+template <typename Tgroup>
+Tgroup ReadGroupFromStream(std::istream& is) {
+  using Telt = typename Tgroup::Telt;
+  std::pair<std::vector<Telt>, Telt> pair = ReadListGenFromStream<Telt>(is);
+  return Tgroup(pair.first, pair.second);
 }
 
 template <typename Tgroup>
