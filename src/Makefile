@@ -40,6 +40,7 @@ CC		= g++ -std=c++20 -Wall -Wextra -O3
 #CC		= clang++ -std=c++20 -O3
 
 NOLINKFLAG 	= -c
+CDEPS           = -MMD -MP
 OUTPUTFLAG 	= -o
 
 #CLOCAL          =
@@ -60,7 +61,7 @@ LIBS		= $(GMP_CXX_LINK) $(BOOST_LINK)
 %.o: %.cpp
 	@echo
 	@echo compile $<
-	$(CC) $(OUTPUTFLAG) $@ $(CFLAGS) $(CLOCAL) $(NOLINKFLAG) $<
+	$(CC) $(OUTPUTFLAG) $@ $(CFLAGS) $(CLOCAL) $(CDEPS) $(NOLINKFLAG) $<
 
 
 
@@ -75,4 +76,9 @@ $(PROGRAM): 	$(OBJECTS)
 
 clean:;
 	rm -f *.o
+	rm -f *.d
 	rm -f $(PROGRAM)
+
+# The header dependencies, written by the compiler as it compiles (-MMD),
+# so that a change to a header rebuilds the objects that include it.
+-include $(OBJECTS:.o=.d)
