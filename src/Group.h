@@ -240,8 +240,12 @@ public:
       if (!IsFirst) {
         str_ret += ",";
       }
+      IsFirst = false;
       str_ret += "[";
       for (Tidx i=0; i<n_act; i++) {
+        if (i > 0) {
+          str_ret += ",";
+        }
         Tidx pnt = eGen.at(i);
         size_t pnt_s = static_cast<size_t>(pnt);
         str_ret += std::to_string(pnt_s);

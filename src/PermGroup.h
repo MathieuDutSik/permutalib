@@ -219,18 +219,6 @@ OrbitsPerms(const std::vector<Telt> &gens, const typename Telt::Tidx &n) {
 }
 
 template <typename Telt>
-typename Telt::Tidx SmallestMovedPointsPerms(std::vector<Telt> const &gens) {
-  using Tidx = typename Telt::Tidx;
-  Tidx siz = 0;
-  for (Tidx i = 0; i < siz; i++) {
-    for (auto &eGen : gens)
-      if (PowAct(i, eGen) != i)
-        return i;
-  }
-  return std::numeric_limits<Tidx>::max();
-}
-
-template <typename Telt>
 std::vector<typename Telt::Tidx>
 MovedPointsPerms(std::vector<Telt> const &gens) {
   using Tidx = typename Telt::Tidx;
