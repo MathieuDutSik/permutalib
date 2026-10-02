@@ -8,7 +8,7 @@ int main(int argc, char *argv[]) {
   try {
     std::vector<int64_t> ListIdx;
     for (int i=0; i<100; i++) {
-      int val = (random() % 5) - 2;
+      int val = permutalib::random_int(-2, 2);
       if (val != 0)
         ListIdx.push_back(val);
     }

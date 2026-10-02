@@ -417,23 +417,6 @@ DoubleSidedPerm<Tidx> LeftQuotient(DoubleSidedPerm<Tidx> const &a,
   return DoubleSidedPerm<Tidx>(ListVal, ListRev);
 }
 
-template <typename Tidx> DoubleSidedPerm<Tidx> SCRandomPerm(int const &d) {
-  std::vector<Tidx> rnd(d);
-  for (int i = 0; i < d; i++)
-    rnd[i] = i;
-  for (int i = 0; i < d; i++) {
-    int idx = d - i;
-    int res = d - i;
-    int k = permutalib_random() % res;
-    if (k != idx) {
-      int tmp = rnd[idx];
-      rnd[idx] = rnd[k];
-      rnd[k] = tmp;
-    }
-  }
-  return DoubleSidedPerm<Tidx>(rnd);
-}
-
 template <typename Tidx>
 DoubleSidedPerm<Tidx> Inverse(DoubleSidedPerm<Tidx> const &ePerm) {
   return ePerm.inverse();
@@ -767,23 +750,6 @@ SingleSidedPerm<Tidx> LeftQuotient(SingleSidedPerm<Tidx> const &a,
   for (Tidx i = 0; i < siz; i++)
     ListVal[Val_A[i]] = Val_B[i];
   return SingleSidedPerm<Tidx>(std::move(ListVal));
-}
-
-template <typename Tidx> SingleSidedPerm<Tidx> SCRandomPerm(Tidx const &d) {
-  std::vector<Tidx> rnd(d);
-  for (Tidx i = 0; i < d; i++)
-    rnd[i] = i;
-  for (Tidx i = 0; i < d; i++) {
-    Tidx idx = d - i;
-    Tidx res = d - i;
-    Tidx k = permutalib_random() % res;
-    if (k != idx) {
-      Tidx tmp = rnd[idx];
-      rnd[idx] = rnd[k];
-      rnd[k] = tmp;
-    }
-  }
-  return DoubleSidedPerm<Tidx>(rnd);
 }
 
 template <typename Tidx>

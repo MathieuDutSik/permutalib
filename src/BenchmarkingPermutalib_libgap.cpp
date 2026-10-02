@@ -186,8 +186,7 @@ int main(int argc, char *argv[]) {
       auto random_face = [](const Tidx &len) -> permutalib::Face {
         permutalib::Face eFace(len);
         for (Tidx i = 0; i < len; i++) {
-          int eVal = Tidx(random()) % 2;
-          eFace[i] = eVal;
+          eFace[i] = permutalib::random_index(2) == 1;
         }
         return eFace;
       };
@@ -211,15 +210,15 @@ int main(int argc, char *argv[]) {
       };
       auto bench_pointstabilizer = [&]() -> void {
         for (long iter = 0; iter < n_iter; iter++) {
-          Tidx pos = Tidx(random()) % n;
+          Tidx pos = permutalib::RandomInteger<Tidx>(n);
           Tgroup eG2 = eG.Stabilizer_OnPoints(pos);
           siz_control += eG2.n_act();
         }
       };
       auto bench_pointrepresentative = [&]() -> void {
         for (long iter = 0; iter < n_iter; iter++) {
-          Tidx pos1 = Tidx(random()) % n;
-          Tidx pos2 = Tidx(random()) % n;
+          Tidx pos1 = permutalib::RandomInteger<Tidx>(n);
+          Tidx pos2 = permutalib::RandomInteger<Tidx>(n);
           std::pair<bool, Telt> eP =
               eG.RepresentativeAction_OnPoints(pos1, pos2);
           siz_control += static_cast<int>(eP.first);

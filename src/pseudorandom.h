@@ -51,12 +51,10 @@ InfoPseudoRandom *GetPseudoRandom() {
   return Rglobal;
 }
 
+// Uniform in [0, val), val > 0 of an unsigned type: the draw is below val, so
+// the conversion back to T is exact.
 template <typename T> T RandomInteger(T const &val) {
-#ifdef TRUE_RANDOM
-  return T(permutalib_random()) % val;
-#else
-  return T(permutalib_random()) % val;
-#endif
+  return T(random_index(val));
 }
 
 void RandomShift(InfoPseudoRandom *R) {
@@ -78,7 +76,7 @@ Face Extract01vector(InfoPseudoRandom *R) {
 
 template <typename Telt> Telt Random(std::vector<Telt> const &V) {
   size_t siz = V.size();
-  size_t pos = size_t(permutalib_random()) % siz;
+  size_t pos = random_index(siz);
   return V[pos];
 }
 
