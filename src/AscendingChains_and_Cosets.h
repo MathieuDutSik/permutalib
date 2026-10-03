@@ -326,25 +326,10 @@ template<typename Telt, typename Tidx_label, typename Tint>
 AscendingEntry<Telt,Tidx_label,Tint> get_ascending_entry(StabChain<Telt, Tidx_label> const& g) {
   using Tidx = typename Telt::Tidx;
   Tidx n_act = g->comm->n;
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
-  std::cerr << "ACC: get_ascending_entry, step 1\n";
-#endif
   std::vector<Telt> l_gens_small = Kernel_SmallGeneratingSet<Telt, Tidx_label, Tint>(g);
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
-  std::cerr << "ACC: get_ascending_entry, step 2\n";
-#endif
   std::vector<std::vector<typename Telt::Tidx>> orbs = OrbitsPerms(l_gens_small, n_act);
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
-  std::cerr << "ACC: get_ascending_entry, step 3\n";
-#endif
   std::vector<std::pair<Tidx,Tidx>> Vbelong = get_belonging_vector(orbs, n_act);
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
-  std::cerr << "ACC: get_ascending_entry, step 4\n";
-#endif
   Tint ord = Order<Telt,Tidx_label,Tint>(g);
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
-  std::cerr << "ACC: get_ascending_entry, step 5\n";
-#endif
   return {std::move(g), std::move(orbs), std::move(Vbelong), std::move(l_gens_small), std::move(ord)};
 }
 
@@ -1037,21 +1022,10 @@ private:
   bool is_end;
   Telt result;
   void compute_position() {
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
-    std::cerr << "ACC: compute_position, start\n";
-    std::cerr << "ACC: l_pos/l_size =";
-    for (size_t i_level=0; i_level<n_level; i_level++) {
-      std::cerr << " (" << l_pos[i_level] << "|" << l_size[i_level] << ")";
-    }
-    std::cerr << "\n";
-#endif
     result = ll_cos[0][l_pos[0]];
     for (size_t i_level=1; i_level<n_level; i_level++) {
       result *= ll_cos[i_level][l_pos[i_level]];
     }
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
-    std::cerr << "ACC: compute_position, end\n";
-#endif
   }
   void single_increase() {
     for (size_t i_level=0; i_level<n_level; i_level++) {
@@ -1091,13 +1065,6 @@ public:
 #endif
     for (size_t i_level=0; i_level<n_level; i_level++) {
       std::vector<Telt> l_cos = Kernel_RightTransversal_Direct<Telt,Tidx_label,Tint>(chain[i_level + 1], chain[i_level]);
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
-      std::cerr << "ACC: i_level=" << i_level << " |l_cos|=" << l_cos.size()
-                << " ord1=" << Order<Telt,Tidx_label,Tint>(chain[i_level])
-                << " ord2=" << Order<Telt,Tidx_label,Tint>(chain[i_level + 1])
-                << "\n";
-      KernelCheckRightCosets<Telt,Tidx_label,Tint>(chain[i_level + 1], chain[i_level], l_cos);
-#endif
       result *= l_cos[0];
       ll_cos.push_back(l_cos);
       l_size.push_back(l_cos.size());
@@ -1206,21 +1173,10 @@ private:
   bool is_end;
   Telt result;
   void compute_position() {
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
-    std::cerr << "ACC: compute_position, start\n";
-    std::cerr << "ACC: l_pos/l_size =";
-    for (size_t i_level=0; i_level<n_level; i_level++) {
-      std::cerr << " (" << l_pos[i_level] << "|" << l_size[i_level] << ")";
-    }
-    std::cerr << "\n";
-#endif
     result = ll_cos[0][l_pos[0]];
     for (size_t i_level=1; i_level<n_level; i_level++) {
       result = ll_cos[i_level][l_pos[i_level]] * result;
     }
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
-    std::cerr << "ACC: compute_position, end\n";
-#endif
   }
   void single_increase() {
     for (size_t i_level=0; i_level<n_level; i_level++) {
@@ -1250,13 +1206,6 @@ public:
     result = G->comm->identity;
     for (size_t i_level=0; i_level<n_level; i_level++) {
       std::vector<Telt> l_cos = Kernel_LeftTransversal_Direct<Telt,Tidx_label,Tint>(chain[i_level + 1], chain[i_level]);
-#ifdef DEBUG_ASCENDING_CHAINS_COSETS_DISABLE
-      std::cerr << "ACC: i_level=" << i_level << " |l_cos|=" << l_cos.size()
-                << " ord1=" << Order<Telt,Tidx_label,Tint>(chain[i_level])
-                << " ord2=" << Order<Telt,Tidx_label,Tint>(chain[i_level + 1])
-                << "\n";
-      KernelCheckLeftCosets<Telt,Tidx_label,Tint>(chain[i_level + 1], chain[i_level], l_cos);
-#endif
       result = l_cos[0] * result;
       ll_cos.push_back(l_cos);
       l_size.push_back(l_cos.size());
