@@ -37,7 +37,11 @@ StabChainOp_listgen(std::vector<Telt> const &Lgen,
 #ifdef DEBUG_STABCHAINMAIN
     std::cerr << "CPP Before call to StabChainStrong\n";
 #endif
-    StabChainStrong(S, Lgen, options);
+    if (options.randomized) {
+      StabChainRandomized(S, Lgen, options, options.size);
+    } else {
+      StabChainStrong(S, Lgen, options);
+    }
   }
   //  std::cerr << "CPP Before the ExtendStabChain section reduced=" <<
   //  options.reduced << " |base|=" << options.base.size() << "\n";
