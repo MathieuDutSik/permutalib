@@ -197,23 +197,13 @@ public:
     size_tint = Order<Telt, Tidx_label, Tint>(S);
     set_exhaustive_canonic();
   }
-  // The group with a known order, exact or as the log10 of an approximation
-  // (see StabChainRandomized): the stabilizer chain is then built by the
-  // randomized construction, much faster for a large base.
+  // The group with a known order: the stabilizer chain is then built by the
+  // randomized construction (StabChainRandomized), much faster for a large
+  // base.
   Group(const std::vector<Telt> &LGen, const Telt &id, const Tint &known_size) {
     StabChainOptions<Tint, Telt> options = GetStandardOptions<Tint, Telt>(id);
     options.randomized = true;
     options.size = known_size;
-    S = StabChainOp_listgen<Telt, Tidx_label, Tint>(LGen, options);
-    UnbindCycles(S);
-    size_tint = Order<Telt, Tidx_label, Tint>(S);
-    set_exhaustive_canonic();
-  }
-  Group(const std::vector<Telt> &LGen, const Telt &id,
-        double log10_size_approx) {
-    StabChainOptions<Tint, Telt> options = GetStandardOptions<Tint, Telt>(id);
-    options.randomized = true;
-    options.log10_size_approx = log10_size_approx;
     S = StabChainOp_listgen<Telt, Tidx_label, Tint>(LGen, options);
     UnbindCycles(S);
     size_tint = Order<Telt, Tidx_label, Tint>(S);

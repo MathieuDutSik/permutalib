@@ -1,7 +1,7 @@
 // Copyright (C) 2026 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 // Compares the deterministic and the randomized stabilizer chain
-// constructions (StabChainRandomized, with no order, the exact order, the
-// log10 of the order and the log10 of twice the order) on a list of groups,
+// constructions (StabChainRandomized, with no order, the exact order and a
+// wrong order, twice the exact one) on a list of groups,
 // against the orders computed by GAP. The list file has one line
 // "name degree order base_length" per group, the group being in
 // GroupDir/name.grp. Prints one line "RESULT name ok|FAIL ..." per group and
@@ -94,14 +94,12 @@ template <typename Telt> int run(std::string const &eFile, Tint const &order_gap
   Tidx n = id.size();
   std::vector<std::string> fails;
   auto fail = [&](std::string const &s) { fails.push_back(s); };
-  auto build = [&](bool randomized, Tint const &size, double &secs,
-                   double log10_approx = -1)
+  auto build = [&](bool randomized, Tint const &size, double &secs)
       -> permutalib::StabChain<Telt, Tidx_label> {
     permutalib::StabChainOptions<Tint, Telt> options =
         permutalib::GetStandardOptions<Tint, Telt>(id);
     options.randomized = randomized;
     options.size = size;
-    options.log10_size_approx = log10_approx;
     auto t0 = std::chrono::steady_clock::now();
     permutalib::StabChain<Telt, Tidx_label> S =
         permutalib::StabChainOp_listgen<Telt, Tidx_label, Tint>(LGen, options);
@@ -114,17 +112,13 @@ template <typename Telt> int run(std::string const &eFile, Tint const &order_gap
   permutalib::StabChain<Telt, Tidx_label> S_det = build(false, Tint(0), t_det);
   permutalib::StabChain<Telt, Tidx_label> S_rnd = build(true, Tint(0), t_rnd);
   permutalib::StabChain<Telt, Tidx_label> S_known = build(true, order_gap, t_known);
-  long exp2;
-  double mant = mpz_get_d_2exp(&exp2, order_gap.get_mpz_t());
-  double log10_order = std::log10(mant) + exp2 * std::log10(2.0);
-  double t_approx, t_approx_high;
-  permutalib::StabChain<Telt, Tidx_label> S_approx =
-      build(true, Tint(0), t_approx, log10_order);
-  permutalib::StabChain<Telt, Tidx_label> S_approx_high =
-      build(true, Tint(0), t_approx_high, log10_order + std::log10(2.0));
+  // A wrong order, too large: never reached, the completion runs.
+  double t_wrong;
+  permutalib::StabChain<Telt, Tidx_label> S_wrong =
+      build(true, Tint(2) * order_gap, t_wrong);
   std::vector<std::pair<std::string, permutalib::StabChain<Telt, Tidx_label> *>>
       chains = {{"det", &S_det}, {"rnd", &S_rnd}, {"known", &S_known},
-                {"approx", &S_approx}, {"approx_high", &S_approx_high}};
+                {"wrong", &S_wrong}};
   for (auto &[name, Sp] : chains) {
     Tint ord = permutalib::Order<Telt, Tidx_label, Tint>(*Sp);
     if (ord != order_gap)
@@ -140,24 +134,21 @@ template <typename Telt> int run(std::string const &eFile, Tint const &order_gap
     fail("det and rnd differ");
   if (!permutalib::EqualityTest(S_det, S_known))
     fail("det and known differ");
-  if (!permutalib::EqualityTest(S_det, S_approx))
-    fail("det and approx differ");
-  if (!permutalib::EqualityTest(S_det, S_approx_high))
-    fail("det and approx_high differ");
+  if (!permutalib::EqualityTest(S_det, S_wrong))
+    fail("det and wrong differ");
   // The Group constructors with an order. GeneratorsOfGroup is the strong
   // generating set, which depends on the construction: only its size is
   // reported.
   size_t n_strong_det = 0, n_strong_rnd = 0;
   {
     Tgroup G1(LGen, id, order_gap);
-    Tgroup G2(LGen, id, log10_order);
-    if (G1.size() != order_gap || G2.size() != order_gap)
-      fail("a Group constructor with the order gives a wrong size");
+    if (G1.size() != order_gap)
+      fail("the Group constructor with the order gives a wrong size");
     Tgroup G0(LGen, id);
-    if (G1 != G0 || G2 != G0)
-      fail("a Group constructor with the order gives another group");
+    if (G1 != G0)
+      fail("the Group constructor with the order gives another group");
     n_strong_det = G0.GeneratorsOfGroup().size();
-    n_strong_rnd = G2.GeneratorsOfGroup().size();
+    n_strong_rnd = G1.GeneratorsOfGroup().size();
   }
   // The top level keeps the input generators, as in the deterministic chain.
   {
@@ -220,7 +211,7 @@ template <typename Telt> int run(std::string const &eFile, Tint const &order_gap
   std::cout << "RESULT " << eFile.substr(eFile.find_last_of('/') + 1) << " "
             << (fails.empty() ? "ok" : "FAIL") << " t_det=" << t_det
             << " t_rnd=" << t_rnd << " t_known=" << t_known
-            << " t_approx=" << t_approx << " t_approx_high=" << t_approx_high
+            << " t_wrong=" << t_wrong
             << " base_det=" << permutalib::BaseStabChain(S_det).size()
             << " base_rnd=" << permutalib::BaseStabChain(S_rnd).size()
             << " strong_det=" << n_strong_det << " strong_rnd=" << n_strong_rnd;
