@@ -34,7 +34,7 @@ jobs:
 
       - name: Run TestDoubleCosetIterator CI
         run: |
-          cd CI_tests/10_TestDoubleCosetIterator
+          cd CI_tests/11_TestDoubleCosetIterator
           bash ProcessExamples.sh
           if [ ! -f "CI_CONCLUSION" ]; then
             echo "The CI test did not create the expected CI_CONCLUSION file" >&2

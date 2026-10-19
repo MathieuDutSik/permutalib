@@ -7,15 +7,15 @@ ci_reset
 SRC=../../src
 ci_require_binary "$SRC/TestPresentation"
 
-# Builds the presentations of Presentation.h for the groups of CI test 12,
+# Builds the presentations of Presentation.h for the groups of CI test 13,
 # from the deterministic and the randomized stabilizer chains. Checks that
 # the relators hold, the index of each level by coset enumeration (which
 # proves the order of the presented group) and, for the orders up to 50000,
 # the order of the simplified presentation on the input generators by
 # coset enumeration. For the orders up to 25000, the presentations from the
 # resolution of Resolution.h are checked in the same way.
-GROUPS_DIR=../12_TestStabChainRandomized
-echo "== TestPresentation on the groups of CI test 12 =="
+GROUPS_DIR=../13_TestStabChainRandomized
+echo "== TestPresentation on the groups of CI test 13 =="
 "$SRC/TestPresentation" "$GROUPS_DIR/ListGroups" "$GROUPS_DIR/Groups" 50000 25000
 
 ci_write_ok

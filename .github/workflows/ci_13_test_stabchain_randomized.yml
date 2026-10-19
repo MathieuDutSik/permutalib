@@ -34,7 +34,7 @@ jobs:
 
       - name: Run TestStabChainRandomized CI
         run: |
-          cd CI_tests/12_TestStabChainRandomized
+          cd CI_tests/13_TestStabChainRandomized
           bash ProcessExamples.sh
           if [ ! -f "CI_CONCLUSION" ]; then
             echo "The CI test did not create the expected CI_CONCLUSION file" >&2

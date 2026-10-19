@@ -104,7 +104,7 @@ generators, the resolution is the one of `ResolutionFiniteGroup` in HAP; for
 instance `SymmetricGroup(5)` with length 5 gives the ranks `[1,4,10,20,35,56]`
 and sizes `[8,38,100,204,340]` recorded in the tests of HAP.
 `TestResolution` checks the resolutions of the groups in
-`CI_tests/11_TestResolution/GroupsHomology` against values from HAP and the
+`CI_tests/12_TestResolution/GroupsHomology` against values from HAP and the
 literature, and `GapResolution` writes a resolution for comparison with HAP.
 
 

@@ -34,7 +34,7 @@ jobs:
 
       - name: Run TestResolution CI
         run: |
-          cd CI_tests/11_TestResolution
+          cd CI_tests/12_TestResolution
           bash ProcessExamples.sh
           if [ ! -f "CI_CONCLUSION" ]; then
             echo "The CI test did not create the expected CI_CONCLUSION file" >&2

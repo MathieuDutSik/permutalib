@@ -34,7 +34,7 @@ jobs:
 
       - name: Run TestPresentation CI
         run: |
-          cd CI_tests/13_TestPresentation
+          cd CI_tests/14_TestPresentation
           bash ProcessExamples.sh
           if [ ! -f "CI_CONCLUSION" ]; then
             echo "The CI test did not create the expected CI_CONCLUSION file" >&2
