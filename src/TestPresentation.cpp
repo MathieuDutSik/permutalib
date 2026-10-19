@@ -10,6 +10,12 @@
 //     relators hold, it starts with the top level generators and, when the
 //     order is at most max_order_enum, the coset enumeration of the trivial
 //     subgroup gives the order.
+// --- For the orders up to max_order_res, the presentations from the
+//     resolution (Resolution.h), on the generators chosen by the
+//     resolution, on both these and the input generators, and on the input
+//     generators: the relators hold and, when the order is at most
+//     max_order_enum, the coset enumeration of the trivial subgroup gives
+//     the order (it may overflow for the input generators).
 // Before that, the coset enumeration is checked on presentations of known
 // groups. The list file has one line "name degree order base_length" per
 // group, the group being in GroupDir/name.grp. Prints one line
@@ -17,6 +23,7 @@
 #include "Group.h"
 #include "Permutation.h"
 #include "Presentation.h"
+#include "Resolution.h"
 #include "StabChainMain.h"
 #include "gmpxx.h"
 #include <chrono>
@@ -171,15 +178,92 @@ int run(std::string const &name, std::string const &eFile,
   return n_fail;
 }
 
+// The order of the presented group by coset enumeration, as a string.
+template <typename Telt>
+std::string enumerated_order(permutalib::Presentation<Telt> const &P) {
+  std::optional<size_t> index = permutalib::CosetEnumeration(
+      P.generators.size(), P.relators, {}, max_cosets);
+  if (!index)
+    return "overflow";
+  return std::to_string(*index);
+}
+
+template <typename Telt>
+int run_resolution(std::string const &name, std::string const &eFile,
+                   Tint const &order_gap, Tint const &max_order_enum) {
+  std::ifstream is(eFile);
+  std::pair<std::vector<Telt>, Telt> pair =
+      permutalib::ReadListGenFromStream<Telt>(is);
+  std::vector<Telt> const &LGen = pair.first;
+  Telt const &id = pair.second;
+  std::vector<std::string> fails;
+  auto fail = [&](std::string const &s) { fails.push_back(s); };
+  auto t0 = std::chrono::steady_clock::now();
+  permutalib::FiniteGroupResolution<Telt, Tint> R(LGen, id, 2);
+  permutalib::Presentation<Telt> P_y = R.presentation();
+  auto t1 = std::chrono::steady_clock::now();
+  permutalib::Presentation<Telt> P_xy =
+      permutalib::PresentationByResolutionMixed<Telt, Tint>(LGen, id);
+  permutalib::Presentation<Telt> P_x =
+      permutalib::PresentationByResolution<Telt, Tint>(LGen, id);
+  auto t2 = std::chrono::steady_clock::now();
+  if (!relators_hold(P_y, id))
+    fail("a relator on the generators of the resolution does not hold");
+  if (!relators_hold(P_xy, id))
+    fail("a relator on both generators does not hold");
+  if (!relators_hold(P_x, id))
+    fail("a relator on the input generators does not hold");
+  std::vector<Telt> gens = permutalib::DistinctGenerators(LGen, id);
+  if (P_x.generators != gens)
+    fail("the generators are not the input generators");
+  // The coset enumeration of the presentation on the input generators may
+  // overflow since its relators are long; the one on both generators,
+  // from which it is obtained by the Tietze transformations of
+  // SimplifyPresentation, is checked instead.
+  std::string enum_y = "skipped", enum_xy = "skipped", enum_x = "skipped";
+  if (order_gap <= max_order_enum) {
+    std::string ord = order_gap.get_str();
+    enum_y = enumerated_order(P_y);
+    enum_xy = enumerated_order(P_xy);
+    enum_x = enumerated_order(P_x);
+    if (enum_y != ord)
+      fail("the presentation on the generators of the resolution has order " +
+           enum_y);
+    if (enum_xy != ord)
+      fail("the presentation on both generators has order " + enum_xy);
+    if (enum_x != ord && enum_x != "overflow")
+      fail("the presentation on the input generators has order " + enum_x);
+  }
+  auto secs = [](auto a, auto b) {
+    return std::chrono::duration<double>(b - a).count();
+  };
+  std::cout << "RESULT " << name << " res " << (fails.empty() ? "ok" : "FAIL")
+            << " resolution: gens=" << P_y.generators.size()
+            << " rels=" << P_y.relators.size()
+            << " len=" << permutalib::TotalLength(P_y.relators)
+            << " enum=" << enum_y << " both: enum=" << enum_xy
+            << " input: gens=" << P_x.generators.size()
+            << " rels=" << P_x.relators.size()
+            << " len=" << permutalib::TotalLength(P_x.relators)
+            << " enum=" << enum_x << " t_res=" << secs(t0, t1)
+            << " t_input=" << secs(t1, t2);
+  for (auto &s : fails)
+    std::cout << " | " << s;
+  std::cout << "\n";
+  return fails.empty() ? 0 : 1;
+}
+
 int main(int argc, char *argv[]) {
   try {
-    if (argc != 4) {
-      std::cerr << "TestPresentation ListFile GroupDir max_order_enum\n";
+    if (argc != 5) {
+      std::cerr << "TestPresentation ListFile GroupDir max_order_enum "
+                   "max_order_res\n";
       return 1;
     }
     std::ifstream is_list(argv[1]);
     std::string dir = argv[2];
     Tint max_order_enum(argv[3]);
+    Tint max_order_res(argv[4]);
     int n_fail = check_known_presentations();
     int n_case = 0;
     std::string name, degree, order_str, base;
@@ -190,6 +274,11 @@ int main(int argc, char *argv[]) {
                                                            order_gap,
                                                            max_order_enum);
       n_case += 2;
+      if (order_gap <= max_order_res) {
+        n_fail += run_resolution<permutalib::SingleSidedPerm<uint16_t>>(
+            name, eFile, order_gap, max_order_enum);
+        n_case++;
+      }
     }
     std::cout << "n_case=" << n_case << " n_fail=" << n_fail << "\n";
     return n_fail == 0 ? 0 : 1;

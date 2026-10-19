@@ -58,6 +58,9 @@
       coset enumeration, [<A_i | T_i, ..., T_k> : <A_{i+1}>] = |Delta_i|,
       which proves the order of the presented group independently of the
       above argument.
+  For small groups, the presentation can also be read from the first two
+  terms of a free resolution, see PresentationByResolution in Resolution.h:
+  its relators are much fewer and shorter.
  */
 
 namespace permutalib {

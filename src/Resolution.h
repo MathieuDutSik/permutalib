@@ -4,8 +4,10 @@
 
 // clang-format off
 #include "Group.h"
+#include "Presentation.h"
 #include <algorithm>
 #include <cstdint>
+#include <limits>
 #include <optional>
 #include <sstream>
 #include <string>
@@ -1000,7 +1002,253 @@ public:
     str += " ])";
     return str;
   }
+
+  /*
+    The presentation of G read from the first two terms of the resolution.
+
+    The free generators of R_1 have boundaries y_j - 1 for group elements
+    y_j, and the 1-cells (j, g) are the edges g -> g y_j of the Cayley graph
+    of G for these generators. The 0-cells paired in degree 1 form a
+    spanning tree T of the Cayley graph, and the boundary of a new free
+    generator of R_2, Differential(2, p) for the 1-cell p, is p plus the
+    paths of T joining its ends: a simple closed loop. The word in the y_j
+    read along that loop is a relator, and
+        G = < y_1, ..., y_r | the relators of the generators of R_2 >.
+    Proof: attach a disc along each translate h.d(e^2_k) of these loops to
+    the Cayley graph, which gives a 2-complex X with a free action of G.
+    The tree T, extended by the pairings of the 1-cells with the 2-cells
+    in the construction of R_2, is built by elementary expansions: the
+    2-cell has in its boundary the paired 1-cell exactly once and otherwise
+    only cells already there. So it is a contractible subcomplex containing
+    the 1-skeleton of X, and X is simply connected. Therefore
+    G = pi_1(X / G), whose 1-skeleton is a bouquet of circles y_j and whose
+    2-cells are attached along the relators.
+
+    The loops are checked to be simple, which the construction guarantees.
+    Needs at least two terms of the resolution.
+   */
+  // The elements y_j with boundary(1, j) = y_j - 1, as indices of elements().
+  std::vector<size_t> generator_elements() const {
+    std::vector<size_t> ret;
+    for (size_t j = 0; j < dimension(1); j++) {
+      ResolutionChain const &bnd = pseudo_boundary[1][j];
+      if (bnd.size() != 2 || bnd[0].cell != 0 || bnd[0].elt != 0 ||
+          bnd[0].coeff != -1 || bnd[1].coeff != 1) {
+        std::cerr << "RES: the boundary of a 1-cell is not y - 1\n";
+        throw PermutalibException{1};
+      }
+      ret.push_back(bnd[1].elt);
+    }
+    return ret;
+  }
+
+  // The word read along the loop of the 1-cycle chain, in the letters
+  // j+1 for the generator y_j.
+  PresentationWord loop_word(ResolutionChain const &chain) const {
+    std::vector<size_t> y = generator_elements();
+    // out[v]: the letter and the end of the edge leaving the vertex v.
+    std::unordered_map<size_t, std::pair<int, size_t>> out;
+    std::unordered_map<size_t, size_t> n_in;
+    for (auto const &term : chain) {
+      if (term.coeff != 1 && term.coeff != -1) {
+        std::cerr << "RES: a coefficient of a loop is not 1 or -1\n";
+        throw PermutalibException{1};
+      }
+      size_t a = term.elt;
+      size_t b = product_index(term.elt, y[term.cell]);
+      int x = static_cast<int>(term.cell) + 1;
+      if (term.coeff < 0) {
+        std::swap(a, b);
+        x = -x;
+      }
+      if (!out.insert({a, {x, b}}).second || ++n_in[b] > 1) {
+        std::cerr << "RES: the boundary of a 2-cell is not a simple loop\n";
+        throw PermutalibException{1};
+      }
+    }
+    PresentationWord w;
+    if (chain.empty())
+      return w;
+    size_t start = out.begin()->first;
+    size_t v = start;
+    do {
+      auto iter = out.find(v);
+      if (iter == out.end()) {
+        std::cerr << "RES: the boundary of a 2-cell is not a cycle\n";
+        throw PermutalibException{1};
+      }
+      w.push_back(iter->second.first);
+      v = iter->second.second;
+    } while (v != start);
+    if (w.size() != chain.size()) {
+      std::cerr << "RES: the boundary of a 2-cell is not a single loop\n";
+      throw PermutalibException{1};
+    }
+    return w;
+  }
+
+  // The presentation on the elements y_j of generator_elements().
+  Presentation<Telt> presentation() const {
+    if (K < 2) {
+      std::cerr << "RES: the presentation needs two terms of the resolution\n";
+      throw PermutalibException{1};
+    }
+    Presentation<Telt> P;
+    for (auto &e : generator_elements())
+      P.generators.push_back(elts[e]);
+    for (auto const &bnd : pseudo_boundary[2])
+      P.relators.push_back(loop_word(bnd));
+    return P;
+  }
+
+  // For every element, a shortest word in the generators gens (indices of
+  // elements()) by a breadth first search of the Cayley graph, in the
+  // letters 1, ..., |gens|.
+  std::vector<PresentationWord>
+  shortest_words(std::vector<size_t> const &gens) const {
+    size_t miss = std::numeric_limits<size_t>::max();
+    std::vector<size_t> parent(N, miss);
+    std::vector<int> letter(N, 0);
+    std::vector<size_t> queue = {0};
+    parent[0] = 0;
+    for (size_t iq = 0; iq < queue.size(); iq++) {
+      size_t g = queue[iq];
+      for (size_t k = 0; k < gens.size(); k++) {
+        for (int s : {1, -1}) {
+          size_t h = s > 0 ? product_index(g, gens[k])
+                           : map_position.at(elts[g] * ~elts[gens[k]]);
+          if (parent[h] == miss) {
+            parent[h] = g;
+            letter[h] = s * (static_cast<int>(k) + 1);
+            queue.push_back(h);
+          }
+        }
+      }
+    }
+    if (queue.size() != N) {
+      std::cerr << "RES: the elements do not generate the group\n";
+      throw PermutalibException{1};
+    }
+    std::vector<PresentationWord> words(N);
+    for (auto &g : queue)
+      if (g != 0) {
+        words[g] = words[parent[g]];
+        words[g].push_back(letter[g]);
+      }
+    return words;
+  }
 };
+
+/*
+  The presentation of the group generated by l_gen on the generators x of
+  l_gen (without the identity and the repetitions, in their order), from
+  the presentation of the resolution on the elements y_j. With W_x the word
+  of x in the y_j and V_y the word of y_j in the x (shortest words in the
+  Cayley graphs), the Tietze transformations give
+      <y | R(y)> = <x, y | R(y), x^{-1} W_x(y), y^{-1} V_y(x)>
+                 = <x | R(V(x)), x^{-1} W_x(V(x))>.
+  PresentationByResolutionMixed returns the second one, with the
+  generators x first, and PresentationByResolution the third one, with the
+  relators reduced.
+ */
+template <typename Telt> struct ResolutionPresentationData {
+  std::vector<Telt> gens;
+  Presentation<Telt> P_y;
+  // W[i]: the word of x_i in the y, V[j]: the word of y_j in the x.
+  std::vector<PresentationWord> W;
+  std::vector<PresentationWord> V;
+};
+
+// The generators without the identity and the repetitions, in their order.
+template <typename Telt>
+std::vector<Telt> DistinctGenerators(std::vector<Telt> const &l_gen,
+                                     Telt const &id) {
+  std::vector<Telt> gens;
+  for (auto const &g : l_gen)
+    if (!(g == id) && std::find(gens.begin(), gens.end(), g) == gens.end())
+      gens.push_back(g);
+  return gens;
+}
+
+template <typename Telt, typename Tint>
+ResolutionPresentationData<Telt>
+GetResolutionPresentationData(std::vector<Telt> const &l_gen, Telt const &id) {
+  ResolutionPresentationData<Telt> data;
+  data.gens = DistinctGenerators(l_gen, id);
+  if (data.gens.empty())
+    return data;
+  FiniteGroupResolution<Telt, Tint> R(data.gens, id, 2);
+  data.P_y = R.presentation();
+  std::vector<size_t> pos_y = R.generator_elements();
+  std::vector<size_t> pos_x;
+  for (auto const &g : data.gens)
+    pos_x.push_back(R.position(g));
+  std::vector<PresentationWord> words_y = R.shortest_words(pos_y);
+  std::vector<PresentationWord> words_x = R.shortest_words(pos_x);
+  for (auto &e : pos_x)
+    data.W.push_back(words_y[e]);
+  for (auto &e : pos_y)
+    data.V.push_back(words_x[e]);
+  return data;
+}
+
+template <typename Telt, typename Tint>
+Presentation<Telt>
+PresentationByResolutionMixed(std::vector<Telt> const &l_gen, Telt const &id) {
+  ResolutionPresentationData<Telt> data =
+      GetResolutionPresentationData<Telt, Tint>(l_gen, id);
+  int n_x = static_cast<int>(data.gens.size());
+  // The letters of y_j are shifted by n_x.
+  auto shift = [&](PresentationWord const &w) -> PresentationWord {
+    PresentationWord ret;
+    for (auto &l : w)
+      ret.push_back(l > 0 ? l + n_x : l - n_x);
+    return ret;
+  };
+  Presentation<Telt> P;
+  P.generators = data.gens;
+  P.generators.insert(P.generators.end(), data.P_y.generators.begin(),
+                      data.P_y.generators.end());
+  for (auto const &r : data.P_y.relators)
+    P.relators.push_back(shift(r));
+  for (int i = 0; i < n_x; i++) {
+    PresentationWord r = {-(i + 1)};
+    AppendFreelyReduced(r, shift(data.W[static_cast<size_t>(i)]));
+    P.relators.push_back(r);
+  }
+  for (size_t j = 0; j < data.V.size(); j++) {
+    PresentationWord r = {-(static_cast<int>(j) + 1 + n_x)};
+    AppendFreelyReduced(r, data.V[j]);
+    P.relators.push_back(r);
+  }
+  P.relators = ReducedListRelators(P.relators);
+  return P;
+}
+
+template <typename Telt, typename Tint>
+Presentation<Telt> PresentationByResolution(std::vector<Telt> const &l_gen,
+                                            Telt const &id) {
+  ResolutionPresentationData<Telt> data =
+      GetResolutionPresentationData<Telt, Tint>(l_gen, id);
+  // The substitution y_j -> V_j.
+  auto subst = [&](PresentationWord const &w) -> PresentationWord {
+    PresentationWord ret;
+    for (auto &l : w) {
+      PresentationWord const &v = data.V[static_cast<size_t>(std::abs(l) - 1)];
+      AppendFreelyReduced(ret, l > 0 ? v : InverseWord(v));
+    }
+    return ret;
+  };
+  std::vector<PresentationWord> rels;
+  for (auto const &r : data.P_y.relators)
+    rels.push_back(subst(r));
+  for (size_t i = 0; i < data.gens.size(); i++) {
+    PresentationWord r = {-(static_cast<int>(i) + 1)};
+    AppendFreelyReduced(r, subst(data.W[i]));
+    rels.push_back(r);
+  }
+  return {data.gens, ReducedListRelators(rels)};
+}
 
 // clang-format off
 }  // namespace permutalib

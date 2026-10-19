@@ -12,10 +12,11 @@ ci_require_binary "$SRC/TestPresentation"
 # the relators hold, the index of each level by coset enumeration (which
 # proves the order of the presented group) and, for the orders up to 50000,
 # the order of the simplified presentation on the input generators by
-# coset enumeration.
+# coset enumeration. For the orders up to 25000, the presentations from the
+# resolution of Resolution.h are checked in the same way.
 GROUPS_DIR=../12_TestStabChainRandomized
 echo "== TestPresentation on the groups of CI test 12 =="
-"$SRC/TestPresentation" "$GROUPS_DIR/ListGroups" "$GROUPS_DIR/Groups" 50000
+"$SRC/TestPresentation" "$GROUPS_DIR/ListGroups" "$GROUPS_DIR/Groups" 50000 25000
 
 ci_write_ok
 echo "Normal case"
