@@ -11,6 +11,7 @@
 #include "NormalStructure.h"
 #include "PermutationElt.h"
 #include "AscendingChains_and_Cosets.h"
+#include "Presentation.h"
 // clang-format on
 #include <map>
 #include <fstream>
@@ -431,6 +432,17 @@ public:
       SmallGenSet = Kernel_SmallGeneratingSet<Telt, Tidx_label, Tint>(S);
     }
     return *SmallGenSet;
+  }
+  // Presentations by generators and relators from the stabilizer chain:
+  // on the strong generators, and on the top level generators of the chain
+  // with the other strong generators eliminated as long as the total length
+  // of the relators stays below max_total_length.
+  Presentation<Telt> PresentationOnStrongGenerators() const {
+    return Kernel_PresentationStrongGenerators(S);
+  }
+  Presentation<Telt>
+  PresentationOnGenerators(size_t max_total_length = 10000000) const {
+    return Kernel_Presentation(S, max_total_length);
   }
   // Compute cosets
   RightCosets right_cosets(const Group<Telt,Tint>& H) const {
