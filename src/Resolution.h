@@ -9,9 +9,12 @@
 #include <cstdint>
 #include <limits>
 #include <optional>
+#include <set>
 #include <sstream>
 #include <string>
+#include <tuple>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 // clang-format on
@@ -59,6 +62,9 @@
   --- homotopy(i, t): the contracting homotopy of the resolution, mapping an
       element of R_i to R_{i+1}. It satisfies d h + h d = id on R_i for i>=1
       and d h(t) = t - eps(t) e^0_0 on R_0, with eps the augmentation.
+  --- partial_contracting_homotopy(i, z): for a cycle z of R_i (of
+      augmentation 0 for i = 0), a chain y of R_{i+1} with d y = z, much
+      shorter in general than h(z) but not given by a linear map.
   --- integral_homology(n): the abelian invariants of H_n(G, Z), obtained by
       tensoring with Z and Smith normal form. The invariants are returned in
       the divisibility form d_1 | d_2 | ... which is the output format of
@@ -416,6 +422,8 @@ private:
   bool use_table;
   std::vector<uint32_t> mult_table;
   std::vector<size_t> extended_elts;
+  // inverse_elts[g] is the index of elts[g]^{-1}
+  std::vector<size_t> inverse_elts;
   // The number of computed terms and the length requested at construction
   size_t K;
   size_t K_target;
@@ -455,6 +463,9 @@ private:
     }
     for (size_t i = 0; i < N; i++) {
       map_position[elts[i]] = i;
+    }
+    for (size_t i = 0; i < N; i++) {
+      inverse_elts.push_back(map_position.at(~elts[i]));
     }
     use_table = N <= max_order_multiplication_table;
     if (use_table) {
@@ -836,6 +847,231 @@ public:
     return ret;
   }
 
+  /*
+    The partial contracting homotopy: for a chain z of R_i (0 <= i < K)
+    with d z = 0 (for i >= 1) or eps(z) = 0 (for i = 0), a chain y of
+    R_{i+1} with d y = z. Unlike homotopy, it is not a linear map with
+    d h + h d = id: it only solves the equation, so it can look for a short
+    solution near the support of z.
+    --- For i = 0, z = sum c_h h is solved by the shortest paths in the
+        Cayley graph from the first element of the support to the others.
+    --- For i >= 1, the boundaries of (i+1)-cells are subtracted from z by
+        the greedy descent while this decreases its L1 norm. The remaining
+        cycle r, often zero, is solved by the contracting homotopy, which
+        gives y = (the subtracted cells) + h(r). If h(z) is shorter, it is
+        taken instead.
+    --- Then, if R_{i+2} is computed, the L1 norm of y is decreased by the
+        greedy descent with the boundaries of (i+2)-cells, which does not
+        change d y.
+    So the length of y is at most the one of h(z) for i >= 1. It is not
+    minimal, but in practice much smaller than the one of h(z).
+   */
+  ResolutionChain partial_contracting_homotopy(size_t i, ResolutionChain const &chain) {
+    if (i + 1 > K) {
+      std::cerr << "RES: partial_contracting_homotopy(" << i << ", .) needs " << i + 1
+                << " terms but only " << K << " were computed\n";
+      throw PermutalibException{1};
+    }
+    if (i == 0) {
+      if (augmentation(chain) != 0) {
+        std::cerr << "RES: partial_contracting_homotopy, the augmentation is nonzero\n";
+        throw PermutalibException{1};
+      }
+    } else {
+      if (!boundary(i, chain).empty()) {
+        std::cerr << "RES: partial_contracting_homotopy, the chain is not a cycle\n";
+        throw PermutalibException{1};
+      }
+    }
+    ResolutionChain ret;
+    if (chain.empty())
+      return ret;
+    if (i == 0) {
+      ret = cayley_graph_pre_image(chain);
+    } else {
+      ResolutionChain r = chain;
+      ret = greedy_descent(i, r);
+      if (!r.empty()) {
+        ResolutionChain c = homotopy(i, r);
+        ret.insert(ret.end(), c.begin(), c.end());
+        ReduceResolutionChain(ret);
+      }
+      ResolutionChain alt = homotopy(i, chain);
+      if (LengthResolutionChain(alt) < LengthResolutionChain(ret))
+        ret = std::move(alt);
+    }
+    // For z = h - b the path is a shortest solution.
+    if (i + 2 <= K && !(i == 0 && chain.size() == 2))
+      greedy_descent(i + 1, ret);
+#ifdef DEBUG_RESOLUTION
+    ResolutionChain diff = boundary(i + 1, ret);
+    for (auto const &term : chain)
+      diff.push_back({-term.coeff, term.cell, term.elt});
+    ReduceResolutionChain(diff);
+    if (!diff.empty()) {
+      std::cerr << "RES: partial_contracting_homotopy, d y differs from z\n";
+      throw PermutalibException{1};
+    }
+#endif
+    return ret;
+  }
+
+private:
+  // Greedy descent: subtracts from the chain r of R_i boundaries q d(j, g)
+  // of (i+1)-cells while this decreases the L1 norm of r, each time the
+  // largest decrease (ties broken by the smallest (j, g, q)). The q are the
+  // ones cancelling a term of r. Returns the chain y of R_{i+1} of the
+  // subtracted cells: d y is the change of r.
+  // The candidates (j, g, q) are kept ordered by their decrease, and only
+  // the cells whose boundary meets the terms changed by a move are
+  // reevaluated after it.
+  ResolutionChain greedy_descent(size_t i, ResolutionChain &r) const {
+    std::vector<ResolutionChain> const &bnds = pseudo_boundary[i + 1];
+    // incidence[k]: the pairs (j, e) with the term (k, e) in d(e^{i+1}_j),
+    // so that the (i+1)-cells whose boundary contains (k, h) are the
+    // (j, h e^{-1}).
+    std::vector<std::vector<std::pair<size_t, size_t>>> incidence(dimension(int(i)));
+    for (size_t j = 0; j < bnds.size(); j++)
+      for (auto const &term : bnds[j])
+        incidence[term.cell].push_back({j, term.elt});
+    // The i-cell (k, h) has index k N + h, and the (i+1)-cell (j, g)
+    // index j N + g.
+    std::unordered_map<size_t, int64_t> res;
+    for (auto const &term : r)
+      res[term.cell * N + term.elt] = term.coeff;
+    auto abs64 = [](int64_t x) -> int64_t { return x < 0 ? -x : x; };
+    auto get_res = [&](size_t x) -> int64_t {
+      auto iter = res.find(x);
+      if (iter == res.end())
+        return 0;
+      return iter->second;
+    };
+    // The candidates as (-decrease, cell, q), and those of each cell.
+    std::set<std::tuple<int64_t, size_t, int64_t>> cands;
+    std::unordered_map<size_t, std::vector<std::pair<int64_t, int64_t>>> cell_cands;
+    auto evaluate = [&](size_t z) -> void {
+      std::vector<std::pair<int64_t, int64_t>> &l_cand = cell_cands[z];
+      for (auto const &cand : l_cand)
+        cands.erase({cand.second, z, cand.first});
+      l_cand.clear();
+      ResolutionChain const &bnd = bnds[z / N];
+      size_t g = z % N;
+      for (auto const &t : bnd) {
+        int64_t v = get_res(t.cell * N + product_index(g, t.elt));
+        if (v == 0 || v % t.coeff != 0)
+          continue;
+        int64_t q = v / t.coeff;
+        bool is_new = true;
+        for (auto const &cand : l_cand)
+          if (cand.first == q)
+            is_new = false;
+        if (!is_new)
+          continue;
+        int64_t gain = 0;
+        for (auto const &t2 : bnd) {
+          int64_t v2 = get_res(t2.cell * N + product_index(g, t2.elt));
+          gain += abs64(v2) - abs64(v2 - q * t2.coeff);
+        }
+        if (gain > 0) {
+          l_cand.push_back({q, -gain});
+          cands.insert({-gain, z, q});
+        }
+      }
+    };
+    // Reevaluates the cells whose boundary meets one of the i-cells l_x.
+    auto evaluate_around = [&](std::vector<size_t> const &l_x) -> void {
+      std::unordered_set<size_t> l_z;
+      for (auto const &x : l_x)
+        for (auto const &inc : incidence[x / N])
+          l_z.insert(inc.first * N + product_index(x % N, inverse_elts[inc.second]));
+      std::vector<size_t> l_z_sort(l_z.begin(), l_z.end());
+      std::sort(l_z_sort.begin(), l_z_sort.end());
+      for (auto const &z : l_z_sort)
+        evaluate(z);
+    };
+    std::vector<size_t> l_x;
+    for (auto const &pair : res)
+      l_x.push_back(pair.first);
+    evaluate_around(l_x);
+    ResolutionChain y;
+    while (!cands.empty()) {
+      std::tuple<int64_t, size_t, int64_t> best = *cands.begin();
+      size_t z = std::get<1>(best);
+      int64_t q = std::get<2>(best);
+      size_t g = z % N;
+      l_x.clear();
+      for (auto const &t : bnds[z / N]) {
+        size_t x = t.cell * N + product_index(g, t.elt);
+        int64_t v = get_res(x) - q * t.coeff;
+        if (v == 0)
+          res.erase(x);
+        else
+          res[x] = v;
+        l_x.push_back(x);
+      }
+      y.push_back({q, z / N, g});
+      evaluate_around(l_x);
+    }
+    r.clear();
+    for (auto const &pair : res)
+      r.push_back({pair.second, pair.first / N, pair.first % N});
+    ReduceResolutionChain(r);
+    ReduceResolutionChain(y);
+    return y;
+  }
+
+  // The 1-cells (j, g) are the edges g -> g y_j of the Cayley graph, with
+  // boundary g y_j - g. The 0-chain sum c_h h of augmentation 0 is the
+  // boundary of sum c_h p_h, with p_h a shortest path from the first
+  // element b of the support to h, since sum c_h (h - b) = sum c_h h.
+  ResolutionChain cayley_graph_pre_image(ResolutionChain const &chain) const {
+    std::vector<size_t> y = generator_elements();
+    size_t miss = std::numeric_limits<size_t>::max();
+    // The edge reaching v in the BFS tree, as a signed term of R_1.
+    std::vector<size_t> parent(N, miss);
+    std::vector<ResolutionTerm> edge(N);
+    size_t b = chain[0].elt;
+    std::vector<size_t> queue = {b};
+    parent[b] = b;
+    size_t n_found = 0;
+    for (auto const &term : chain)
+      if (term.elt == b)
+        n_found++;
+    for (size_t iq = 0; iq < queue.size() && n_found < chain.size(); iq++) {
+      size_t g = queue[iq];
+      for (size_t j = 0; j < y.size(); j++) {
+        // Forward along the edge (j, g), backward along (j, g y_j^{-1}).
+        size_t h_fwd = product_index(g, y[j]);
+        size_t h_bwd = product_index(g, inverse_elts[y[j]]);
+        std::pair<size_t, ResolutionTerm> l_cand[2] = {{h_fwd, {1, j, g}},
+                                                      {h_bwd, {-1, j, h_bwd}}};
+        for (auto const &cand : l_cand) {
+          size_t h = cand.first;
+          if (parent[h] == miss) {
+            parent[h] = g;
+            edge[h] = cand.second;
+            queue.push_back(h);
+            for (auto const &term : chain)
+              if (term.elt == h)
+                n_found++;
+          }
+        }
+      }
+    }
+    ResolutionChain ret;
+    for (auto const &term : chain) {
+      size_t v = term.elt;
+      while (v != b) {
+        ResolutionTerm const &e = edge[v];
+        ret.push_back({term.coeff * e.coeff, e.cell, e.elt});
+        v = parent[v];
+      }
+    }
+    ReduceResolutionChain(ret);
+    return ret;
+  }
+
+public:
   // The matrix of the boundary d_i tensored with Z over ZG, that is the
   // integer matrix with dimension(i-1) rows and dimension(i) columns
   // obtained by mapping every group element to 1.

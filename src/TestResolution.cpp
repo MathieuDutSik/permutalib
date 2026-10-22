@@ -12,6 +12,7 @@
   Checks of the resolutions computed in Resolution.h:
   --- d o d = 0 and the augmentation vanishes on the image of d_1.
   --- The contracting homotopy satisfies d h + h d = id.
+  --- The partial contracting homotopy y of a cycle z satisfies d y = z.
   --- The consistency checks of check_homology_consistency (finiteness,
       divisibility by the group order, universal coefficient theorem with
       the homology modulo p, abelianization).
@@ -89,6 +90,88 @@ void CheckHomotopy(Tres &R) {
         }
       }
     }
+  }
+}
+
+// The partial contracting homotopy y of a cycle z satisfies d y = z. It is
+// compared with the contracting homotopy h(z), which also satisfies
+// d h(z) = z, by the total length of the solutions and the running time.
+// The cycles are z = d(c) for small chains c of R_{i+1} (z = g - 1 for
+// i = 0) and z = x - h(d x) for x a cell of R_i, at most n_sample of each
+// kind chosen by a fixed pseudo-random sequence (fewer for large groups).
+template <typename Tres>
+void CheckPartialHomotopy(Tres &R) {
+  size_t K = R.length();
+  size_t N = R.group_order();
+  size_t n_sample = N > 1000 ? 20 : 200;
+  uint64_t seed = 1;
+  auto next_rand = [&](size_t n) -> size_t {
+    seed = seed * 6364136223846793005ULL + 1442695040888963407ULL;
+    return size_t((seed >> 33) % n);
+  };
+  for (size_t i = 0; i < K; i++) {
+    std::vector<permutalib::ResolutionChain> l_cycle;
+    size_t n_cell = R.dimension(int(i)) * N;
+    for (size_t u = 0; u < std::min(n_sample, n_cell); u++) {
+      permutalib::ResolutionChain z;
+      if (i == 0) {
+        z = {{-1, 0, 0}, {1, 0, next_rand(N)}};
+      } else {
+        permutalib::ResolutionChain c;
+        for (size_t v = 0; v < 3; v++)
+          c.push_back({int64_t(next_rand(3)) - 1, next_rand(R.dimension(int(i) + 1)), next_rand(N)});
+        permutalib::ReduceResolutionChain(c);
+        z = R.boundary(i + 1, c);
+      }
+      l_cycle.push_back(z);
+      if (i > 0) {
+        permutalib::ResolutionTerm x{1, next_rand(R.dimension(int(i))), next_rand(N)};
+        z = R.homotopy(i - 1, R.boundary(i, {x}));
+        for (auto &term : z)
+          term.coeff = -term.coeff;
+        z.push_back(x);
+        permutalib::ReduceResolutionChain(z);
+        l_cycle.push_back(z);
+      }
+    }
+    size_t len_h = 0;
+    size_t len_p = 0;
+    int64_t time_h = 0;
+    int64_t time_p = 0;
+    size_t n_shorter = 0;
+    size_t n_longer = 0;
+    for (auto const &z : l_cycle) {
+      std::chrono::time_point<std::chrono::system_clock> time1 =
+          std::chrono::system_clock::now();
+      permutalib::ResolutionChain y_p = R.partial_contracting_homotopy(i, z);
+      std::chrono::time_point<std::chrono::system_clock> time2 =
+          std::chrono::system_clock::now();
+      permutalib::ResolutionChain y_h = R.homotopy(i, z);
+      std::chrono::time_point<std::chrono::system_clock> time3 =
+          std::chrono::system_clock::now();
+      time_p += std::chrono::duration_cast<std::chrono::microseconds>(time2 - time1).count();
+      time_h += std::chrono::duration_cast<std::chrono::microseconds>(time3 - time2).count();
+      permutalib::ResolutionChain diff = R.boundary(i + 1, y_p);
+      for (auto const &term : z)
+        diff.push_back({-term.coeff, term.cell, term.elt});
+      permutalib::ReduceResolutionChain(diff);
+      if (diff.size() != 0) {
+        std::cerr << "The partial contracting homotopy fails in dimension " << i << "\n";
+        throw permutalib::PermutalibException{1};
+      }
+      size_t l_p = permutalib::LengthResolutionChain(y_p);
+      len_p += l_p;
+      size_t l_h = permutalib::LengthResolutionChain(y_h);
+      len_h += l_h;
+      if (l_p < l_h)
+        n_shorter++;
+      if (l_p > l_h)
+        n_longer++;
+    }
+    std::cerr << "  partial homotopy i=" << i << " |cycles|=" << l_cycle.size()
+              << " length partial=" << len_p << " (" << time_p << "us)"
+              << " homotopy=" << len_h << " (" << time_h << "us) shorter=" << n_shorter
+              << " longer=" << n_longer << "\n";
   }
 }
 
@@ -257,6 +340,7 @@ int main(int argc, char *argv[]) {
         }
         CheckBoundarySquare(R);
         CheckHomotopy(R);
+        CheckPartialHomotopy(R);
         std::cerr << "  d o d = 0, homotopy, consistency and expected values are correct\n";
         if (recompute) {
           Tres R2(ConjugateGenerators(l_gen, id), id, K, true);

@@ -91,7 +91,9 @@ R.extend();                                          // one more term
 
 A chain is a list of terms `coeff * (elt . e_cell)` with `elt` an index in
 `R.elements()`. The contracting homotopy is available as `R.homotopy(i, term)`
-and `R.GapString()` prints the resolution in the word format of HAP.
+and `R.GapString()` prints the resolution in the word format of HAP. For a
+cycle `z` of `R_i`, `R.partial_contracting_homotopy(i, z)` returns a chain `y`
+with `d y = z` that is in general much shorter than `R.homotopy(i, z)`.
 
 The homology is returned in the divisibility form `d_1 | d_2 | ...` of
 `Homology(TensorWithIntegers(R), n)` in HAP; `R.integral_homology_prime_power(n)`
